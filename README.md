@@ -64,27 +64,34 @@ The remaining interactive drills (Chord Drill, Arpeggios, Root Cycling, Progress
    - `CLERK_FRONTEND_API_URL` (e.g. `https://<your-app>.clerk.accounts.dev`)
    - `NEXT_PUBLIC_CONVEX_URL` from your Convex project
 
-3. Make sure your Clerk app has a JWT template named `convex` with `aud: "convex"` so Convex can validate Clerk sessions. The template can be created in the Clerk Dashboard under **Sessions → JWT Templates** or via the Clerk Backend API.
+3. Configure Clerk authentication for email and password only:
 
-4. Install dependencies:
+   - In the Clerk Dashboard, go to **User & Authentication → Email, Phone, Username**.
+   - Set **Email address** to **Required**.
+   - Set **Phone number** to **Optional** or **Disabled**.
+   - Under **Authentication strategies**, enable **Password**.
+
+4. Make sure your Clerk app has a JWT template named `convex` with `aud: "convex"` so Convex can validate Clerk sessions. The template can be created in the Clerk Dashboard under **Sessions → JWT Templates** or via the Clerk Backend API.
+
+5. Install dependencies:
 
    ```bash
    npm install
    ```
 
-5. Start the Convex dev server:
+6. Start the Convex dev server:
 
    ```bash
    npx convex dev
    ```
 
-6. In another terminal, run the Next.js development server:
+7. In another terminal, run the Next.js development server:
 
    ```bash
    npm run dev
    ```
 
-7. Open [http://localhost:3000](http://localhost:3000).
+8. Open [http://localhost:3000](http://localhost:3000).
 
 ## Testing
 
