@@ -26,7 +26,7 @@ This repository now contains:
   - Arpeggio transition and miss logging
   - Root Cycling recall stats
   - Recharts visualizations with grade colors, redo indicators, and good/hard threshold lines
-  - A one-time client-side import for legacy localStorage data from Reflex Drill EXT
+  - A one-time client-side migration from Reflex Drill EXT via exported JSON file (localStorage is not shared across origins)
 - **Clerk authentication** with route protection via `proxy.ts` and shadcn-themed sign-in/sign-up pages.
 - **Convex data persistence** for users and tracking events, with Clerk JWT integration.
 - A **Vercel AI SDK** streaming chat endpoint stub.
@@ -112,6 +112,16 @@ npx playwright test --workers=1
 
 Test credentials are stored in `.env.local` as `E2E_CLERK_USER_EMAIL` and `E2E_CLERK_USER_PASSWORD`.
 
+## Migrating from Reflex Drill EXT
+
+Because browser `localStorage` is scoped to each origin, the Piano Suite app cannot directly read the tracking data stored by Reflex Drill EXT (which runs on a different port or `file://` origin). Instead, use the export/import flow:
+
+1. Open the original **Reflex Drill EXT** app and switch to the **Tracking** tab.
+2. Click **Export tracking data** and save `reflex-drill-tracking-export.json`.
+3. Open Piano Suite, sign in, and go to **Tools → Tracking**.
+4. Drag the exported file onto the import area, or click **Choose file**.
+5. Review the import report, then explore your Chord Drill, Arpeggios, and Root Cycling history.
+
 ## Taskbar launcher
 
 A desktop launcher is included so you can start the dev server from your taskbar or app menu:
@@ -148,7 +158,7 @@ npm run build
 - [x] Add Vercel AI SDK streaming chat route stub
 - [x] Add Vercel-dashboard-style Tools hub with sidebar
 - [x] Port Reflex Drill EXT Tracking tab with Recharts visualizations
-- [x] Add one-time localStorage import for legacy Reflex Drill EXT data
+- [x] Add one-time migration from Reflex Drill EXT tracking data
 - [x] Add Playwright E2E tests with authenticated flows
 - [ ] Migrate Chord Drill interactive page
 - [ ] Migrate Arpeggios interactive page

@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { UploadCloud, CheckCircle2, AlertCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface LegacyChordDrillEvent {
   id?: string;
@@ -49,6 +51,23 @@ interface FoundData {
   rootCycle: LegacyRootCycleEvent[];
 }
 
+interface ImportReport {
+  chordDrillCount: number;
+  arpeggioCount: number;
+  arpeggioMissCount: number;
+  rootCycleCount: number;
+}
+
+interface ExportedTrackingData {
+  version?: number;
+  exportedAt?: number;
+  source?: string;
+  chordDrill?: LegacyChordDrillEvent[];
+  arpeggio?: LegacyArpeggioEvent[];
+  arpeggioMiss?: LegacyArpeggioMissEvent[];
+  rootCycle?: LegacyRootCycleEvent[];
+}
+
 const STORAGE_KEYS = {
   chordDrill: "blocked-drill-first-chord-log",
   arpeggio: "blocked-drill-arpeggio-log",
@@ -64,6 +83,22 @@ function parse<T>(raw: string | null): T[] {
   } catch {
     return [];
   }
+}
+
+function loadFoundData(): FoundData | null {
+  if (typeof window === "undefined") return null;
+  const data: FoundData = {
+    chordDrill: parse<LegacyChordDrillEvent>(localStorage.getItem(STORAGE_KEYS.chordDrill)),
+    arpeggio: parse<LegacyArpeggioEvent>(localStorage.getItem(STORAGE_KEYS.arpeggio)),
+    arpeggioMiss: parse<LegacyArpeggioMissEvent>(localStorage.getItem(STORAGE_KEYS.arpeggioMiss)),
+    rootCycle: parse<LegacyRootCycleEvent>(localStorage.getItem(STORAGE_KEYS.rootCycle)),
+  };
+  const total =
+    data.chordDrill.length +
+    data.arpeggio.length +
+    data.arpeggioMiss.length +
+    data.rootCycle.length;
+  return total > 0 ? data : null;
 }
 
 function normalizeRootCycleEvent(e: LegacyRootCycleEvent) {
@@ -94,96 +129,232 @@ function normalizeGrade(label?: string | null): string | undefined {
   return map[label] || undefined;
 }
 
-function loadFoundData(): FoundData | null {
-  if (typeof window === "undefined") return null;
-  const data: FoundData = {
-    chordDrill: parse<LegacyChordDrillEvent>(localStorage.getItem(STORAGE_KEYS.chordDrill)),
-    arpeggio: parse<LegacyArpeggioEvent>(localStorage.getItem(STORAGE_KEYS.arpeggio)),
-    arpeggioMiss: parse<LegacyArpeggioMissEvent>(localStorage.getItem(STORAGE_KEYS.arpeggioMiss)),
-    rootCycle: parse<LegacyRootCycleEvent>(localStorage.getItem(STORAGE_KEYS.rootCycle)),
+function toImportArgs(data: FoundData) {
+  return {
+    chordDrillEvents: data.chordDrill.map((e) => ({
+      chord: e.chord,
+      reactionTimeMs: e.ms,
+      grade: normalizeGrade(e.gradeLabel),
+      redo: !!e.isRedo,
+      timestamp: e.ts,
+    })),
+    arpeggioEvents: data.arpeggio.map((e) => ({
+      chord: e.chord,
+      fromDeg: e.fromDeg,
+      toDeg: e.toDeg,
+      reactionTimeMs: e.ms,
+      timestamp: e.ts,
+    })),
+    arpeggioMissEvents: data.arpeggioMiss.map((e) => ({
+      chord: e.chord,
+      fromDeg: e.fromDeg,
+      toDeg: e.toDeg,
+      played: e.played,
+      timestamp: e.ts,
+    })),
+    rootCycleEvents: data.rootCycle.map(normalizeRootCycleEvent),
   };
-  const total =
-    data.chordDrill.length +
-    data.arpeggio.length +
-    data.arpeggioMiss.length +
-    data.rootCycle.length;
-  return total > 0 ? data : null;
+}
+
+function parseExportFile(json: unknown): FoundData {
+  const data = json as ExportedTrackingData;
+  return {
+    chordDrill: Array.isArray(data.chordDrill) ? data.chordDrill : [],
+    arpeggio: Array.isArray(data.arpeggio) ? data.arpeggio : [],
+    arpeggioMiss: Array.isArray(data.arpeggioMiss) ? data.arpeggioMiss : [],
+    rootCycle: Array.isArray(data.rootCycle) ? data.rootCycle : [],
+  };
+}
+
+function totalEntries(data: FoundData) {
+  return data.chordDrill.length + data.arpeggio.length + data.arpeggioMiss.length + data.rootCycle.length;
 }
 
 export function ImportLocalStorage() {
   const [found, setFound] = useState<FoundData | null>(loadFoundData);
   const [status, setStatus] = useState<"idle" | "importing" | "done" | "error">("idle");
+  const [report, setReport] = useState<ImportReport | null>(null);
+  const [dragOver, setDragOver] = useState(false);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const importData = useMutation(api.tracking.bulkImportTracking);
 
-  if (!found || status === "done") return null;
+  const runImport = useCallback(
+    async (data: FoundData, clearLegacyKeys: boolean) => {
+      setStatus("importing");
+      setFileError(null);
+      try {
+        const result = await importData(toImportArgs(data));
+        if (clearLegacyKeys) {
+          Object.values(STORAGE_KEYS).forEach((key) => localStorage.removeItem(key));
+        }
+        setReport(result as ImportReport);
+        setFound(null);
+        setStatus("done");
+      } catch (err) {
+        console.error("Import failed", err);
+        setStatus("error");
+      }
+    },
+    [importData]
+  );
 
-  const total =
-    found.chordDrill.length +
-    found.arpeggio.length +
-    found.arpeggioMiss.length +
-    found.rootCycle.length;
-
-  async function handleImport() {
-    setStatus("importing");
-    try {
-      await importData({
-        chordDrillEvents: found!.chordDrill.map((e) => ({
-          chord: e.chord,
-          reactionTimeMs: e.ms,
-          grade: normalizeGrade(e.gradeLabel),
-          redo: !!e.isRedo,
-          timestamp: e.ts,
-        })),
-        arpeggioEvents: found!.arpeggio.map((e) => ({
-          chord: e.chord,
-          fromDeg: e.fromDeg,
-          toDeg: e.toDeg,
-          reactionTimeMs: e.ms,
-          timestamp: e.ts,
-        })),
-        arpeggioMissEvents: found!.arpeggioMiss.map((e) => ({
-          chord: e.chord,
-          fromDeg: e.fromDeg,
-          toDeg: e.toDeg,
-          played: e.played,
-          timestamp: e.ts,
-        })),
-        rootCycleEvents: found!.rootCycle.map(normalizeRootCycleEvent),
-      });
-      // Clear legacy keys so the import card doesn't reappear.
-      Object.values(STORAGE_KEYS).forEach((key) => localStorage.removeItem(key));
-      setFound(null);
-      setStatus("done");
-    } catch (err) {
-      console.error("Import failed", err);
-      setStatus("error");
-    }
+  async function handleImportLocal() {
+    if (!found) return;
+    await runImport(found, true);
   }
 
   function handleSkip() {
     Object.values(STORAGE_KEYS).forEach((key) => localStorage.removeItem(key));
     setFound(null);
-    setStatus("done");
+  }
+
+  async function handleFile(file: File) {
+    setFileError(null);
+    try {
+      const text = await file.text();
+      const json = JSON.parse(text);
+      const data = parseExportFile(json);
+      if (totalEntries(data) === 0) {
+        setFileError("That file doesn't contain any tracking entries.");
+        return;
+      }
+      await runImport(data, false);
+    } catch {
+      setFileError("Could not read that file. Make sure it's a valid Reflex Drill EXT export.");
+    }
+  }
+
+  function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) handleFile(file);
+    if (e.target) e.target.value = "";
+  }
+
+  function onDrop(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) handleFile(file);
+  }
+
+  if (status === "done" && report) {
+    const total =
+      report.chordDrillCount +
+      report.arpeggioCount +
+      report.arpeggioMissCount +
+      report.rootCycleCount;
+    return (
+      <Card className="mb-6 border-primary/30 bg-primary/5">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <CheckCircle2 className="h-5 w-5 text-primary" />
+            Import complete
+          </CardTitle>
+          <CardDescription>
+            Imported {total} practice {total === 1 ? "entry" : "entries"} from Reflex Drill EXT.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ul className="grid gap-2 text-sm sm:grid-cols-2">
+            <li className="flex justify-between rounded-lg border border-border/50 bg-card px-3 py-2">
+              <span className="text-muted-foreground">Chord Drill</span>
+              <span className="font-medium">{report.chordDrillCount}</span>
+            </li>
+            <li className="flex justify-between rounded-lg border border-border/50 bg-card px-3 py-2">
+              <span className="text-muted-foreground">Arpeggios</span>
+              <span className="font-medium">{report.arpeggioCount}</span>
+            </li>
+            <li className="flex justify-between rounded-lg border border-border/50 bg-card px-3 py-2">
+              <span className="text-muted-foreground">Arpeggio misses</span>
+              <span className="font-medium">{report.arpeggioMissCount}</span>
+            </li>
+            <li className="flex justify-between rounded-lg border border-border/50 bg-card px-3 py-2">
+              <span className="text-muted-foreground">Root Cycling</span>
+              <span className="font-medium">{report.rootCycleCount}</span>
+            </li>
+          </ul>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
     <Card className="mb-6 border-primary/30 bg-primary/5">
       <CardHeader>
-        <CardTitle className="text-base">Import local tracking data?</CardTitle>
+        <CardTitle className="text-base">Import practice history</CardTitle>
         <CardDescription>
-          Found {total} legacy practice entries from Reflex Drill EXT in this browser.
-          Import them to Convex so they sync across devices.
+          Bring your Reflex Drill EXT tracking data into Piano Suite so it syncs across devices.
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-wrap gap-3">
-        <Button onClick={handleImport} disabled={status === "importing"}>
-          {status === "importing" ? "Importing…" : "Import to cloud"}
-        </Button>
-        <Button variant="ghost" onClick={handleSkip} disabled={status === "importing"}>
-          Skip and delete local data
-        </Button>
-        {status === "error" && (
-          <span className="text-sm text-destructive">Import failed. Check console.</span>
+      <CardContent className="space-y-4">
+        {found && totalEntries(found) > 0 && (
+          <div className="rounded-xl border border-border/50 bg-card p-4">
+            <p className="mb-3 text-sm text-muted-foreground">
+              Found {totalEntries(found)} legacy practice {totalEntries(found) === 1 ? "entry" : "entries"} from
+              Reflex Drill EXT in this browser.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={handleImportLocal} disabled={status === "importing"}>
+                {status === "importing" ? "Importing…" : "Import from this browser"}
+              </Button>
+              <Button variant="ghost" onClick={handleSkip} disabled={status === "importing"}>
+                Skip and delete local data
+              </Button>
+            </div>
+          </div>
+        )}
+
+        <div
+          className={cn(
+            "rounded-xl border-2 border-dashed p-6 text-center transition-colors",
+            dragOver
+              ? "border-primary bg-primary/10"
+              : "border-border/50 bg-card hover:border-primary/30 hover:bg-muted/30"
+          )}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragOver(true);
+          }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={onDrop}
+        >
+          <UploadCloud className="mx-auto h-8 w-8 text-muted-foreground" />
+          <p className="mt-2 text-sm font-medium">Import from export file</p>
+          <p className="text-xs text-muted-foreground">
+            Drag and drop{" "}
+            <code className="rounded bg-muted px-1 py-0.5">reflex-drill-tracking-export.json</code>{" "}
+            here, or click to browse.
+          </p>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json,application/json"
+            className="hidden"
+            onChange={onFileChange}
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-3"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={status === "importing"}
+          >
+            Choose file
+          </Button>
+        </div>
+
+        {fileError && (
+          <div className="flex items-center gap-2 text-sm text-destructive">
+            <AlertCircle className="h-4 w-4" />
+            {fileError}
+          </div>
+        )}
+        {status === "error" && !fileError && (
+          <div className="flex items-center gap-2 text-sm text-destructive">
+            <AlertCircle className="h-4 w-4" />
+            Import failed. Check the console for details.
+          </div>
         )}
       </CardContent>
     </Card>

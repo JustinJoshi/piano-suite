@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "exportedAt": 1785084000000,
+  "source": "reflex-drill-ext",
+  "chordDrill": [
+    {
+      "chord": "Cmaj7",
+      "ms": 1200,
+      "grade": 3,
+      "gradeLabel": "Good",
+      "isRedo": false,
+      "ts": 1784997600000
+    },
+    {
+      "chord": "Cmaj7",
+      "ms": 900,
+      "grade": 3,
+      "gradeLabel": "Good",
+      "isRedo": false,
+      "ts": 1785039600000
+    }
+  ],
+  "arpeggio": [
+    {
+      "chord": "Dm7",
+      "fromDeg": "Root",
+      "toDeg": "9",
+      "ms": 350,
+      "ts": 1784997600000
+    }
+  ],
+  "arpeggioMiss": [
+    {
+      "chord": "Dm7",
+      "fromDeg": "Root",
+      "toDeg": "9",
+      "played": "Eb",
+      "ts": 1785031200000
+    }
+  ],
+  "rootCycle": [
+    {
+      "mode": "chord",
+      "label": "Dm7",
+      "root": "D",
+      "ms": 1100,
+      "ts": 1784997600000
+    }
+  ]
+}
