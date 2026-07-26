@@ -49,4 +49,24 @@ test.describe("/tools dashboard", () => {
       ).toBeVisible();
     }
   });
+
+  test("sidebar Welcome link navigates to the landing page", async ({
+    page,
+  }) => {
+    await signInAsTestUser(page);
+    await page.goto("/tools");
+
+    await page.locator("aside nav").getByRole("link", { name: "Welcome" }).click();
+    await expect(page).toHaveURL("/");
+    await expect(page.locator("body")).toContainText("Anki MIDI Chord Trainer");
+  });
+
+  test("dashboard cards link to their tool routes", async ({ page }) => {
+    await signInAsTestUser(page);
+    await page.goto("/tools");
+
+    await page.getByRole("main").getByRole("link", { name: "Tracking" }).click();
+    await expect(page).toHaveURL("/tools/tracking");
+    await expect(page.getByRole("heading", { name: "Tracking" })).toBeVisible();
+  });
 });

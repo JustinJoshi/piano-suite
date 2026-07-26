@@ -20,42 +20,49 @@ const tools = [
     description:
       "Overview and getting-started hub for the practice suite.",
     icon: Home,
+    href: "/",
   },
   {
     title: "Chord Drill",
     description:
       "Blocked-practice chord drill with timer, stats, and AnkiConnect integration.",
     icon: Music,
+    href: "/tools/chord-drill",
   },
   {
     title: "Arpeggios",
     description:
       "Practice 7-note minor-11 arpeggio cells with two-phase root and sequence drilling.",
     icon: Zap,
+    href: "/tools/arpeggios",
   },
   {
     title: "Root Cycling",
     description:
       "Drill one fixed chord or arpeggio idea across random roots in all 12 keys.",
     icon: RefreshCw,
+    href: "/tools/root-cycling",
   },
   {
     title: "Tracking",
     description:
       "Review first-chord times, transition times, misses, and streaks over time.",
     icon: BarChart3,
+    href: "/tools/tracking",
   },
   {
     title: "Progression",
     description:
       "Loop ii-V-I and 12-bar blues progressions with per-chord transition timing.",
     icon: ArrowRightLeft,
+    href: "/tools/progression",
   },
   {
     title: "Technique",
     description:
       "Daily technique habit tracker with metronome, BPM log, and a 28-day grid.",
     icon: Timer,
+    href: "/tools/technique",
   },
 ];
 
@@ -108,6 +115,7 @@ export default function ToolsPage() {
                 title={tool.title}
                 description={tool.description}
                 icon={tool.icon}
+                href={tool.href}
               />
             ))}
           </div>

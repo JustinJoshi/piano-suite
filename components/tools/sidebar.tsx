@@ -15,7 +15,7 @@ import { UserButton, useUser } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 
 const toolLinks = [
-  { name: "Welcome", href: "/tools/welcome", icon: Home },
+  { name: "Welcome", href: "/", icon: Home },
   { name: "Chord Drill", href: "/tools/chord-drill", icon: Music },
   { name: "Arpeggios", href: "/tools/arpeggios", icon: Zap },
   { name: "Root Cycling", href: "/tools/root-cycling", icon: RefreshCw },

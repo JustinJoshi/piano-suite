@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { LucideIcon } from "lucide-react";
 import {
   Card,
@@ -11,24 +12,27 @@ interface ToolCardProps {
   title: string;
   description: string;
   icon: LucideIcon;
+  href: string;
 }
 
-export function ToolCard({ title, description, icon: Icon }: ToolCardProps) {
+export function ToolCard({ title, description, icon: Icon, href }: ToolCardProps) {
   return (
-    <Card className="hover:border-primary/30 hover:bg-card/80 transition-colors">
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-primary">
-            <Icon className="h-4 w-4" />
+    <Link href={href} className="block">
+      <Card className="hover:border-primary/30 hover:bg-card/80 transition-colors cursor-pointer">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-primary">
+              <Icon className="h-4 w-4" />
+            </div>
+            <CardTitle data-testid="tool-card-title">{title}</CardTitle>
           </div>
-          <CardTitle data-testid="tool-card-title">{title}</CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <CardDescription className="text-sm leading-relaxed">
-          {description}
-        </CardDescription>
-      </CardContent>
-    </Card>
+        </CardHeader>
+        <CardContent>
+          <CardDescription className="text-sm leading-relaxed">
+            {description}
+          </CardDescription>
+        </CardContent>
+      </Card>
+    </Link>
   );
 }

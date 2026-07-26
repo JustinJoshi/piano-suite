@@ -33,7 +33,7 @@ This repository now contains:
 - **Playwright end-to-end tests**, including authenticated flows for the Tools hub and Tracking dashboard.
 - The original Anki deck exports (`chord-symbols-CGDAE.txt` and `chord-symbols-CGDAEno11.txt`) preserved for download.
 
-The remaining interactive drills (Chord Drill, Arpeggios, Root Cycling, Progression, Technique) are scaffolded in the Tools hub and will be migrated next.
+The remaining interactive drills (Chord Drill, Arpeggios, Root Cycling, Progression, Technique) are scaffolded in the Tools hub as placeholder routes and will be migrated next. Every tool in the sidebar and every dashboard card is now clickable and links to its related route.
 
 ## Tech Stack
 
