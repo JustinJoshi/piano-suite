@@ -97,8 +97,13 @@ The remaining interactive drills (Chord Drill, Arpeggios, Root Cycling, Progress
 
 End-to-end tests run with Playwright. A deterministic test user is created automatically during global setup.
 
+Make sure the **Convex dev server is running** before starting tests, because the authenticated tracking tests hit the local Convex backend.
+
 ```bash
-# Run all tests
+# Terminal 1: start Convex
+npx convex dev
+
+# Terminal 2: run tests
 npm run test:e2e
 
 # Run with a single worker (useful for debugging)

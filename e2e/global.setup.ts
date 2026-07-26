@@ -31,6 +31,24 @@ setup("global setup", async () => {
     throw new Error("E2E_CLERK_USER_PASSWORD must be at least 8 characters.");
   }
 
+  // Fail fast if the Convex dev server is not reachable. Authenticated tests
+  // depend on the local backend, and without this check they hang on the first
+  // mutation instead of reporting a clear error.
+  const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
+  if (convexUrl) {
+    try {
+      const res = await fetch(convexUrl);
+      if (!res.ok) {
+        throw new Error(`Convex returned HTTP ${res.status}`);
+      }
+    } catch (err) {
+      throw new Error(
+        `Convex dev server does not appear to be running at ${convexUrl}. ` +
+          "Start it with `npx convex dev` before running tests."
+      );
+    }
+  }
+
   // Ensure a deterministic test user exists. Using a +clerk_test email
   // suppresses real email delivery (verification codes, notifications, etc.)
   const email =
