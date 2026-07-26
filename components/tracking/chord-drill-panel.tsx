@@ -1,0 +1,152 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { TrackingChart } from "./tracking-chart";
+import { cn } from "@/lib/utils";
+
+export function ChordDrillPanel() {
+  const rawEvents = useQuery(api.tracking.listChordDrillEvents);
+  const clear = useMutation(api.tracking.clearChordDrillEventsByChord);
+  const [selectedChord, setSelectedChord] = useState<string | null>(null);
+
+  const groups = useMemo(() => {
+    const events = rawEvents ?? [];
+    const map = new Map<string, typeof events>();
+    for (const e of events) {
+      if (!e.chord) continue;
+      const list = map.get(e.chord) ?? [];
+      list.push(e);
+      map.set(e.chord, list);
+    }
+    // Sort chords by most recent attempt first
+    return new Map(
+      [...map.entries()].sort((a, b) => {
+        const la = a[1][a[1].length - 1].timestamp;
+        const lb = b[1][b[1].length - 1].timestamp;
+        return lb - la;
+      })
+    );
+  }, [rawEvents]);
+
+  const chords = useMemo(() => [...groups.keys()], [groups]);
+
+  const activeChord = selectedChord && groups.has(selectedChord) ? selectedChord : chords[0] ?? null;
+
+  const chartData = useMemo(() => {
+    const list = groups.get(activeChord) ?? [];
+    return list
+      .slice()
+      .sort((a, b) => a.timestamp - b.timestamp)
+      .map((e, i) => ({
+        attempt: i + 1,
+        seconds: e.reactionTimeMs / 1000,
+        ms: e.reactionTimeMs,
+        grade: e.grade,
+        redo: e.redo,
+        date: new Date(e.timestamp),
+        label: e.chord ?? "",
+      }));
+  }, [groups, activeChord]);
+
+  async function handleClear() {
+    if (!activeChord) return;
+    await clear({ chord: activeChord });
+    setSelectedChord(null);
+  }
+
+  if (!(rawEvents ?? []).length) {
+    return (
+      <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
+        No first-chord attempts logged yet.
+        <br />
+        Play a round on the Chord Drill tab to start building this.
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
+      <Card className="h-fit max-h-[640px] overflow-y-auto">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
+            Chords
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-1 pt-0">
+          {chords.map((chord) => {
+            const entries = groups.get(chord)!;
+            const last = entries[entries.length - 1];
+            return (
+              <button
+                key={chord}
+                onClick={() => setSelectedChord(chord)}
+                className={cn(
+                  "flex w-full items-center justify-between rounded-lg border px-3 py-2 text-left text-sm transition-colors",
+                  activeChord === chord
+                    ? "border-primary/50 bg-primary/10 text-primary"
+                    : "border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                )}
+              >
+                <span className="font-medium">{chord}</span>
+                <span className="text-xs opacity-80">
+                  {entries.length} · {(last.reactionTimeMs / 1000).toFixed(2)}s
+                </span>
+              </button>
+            );
+          })}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="font-heading text-lg">{activeChord ?? "—"}</CardTitle>
+          <CardDescription>
+            {chartData.length
+              ? `${chartData.length} first-chord attempt${chartData.length === 1 ? "" : "s"} recorded`
+              : ""}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <TrackingChart
+            data={chartData}
+            emptyMessage="No attempts logged for this chord yet."
+          />
+          <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-[#C1614A]" /> Again
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-[#E8CF7A]" /> Hard
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-[#7FA37A]" /> Good
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-[#6FA9A3]" /> Easy
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-[#5c5646]" /> Ungraded
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="inline-block h-2 w-2 rounded-full border-2 border-[#7FA37A]" /> Redo
+            </span>
+          </div>
+          {activeChord && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mt-4 text-muted-foreground hover:text-destructive"
+              onClick={handleClear}
+            >
+              Clear this chord&apos;s log
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
