@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "@clerk/ui/themes/shadcn.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -97,4 +98,17 @@
   .hero-container {
     height: clamp(600px, calc(100vh - 4rem), 900px);
   }
+}
+
+/* ---------- Dashboard / Vercel-style tools layout ---------- */
+:root {
+  --sidebar-width: 260px;
+}
+
+.dashboard-sidebar {
+  width: var(--sidebar-width);
+}
+
+.dashboard-main {
+  margin-left: var(--sidebar-width);
 }

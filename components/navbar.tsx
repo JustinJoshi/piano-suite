@@ -2,6 +2,12 @@
 
 import Link from "next/link";
 import { Music } from "lucide-react";
+import {
+  SignInButton,
+  SignUpButton,
+  Show,
+  UserButton,
+} from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 
 const navLinks = [
@@ -34,19 +40,28 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="hidden text-muted-foreground hover:text-foreground sm:inline-flex"
-          >
-            Sign in
-          </Button>
-          <Button
-            size="sm"
-            className="rounded-full bg-primary px-4 text-primary-foreground hover:bg-primary/90"
-          >
-            Try it free
-          </Button>
+          <Show when="signed-out">
+            <SignInButton>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="hidden text-muted-foreground hover:text-foreground sm:inline-flex"
+              >
+                Sign in
+              </Button>
+            </SignInButton>
+            <SignUpButton>
+              <Button
+                size="sm"
+                className="rounded-full bg-primary px-4 text-primary-foreground hover:bg-primary/90"
+              >
+                Try it free
+              </Button>
+            </SignUpButton>
+          </Show>
+          <Show when="signed-in">
+            <UserButton />
+          </Show>
         </div>
       </div>
     </header>
