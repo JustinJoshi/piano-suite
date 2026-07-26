@@ -16,26 +16,37 @@ The goal is to give piano players a single place to:
 
 ## What it is
 
-Right now this repository contains the foundation of that platform:
+This repository now contains:
 
-- A **Next.js 14+ App Router** application with TypeScript.
+- A **Next.js 16+ App Router** application with TypeScript.
 - A **Lunar.dev-inspired landing page** that ports the original Reflex Drill EXT welcome content into a polished, modern marketing layout.
-- A complete **design system** built on Tailwind CSS, shadcn/ui components, and warm gold/dark tokens carried over from the original styling work.
-- Scaffolding for **Clerk authentication**, **Convex data persistence**, and a **Vercel AI SDK** streaming chat endpoint.
+- A **Vercel-dashboard-inspired Tools hub** (`/tools`) with a sidebar navigation drawn from the original Reflex Drill EXT tabs.
+- A migrated **Tracking dashboard** (`/tools/tracking`) ported from Reflex Drill EXT, including:
+  - Chord Drill first-chord timing history
+  - Arpeggio transition and miss logging
+  - Root Cycling recall stats
+  - Recharts visualizations with grade colors, redo indicators, and good/hard threshold lines
+  - A one-time client-side import for legacy localStorage data from Reflex Drill EXT
+- **Clerk authentication** with route protection via `proxy.ts` and shadcn-themed sign-in/sign-up pages.
+- **Convex data persistence** for users and tracking events, with Clerk JWT integration.
+- A **Vercel AI SDK** streaming chat endpoint stub.
+- **Playwright end-to-end tests**, including authenticated flows for the Tools hub and Tracking dashboard.
 - The original Anki deck exports (`chord-symbols-CGDAE.txt` and `chord-symbols-CGDAEno11.txt`) preserved for download.
 
-The actual interactive drills are not migrated yet; this repo establishes the architecture, landing experience, and toolchain first.
+The remaining interactive drills (Chord Drill, Arpeggios, Root Cycling, Progression, Technique) are scaffolded in the Tools hub and will be migrated next.
 
 ## Tech Stack
 
 | Layer | Tool |
 |-------|------|
-| Framework | Next.js 14+ (App Router) |
+| Framework | Next.js 16+ (App Router) |
 | Language | TypeScript |
 | Styling | Tailwind CSS + shadcn/ui |
 | Auth | Clerk |
 | Database | Convex |
 | AI / Chat | Vercel AI SDK |
+| Charts | Recharts |
+| E2E Tests | Playwright + @clerk/testing |
 | Icons | Lucide React |
 | Fonts | Inter, Fraunces, Geist Mono |
 
@@ -47,21 +58,68 @@ The actual interactive drills are not migrated yet; this repo establishes the ar
    cp .env.example .env.local
    ```
 
-   Fill in real Clerk and Convex credentials when you are ready to enable auth and persistence.
+2. Fill in real credentials:
 
-2. Install dependencies:
+   - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` from [Clerk](https://clerk.dev)
+   - `CLERK_FRONTEND_API_URL` (e.g. `https://<your-app>.clerk.accounts.dev`)
+   - `NEXT_PUBLIC_CONVEX_URL` from your Convex project
+
+3. Make sure your Clerk app has a JWT template named `convex` with `aud: "convex"` so Convex can validate Clerk sessions. The template can be created in the Clerk Dashboard under **Sessions → JWT Templates** or via the Clerk Backend API.
+
+4. Install dependencies:
 
    ```bash
    npm install
    ```
 
-3. Run the development server:
+5. Start the Convex dev server:
+
+   ```bash
+   npx convex dev
+   ```
+
+6. In another terminal, run the Next.js development server:
 
    ```bash
    npm run dev
    ```
 
-4. Open [http://localhost:3000](http://localhost:3000).
+7. Open [http://localhost:3000](http://localhost:3000).
+
+## Testing
+
+End-to-end tests run with Playwright. A deterministic test user is created automatically during global setup.
+
+```bash
+# Run all tests
+npm run test:e2e
+
+# Run with a single worker (useful for debugging)
+npx playwright test --workers=1
+```
+
+Test credentials are stored in `.env.local` as `E2E_CLERK_USER_EMAIL` and `E2E_CLERK_USER_PASSWORD`.
+
+## Taskbar launcher
+
+A desktop launcher is included so you can start the dev server from your taskbar or app menu:
+
+- Launcher script: `/home/justin/piano-suite/launch.sh`
+- Desktop entry: `~/.local/share/applications/piano-suite.desktop`
+
+Clicking the icon will:
+
+1. Kill any existing dev server already running on port 3000.
+2. Start a fresh `npm run dev` instance in the background.
+3. Open the app in your default browser once the server is reachable.
+
+To add the launcher to your taskbar:
+
+- **GNOME / Ubuntu**: Open the Activities overview, search for "Piano Suite", right-click the icon, and select **Add to Favorites**.
+- **KDE Plasma**: Open the app menu, search for "Piano Suite", right-click, and choose **Add to Panel / Task Manager**.
+- **XFCE**: Right-click the panel → **Panel** → **Add New Items** → **Launcher**, then add Piano Suite from the applications list.
+
+If the icon does not appear in the app menu immediately after creation, log out and log back in once to refresh the desktop database.
 
 ## Build
 
@@ -73,14 +131,20 @@ npm run build
 
 - [x] Scaffold Next.js + Tailwind + shadcn/ui
 - [x] Port welcome-page content with Lunar-style layout
-- [x] Add Clerk and Convex scaffolding
-- [x] Add stub AI chat route
-- [ ] Wire real Clerk credentials and route protection (`middleware.ts`)
-- [ ] Deploy Convex project and connect `NEXT_PUBLIC_CONVEX_URL`
-- [ ] Implement real LLM + RAG against article embeddings
-- [ ] Migrate chord drill, progression drill, and technique tracker as Next.js routes
+- [x] Add Clerk authentication and route protection
+- [x] Add Convex data persistence and user sync
+- [x] Add Vercel AI SDK streaming chat route stub
+- [x] Add Vercel-dashboard-style Tools hub with sidebar
+- [x] Port Reflex Drill EXT Tracking tab with Recharts visualizations
+- [x] Add one-time localStorage import for legacy Reflex Drill EXT data
+- [x] Add Playwright E2E tests with authenticated flows
+- [ ] Migrate Chord Drill interactive page
+- [ ] Migrate Arpeggios interactive page
+- [ ] Migrate Root Cycling interactive page
+- [ ] Migrate Progression interactive page
+- [ ] Migrate Technique habit tracker
 - [ ] Add article pages under `/learn/[slug]`
-- [ ] Add user dashboard for practice stats and history
+- [ ] Implement real LLM + RAG against article embeddings
 
 ## License
 
