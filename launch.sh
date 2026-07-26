@@ -7,30 +7,15 @@ URL="http://localhost:3000"
 
 cd "$PROJECT_DIR"
 
-# Kill any previous dev server instances tied to this project directory.
-# We match processes whose cwd is the project dir and whose command line
-# contains npm/node running the dev server.
+# Kill only the Next.js dev server on port 3000. Leave other project
+# processes (e.g. the Convex dev server on port 3210) running.
 pids=$(lsof -t -i :3000 2>/dev/null || true)
 if [ -n "$pids" ]; then
-  echo "Stopping existing dev server on port 3000 (PIDs: $pids)..." | tee -a "$LOG_FILE"
+  echo "Stopping existing Next.js dev server on port 3000 (PIDs: $pids)..." | tee -a "$LOG_FILE"
   kill $pids 2>/dev/null || true
   sleep 2
   kill -9 $pids 2>/dev/null || true
 fi
-
-# Also sweep any node/npm processes whose cwd is this project.
-for pid_dir in /proc/[0-9]*/cwd; do
-  if [ -L "$pid_dir" ] && [ "$(readlink "$pid_dir" 2>/dev/null)" = "$PROJECT_DIR" ]; then
-    pid=$(basename "$(dirname "$pid_dir")")
-    cmd=$(cat "/proc/$pid/cmdline" 2>/dev/null | tr '\0' ' ' || true)
-    case "$cmd" in
-      *node*|*npm*)
-        echo "Stopping leftover project process $pid..." | tee -a "$LOG_FILE"
-        kill "$pid" 2>/dev/null || true
-        ;;
-    esac
-  fi
-done
 
 # Rotate / clear the log.
 echo "--- Launcher started $(date -Iseconds) ---" > "$LOG_FILE"
