@@ -1,0 +1,49 @@
+#separator:tab
+#notetype:Basic
+#deck:Piano::Chord Symbols 9 11 13 (C G D A E)
+#columns:Front	Back
+Cmaj9	Chord: C E G B D  |  Scale: C Ionian (C D E F G A B)  |  Fingering: RH 1-2-3-4-5  LH 5-4-3-2-1
+Cm9	Chord: C Eb G Bb D  |  Scale: C Dorian (C D Eb F G A Bb)  |  Fingering: RH 1-2-3-4-5  LH 5-4-3-2-1
+C9	Chord: C E G Bb D  |  Scale: C Mixolydian (C D E F G A Bb)  |  Fingering: RH 1-2-3-4-5  LH 5-4-3-2-1
+Cmaj11	Chord: C E G B D F  |  Scale: C Ionian (C D E F G A B)  |  Fingering: LH 5(Root)  RH 1-2-3-5(3-7-9-11)
+Cm11	Chord: C Eb G Bb D F  |  Scale: C Dorian (C D Eb F G A Bb)  |  Fingering: LH 5(Root)  RH 1-2-3-5(3-7-9-11)
+C11	Chord: C E G Bb D F  |  Scale: C Mixolydian (C D E F G A Bb)  |  Fingering: LH 5(Root)  RH 1-2-3-5(3-7-9-11)
+Cmaj13	Chord: C E G B D F A  |  Scale: C Ionian (C D E F G A B)  |  Fingering: LH 5(Root)  RH 1-2-3-5(7-9-3-13)
+Cm13	Chord: C Eb G Bb D F A  |  Scale: C Dorian (C D Eb F G A Bb)  |  Fingering: LH 5(Root)  RH 1-2-3-5(7-9-3-13)
+C13	Chord: C E G Bb D F A  |  Scale: C Mixolydian (C D E F G A Bb)  |  Fingering: LH 5(Root)  RH 1-2-3-5(7-9-3-13)
+Gmaj9	Chord: G B D F# A  |  Scale: G Ionian (G A B C D E F#)  |  Fingering: RH 1-2-3-4-5  LH 5-4-3-2-1
+Gm9	Chord: G Bb D F A  |  Scale: G Dorian (G A Bb C D E F)  |  Fingering: RH 1-2-3-4-5  LH 5-4-3-2-1
+G9	Chord: G B D F A  |  Scale: G Mixolydian (G A B C D E F)  |  Fingering: RH 1-2-3-4-5  LH 5-4-3-2-1
+Gmaj11	Chord: G B D F# A C  |  Scale: G Ionian (G A B C D E F#)  |  Fingering: LH 5(Root)  RH 1-2-3-5(3-7-9-11)
+Gm11	Chord: G Bb D F A C  |  Scale: G Dorian (G A Bb C D E F)  |  Fingering: LH 5(Root)  RH 1-2-3-5(3-7-9-11)
+G11	Chord: G B D F A C  |  Scale: G Mixolydian (G A B C D E F)  |  Fingering: LH 5(Root)  RH 1-2-3-5(3-7-9-11)
+Gmaj13	Chord: G B D F# A C E  |  Scale: G Ionian (G A B C D E F#)  |  Fingering: LH 5(Root)  RH 1-2-3-5(7-9-3-13)
+Gm13	Chord: G Bb D F A C E  |  Scale: G Dorian (G A Bb C D E F)  |  Fingering: LH 5(Root)  RH 1-2-3-5(7-9-3-13)
+G13	Chord: G B D F A C E  |  Scale: G Mixolydian (G A B C D E F)  |  Fingering: LH 5(Root)  RH 1-2-3-5(7-9-3-13)
+Dmaj9	Chord: D F# A C# E  |  Scale: D Ionian (D E F# G A B C#)  |  Fingering: RH 1-2-3-4-5  LH 5-4-3-2-1
+Dm9	Chord: D F A C E  |  Scale: D Dorian (D E F G A B C)  |  Fingering: RH 1-2-3-4-5  LH 5-4-3-2-1
+D9	Chord: D F# A C E  |  Scale: D Mixolydian (D E F# G A B C)  |  Fingering: RH 1-2-3-4-5  LH 5-4-3-2-1
+Dmaj11	Chord: D F# A C# E G  |  Scale: D Ionian (D E F# G A B C#)  |  Fingering: LH 5(Root)  RH 1-2-3-5(3-7-9-11)
+Dm11	Chord: D F A C E G  |  Scale: D Dorian (D E F G A B C)  |  Fingering: LH 5(Root)  RH 1-2-3-5(3-7-9-11)
+D11	Chord: D F# A C E G  |  Scale: D Mixolydian (D E F# G A B C)  |  Fingering: LH 5(Root)  RH 1-2-3-5(3-7-9-11)
+Dmaj13	Chord: D F# A C# E G B  |  Scale: D Ionian (D E F# G A B C#)  |  Fingering: LH 5(Root)  RH 1-2-3-5(7-9-3-13)
+Dm13	Chord: D F A C E G B  |  Scale: D Dorian (D E F G A B C)  |  Fingering: LH 5(Root)  RH 1-2-3-5(7-9-3-13)
+D13	Chord: D F# A C E G B  |  Scale: D Mixolydian (D E F# G A B C)  |  Fingering: LH 5(Root)  RH 1-2-3-5(7-9-3-13)
+Amaj9	Chord: A C# E G# B  |  Scale: A Ionian (A B C# D E F# G#)  |  Fingering: RH 1-2-3-4-5  LH 5-4-3-2-1
+Am9	Chord: A C E G B  |  Scale: A Dorian (A B C D E F# G)  |  Fingering: RH 1-2-3-4-5  LH 5-4-3-2-1
+A9	Chord: A C# E G B  |  Scale: A Mixolydian (A B C# D E F# G)  |  Fingering: RH 1-2-3-4-5  LH 5-4-3-2-1
+Amaj11	Chord: A C# E G# B D  |  Scale: A Ionian (A B C# D E F# G#)  |  Fingering: LH 5(Root)  RH 1-2-3-5(3-7-9-11)
+Am11	Chord: A C E G B D  |  Scale: A Dorian (A B C D E F# G)  |  Fingering: LH 5(Root)  RH 1-2-3-5(3-7-9-11)
+A11	Chord: A C# E G B D  |  Scale: A Mixolydian (A B C# D E F# G)  |  Fingering: LH 5(Root)  RH 1-2-3-5(3-7-9-11)
+Amaj13	Chord: A C# E G# B D F#  |  Scale: A Ionian (A B C# D E F# G#)  |  Fingering: LH 5(Root)  RH 1-2-3-5(7-9-3-13)
+Am13	Chord: A C E G B D F#  |  Scale: A Dorian (A B C D E F# G)  |  Fingering: LH 5(Root)  RH 1-2-3-5(7-9-3-13)
+A13	Chord: A C# E G B D F#  |  Scale: A Mixolydian (A B C# D E F# G)  |  Fingering: LH 5(Root)  RH 1-2-3-5(7-9-3-13)
+Emaj9	Chord: E G# B D# F#  |  Scale: E Ionian (E F# G# A B C# D#)  |  Fingering: RH 1-2-3-4-5  LH 5-4-3-2-1
+Em9	Chord: E G B D F#  |  Scale: E Dorian (E F# G A B C# D)  |  Fingering: RH 1-2-3-4-5  LH 5-4-3-2-1
+E9	Chord: E G# B D F#  |  Scale: E Mixolydian (E F# G# A B C# D)  |  Fingering: RH 1-2-3-4-5  LH 5-4-3-2-1
+Emaj11	Chord: E G# B D# F# A  |  Scale: E Ionian (E F# G# A B C# D#)  |  Fingering: LH 5(Root)  RH 1-2-3-5(3-7-9-11)
+Em11	Chord: E G B D F# A  |  Scale: E Dorian (E F# G A B C# D)  |  Fingering: LH 5(Root)  RH 1-2-3-5(3-7-9-11)
+E11	Chord: E G# B D F# A  |  Scale: E Mixolydian (E F# G# A B C# D)  |  Fingering: LH 5(Root)  RH 1-2-3-5(3-7-9-11)
+Emaj13	Chord: E G# B D# F# A C#  |  Scale: E Ionian (E F# G# A B C# D#)  |  Fingering: LH 5(Root)  RH 1-2-3-5(7-9-3-13)
+Em13	Chord: E G B D F# A C#  |  Scale: E Dorian (E F# G A B C# D)  |  Fingering: LH 5(Root)  RH 1-2-3-5(7-9-3-13)
+E13	Chord: E G# B D F# A C#  |  Scale: E Mixolydian (E F# G# A B C# D)  |  Fingering: LH 5(Root)  RH 1-2-3-5(7-9-3-13)

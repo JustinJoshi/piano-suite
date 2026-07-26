@@ -1,26 +1,100 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-fraunces);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --background: #0c0a08;
+  --foreground: #ede6d6;
+  --card: #16140f;
+  --card-foreground: #ede6d6;
+  --popover: #1c1912;
+  --popover-foreground: #ede6d6;
+  --primary: #c9a227;
+  --primary-foreground: #16140f;
+  --secondary: #1c1912;
+  --secondary-foreground: #ede6d6;
+  --muted: #211e17;
+  --muted-foreground: #a79b85;
+  --accent: #c9a227;
+  --accent-foreground: #16140f;
+  --destructive: #c1614a;
+  --border: rgba(201, 162, 39, 0.12);
+  --input: rgba(201, 162, 39, 0.15);
+  --ring: #c9a227;
+  --radius: 0.75rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Custom utilities for the Lunar-inspired hero visual */
+.hero-glow {
+  background:
+    radial-gradient(circle at 30% 40%, rgba(201, 162, 39, 0.28) 0%, transparent 45%),
+    radial-gradient(circle at 70% 60%, rgba(201, 162, 39, 0.16) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(232, 207, 122, 0.08) 0%, transparent 55%);
+}
+
+.hero-orb {
+  background: radial-gradient(circle at 35% 35%, #e8cf7a 0%, #c9a227 35%, #7a5f12 70%, transparent 100%);
+  box-shadow:
+    0 0 80px 20px rgba(201, 162, 39, 0.35),
+    inset -20px -20px 60px rgba(0, 0, 0, 0.45);
+}
+
+.beam {
+  background: linear-gradient(90deg, transparent 0%, rgba(201, 162, 39, 0.55) 45%, rgba(232, 207, 122, 0.8) 50%, rgba(201, 162, 39, 0.55) 55%, transparent 100%);
+  filter: blur(2px);
+}
+
+.hero-container {
+  min-height: 600px;
+}
+
+@media (min-width: 1024px) {
+  .hero-container {
+    height: clamp(600px, calc(100vh - 4rem), 900px);
+  }
 }
