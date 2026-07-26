@@ -40,15 +40,31 @@ setup("global setup", async () => {
   const { data: existing } = await client.users.getUserList({ emailAddress: [email] });
 
   if (existing.length === 0) {
-    const user = await client.users.createUser({
-      emailAddress: [email],
-      password,
-      // This instance requires a phone number for user creation. Use a fixed,
-      // synthetic E.164 number for the deterministic test user.
-      phoneNumber: ["+14155552671"],
-      firstName: "Test",
-      lastName: "User",
-    });
+    // Try creating the user without a phone number first. Some Clerk instances
+    // require phone numbers; if creation fails because of that, retry with a
+    // fixed synthetic test number.
+    let user;
+    try {
+      user = await client.users.createUser({
+        emailAddress: [email],
+        password,
+        firstName: "Test",
+        lastName: "User",
+      });
+    } catch (err: any) {
+      const message = err?.errors?.[0]?.longMessage || err?.message || "";
+      if (message.toLowerCase().includes("phone")) {
+        user = await client.users.createUser({
+          emailAddress: [email],
+          password,
+          phoneNumber: ["+14155552671"],
+          firstName: "Test",
+          lastName: "User",
+        });
+      } else {
+        throw err;
+      }
+    }
     trackUser(user.id, email);
   } else {
     // Keep the password in sync with the environment in case it was changed.
