@@ -145,4 +145,60 @@ describe("useDrillTimer", () => {
     expect(result.current.phase).toBe("finished");
     expect(onFinish).toHaveBeenCalled();
   });
+
+  it("pauses at success in multi-rep mode", () => {
+    const onSuccess = vi.fn();
+    const onFinish = vi.fn();
+    const { result } = renderHook(() =>
+      useDrillTimer({ multiRep: true, onSuccess, onFinish })
+    );
+
+    act(() => {
+      result.current.start();
+      result.current.arm();
+      vi.advanceTimersByTime(300);
+      result.current.markSuccess();
+    });
+
+    expect(result.current.phase).toBe("success");
+    expect(onSuccess).toHaveBeenCalledWith(expect.closeTo(300, 50));
+    expect(onFinish).not.toHaveBeenCalled();
+
+    act(() => {
+      result.current.nextRep();
+    });
+
+    expect(result.current.phase).toBe("armed");
+  });
+
+  it("finishes a multi-rep round through the break timer", () => {
+    const onFinish = vi.fn();
+    const onBreakComplete = vi.fn();
+    const { result } = renderHook(() =>
+      useDrillTimer({ multiRep: true, breakSeconds: 2, onFinish, onBreakComplete })
+    );
+
+    act(() => {
+      result.current.start();
+      result.current.arm();
+      result.current.markSuccess();
+    });
+
+    expect(result.current.phase).toBe("success");
+
+    act(() => {
+      result.current.finishRound();
+    });
+
+    expect(result.current.phase).toBe("break-before-grade");
+    expect(result.current.breakRemaining).toBe(2);
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    expect(result.current.phase).toBe("finished");
+    expect(onBreakComplete).toHaveBeenCalled();
+    expect(onFinish).toHaveBeenCalled();
+  });
 });

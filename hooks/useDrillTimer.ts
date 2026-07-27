@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export type DrillPhase =
   | "idle"
@@ -14,6 +14,7 @@ export type DrillPhase =
 export type DrillTimerOptions = {
   countdownSeconds?: number;
   breakSeconds?: number;
+  multiRep?: boolean;
   onCountdownComplete?: () => void;
   onStartTiming?: () => void;
   onSuccess?: (elapsedMs: number) => void;
@@ -27,6 +28,11 @@ export type DrillTimerOptions = {
  * Drives the lifecycle of a single drill attempt:
  *   idle -> countdown -> armed -> timing -> success -> break -> finished
  *
+ * When `multiRep` is true, `markSuccess()` pauses at the "success" phase so
+ * the consumer can run multiple reps per round. Call `nextRep()` to return to
+ * the armed state, or `finishRound()` to complete the round (running the break
+ * timer and finishing).
+ *
  * The consumer is responsible for detecting MIDI events and calling
  * `arm()` (hands lifted) and `markSuccess()` (correct input detected).
  */
@@ -34,6 +40,7 @@ export function useDrillTimer(options: DrillTimerOptions = {}) {
   const {
     countdownSeconds = 0,
     breakSeconds = 0,
+    multiRep = false,
     onCountdownComplete,
     onStartTiming,
     onSuccess,
@@ -127,17 +134,7 @@ export function useDrillTimer(options: DrillTimerOptions = {}) {
     onStartTiming?.();
   }, [startTimingLoop, onStartTiming, setPhaseSync]);
 
-  const markSuccess = useCallback(() => {
-    if (phaseRef.current !== "timing") return;
-
-    const elapsed = readyTimeRef.current !== null
-      ? performance.now() - readyTimeRef.current
-      : 0;
-
-    stopTimingLoop();
-    setLiveMs(elapsed);
-    onSuccess?.(elapsed);
-
+  const finishRoundInternal = useCallback(() => {
     if (breakSeconds > 0) {
       setPhaseSync("break-before-grade");
       setBreakRemaining(breakSeconds);
@@ -159,7 +156,35 @@ export function useDrillTimer(options: DrillTimerOptions = {}) {
       setPhaseSync("finished");
       onFinish?.();
     }
-  }, [breakSeconds, stopTimingLoop, onSuccess, clearBreak, onBreakComplete, onFinish, setPhaseSync]);
+  }, [breakSeconds, clearBreak, onBreakComplete, onFinish, setPhaseSync]);
+
+  const markSuccess = useCallback(() => {
+    if (phaseRef.current !== "timing") return;
+
+    const elapsed = readyTimeRef.current !== null
+      ? performance.now() - readyTimeRef.current
+      : 0;
+
+    stopTimingLoop();
+    setLiveMs(elapsed);
+    onSuccess?.(elapsed);
+
+    if (multiRep) {
+      setPhaseSync("success");
+    } else {
+      finishRoundInternal();
+    }
+  }, [stopTimingLoop, onSuccess, multiRep, finishRoundInternal, setPhaseSync]);
+
+  const nextRep = useCallback(() => {
+    if (phaseRef.current !== "success") return;
+    setPhaseSync("armed");
+  }, [setPhaseSync]);
+
+  const finishRound = useCallback(() => {
+    if (phaseRef.current !== "success") return;
+    finishRoundInternal();
+  }, [finishRoundInternal]);
 
   const cancel = useCallback(() => {
     clearCountdown();
@@ -184,15 +209,32 @@ export function useDrillTimer(options: DrillTimerOptions = {}) {
     };
   }, [clearCountdown, clearBreak, clearRaf]);
 
-  return {
-    phase,
-    liveMs,
-    countdownValue,
-    breakRemaining,
-    start,
-    arm,
-    markSuccess,
-    cancel,
-    reset,
-  };
+  return useMemo(
+    () => ({
+      phase,
+      liveMs,
+      countdownValue,
+      breakRemaining,
+      start,
+      arm,
+      markSuccess,
+      nextRep,
+      finishRound,
+      cancel,
+      reset,
+    }),
+    [
+      phase,
+      liveMs,
+      countdownValue,
+      breakRemaining,
+      start,
+      arm,
+      markSuccess,
+      nextRep,
+      finishRound,
+      cancel,
+      reset,
+    ]
+  );
 }

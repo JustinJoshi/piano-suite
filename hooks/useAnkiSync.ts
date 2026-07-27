@@ -12,6 +12,9 @@ import {
 export type ParsedAnkiCard = {
   card: AnkiCard;
   chordSymbol: string | null;
+  rootName: string | null;
+  qualitySuffix: string | null;
+  qualityIdx: number | null;
   queue: AnkiCardQueue;
   deckStats: DeckStats;
 };
@@ -114,23 +117,27 @@ export function useAnkiSync(options: AnkiSyncOptions) {
     lastCardIdRef.current = cardId;
 
     const parsed = parseChord(meta.card.question);
-    const chordSymbol = parsed?.fullSymbol ?? null;
 
-    if (parsed) {
-      const next: ParsedAnkiCard = {
-        card: meta.card,
-        chordSymbol,
-        queue: meta.queue,
-        deckStats: meta.deckStats,
-      };
-      lastParsedCardRef.current = next;
-      dispatch({ type: "connected", parsedCard: next });
-      onCard?.(next);
-    } else {
+    if (!parsed) {
       lastParsedCardRef.current = null;
       dispatch({ type: "no-card", deckStats: meta.deckStats });
       onCard?.(null);
+      return;
     }
+
+    const next: ParsedAnkiCard = {
+      card: meta.card,
+      chordSymbol: parsed.fullSymbol,
+      rootName: parsed.root.name,
+      qualitySuffix: parsed.suffix,
+      qualityIdx: parsed.qualityIdx,
+      queue: meta.queue,
+      deckStats: meta.deckStats,
+    };
+
+    lastParsedCardRef.current = next;
+    dispatch({ type: "connected", parsedCard: next });
+    onCard?.(next);
   }, [enabled, onCard, onFirstConnect]);
 
   useEffect(() => {
