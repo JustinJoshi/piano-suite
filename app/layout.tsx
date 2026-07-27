@@ -3,6 +3,8 @@ import { Inter, Fraunces, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { shadcn } from "@clerk/ui/themes";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
+import { ThemeProvider } from "@/components/theme-provider";
+import { defaultTheme } from "@/lib/themes";
 import "./globals.css";
 
 const inter = Inter({
@@ -38,9 +40,16 @@ export default function RootLayout({
       className={`${inter.variable} ${fraunces.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <ClerkProvider appearance={{ theme: shadcn }}>
-          <ConvexClientProvider>{children}</ConvexClientProvider>
-        </ClerkProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme={defaultTheme}
+          enableSystem={false}
+          storageKey="piano-suite-theme"
+        >
+          <ClerkProvider appearance={{ theme: shadcn }}>
+            <ConvexClientProvider>{children}</ConvexClientProvider>
+          </ClerkProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

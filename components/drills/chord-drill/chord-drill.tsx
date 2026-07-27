@@ -21,9 +21,9 @@ import { cn } from "@/lib/utils";
 import { Shuffle, RotateCcw } from "lucide-react";
 
 const GRADE_COLORS = {
-  Again: "bg-[#C1614A] text-white",
-  Hard: "bg-[#E8CF7A] text-black",
-  Good: "bg-[#7FA37A] text-white",
+  Again: "bg-grade-again text-white",
+  Hard: "bg-grade-hard text-black",
+  Good: "bg-grade-good text-white",
 };
 
 function ToggleGroup({

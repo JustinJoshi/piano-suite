@@ -117,22 +117,22 @@ export function ChordDrillPanel() {
           />
           <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
             <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-[#C1614A]" /> Again
+              <span className="h-2 w-2 rounded-full bg-grade-again" /> Again
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-[#E8CF7A]" /> Hard
+              <span className="h-2 w-2 rounded-full bg-grade-hard" /> Hard
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-[#7FA37A]" /> Good
+              <span className="h-2 w-2 rounded-full bg-grade-good" /> Good
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-[#6FA9A3]" /> Easy
+              <span className="h-2 w-2 rounded-full bg-grade-easy" /> Easy
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-[#5c5646]" /> Ungraded
+              <span className="h-2 w-2 rounded-full bg-grade-ungraded" /> Ungraded
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="inline-block h-2 w-2 rounded-full border-2 border-[#7FA37A]" /> Redo
+              <span className="inline-block h-2 w-2 rounded-full border-2 border-grade-good" /> Redo
             </span>
           </div>
           {activeChord && (

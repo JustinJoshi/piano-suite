@@ -27,6 +27,12 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-sidebar-background: var(--sidebar-background);
+  --color-grade-again: var(--grade-again);
+  --color-grade-hard: var(--grade-hard);
+  --color-grade-good: var(--grade-good);
+  --color-grade-easy: var(--grade-easy);
+  --color-grade-ungraded: var(--grade-ungraded);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -36,26 +42,188 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/*
+ * Theme token system
+ *
+ * Colors are defined as CSS custom properties so they can be swapped at
+ * runtime by changing a class on <html>. The Tailwind utilities above map
+ * those properties to bg-primary, text-primary, etc.
+ *
+ * The :root block is the Amber (default) theme. Alternate themes override
+ * only the variables they need to change.
+ */
+
 :root {
+  /* Core surfaces */
   --background: #0c0a08;
   --foreground: #ede6d6;
   --card: #16140f;
   --card-foreground: #ede6d6;
   --popover: #1c1912;
   --popover-foreground: #ede6d6;
-  --primary: #c9a227;
-  --primary-foreground: #16140f;
   --secondary: #1c1912;
   --secondary-foreground: #ede6d6;
   --muted: #211e17;
   --muted-foreground: #a79b85;
+  --destructive: #c1614a;
+  --radius: 0.75rem;
+
+  /* Brand / accent (Amber) */
+  --primary: #c9a227;
+  --primary-foreground: #16140f;
   --accent: #c9a227;
   --accent-foreground: #16140f;
-  --destructive: #c1614a;
+  --ring: #c9a227;
   --border: rgba(201, 162, 39, 0.12);
   --input: rgba(201, 162, 39, 0.15);
+  --primary-glow: rgba(201, 162, 39, 0.6);
+
+  /* Shared semantic tokens */
+  --sidebar-background: #0a0a0a;
+
+  --hero-glow-1: rgba(201, 162, 39, 0.28);
+  --hero-glow-2: rgba(201, 162, 39, 0.16);
+  --hero-glow-3: rgba(232, 207, 122, 0.08);
+  --hero-orb-inner: #e8cf7a;
+  --hero-orb-mid: #c9a227;
+  --hero-orb-outer: #7a5f12;
+  --hero-orb-shadow: rgba(201, 162, 39, 0.35);
+  --beam-mid: rgba(201, 162, 39, 0.55);
+  --beam-highlight: rgba(232, 207, 122, 0.8);
+
+  --grade-again: #c1614a;
+  --grade-hard: #e8cf7a;
+  --grade-good: #7fa37a;
+  --grade-easy: #6fa9a3;
+  --grade-ungraded: #5c5646;
+}
+
+/* ---------- Alternate presets ---------- */
+
+.amber {
+  --primary: #c9a227;
+  --primary-foreground: #16140f;
+  --accent: #c9a227;
+  --accent-foreground: #16140f;
   --ring: #c9a227;
-  --radius: 0.75rem;
+  --border: rgba(201, 162, 39, 0.12);
+  --input: rgba(201, 162, 39, 0.15);
+  --primary-glow: rgba(201, 162, 39, 0.6);
+
+  --hero-glow-1: rgba(201, 162, 39, 0.28);
+  --hero-glow-2: rgba(201, 162, 39, 0.16);
+  --hero-glow-3: rgba(232, 207, 122, 0.08);
+  --hero-orb-inner: #e8cf7a;
+  --hero-orb-mid: #c9a227;
+  --hero-orb-outer: #7a5f12;
+  --hero-orb-shadow: rgba(201, 162, 39, 0.35);
+  --beam-mid: rgba(201, 162, 39, 0.55);
+  --beam-highlight: rgba(232, 207, 122, 0.8);
+}
+
+.rose {
+  --primary: #e11d48;
+  --primary-foreground: #0c0a08;
+  --accent: #fb7185;
+  --accent-foreground: #0c0a08;
+  --ring: #e11d48;
+  --border: rgba(225, 29, 72, 0.12);
+  --input: rgba(225, 29, 72, 0.15);
+  --primary-glow: rgba(225, 29, 72, 0.6);
+
+  --hero-glow-1: rgba(225, 29, 72, 0.28);
+  --hero-glow-2: rgba(225, 29, 72, 0.16);
+  --hero-glow-3: rgba(251, 113, 133, 0.08);
+  --hero-orb-inner: #fda4af;
+  --hero-orb-mid: #e11d48;
+  --hero-orb-outer: #881337;
+  --hero-orb-shadow: rgba(225, 29, 72, 0.35);
+  --beam-mid: rgba(225, 29, 72, 0.55);
+  --beam-highlight: rgba(251, 113, 133, 0.8);
+}
+
+.emerald {
+  --primary: #10b981;
+  --primary-foreground: #0c0a08;
+  --accent: #34d399;
+  --accent-foreground: #0c0a08;
+  --ring: #10b981;
+  --border: rgba(16, 185, 129, 0.12);
+  --input: rgba(16, 185, 129, 0.15);
+  --primary-glow: rgba(16, 185, 129, 0.6);
+
+  --hero-glow-1: rgba(16, 185, 129, 0.28);
+  --hero-glow-2: rgba(16, 185, 129, 0.16);
+  --hero-glow-3: rgba(52, 211, 153, 0.08);
+  --hero-orb-inner: #6ee7b7;
+  --hero-orb-mid: #10b981;
+  --hero-orb-outer: #065f46;
+  --hero-orb-shadow: rgba(16, 185, 129, 0.35);
+  --beam-mid: rgba(16, 185, 129, 0.55);
+  --beam-highlight: rgba(52, 211, 153, 0.8);
+}
+
+.ocean {
+  --primary: #06b6d4;
+  --primary-foreground: #0c0a08;
+  --accent: #22d3ee;
+  --accent-foreground: #0c0a08;
+  --ring: #06b6d4;
+  --border: rgba(6, 182, 212, 0.12);
+  --input: rgba(6, 182, 212, 0.15);
+  --primary-glow: rgba(6, 182, 212, 0.6);
+
+  --hero-glow-1: rgba(6, 182, 212, 0.28);
+  --hero-glow-2: rgba(6, 182, 212, 0.16);
+  --hero-glow-3: rgba(34, 211, 238, 0.08);
+  --hero-orb-inner: #67e8f9;
+  --hero-orb-mid: #06b6d4;
+  --hero-orb-outer: #155e75;
+  --hero-orb-shadow: rgba(6, 182, 212, 0.35);
+  --beam-mid: rgba(6, 182, 212, 0.55);
+  --beam-highlight: rgba(34, 211, 238, 0.8);
+}
+
+.violet {
+  --primary: #8b5cf6;
+  --primary-foreground: #ffffff;
+  --accent: #a78bfa;
+  --accent-foreground: #0c0a08;
+  --ring: #8b5cf6;
+  --border: rgba(139, 92, 246, 0.12);
+  --input: rgba(139, 92, 246, 0.15);
+  --primary-glow: rgba(139, 92, 246, 0.6);
+
+  --hero-glow-1: rgba(139, 92, 246, 0.28);
+  --hero-glow-2: rgba(139, 92, 246, 0.16);
+  --hero-glow-3: rgba(167, 139, 250, 0.08);
+  --hero-orb-inner: #c4b5fd;
+  --hero-orb-mid: #8b5cf6;
+  --hero-orb-outer: #5b21b6;
+  --hero-orb-shadow: rgba(139, 92, 246, 0.35);
+  --beam-mid: rgba(139, 92, 246, 0.55);
+  --beam-highlight: rgba(167, 139, 250, 0.8);
+}
+
+.slate {
+  --primary: #94a3b8;
+  --primary-foreground: #0c0a08;
+  --accent: #cbd5e1;
+  --accent-foreground: #0c0a08;
+  --ring: #94a3b8;
+  --border: rgba(148, 163, 184, 0.12);
+  --input: rgba(148, 163, 184, 0.15);
+  --primary-glow: rgba(148, 163, 184, 0.6);
+
+  --hero-glow-1: rgba(148, 163, 184, 0.28);
+  --hero-glow-2: rgba(148, 163, 184, 0.16);
+  --hero-glow-3: rgba(203, 213, 225, 0.08);
+  --hero-orb-inner: #e2e8f0;
+  --hero-orb-mid: #94a3b8;
+  --hero-orb-outer: #475569;
+  --hero-orb-shadow: rgba(148, 163, 184, 0.35);
+  --beam-mid: rgba(148, 163, 184, 0.55);
+  --beam-highlight: rgba(203, 213, 225, 0.8);
 }
 
 @layer base {
@@ -70,23 +238,24 @@
   }
 }
 
-/* Custom utilities for the Lunar-inspired hero visual */
+/* Custom utilities for the hero visual. They read from theme tokens so the
+   orb/glow recolor automatically when the active theme changes. */
 .hero-glow {
   background:
-    radial-gradient(circle at 30% 40%, rgba(201, 162, 39, 0.28) 0%, transparent 45%),
-    radial-gradient(circle at 70% 60%, rgba(201, 162, 39, 0.16) 0%, transparent 40%),
-    radial-gradient(circle at 50% 50%, rgba(232, 207, 122, 0.08) 0%, transparent 55%);
+    radial-gradient(circle at 30% 40%, var(--hero-glow-1) 0%, transparent 45%),
+    radial-gradient(circle at 70% 60%, var(--hero-glow-2) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, var(--hero-glow-3) 0%, transparent 55%);
 }
 
 .hero-orb {
-  background: radial-gradient(circle at 35% 35%, #e8cf7a 0%, #c9a227 35%, #7a5f12 70%, transparent 100%);
+  background: radial-gradient(circle at 35% 35%, var(--hero-orb-inner) 0%, var(--hero-orb-mid) 35%, var(--hero-orb-outer) 70%, transparent 100%);
   box-shadow:
-    0 0 80px 20px rgba(201, 162, 39, 0.35),
+    0 0 80px 20px var(--hero-orb-shadow),
     inset -20px -20px 60px rgba(0, 0, 0, 0.45);
 }
 
 .beam {
-  background: linear-gradient(90deg, transparent 0%, rgba(201, 162, 39, 0.55) 45%, rgba(232, 207, 122, 0.8) 50%, rgba(201, 162, 39, 0.55) 55%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, var(--beam-mid) 45%, var(--beam-highlight) 50%, var(--beam-mid) 55%, transparent 100%);
   filter: blur(2px);
 }
 

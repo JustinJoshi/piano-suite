@@ -10,6 +10,7 @@ import {
   BarChart3,
   ArrowRightLeft,
   Timer,
+  Palette,
 } from "lucide-react";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
@@ -29,7 +30,7 @@ export function Sidebar() {
   const { user, isLoaded } = useUser();
 
   return (
-    <aside className="dashboard-sidebar fixed left-0 top-0 z-40 flex h-screen flex-col border-r border-border/50 bg-[#0a0a0a]">
+    <aside className="dashboard-sidebar fixed left-0 top-0 z-40 flex h-screen flex-col border-r border-border/50 bg-sidebar-background">
       {/* Brand */}
       <div className="flex h-16 items-center gap-2 border-b border-border/50 px-4">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
@@ -77,6 +78,33 @@ export function Sidebar() {
               </li>
             );
           })}
+        </ul>
+
+        <div className="mb-2 mt-6 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          Settings
+        </div>
+        <ul className="space-y-0.5">
+          <li>
+            <Link
+              href="/settings/theme"
+              className={cn(
+                "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                pathname === "/settings/theme"
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              )}
+            >
+              <Palette
+                className={cn(
+                  "h-4 w-4 transition-colors",
+                  pathname === "/settings/theme"
+                    ? "text-primary"
+                    : "text-muted-foreground group-hover:text-foreground"
+                )}
+              />
+              Theme
+            </Link>
+          </li>
         </ul>
       </nav>
 

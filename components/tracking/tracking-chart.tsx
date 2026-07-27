@@ -29,13 +29,13 @@ interface TrackingChartProps {
 }
 
 const gradeColors: Record<string, string> = {
-  Again: "#C1614A",
-  Hard: "#E8CF7A",
-  Good: "#7FA37A",
-  Easy: "#6FA9A3",
+  Again: "var(--color-grade-again)",
+  Hard: "var(--color-grade-hard)",
+  Good: "var(--color-grade-good)",
+  Easy: "var(--color-grade-easy)",
 };
 
-const ungradedColor = "#5c5646";
+const ungradedColor = "var(--color-grade-ungraded)";
 
 function buildTicks(maxSeconds: number) {
   const niceMax = Math.ceil(maxSeconds * 1.15 * 2) / 2;
@@ -130,7 +130,7 @@ export function TrackingChart({
     <div className="h-[320px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ top: 16, right: 16, bottom: 24, left: 8 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(201,162,39,0.12)" />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-primary)" strokeOpacity={0.12} />
           <XAxis
             dataKey="attempt"
             tickLine={false}
@@ -156,7 +156,7 @@ export function TrackingChart({
           {goodSec <= niceMax && (
             <ReferenceLine
               y={goodSec}
-              stroke="#7FA37A"
+              stroke="var(--color-grade-good)"
               strokeDasharray="4 3"
               strokeOpacity={0.55}
             />
@@ -164,7 +164,7 @@ export function TrackingChart({
           {hardSec <= niceMax && (
             <ReferenceLine
               y={hardSec}
-              stroke="#E8CF7A"
+              stroke="var(--color-grade-hard)"
               strokeDasharray="4 3"
               strokeOpacity={0.55}
             />
@@ -172,7 +172,8 @@ export function TrackingChart({
           <Line
             type="monotone"
             dataKey="seconds"
-            stroke="rgba(201,162,39,0.5)"
+            stroke="var(--color-primary)"
+            strokeOpacity={0.5}
             strokeWidth={1.5}
             dot={<CustomDot />}
             activeDot={{ r: 7 }}

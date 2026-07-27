@@ -52,3 +52,6 @@ next-env.d.ts
 
 # convex dev server log
 .convex-dev.log
+
+# per-agent git worktrees
+.worktrees/

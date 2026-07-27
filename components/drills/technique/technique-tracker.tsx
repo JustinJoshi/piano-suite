@@ -128,7 +128,7 @@ export function TechniqueTracker() {
                   className={cn(
                     "h-3 w-3 rounded-full transition-all duration-100",
                     pulse && metronomeRunning
-                      ? "bg-primary shadow-[0_0_12px_2px_rgba(201,162,39,0.6)]"
+                      ? "bg-primary shadow-[0_0_12px_2px_var(--primary-glow)]"
                       : "bg-muted"
                   )}
                 />
