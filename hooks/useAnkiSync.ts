@@ -117,7 +117,7 @@ export function useAnkiSync(options: AnkiSyncOptions) {
     lastCardIdRef.current = cardId;
 
     const chord = parseChord(meta.card.question);
-    const root = parseRootFromText(meta.card.question);
+    const root = chord?.root ?? parseRootFromText(meta.card.question);
 
     if (!root) {
       lastParsedCardRef.current = null;

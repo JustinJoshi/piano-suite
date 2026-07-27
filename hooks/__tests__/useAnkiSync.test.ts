@@ -162,4 +162,33 @@ describe("useAnkiSync", () => {
 
     unmount();
   });
+
+  it("uses the root from parseChord when rendered Anki HTML contains note names in CSS", async () => {
+    const { parseChord } = await vi.importActual<typeof musicTheory>("@/lib/music-theory");
+
+    vi.mocked(anki.getCurrentCardWithMeta).mockResolvedValue({
+      card: {
+        cardId: 123,
+        question: '<style>.card { font-family: arial; }</style><div class="card">Fm7</div>',
+        answer: "",
+        deckName: "Piano::Chord Symbols",
+        modelName: "Basic",
+        fields: {},
+      },
+      queue: "review",
+      deckStats: { new: 0, learn: 0, review: 0, total: 0 },
+    });
+
+    vi.mocked(musicTheory.parseChord).mockImplementation(parseChord);
+
+    const { result } = renderHook(() => useAnkiSync({ enabled: true, pollIntervalMs: 100000 }));
+
+    await waitFor(() => {
+      expect(result.current.status).toBe("connected");
+    });
+
+    expect(result.current.parsedCard?.chordSymbol).toBe("Fm7");
+    expect(result.current.parsedCard?.rootName).toBe("F");
+    expect(result.current.parsedCard?.qualityIdx).toBe(2);
+  });
 });
