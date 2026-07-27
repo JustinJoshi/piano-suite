@@ -12,7 +12,8 @@ import {
   Timer,
   Palette,
 } from "lucide-react";
-import { UserButton, useUser } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
+import { AppUserButton } from "@/components/app-user-button";
 import { cn } from "@/lib/utils";
 
 const toolLinks = [
@@ -111,7 +112,7 @@ export function Sidebar() {
       {/* User account */}
       <div className="border-t border-border/50 p-3">
         <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground">
-          <UserButton
+          <AppUserButton
             appearance={{
               elements: {
                 avatarBox: "h-6 w-6 rounded-full",

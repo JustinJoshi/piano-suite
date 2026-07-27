@@ -9,7 +9,7 @@ import {
   Search,
   Bell,
 } from "lucide-react";
-import { UserButton } from "@clerk/nextjs";
+import { AppUserButton } from "@/components/app-user-button";
 import { ToolCard } from "@/components/tools/tool-card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -90,7 +90,7 @@ export default function ToolsPage() {
           <Button variant="ghost" size="icon" className="text-muted-foreground">
             <Bell className="h-4 w-4" />
           </Button>
-          <UserButton />
+          <AppUserButton />
         </div>
       </header>
 

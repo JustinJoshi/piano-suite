@@ -6,8 +6,8 @@ import {
   SignInButton,
   SignUpButton,
   Show,
-  UserButton,
 } from "@clerk/nextjs";
+import { AppUserButton } from "@/components/app-user-button";
 import { Button } from "@/components/ui/button";
 
 const navLinks = [
@@ -60,7 +60,7 @@ export function Navbar() {
             </SignUpButton>
           </Show>
           <Show when="signed-in">
-            <UserButton />
+            <AppUserButton />
           </Show>
         </div>
       </div>
