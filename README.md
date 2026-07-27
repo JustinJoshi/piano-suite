@@ -20,6 +20,7 @@ This repository now contains:
 
 - A **Next.js 16+ App Router** application with TypeScript.
 - A **Lunar.dev-inspired landing page** that ports the original Reflex Drill EXT welcome content into a polished, modern marketing layout.
+- An **Articles section** (`/articles`) with a listing page and statically generated article pages (`/articles/[slug]`). Articles are authored in Markdown with YAML frontmatter, rendered with `react-markdown`, and styled with reusable Tailwind utility classes.
 - A **Vercel-dashboard-inspired Tools hub** (`/tools`) with a sidebar navigation drawn from the original Reflex Drill EXT tabs.
 - A migrated **Chord Drill** (`/tools/chord-drill`) ported from Reflex Drill EXT, including Single Shape / Family Cycle / Extended Family modes, root/quality selection, reps, per-chord rep overrides, Anki Sync with auto-timer and auto-grade, break-before-grading, and personal-best stats persisted via Convex.
 - A migrated **Technique habit tracker** (`/tools/technique`) ported from Reflex Drill EXT, including a built-in metronome, BPM logging, streak counter, 28-day practice grid, and a one-time import from the original `technique-habit-log-v1` localStorage key.
@@ -42,6 +43,7 @@ A shared **primitive layer** has been extracted from the original Reflex Drill E
 - `lib/music-theory.ts` — pitch classes, chord parsing, quality definitions
 - `lib/scoring.ts` — comparing held MIDI notes to target chords and sequences
 - `lib/chord-drill.ts` — pure chord-drill helpers (grading, rep targets, history)
+- `lib/articles.ts` — Markdown article parsing, frontmatter handling, and listing helpers
 - `lib/anki.ts` — typed AnkiConnect client
 - `hooks/useMidi.ts` — Web MIDI device selection and held-note tracking
 - `hooks/useAudio.ts` — Web Audio chimes, ticks, and metronome
@@ -194,7 +196,7 @@ npm run build
 - [ ] Migrate Root Cycling interactive page
 - [ ] Migrate Progression interactive page
 - [x] Migrate Technique habit tracker
-- [ ] Add article pages under `/learn/[slug]`
+- [x] Add article pages under `/articles/[slug]`
 - [ ] Implement real LLM + RAG against article embeddings
 
 ## License
