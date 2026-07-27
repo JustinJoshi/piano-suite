@@ -240,6 +240,28 @@ export function useArpeggios(enabled: boolean): ArpeggioEngine {
   }, []);
 
   // -------------------------------------------------------------------------
+  // Core drill actions
+  // -------------------------------------------------------------------------
+  const armChord = useCallback(() => {
+    if (!chord) return;
+    setPhase("awaiting-root");
+    setTargetIdxState(0);
+    targetIdxRef.current = 0;
+    setLapCountState(0);
+    lapCountRef.current = 0;
+    setMissCountState(0);
+    missCountRef.current = 0;
+    setMissesThisLapState(0);
+    missesThisLapRef.current = 0;
+    setRecentHistoryState([]);
+    recentHistoryRef.current = [];
+    lastEventTimeRef.current = null;
+    sinceArmFirstNoteRef.current = true;
+    setLiveMsState(0);
+    startLiveTimer();
+  }, [chord, setPhase, startLiveTimer]);
+
+  // -------------------------------------------------------------------------
   // Countdown / break timers
   // -------------------------------------------------------------------------
   const stopCountdown = useCallback(() => {
@@ -267,7 +289,7 @@ export function useArpeggios(enabled: boolean): ArpeggioEngine {
         return next;
       });
     }, 1000);
-  }, [setPhase, stopCountdown, playTick]);
+  }, [setPhase, stopCountdown, playTick, armChord]);
 
   const runBreak = useCallback((): Promise<boolean> => {
     return new Promise((resolve) => {
@@ -311,28 +333,6 @@ export function useArpeggios(enabled: boolean): ArpeggioEngine {
     }
   }, []);
 
-  // -------------------------------------------------------------------------
-  // Core drill actions
-  // -------------------------------------------------------------------------
-  const armChord = useCallback(() => {
-    if (!chord) return;
-    setPhase("awaiting-root");
-    setTargetIdxState(0);
-    targetIdxRef.current = 0;
-    setLapCountState(0);
-    lapCountRef.current = 0;
-    setMissCountState(0);
-    missCountRef.current = 0;
-    setMissesThisLapState(0);
-    missesThisLapRef.current = 0;
-    setRecentHistoryState([]);
-    recentHistoryRef.current = [];
-    lastEventTimeRef.current = null;
-    sinceArmFirstNoteRef.current = true;
-    setLiveMsState(0);
-    startLiveTimer();
-  }, [chord, setPhase, startLiveTimer]);
-
   const finishLap = useCallback(() => {
     setLapCountState((prev) => {
       lapCountRef.current = prev + 1;
@@ -356,15 +356,23 @@ export function useArpeggios(enabled: boolean): ArpeggioEngine {
       const proceeded = await runBreak();
       if (!proceeded) return;
 
-      const flipped = await flipCurrentCard();
-      if (flipped && autoGradeRef.current && ankiFollowRef.current && followedCardRef.current) {
+      try {
+        await flipCurrentCard();
+      } catch (err) {
+        console.error("Failed to flip Anki card", err);
+        setGradeStatus("idle");
+        return;
+      }
+
+      if (autoGradeRef.current && ankiFollowRef.current && followedCardRef.current) {
         setGradeStatus("pending");
-        const result = gradeForMisses(missesThisLapRef.current, settingsRef.current.missThresholds);
-        const graded = await gradeCurrentCard(result.ease);
-        if (graded) {
+        try {
+          const result = gradeForMisses(missesThisLapRef.current, settingsRef.current.missThresholds);
+          await gradeCurrentCard(result.ease);
           setLastGradeResult({ grade: result.label, misses: missesThisLapRef.current });
           setGradeStatus("sent");
-        } else {
+        } catch (err) {
+          console.error("Failed to grade Anki card", err);
           setGradeStatus("idle");
         }
       }
@@ -449,7 +457,7 @@ export function useArpeggios(enabled: boolean): ArpeggioEngine {
         }
       }
     },
-    [startLiveTimer, finishLap]
+    [setPhase, startLiveTimer, finishLap]
   );
 
   // Keep a set of currently held pitch classes so the awaiting-root check can
@@ -477,7 +485,7 @@ export function useArpeggios(enabled: boolean): ArpeggioEngine {
   // Anki sync
   // -------------------------------------------------------------------------
   const applyAnkiChord = useCallback(
-    (rootPc: number, rootName: string) => {
+    (rootPc: number) => {
       const match = findArpeggioByRootPc(rootPc);
       if (!match) {
         // Should not happen for standard 12 roots, but handle gracefully.
@@ -514,10 +522,14 @@ export function useArpeggios(enabled: boolean): ArpeggioEngine {
         return;
       }
 
-      const root = ARPEGGIO_CHORDS.find((c) => c.lh[0].name === parsed.rootName)
-        ? ARPEGGIO_CHORDS.find((c) => c.lh[0].name === parsed.rootName)
-        : ARPEGGIO_CHORDS.find((c) => c.id.startsWith(parsed.rootName!));
+      const root = parseRoot(parsed.rootName);
       if (!root) {
+        pendingCardRef.current = null;
+        return;
+      }
+
+      const arpeggio = findArpeggioByRootPc(root.pc);
+      if (!arpeggio) {
         pendingCardRef.current = null;
         return;
       }
@@ -529,9 +541,9 @@ export function useArpeggios(enabled: boolean): ArpeggioEngine {
 
       // Apply immediately if the page is visible; otherwise queue it.
       if (document.visibilityState === "visible") {
-        applyAnkiChord(root.lh[0].pc, parsed.rootName);
+        applyAnkiChord(root.pc);
       } else {
-        pendingCardRef.current = { rootPc: root.lh[0].pc, rootName: parsed.rootName };
+        pendingCardRef.current = { rootPc: root.pc, rootName: parsed.rootName };
       }
     },
     [applyAnkiChord]
@@ -576,7 +588,7 @@ export function useArpeggios(enabled: boolean): ArpeggioEngine {
     if (!loaded) return;
     if (document.visibilityState === "visible" && phaseRef.current === "idle") {
       if (ankiFollowRef.current && pendingCardRef.current) {
-        applyAnkiChord(pendingCardRef.current.rootPc, pendingCardRef.current.rootName);
+        applyAnkiChord(pendingCardRef.current.rootPc);
         pendingCardRef.current = null;
       } else {
         armChord();
@@ -587,7 +599,7 @@ export function useArpeggios(enabled: boolean): ArpeggioEngine {
   useEffect(() => {
     const onVisibility = () => {
       if (document.visibilityState === "visible" && pendingCardRef.current) {
-        applyAnkiChord(pendingCardRef.current.rootPc, pendingCardRef.current.rootName);
+        applyAnkiChord(pendingCardRef.current.rootPc);
         pendingCardRef.current = null;
       }
     };

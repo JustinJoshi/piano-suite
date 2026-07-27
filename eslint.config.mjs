@@ -14,7 +14,7 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
   ]),
   {
-    files: ["hooks/useChordDrill.ts", "hooks/useChordDrillSettings.ts", "hooks/useArpeggioSettings.ts"],
+    files: ["hooks/useChordDrill.ts", "hooks/useChordDrillSettings.ts", "hooks/useArpeggioSettings.ts", "hooks/useArpeggios.ts"],
     rules: {
       // These hooks intentionally use refs to bridge async callbacks and
       // stabilize the drill engine's callbacks across render cycles. The
