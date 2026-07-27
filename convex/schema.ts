@@ -33,6 +33,18 @@ export default defineSchema({
     .index("by_user_chord", ["userId", "chord"])
     .index("by_user_timestamp", ["userId", "timestamp"]),
 
+  // Daily technique habit sessions (exercise name, BPM, notes).
+  techniqueSessions: defineTable({
+    userId: v.id("users"),
+    date: v.string(), // YYYY-MM-DD (UTC)
+    exercise: v.string(),
+    bpm: v.number(),
+    notes: v.optional(v.string()),
+    timestamp: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_date", ["userId", "date"]),
+
   // Wrong-note events from the Arpeggios drill.
   missEvents: defineTable({
     userId: v.id("users"),
