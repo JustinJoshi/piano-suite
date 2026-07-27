@@ -13,16 +13,20 @@ export default defineSchema({
     .index("by_email", ["email"]),
 
   // Timing events from the Reflex Drill EXT tracking tab:
-  // chord-drill first-chord times, arpeggio transitions, root-cycling attempts.
+  // chord-drill first-chord times, arpeggio transitions, root-cycling attempts,
+  // and progression drill step transitions.
   practiceEvents: defineTable({
     userId: v.id("users"),
-    tool: v.string(), // "chord-drill" | "arpeggios" | "root-cycling"
+    tool: v.string(), // "chord-drill" | "arpeggios" | "root-cycling" | "progression"
     chord: v.optional(v.string()),
     fromDeg: v.optional(v.string()),
     toDeg: v.optional(v.string()),
     root: v.optional(v.string()),
     quality: v.optional(v.string()),
     mode: v.optional(v.string()), // "chord" | "arpeggio" for root-cycling
+    progression: v.optional(v.string()), // e.g. "ii-V-I" | "blues12"
+    key: v.optional(v.string()), // progression key, e.g. "C"
+    stepLabel: v.optional(v.string()), // e.g. "ii" | "bar 5"
     reactionTimeMs: v.number(),
     grade: v.optional(v.string()), // Again | Hard | Good | Easy
     redo: v.boolean(),

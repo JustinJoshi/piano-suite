@@ -64,6 +64,17 @@ export const listRootCycleEvents = query({
   },
 });
 
+export const listProgressionEvents = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await currentUserId(ctx);
+    return await ctx.db
+      .query("practiceEvents")
+      .withIndex("by_user_tool", (q) => q.eq("userId", userId).eq("tool", "progression"))
+      .collect();
+  },
+});
+
 // --------------------------------------------------------------------------
 // Mutations - single events
 // --------------------------------------------------------------------------
@@ -175,6 +186,30 @@ export const logRootCycleEvent = mutation({
   },
 });
 
+export const logProgressionEvent = mutation({
+  args: {
+    progression: v.string(),
+    key: v.string(),
+    stepLabel: v.string(),
+    chord: v.string(),
+    reactionTimeMs: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await currentUserId(ctx);
+    return await ctx.db.insert("practiceEvents", {
+      userId,
+      tool: "progression",
+      chord: args.chord,
+      progression: args.progression,
+      key: args.key,
+      stepLabel: args.stepLabel,
+      reactionTimeMs: args.reactionTimeMs,
+      redo: false,
+      timestamp: Date.now(),
+    });
+  },
+});
+
 // --------------------------------------------------------------------------
 // Mutations - clear logs
 // --------------------------------------------------------------------------
@@ -244,6 +279,27 @@ export const clearRootCycleEventsByGroup = mutation({
         if (args.toDeg) filters.push(q.eq(q.field("toDeg"), args.toDeg));
         return q.and(...filters);
       })
+      .collect();
+    for (const event of events) await ctx.db.delete(event._id);
+  },
+});
+
+export const clearProgressionEventsByProgression = mutation({
+  args: {
+    progression: v.string(),
+    key: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await currentUserId(ctx);
+    const events = await ctx.db
+      .query("practiceEvents")
+      .withIndex("by_user_tool", (q) => q.eq("userId", userId).eq("tool", "progression"))
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("progression"), args.progression),
+          q.eq(q.field("key"), args.key)
+        )
+      )
       .collect();
     for (const event of events) await ctx.db.delete(event._id);
   },
