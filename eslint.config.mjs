@@ -19,8 +19,11 @@ const eslintConfig = defineConfig([
       "hooks/useChordDrillSettings.ts",
       "hooks/useArpeggioSettings.ts",
       "hooks/useArpeggios.ts",
+      "hooks/useMidi.ts",
       "hooks/useProgression.ts",
       "hooks/useProgressionSettings.ts",
+      "hooks/useRootCycling.ts",
+      "hooks/useRootCyclingSettings.ts",
     ],
     rules: {
       // These hooks intentionally use refs to bridge async callbacks and
