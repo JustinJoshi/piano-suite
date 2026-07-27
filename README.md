@@ -69,7 +69,7 @@ A shared **primitive layer** has been extracted from the original Reflex Drill E
 
 Piano Suite has a token-driven theming system. Colors are defined as CSS custom properties in `app/globals.css` and exposed as Tailwind utilities (`bg-primary`, `text-primary`, `ring-primary`, etc.). A built-in theme picker lives at `/settings/theme` and lets users switch between presets (Amber, Rose, Emerald, Ocean, Violet, Slate). The choice is saved to `localStorage` and synced to Convex for signed-in users.
 
-When adding new UI, use the theme tokens instead of hard-coded colors. See `AGENTS.md` for the full theming conventions.
+When adding new UI, use the theme tokens instead of hard-coded colors. See `AGENTS.md` for the full theming conventions and `DESIGN-PRINCIPLES.md` for the broader visual design system.
 
 A `/tools/midi-test` page is included for manually verifying MIDI input and audio output during development.
 

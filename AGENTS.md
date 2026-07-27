@@ -40,6 +40,8 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 
 The app has a token-driven theming system. **Never hard-code hex/rgb/hsl colors, raw gradients, or glow shadows in components.** Always pull colors from the theme so they switch correctly when the user changes presets.
 
+Before making styling changes, read `DESIGN-PRINCIPLES.md` for the visual conventions (typography, spacing, surface treatments, hero graphics, dashboard layout) that should be preserved across the app.
+
 ### Where tokens live
 
 - `app/globals.css` — the single source of truth for all color tokens.
