@@ -13,6 +13,19 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    files: ["hooks/useChordDrill.ts", "hooks/useChordDrillSettings.ts"],
+    rules: {
+      // These hooks intentionally use refs to bridge async callbacks and
+      // stabilize the drill engine's callbacks across render cycles. The
+      // React Compiler's strict immutability rules fight the engine's
+      // imperative timer/MIDI state machine, so they are disabled here.
+      "react-hooks/immutability": "off",
+      "react-hooks/set-state-in-effect": "off",
+      "react-hooks/preserve-manual-memoization": "off",
+      "react-hooks/exhaustive-deps": "warn",
+    },
+  },
 ]);
 
 export default eslintConfig;

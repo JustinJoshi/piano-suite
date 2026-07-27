@@ -21,6 +21,7 @@ This repository now contains:
 - A **Next.js 16+ App Router** application with TypeScript.
 - A **Lunar.dev-inspired landing page** that ports the original Reflex Drill EXT welcome content into a polished, modern marketing layout.
 - A **Vercel-dashboard-inspired Tools hub** (`/tools`) with a sidebar navigation drawn from the original Reflex Drill EXT tabs.
+- A migrated **Chord Drill** (`/tools/chord-drill`) ported from Reflex Drill EXT, including Single Shape / Family Cycle / Extended Family modes, root/quality selection, reps, per-chord rep overrides, Anki Sync with auto-timer and auto-grade, break-before-grading, and personal-best stats persisted via Convex.
 - A migrated **Technique habit tracker** (`/tools/technique`) ported from Reflex Drill EXT, including a built-in metronome, BPM logging, streak counter, 28-day practice grid, and a one-time import from the original `technique-habit-log-v1` localStorage key.
 - A migrated **Tracking dashboard** (`/tools/tracking`) ported from Reflex Drill EXT, including:
   - Chord Drill first-chord timing history
@@ -40,12 +41,16 @@ A shared **primitive layer** has been extracted from the original Reflex Drill E
 
 - `lib/music-theory.ts` — pitch classes, chord parsing, quality definitions
 - `lib/scoring.ts` — comparing held MIDI notes to target chords and sequences
+- `lib/chord-drill.ts` — pure chord-drill helpers (grading, rep targets, history)
 - `lib/anki.ts` — typed AnkiConnect client
 - `hooks/useMidi.ts` — Web MIDI device selection and held-note tracking
 - `hooks/useAudio.ts` — Web Audio chimes, ticks, and metronome
-- `hooks/useDrillTimer.ts` — generic drill timer state machine
+- `hooks/useDrillTimer.ts` — generic drill timer state machine (single- or multi-rep)
 - `hooks/useAnkiSync.ts` — polling Anki for the current review card
+- `hooks/useChordDrill.ts` — composed chord-drill engine
+- `convex/settings.ts` — generic per-user settings persistence
 - `components/drills/drill-shell.tsx` — shared layout wrapper for tool pages
+- `components/drills/midi-connection-bar.tsx` — reusable MIDI input bar
 
 A `/tools/midi-test` page is included for manually verifying MIDI input and audio output during development.
 
@@ -184,7 +189,7 @@ npm run build
 - [x] Port Reflex Drill EXT Tracking tab with Recharts visualizations
 - [x] Add one-time migration from Reflex Drill EXT tracking data
 - [x] Add Playwright E2E tests with authenticated flows
-- [ ] Migrate Chord Drill interactive page
+- [x] Migrate Chord Drill interactive page
 - [ ] Migrate Arpeggios interactive page
 - [ ] Migrate Root Cycling interactive page
 - [ ] Migrate Progression interactive page
