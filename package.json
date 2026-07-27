@@ -12,6 +12,7 @@
     "test:unit:run": "vitest run"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^4.0.20",
     "@base-ui/react": "^1.6.0",
     "@clerk/nextjs": "^7.6.1",
     "@clerk/ui": "^1.26.0",

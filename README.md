@@ -23,6 +23,7 @@ This repository now contains:
 - An **Articles section** (`/articles`) with a listing page and statically generated article pages (`/articles/[slug]`). Articles are authored in Markdown with YAML frontmatter, rendered with `react-markdown`, and styled with reusable Tailwind utility classes. The shared site navbar is included on article pages so readers can navigate back to the home page and other sections at any time.
 - A **Vercel-dashboard-inspired Tools hub** (`/tools`) with a sidebar navigation drawn from the original Reflex Drill EXT tabs.
 - A migrated **Chord Drill** (`/tools/chord-drill`) ported from Reflex Drill EXT, including Single Shape / Family Cycle / Extended Family modes, root/quality selection, reps, per-chord rep overrides, Anki Sync with auto-timer and auto-grade, break-before-grading, and personal-best stats persisted via Convex.
+- A migrated **Arpeggios** (`/tools/arpeggios`) ported from Reflex Drill EXT, including the 12 minor-11th cells with left-hand pedal and right-hand sequence drilling, per-transition timing, miss logging, sequence customization, lap chimes, and Anki Sync that maps any card root to the matching minor-11th arpeggio and auto-grades by misses.
 - A migrated **Technique habit tracker** (`/tools/technique`) ported from Reflex Drill EXT, including a built-in metronome, BPM logging, streak counter, 28-day practice grid, and a one-time import from the original `technique-habit-log-v1` localStorage key.
 - A migrated **Tracking dashboard** (`/tools/tracking`) ported from Reflex Drill EXT, including:
   - Chord Drill first-chord timing history
@@ -32,17 +33,19 @@ This repository now contains:
   - A one-time client-side migration from Reflex Drill EXT via exported JSON file (localStorage is not shared across origins)
 - **Clerk authentication** with route protection via `proxy.ts` and shadcn-themed sign-in/sign-up pages.
 - **Convex data persistence** for users and tracking events, with Clerk JWT integration.
-- A **Vercel AI SDK** streaming chat endpoint stub.
+- An **AI chat assistant** (`/chat`) powered by the Kimi Code API, grounded in the site's articles, and restricted to a single owner Clerk user.
 - **Playwright end-to-end tests**, including authenticated flows for the Tools hub and Tracking dashboard.
 - The original Anki deck exports (`chord-symbols-CGDAE.txt` and `chord-symbols-CGDAEno11.txt`) preserved for download.
 
-The remaining interactive drills (Chord Drill, Arpeggios, Root Cycling, Progression, Technique) are scaffolded in the Tools hub as placeholder routes and will be migrated next. Every tool in the sidebar and every dashboard card is now clickable and links to its related route.
+The remaining interactive drills (Root Cycling, Progression) are scaffolded in the Tools hub as placeholder routes and will be migrated next. Every tool in the sidebar and every dashboard card is now clickable and links to its related route.
 
 A shared **primitive layer** has been extracted from the original Reflex Drill EXT code to make the upcoming migrations consistent and testable:
 
 - `lib/music-theory.ts` — pitch classes, chord parsing, quality definitions
 - `lib/scoring.ts` — comparing held MIDI notes to target chords and sequences
 - `lib/chord-drill.ts` — pure chord-drill helpers (grading, rep targets, history)
+- `lib/sequence-drill.ts` — generic two-phase sequence-drill primitives (LH pedal + RH sequence)
+- `lib/arpeggios.ts` — the 12 minor-11th arpeggio cells and persisted settings schema
 - `lib/articles.ts` — Markdown article parsing, frontmatter handling, and listing helpers
 - `lib/anki.ts` — typed AnkiConnect client
 - `lib/themes.ts` — theme registry and helpers for the theming system
@@ -51,6 +54,7 @@ A shared **primitive layer** has been extracted from the original Reflex Drill E
 - `hooks/useDrillTimer.ts` — generic drill timer state machine (single- or multi-rep)
 - `hooks/useAnkiSync.ts` — polling Anki for the current review card
 - `hooks/useChordDrill.ts` — composed chord-drill engine
+- `hooks/useArpeggios.ts` — composed minor-11th arpeggio engine
 - `hooks/useThemePreference.ts` — active theme state, localStorage, and Convex sync
 - `convex/settings.ts` — generic per-user settings persistence
 - `components/drills/drill-shell.tsx` — shared layout wrapper for tool pages
@@ -93,6 +97,8 @@ A `/tools/midi-test` page is included for manually verifying MIDI input and audi
    - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` from [Clerk](https://clerk.dev)
    - `CLERK_FRONTEND_API_URL` (e.g. `https://<your-app>.clerk.accounts.dev`)
    - `NEXT_PUBLIC_CONVEX_URL` from your Convex project
+   - `KIMI_CODE_API_KEY`, `KIMI_CODE_BASE_URL`, and `KIMI_CODE_MODEL` from the [Kimi Code Console](https://www.kimi.com/code/console)
+   - `ALLOWED_CLERK_USER_ID` — the Clerk user ID that is permitted to use `/chat`
 
 3. Configure Clerk authentication for email and password only:
 
@@ -201,13 +207,13 @@ npm run build
 - [x] Add one-time migration from Reflex Drill EXT tracking data
 - [x] Add Playwright E2E tests with authenticated flows
 - [x] Migrate Chord Drill interactive page
-- [ ] Migrate Arpeggios interactive page
+- [x] Migrate Arpeggios interactive page
 - [ ] Migrate Root Cycling interactive page
 - [ ] Migrate Progression interactive page
 - [x] Migrate Technique habit tracker
 - [x] Add article pages under `/articles/[slug]`
 - [x] Add token-driven theming system with `/settings/theme`
-- [ ] Implement real LLM + RAG against article embeddings
+- [x] Implement real LLM chat grounded on articles (Kimi Code API, owner-only access)
 
 ## License
 
