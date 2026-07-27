@@ -24,6 +24,7 @@ This repository now contains:
 - A **Vercel-dashboard-inspired Tools hub** (`/tools`) with a sidebar navigation drawn from the original Reflex Drill EXT tabs.
 - A migrated **Chord Drill** (`/tools/chord-drill`) ported from Reflex Drill EXT, including Single Shape / Family Cycle / Extended Family modes, root/quality selection, reps, per-chord rep overrides, Anki Sync with auto-timer and auto-grade, break-before-grading, and personal-best stats persisted via Convex.
 - A migrated **Arpeggios** (`/tools/arpeggios`) ported from Reflex Drill EXT, including the 12 minor-11th cells with left-hand pedal and right-hand sequence drilling, per-transition timing, miss logging, sequence customization, lap chimes, and Anki Sync that maps any card root to the matching minor-11th arpeggio and auto-grades by misses.
+- A migrated **Progression** (`/tools/progression`) ported from Reflex Drill EXT, including ii-V-I and 12-bar blues drills in C/G/D/A/E, per-chord transition timing, auto-looping, step and loop chimes, optional Anki card flip on loop completion, and personal-best stats persisted via Convex.
 - A migrated **Technique habit tracker** (`/tools/technique`) ported from Reflex Drill EXT, including a built-in metronome, BPM logging, streak counter, 28-day practice grid, and a one-time import from the original `technique-habit-log-v1` localStorage key.
 - A migrated **Tracking dashboard** (`/tools/tracking`) ported from Reflex Drill EXT, including:
   - Chord Drill first-chord timing history
@@ -37,7 +38,7 @@ This repository now contains:
 - **Playwright end-to-end tests**, including authenticated flows for the Tools hub and Tracking dashboard.
 - The original Anki deck exports (`chord-symbols-CGDAE.txt` and `chord-symbols-CGDAEno11.txt`) preserved for download.
 
-The remaining interactive drills (Root Cycling, Progression) are scaffolded in the Tools hub as placeholder routes and will be migrated next. Every tool in the sidebar and every dashboard card is now clickable and links to its related route.
+The remaining interactive drill (Root Cycling) is scaffolded in the Tools hub as a placeholder route and will be migrated next. Every tool in the sidebar and every dashboard card is now clickable and links to its related route.
 
 A shared **primitive layer** has been extracted from the original Reflex Drill EXT code to make the upcoming migrations consistent and testable:
 
@@ -46,6 +47,7 @@ A shared **primitive layer** has been extracted from the original Reflex Drill E
 - `lib/chord-drill.ts` — pure chord-drill helpers (grading, rep targets, history)
 - `lib/sequence-drill.ts` — generic two-phase sequence-drill primitives (LH pedal + RH sequence)
 - `lib/arpeggios.ts` — the 12 minor-11th arpeggio cells and persisted settings schema
+- `lib/progression.ts` — ii-V-I and 12-bar blues progression builders, history reducer, and settings schema
 - `lib/articles.ts` — Markdown article parsing, frontmatter handling, and listing helpers
 - `lib/anki.ts` — typed AnkiConnect client
 - `lib/themes.ts` — theme registry and helpers for the theming system
@@ -55,6 +57,7 @@ A shared **primitive layer** has been extracted from the original Reflex Drill E
 - `hooks/useAnkiSync.ts` — polling Anki for the current review card
 - `hooks/useChordDrill.ts` — composed chord-drill engine
 - `hooks/useArpeggios.ts` — composed minor-11th arpeggio engine
+- `hooks/useProgression.ts` — composed looping progression engine
 - `hooks/useThemePreference.ts` — active theme state, localStorage, and Convex sync
 - `convex/settings.ts` — generic per-user settings persistence
 - `components/drills/drill-shell.tsx` — shared layout wrapper for tool pages
@@ -208,8 +211,8 @@ npm run build
 - [x] Add Playwright E2E tests with authenticated flows
 - [x] Migrate Chord Drill interactive page
 - [x] Migrate Arpeggios interactive page
+- [x] Migrate Progression interactive page
 - [ ] Migrate Root Cycling interactive page
-- [ ] Migrate Progression interactive page
 - [x] Migrate Technique habit tracker
 - [x] Add article pages under `/articles/[slug]`
 - [x] Add token-driven theming system with `/settings/theme`

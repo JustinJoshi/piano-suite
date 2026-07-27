@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { type AnkiCardQueue } from "@/lib/anki";
 import {
   gradeForTime,
   effectiveRepTarget,
@@ -41,7 +42,7 @@ describe("effectiveRepTarget", () => {
     perChordReps: {},
     newCardRepBoost: false,
     newCardRepTarget: 20,
-    currentCardQueue: null as const,
+    currentCardQueue: null as AnkiCardQueue,
   };
 
   it("falls back to the base target", () => {
