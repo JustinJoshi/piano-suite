@@ -35,6 +35,19 @@ This repository now contains:
 
 The remaining interactive drills (Chord Drill, Arpeggios, Root Cycling, Progression, Technique) are scaffolded in the Tools hub as placeholder routes and will be migrated next. Every tool in the sidebar and every dashboard card is now clickable and links to its related route.
 
+A shared **primitive layer** has been extracted from the original Reflex Drill EXT code to make the upcoming migrations consistent and testable:
+
+- `lib/music-theory.ts` — pitch classes, chord parsing, quality definitions
+- `lib/scoring.ts` — comparing held MIDI notes to target chords and sequences
+- `lib/anki.ts` — typed AnkiConnect client
+- `hooks/useMidi.ts` — Web MIDI device selection and held-note tracking
+- `hooks/useAudio.ts` — Web Audio chimes, ticks, and metronome
+- `hooks/useDrillTimer.ts` — generic drill timer state machine
+- `hooks/useAnkiSync.ts` — polling Anki for the current review card
+- `components/drills/drill-shell.tsx` — shared layout wrapper for tool pages
+
+A `/tools/midi-test` page is included for manually verifying MIDI input and audio output during development.
+
 ## Tech Stack
 
 | Layer | Tool |
@@ -94,6 +107,16 @@ The remaining interactive drills (Chord Drill, Arpeggios, Root Cycling, Progress
 8. Open [http://localhost:3000](http://localhost:3000).
 
 ## Testing
+
+Unit tests run with Vitest and React Testing Library. They cover the primitive layer (music theory, scoring, Anki client) and the React hooks.
+
+```bash
+# Run unit tests in watch mode
+npm run test:unit
+
+# Run unit tests once
+npm run test:unit:run
+```
 
 End-to-end tests run with Playwright. A deterministic test user is created automatically during global setup.
 

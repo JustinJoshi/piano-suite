@@ -41,7 +41,7 @@ setup("global setup", async () => {
       if (!res.ok) {
         throw new Error(`Convex returned HTTP ${res.status}`);
       }
-    } catch (err) {
+    } catch {
       throw new Error(
         `Convex dev server does not appear to be running at ${convexUrl}. ` +
           "Start it with `npx convex dev` before running tests."
@@ -69,8 +69,9 @@ setup("global setup", async () => {
         firstName: "Test",
         lastName: "User",
       });
-    } catch (err: any) {
-      const message = err?.errors?.[0]?.longMessage || err?.message || "";
+    } catch (err: unknown) {
+      const clerkError = err as { errors?: Array<{ longMessage?: string }>; message?: string } | undefined;
+      const message = clerkError?.errors?.[0]?.longMessage || clerkError?.message || "";
       if (message.toLowerCase().includes("phone")) {
         user = await client.users.createUser({
           emailAddress: [email],

@@ -21,40 +21,6 @@ const legacyChordDrill = [
   },
 ];
 
-const exportFixture = {
-  version: 1,
-  exportedAt: Date.now(),
-  source: "reflex-drill-ext",
-  chordDrill: legacyChordDrill,
-  arpeggio: [
-    {
-      chord: "Dm7",
-      fromDeg: "Root",
-      toDeg: "9",
-      ms: 350,
-      ts: Date.now() - 86400000,
-    },
-  ],
-  arpeggioMiss: [
-    {
-      chord: "Dm7",
-      fromDeg: "Root",
-      toDeg: "9",
-      played: "Eb",
-      ts: Date.now() - 43200000,
-    },
-  ],
-  rootCycle: [
-    {
-      mode: "chord",
-      label: "Dm7",
-      root: "D",
-      ms: 1100,
-      ts: Date.now() - 86400000,
-    },
-  ],
-};
-
 test.describe("/tools/tracking authenticated", () => {
   test("signed-in user sees tracking dashboard", async ({ page }) => {
     await signInAsTestUser(page);
