@@ -6,9 +6,9 @@ const SIDEBAR_TOOLS = [
   "Chord Drill",
   "Arpeggios",
   "Root Cycling",
-  "Tracking",
   "Progression",
   "Technique",
+  "Tracking",
 ];
 
 test.describe("/tools dashboard", () => {

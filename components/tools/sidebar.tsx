@@ -19,9 +19,9 @@ const toolLinks = [
   { name: "Chord Drill", href: "/tools/chord-drill", icon: Music },
   { name: "Arpeggios", href: "/tools/arpeggios", icon: Zap },
   { name: "Root Cycling", href: "/tools/root-cycling", icon: RefreshCw },
-  { name: "Tracking", href: "/tools/tracking", icon: BarChart3 },
   { name: "Progression", href: "/tools/progression", icon: ArrowRightLeft },
   { name: "Technique", href: "/tools/technique", icon: Timer },
+  { name: "Tracking", href: "/tools/tracking", icon: BarChart3 },
 ];
 
 export function Sidebar() {
