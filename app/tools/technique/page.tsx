@@ -39,8 +39,10 @@ export default function TechniquePage() {
         </div>
       ) : (
         <>
+          <div className="flex-1">
+            <TechniqueTracker />
+          </div>
           <ImportTechnique />
-          <TechniqueTracker />
         </>
       )}
     </DrillShell>

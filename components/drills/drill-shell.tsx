@@ -43,8 +43,10 @@ export function DrillShell({
         ) : null}
       </header>
 
-      <div className="flex-1 p-6 lg:p-8">
-        <div className="mx-auto max-w-6xl">{children}</div>
+      <div className="flex min-h-full flex-1 flex-col p-6 lg:p-8">
+        <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col">
+          {children}
+        </div>
       </div>
     </div>
   );

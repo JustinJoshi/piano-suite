@@ -55,33 +55,35 @@ export default function TrackingPage() {
             Loading your practice history…
           </div>
         ) : (
-          <div className="mx-auto max-w-6xl">
-            <ImportLocalStorage />
+          <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col">
+            <div className="flex-1">
+              <div className="mb-6 flex flex-wrap gap-2">
+                {tabs.map((tab) => {
+                  const Icon = tab.icon;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={cn(
+                        "inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
+                        activeTab === tab.id
+                          ? "border-primary/50 bg-primary/10 text-primary"
+                          : "border-border bg-card text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                      )}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
 
-            <div className="mb-6 flex flex-wrap gap-2">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={cn(
-                      "inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
-                      activeTab === tab.id
-                        ? "border-primary/50 bg-primary/10 text-primary"
-                        : "border-border bg-card text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                    )}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {tab.label}
-                  </button>
-                );
-              })}
+              {activeTab === "chords" && <ChordDrillPanel />}
+              {activeTab === "arpeggios" && <ArpeggioPanel />}
+              {activeTab === "rootcycle" && <RootCyclingPanel />}
             </div>
 
-            {activeTab === "chords" && <ChordDrillPanel />}
-            {activeTab === "arpeggios" && <ArpeggioPanel />}
-            {activeTab === "rootcycle" && <RootCyclingPanel />}
+            <ImportLocalStorage />
           </div>
         )}
       </div>
