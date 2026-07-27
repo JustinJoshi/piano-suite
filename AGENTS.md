@@ -81,7 +81,7 @@ If a component genuinely needs a color that is not covered by the existing token
 
 ## Parallel Work & Git Worktrees
 
-When working on multiple tasks at the same time across different agent sessions, use **git worktrees** to avoid file collisions. Each worktree is an independent working directory backed by the same repository.
+**Always use a git worktree for any code change.** Do not edit files directly in `/home/justin/piano-suite` on `main`. Other agents may be active in parallel, and worktrees are the only reliable way to avoid file collisions. Each worktree is an independent working directory backed by the same repository.
 
 ### Quick setup
 
@@ -111,6 +111,7 @@ git worktree remove .worktrees/kimi-arpeggios
 
 ### What to avoid
 
+- **Do not edit files directly in `/home/justin/piano-suite` on `main`.** Always create a worktree first, even if no other agent is visibly active.
 - **Do not run multiple agents in `/home/justin/piano-suite` at the same time.** They will overwrite each other's edits.
 - **Do not reuse branches across worktrees.** Git only allows one worktree per branch.
 - **Do not leave worktrees around after merging.** Remove them with `git worktree remove` so branch names stay available.
@@ -158,15 +159,18 @@ Most new work fits cleanly inside one of these areas. Keep all related changes i
    ```
 5. If e2e tests cover the changed flow, run `npm run test:e2e` as well.
 
-### Port and database isolation
+### Shared resources across worktrees
 
-Each worktree shares the same project setup, so running `npm run dev` from two worktrees will collide on port `3000`. Use a different port per worktree:
+Worktrees isolate the working directory and Git state, but they do **not** isolate running services. Be aware of the following shared resources:
 
-```bash
-PORT=3001 npm run dev
-```
+- **`npm run dev` port:** Every worktree defaults to Next.js on port `3000`. If another agent already has a dev server running, start yours on a different port:
+  ```bash
+  PORT=3001 npm run dev
+  ```
+- **Convex dev server (`npx convex dev`):** There is only one local Convex backend on port `3210` (by default). All worktrees share it. Schema migrations, seeded data, and tracked events from one worktree are visible to every other worktree. Avoid destructive migrations while other agents are testing, and coordinate if database state matters for your task.
+- **`node_modules` and lockfile:** The dependency tree is shared. If your task requires adding or removing dependencies, own `package.json`/`package-lock.json` for that batch and warn other active agents.
 
-The Convex dev server (`npx convex dev`) also runs a single local backend. Migrations and seeded data from one worktree affect all worktrees. If you need isolated database state, run Convex on a separate project/deployment or avoid destructive migrations while other agents are testing.
+If you need fully isolated database state, run Convex against a separate project/deployment instead of the shared local backend.
 
 ## Finishing work
 
