@@ -45,14 +45,23 @@ A shared **primitive layer** has been extracted from the original Reflex Drill E
 - `lib/chord-drill.ts` — pure chord-drill helpers (grading, rep targets, history)
 - `lib/articles.ts` — Markdown article parsing, frontmatter handling, and listing helpers
 - `lib/anki.ts` — typed AnkiConnect client
+- `lib/themes.ts` — theme registry and helpers for the theming system
 - `hooks/useMidi.ts` — Web MIDI device selection and held-note tracking
 - `hooks/useAudio.ts` — Web Audio chimes, ticks, and metronome
 - `hooks/useDrillTimer.ts` — generic drill timer state machine (single- or multi-rep)
 - `hooks/useAnkiSync.ts` — polling Anki for the current review card
 - `hooks/useChordDrill.ts` — composed chord-drill engine
+- `hooks/useThemePreference.ts` — active theme state, localStorage, and Convex sync
 - `convex/settings.ts` — generic per-user settings persistence
 - `components/drills/drill-shell.tsx` — shared layout wrapper for tool pages
 - `components/drills/midi-connection-bar.tsx` — reusable MIDI input bar
+- `components/theme-provider.tsx` — `next-themes` wrapper
+
+## Theming
+
+Piano Suite has a token-driven theming system. Colors are defined as CSS custom properties in `app/globals.css` and exposed as Tailwind utilities (`bg-primary`, `text-primary`, `ring-primary`, etc.). A built-in theme picker lives at `/settings/theme` and lets users switch between presets (Amber, Rose, Emerald, Ocean, Violet, Slate). The choice is saved to `localStorage` and synced to Convex for signed-in users.
+
+When adding new UI, use the theme tokens instead of hard-coded colors. See `AGENTS.md` for the full theming conventions.
 
 A `/tools/midi-test` page is included for manually verifying MIDI input and audio output during development.
 
@@ -197,6 +206,7 @@ npm run build
 - [ ] Migrate Progression interactive page
 - [x] Migrate Technique habit tracker
 - [x] Add article pages under `/articles/[slug]`
+- [x] Add token-driven theming system with `/settings/theme`
 - [ ] Implement real LLM + RAG against article embeddings
 
 ## License

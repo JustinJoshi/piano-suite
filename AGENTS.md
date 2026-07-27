@@ -36,8 +36,172 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 - Drill components: `components/drills/<kebab-case>/<PascalCase>.tsx`
 - Tests: co-located in `__tests__` directories next to the code under test
 
+## Theming conventions
+
+The app has a token-driven theming system. **Never hard-code hex/rgb/hsl colors, raw gradients, or glow shadows in components.** Always pull colors from the theme so they switch correctly when the user changes presets.
+
+### Where tokens live
+
+- `app/globals.css` — the single source of truth for all color tokens.
+- `lib/themes.ts` — the registry of preset themes (`amber`, `rose`, `emerald`, `ocean`, `violet`, `slate`).
+- `hooks/useThemePreference.ts` — the hook for reading and setting the active theme.
+- `app/settings/theme/page.tsx` — the user-facing theme picker.
+
+### Tokens you should use
+
+| Token / utility | Purpose | Example |
+|---|---|---|
+| `--color-primary` / `bg-primary`, `text-primary`, `border-primary`, `ring-primary` | Main brand color (buttons, active nav, focus rings) | `bg-primary text-primary-foreground` |
+| `--color-accent` / `bg-accent`, `text-accent` | Accent highlights | `text-accent` |
+| `--color-background`, `--color-foreground`, `--color-card`, `--color-muted` | Surfaces and text | `bg-card text-foreground` |
+| `--color-grade-again`, `--grade-hard`, `--grade-good`, `--grade-easy`, `--grade-ungraded` | Anki-style grade badges/dots | `bg-grade-good` |
+| `--hero-glow-*`, `--hero-orb-*`, `--beam-mid`, `--beam-highlight` | Hero section graphics | used by `.hero-glow`, `.hero-orb`, `.beam` |
+| `--color-sidebar-background` / `bg-sidebar-background` | Dashboard sidebar | `bg-sidebar-background` |
+| `--primary-glow` | Primary glow shadows | `shadow-[0_0_12px_2px_var(--primary-glow)]` |
+
+### Adding a new preset theme
+
+1. Add the theme id and metadata to `lib/themes.ts`.
+2. Add a matching CSS class in `app/globals.css` that overrides the relevant tokens (see existing `.rose`, `.emerald`, etc.).
+3. Make sure the class name matches the `id` exactly — `next-themes` applies it to `<html>`.
+
+### Anti-patterns to avoid
+
+- `bg-[#c9a227]`, `text-[#E8CF7A]`, `shadow-[0_0_12px_2px_rgba(201,162,39,0.6)]` in components.
+- Inline SVG/chart strokes with raw hex strings — use `var(--color-*)` instead.
+- Adding one-off Tailwind color utilities like `text-blue-500` for branded UI; use the semantic tokens.
+
+If a component genuinely needs a color that is not covered by the existing tokens, add a new semantic token to `app/globals.css` rather than hard-coding it.
+
 ## Testing
 
 - Unit tests: `npm run test:unit:run`
 - E2E tests: `npm run test:e2e`
 - All new primitives must have unit tests before a tool migration is considered complete.
+
+## Parallel Work & Git Worktrees
+
+When working on multiple tasks at the same time across different agent sessions, use **git worktrees** to avoid file collisions. Each worktree is an independent working directory backed by the same repository.
+
+### Quick setup
+
+```bash
+cd /home/justin/piano-suite
+mkdir -p .worktrees
+
+# Create a worktree + branch for the new task
+git worktree add .worktrees/<your-name>-<task-name> -b <your-name>/<task-name>
+cd .worktrees/<your-name>-<task-name>
+```
+
+Example:
+
+```bash
+git worktree add .worktrees/kimi-arpeggios -b kimi/arpeggios
+cd .worktrees/kimi-arpeggios
+```
+
+Work inside that directory only. Commit incrementally. When done, merge the branch into `main` from the main worktree and remove the worktree:
+
+```bash
+cd /home/justin/piano-suite
+git merge kimi/arpeggios
+git worktree remove .worktrees/kimi-arpeggios
+```
+
+### What to avoid
+
+- **Do not run multiple agents in `/home/justin/piano-suite` at the same time.** They will overwrite each other's edits.
+- **Do not reuse branches across worktrees.** Git only allows one worktree per branch.
+- **Do not leave worktrees around after merging.** Remove them with `git worktree remove` so branch names stay available.
+
+### Hotspot files — single-writer rule
+
+These files are touched by many features. If more than one agent edits them in parallel, expect merge conflicts:
+
+- `convex/schema.ts`
+- `app/globals.css`
+- `app/layout.tsx`
+- `app/tools/layout.tsx`
+- `components/tools/sidebar.tsx`
+- `components/navbar.tsx`
+- `components/ui/*`
+- `lib/music-theory.ts`
+- `lib/scoring.ts`
+- `package.json` / `package-lock.json`
+
+If your task needs to change one of these, mention it explicitly before starting and coordinate with any other active agent. For dependency changes, let one agent own `package.json`/`package-lock.json` per integration batch.
+
+### Per-tool isolation
+
+Most new work fits cleanly inside one of these areas. Keep all related changes in the matching directories:
+
+| Concern | Where it lives |
+|---------|----------------|
+| New tool page | `app/tools/<tool>/page.tsx` |
+| Tool component | `components/drills/<tool>/` |
+| Pure helpers | `lib/<tool>.ts` |
+| Tool settings / backend | `convex/<tool>.ts` |
+| Tool hook | `hooks/use<Tool>.ts` |
+| Tool tests | `lib/__tests__/<tool>.test.ts`, `hooks/__tests__/use<Tool>.test.ts`, `e2e/<tool>.*.spec.ts` |
+
+### Merge workflow
+
+1. Finish and commit your work in the worktree.
+2. From the main worktree, make sure `main` is up to date: `git pull origin main`.
+3. Merge one branch at a time, rebasing the next branch onto the updated `main` before merging it.
+4. Run the full gate before each merge:
+   ```bash
+   npm run lint
+   npm run test:unit:run
+   npm run build
+   ```
+5. If e2e tests cover the changed flow, run `npm run test:e2e` as well.
+
+### Port and database isolation
+
+Each worktree shares the same project setup, so running `npm run dev` from two worktrees will collide on port `3000`. Use a different port per worktree:
+
+```bash
+PORT=3001 npm run dev
+```
+
+The Convex dev server (`npx convex dev`) also runs a single local backend. Migrations and seeded data from one worktree affect all worktrees. If you need isolated database state, run Convex on a separate project/deployment or avoid destructive migrations while other agents are testing.
+
+## Finishing work
+
+When you complete a task, follow this checklist before telling the user you are done:
+
+1. **Update `README.md`.** If the change affects what the app does, how to run it, or what features exist, add or update the relevant section in the README.
+2. **Update `AGENTS.md` if needed.** If you introduced new conventions, primitives, or workflow rules that future agents need to know, document them here.
+3. **Run the gate.** At minimum:
+   ```bash
+   npm run lint
+   npm run test:unit:run
+   npm run build
+   ```
+   Run `npm run test:e2e` if the change touches an authenticated or critical user flow.
+4. **Commit with descriptive messages.** Use one commit per logical change. Message titles should describe *what* and *why*, e.g.:
+   - `feat: add token-driven theme system with six presets`
+   - `fix: use theme grade tokens in tracking chart instead of hard-coded hex`
+   - `docs: update README and AGENTS with theming conventions`
+5. **Push to GitHub.** Do not leave committed work sitting local-only unless the user explicitly asked you not to push.
+   ```bash
+   git push origin <branch>
+   ```
+
+If you are working in a git worktree, push from the worktree branch. If you are on `main` in the main worktree, push directly.
+
+### Cleaning up stale state
+
+If a git command fails with an `index.lock` error, no other git process is running, and the worktree is stale, remove the lock:
+
+```bash
+rm .git/worktrees/<worktree-name>/index.lock
+```
+
+To remove ghost worktree entries after a crash:
+
+```bash
+git worktree prune
+```
