@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useReducer, useRef } from "react";
-import { parseChord } from "@/lib/music-theory";
+import { parseChord, parseRootFromText } from "@/lib/music-theory";
 import {
   getCurrentCardWithMeta,
   type AnkiCard,
@@ -116,9 +116,10 @@ export function useAnkiSync(options: AnkiSyncOptions) {
 
     lastCardIdRef.current = cardId;
 
-    const parsed = parseChord(meta.card.question);
+    const chord = parseChord(meta.card.question);
+    const root = parseRootFromText(meta.card.question);
 
-    if (!parsed) {
+    if (!root) {
       lastParsedCardRef.current = null;
       dispatch({ type: "no-card", deckStats: meta.deckStats });
       onCard?.(null);
@@ -127,10 +128,10 @@ export function useAnkiSync(options: AnkiSyncOptions) {
 
     const next: ParsedAnkiCard = {
       card: meta.card,
-      chordSymbol: parsed.fullSymbol,
-      rootName: parsed.root.name,
-      qualitySuffix: parsed.suffix,
-      qualityIdx: parsed.qualityIdx,
+      chordSymbol: chord?.fullSymbol ?? null,
+      rootName: root.name,
+      qualitySuffix: chord?.suffix ?? null,
+      qualityIdx: chord?.qualityIdx ?? null,
       queue: meta.queue,
       deckStats: meta.deckStats,
     };

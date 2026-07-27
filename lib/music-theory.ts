@@ -184,6 +184,44 @@ export type ParsedChord = {
   fullSymbol: string;
 };
 
+const ROOT_TOKENS = [
+  "C#",
+  "Db",
+  "D#",
+  "Eb",
+  "F#",
+  "Gb",
+  "G#",
+  "Ab",
+  "A#",
+  "Bb",
+  "C",
+  "D",
+  "E",
+  "F",
+  "G",
+  "A",
+  "B",
+];
+
+const ROOT_PATTERN = new RegExp(
+  `(?<![A-Za-z#b♯♭0-9])(${ROOT_TOKENS.join("|")})`,
+  "i"
+);
+
+/**
+ * Parse just a root name from free text.
+ *
+ * Returns null if no recognizable root is found.
+ */
+export function parseRootFromText(text: string): Root | null {
+  if (!text) return null;
+  const plain = text.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  const m = plain.match(ROOT_PATTERN);
+  if (!m) return null;
+  return parseRoot(m[1]);
+}
+
 /**
  * Parse a chord symbol from free text.
  *
@@ -201,28 +239,8 @@ export function parseChord(text: string): ParsedChord | null {
 
   const suffixRe = suffixes.length ? `(${suffixes.join("|")})?` : "()?";
 
-  const rootTokens = [
-    "C#",
-    "Db",
-    "D#",
-    "Eb",
-    "F#",
-    "Gb",
-    "G#",
-    "Ab",
-    "A#",
-    "Bb",
-    "C",
-    "D",
-    "E",
-    "F",
-    "G",
-    "A",
-    "B",
-  ];
-
   const pattern = new RegExp(
-    `(?<![A-Za-z#b♯♭0-9])(${rootTokens.join("|")})\\s*${suffixRe}(?![A-Za-z#b♯♭0-9])`,
+    `(?<![A-Za-z#b♯♭0-9])(${ROOT_TOKENS.join("|")})\\s*${suffixRe}(?![A-Za-z#b♯♭0-9])`,
     "i"
   );
 
