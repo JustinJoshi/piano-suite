@@ -20,14 +20,11 @@ export type MidiNoteEventDetail = {
  * so non-React consumers (or sibling tabs) can share the same connection.
  */
 export function useMidi() {
-  const isMidiSupported =
-    typeof navigator !== "undefined" && "requestMIDIAccess" in navigator;
-
-  const [supported, setSupported] = useState<boolean>(isMidiSupported);
+  // Start with a server-safe default and detect support after hydration to
+  // avoid a mismatch between the server-rendered HTML and the client render.
+  const [supported, setSupported] = useState<boolean>(false);
   const [connected, setConnected] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(
-    isMidiSupported ? null : "Web MIDI is not supported in this browser."
-  );
+  const [error, setError] = useState<string | null>(null);
   const [inputs, setInputs] = useState<MidiInputInfo[]>([]);
   const [selectedInputId, setSelectedInputIdState] = useState<string | null>(null);
   const [heldNotes, setHeldNotes] = useState<number[]>([]);
@@ -35,6 +32,15 @@ export function useMidi() {
 
   const accessRef = useRef<MIDIAccess | null>(null);
   const heldSetRef = useRef<Set<number>>(new Set());
+
+  useEffect(() => {
+    const isMidiSupported =
+      typeof navigator !== "undefined" && "requestMIDIAccess" in navigator;
+    setSupported(isMidiSupported);
+    if (!isMidiSupported) {
+      setError("Web MIDI is not supported in this browser.");
+    }
+  }, []);
 
   const updateHeldState = useCallback(() => {
     const sorted = [...heldSetRef.current].sort((a, b) => a - b);
