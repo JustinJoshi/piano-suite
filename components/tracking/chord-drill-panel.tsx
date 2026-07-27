@@ -7,16 +7,22 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { TrackingChart } from "./tracking-chart";
 import { cn } from "@/lib/utils";
+import { useCachedTrackingQuery } from "@/hooks/useCachedTrackingQuery";
+import { Loader2 } from "lucide-react";
 
 export function ChordDrillPanel() {
-  const rawEvents = useQuery(api.tracking.listChordDrillEvents);
-  const clear = useMutation(api.tracking.clearChordDrillEventsByChord);
+  const liveEvents = useQuery(api.tracking.listChordDrillEvents);
+  const clearMutation = useMutation(api.tracking.clearChordDrillEventsByChord);
+  const { data: events, isLoading, clear: clearCache } = useCachedTrackingQuery(
+    "chordDrillEvents",
+    liveEvents
+  );
   const [selectedChord, setSelectedChord] = useState<string | null>(null);
 
   const groups = useMemo(() => {
-    const events = rawEvents ?? [];
-    const map = new Map<string, typeof events>();
-    for (const e of events) {
+    const eventsList = events ?? [];
+    const map = new Map<string, typeof eventsList>();
+    for (const e of eventsList) {
       if (!e.chord) continue;
       const list = map.get(e.chord) ?? [];
       list.push(e);
@@ -30,7 +36,7 @@ export function ChordDrillPanel() {
         return lb - la;
       })
     );
-  }, [rawEvents]);
+  }, [events]);
 
   const chords = useMemo(() => [...groups.keys()], [groups]);
 
@@ -54,11 +60,21 @@ export function ChordDrillPanel() {
 
   async function handleClear() {
     if (!activeChord) return;
-    await clear({ chord: activeChord });
+    await clearMutation({ chord: activeChord });
+    clearCache();
     setSelectedChord(null);
   }
 
-  if (!(rawEvents ?? []).length) {
+  if (isLoading) {
+    return (
+      <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
+        <Loader2 className="mx-auto mb-2 h-5 w-5 animate-spin" />
+        Loading your chord drill history…
+      </div>
+    );
+  }
+
+  if (!(events ?? []).length) {
     return (
       <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
         No first-chord attempts logged yet.

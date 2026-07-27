@@ -7,22 +7,32 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { TrackingChart } from "./tracking-chart";
 import { cn } from "@/lib/utils";
+import { useCachedTrackingQuery } from "@/hooks/useCachedTrackingQuery";
+import { Loader2 } from "lucide-react";
 
 function transitionKey(chord: string, fromDeg: string, toDeg: string) {
   return `${chord} · ${fromDeg}→${toDeg}`;
 }
 
 export function ArpeggioPanel() {
-  const rawEvents = useQuery(api.tracking.listArpeggioEvents);
-  const rawMisses = useQuery(api.tracking.listArpeggioMissEvents);
-  const clear = useMutation(api.tracking.clearArpeggioEventsByTransition);
+  const liveEvents = useQuery(api.tracking.listArpeggioEvents);
+  const liveMisses = useQuery(api.tracking.listArpeggioMissEvents);
+  const clearMutation = useMutation(api.tracking.clearArpeggioEventsByTransition);
+  const { data: events, isLoading: eventsLoading, clear: clearEventsCache } = useCachedTrackingQuery(
+    "arpeggioEvents",
+    liveEvents
+  );
+  const { data: misses, isLoading: missesLoading, clear: clearMissesCache } = useCachedTrackingQuery(
+    "arpeggioMissEvents",
+    liveMisses
+  );
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
   const groups = useMemo(() => {
-    const events = rawEvents ?? [];
-    const misses = rawMisses ?? [];
-    const map = new Map<string, typeof events>();
-    for (const e of events) {
+    const eventsList = events ?? [];
+    const missesList = misses ?? [];
+    const map = new Map<string, typeof eventsList>();
+    for (const e of eventsList) {
       if (!e.chord || !e.fromDeg || !e.toDeg) continue;
       const k = transitionKey(e.chord, e.fromDeg, e.toDeg);
       const list = map.get(k) ?? [];
@@ -30,7 +40,7 @@ export function ArpeggioPanel() {
       map.set(k, list);
     }
     // Include transitions that only have misses
-    for (const m of misses) {
+    for (const m of missesList) {
       const k = transitionKey(m.chord, m.fromDeg, m.toDeg);
       if (!map.has(k)) map.set(k, []);
     }
@@ -41,7 +51,7 @@ export function ArpeggioPanel() {
         return lb - la;
       })
     );
-  }, [rawEvents, rawMisses]);
+  }, [events, misses]);
 
   const keys = useMemo(() => [...groups.keys()], [groups]);
   const activeKey = selectedKey && groups.has(selectedKey) ? selectedKey : keys[0] ?? null;
@@ -62,13 +72,14 @@ export function ArpeggioPanel() {
       }));
   }, [groups, activeKey]);
 
+  const missesList = useMemo(() => misses ?? [], [misses]);
+
   const missBreakdown = useMemo(() => {
     if (!activeKey) return null;
-    const misses = rawMisses ?? [];
     const [chord, transition] = activeKey.split(" · ");
     if (!transition) return null;
     const [fromDeg, toDeg] = transition.split("→");
-    const relevant = misses.filter(
+    const relevant = missesList.filter(
       (m) => m.chord === chord && m.fromDeg === fromDeg && m.toDeg === toDeg
     );
     if (!relevant.length) return null;
@@ -80,14 +91,25 @@ export function ArpeggioPanel() {
       .sort((a, b) => b[1] - a[1])
       .map(([note, count]) => `played ${note} instead (×${count})`)
       .join(", ");
-  }, [activeKey, rawMisses]);
+  }, [activeKey, missesList]);
 
   async function handleClear() {
     if (!activeKey) return;
     const [chord, transition] = activeKey.split(" · ");
     const [fromDeg, toDeg] = transition.split("→");
-    await clear({ chord, fromDeg, toDeg });
+    await clearMutation({ chord, fromDeg, toDeg });
+    clearEventsCache();
+    clearMissesCache();
     setSelectedKey(null);
+  }
+
+  if (eventsLoading && missesLoading) {
+    return (
+      <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
+        <Loader2 className="mx-auto mb-2 h-5 w-5 animate-spin" />
+        Loading your arpeggio history…
+      </div>
+    );
   }
 
   if (!keys.length) {
@@ -111,10 +133,9 @@ export function ArpeggioPanel() {
         <CardContent className="space-y-1 pt-0">
           {keys.map((key) => {
             const entries = groups.get(key)!;
-            const misses = rawMisses ?? [];
             const [chord, transition] = key.split(" · ");
             const [fromDeg, toDeg] = transition.split("→");
-            const missCount = misses.filter(
+            const missCount = missesList.filter(
               (m) => m.chord === chord && m.fromDeg === fromDeg && m.toDeg === toDeg
             ).length;
             const last = entries.length ? entries[entries.length - 1] : null;

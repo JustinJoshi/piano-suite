@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { TrackingChart } from "./tracking-chart";
 import { cn } from "@/lib/utils";
+import { useCachedTrackingQuery } from "@/hooks/useCachedTrackingQuery";
+import { Loader2 } from "lucide-react";
 
 function rcGroupKey(
   mode: string,
@@ -21,14 +23,18 @@ function rcGroupKey(
 }
 
 export function RootCyclingPanel() {
-  const rawEvents = useQuery(api.tracking.listRootCycleEvents);
-  const clear = useMutation(api.tracking.clearRootCycleEventsByGroup);
+  const liveEvents = useQuery(api.tracking.listRootCycleEvents);
+  const clearMutation = useMutation(api.tracking.clearRootCycleEventsByGroup);
+  const { data: events, isLoading, clear: clearCache } = useCachedTrackingQuery(
+    "rootCycleEvents",
+    liveEvents
+  );
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
   const groups = useMemo(() => {
-    const events = rawEvents ?? [];
-    const map = new Map<string, typeof events>();
-    for (const e of events) {
+    const eventsList = events ?? [];
+    const map = new Map<string, typeof eventsList>();
+    for (const e of eventsList) {
       const k = rcGroupKey(e.mode ?? "", e.quality, e.fromDeg, e.toDeg);
       const list = map.get(k) ?? [];
       list.push(e);
@@ -41,7 +47,7 @@ export function RootCyclingPanel() {
         return lb - la;
       })
     );
-  }, [rawEvents]);
+  }, [events]);
 
   const keys = useMemo(() => [...groups.keys()], [groups]);
   const activeKey = selectedKey && groups.has(selectedKey) ? selectedKey : keys[0] ?? null;
@@ -87,11 +93,21 @@ export function RootCyclingPanel() {
       const transition = activeKey.slice("Arpeggio · ".length);
       [fromDeg, toDeg] = transition.split("→");
     }
-    await clear({ mode, quality, fromDeg, toDeg });
+    await clearMutation({ mode, quality, fromDeg, toDeg });
+    clearCache();
     setSelectedKey(null);
   }
 
-  if (!(rawEvents ?? []).length) {
+  if (isLoading) {
+    return (
+      <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
+        <Loader2 className="mx-auto mb-2 h-5 w-5 animate-spin" />
+        Loading your root cycling history…
+      </div>
+    );
+  }
+
+  if (!(events ?? []).length) {
     return (
       <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
         No Root Cycling attempts logged yet.
