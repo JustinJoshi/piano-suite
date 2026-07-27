@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Ignore build artifacts and node_modules inside other agents' worktrees.
+    ".worktrees/**",
   ]),
   {
     files: [
