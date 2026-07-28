@@ -8,6 +8,7 @@ import {
   Timer,
   Search,
   Bell,
+  Waves,
 } from "lucide-react";
 import { AppUserButton } from "@/components/app-user-button";
 import { ToolCard } from "@/components/tools/tool-card";
@@ -63,6 +64,13 @@ const tools = [
       "Daily technique habit tracker with metronome, BPM log, and a 28-day grid.",
     icon: Timer,
     href: "/tools/technique",
+  },
+  {
+    title: "Chladni Lab",
+    description:
+      "Interactive square-plate waveform explorer for the hero background shader.",
+    icon: Waves,
+    href: "/tools/chladni",
   },
 ];
 

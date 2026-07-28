@@ -6,6 +6,8 @@ import {
   smoothstep,
   lerp,
   cssColorToRgb,
+  clamp,
+  randomMode,
 } from "@/lib/chladni";
 
 describe("chladni", () => {
@@ -148,5 +150,33 @@ describe("cssColorToRgb", () => {
 
   it("returns black for unsupported strings", () => {
     expect(cssColorToRgb("not-a-color")).toEqual([0, 0, 0]);
+  });
+});
+
+describe("clamp", () => {
+  it("clamps values to the [min, max] range", () => {
+    expect(clamp(-5, 0, 10)).toBe(0);
+    expect(clamp(15, 0, 10)).toBe(10);
+    expect(clamp(5, 0, 10)).toBe(5);
+  });
+});
+
+describe("randomMode", () => {
+  it("returns distinct mode pairs within the requested max", () => {
+    for (let i = 0; i < 20; i++) {
+      const [m, n] = randomMode(12);
+      expect(m).toBeGreaterThanOrEqual(2);
+      expect(m).toBeLessThanOrEqual(12);
+      expect(n).toBeGreaterThanOrEqual(2);
+      expect(n).toBeLessThanOrEqual(12);
+      expect(m).not.toBe(n);
+    }
+  });
+
+  it("returns a safe default pair when max is too small", () => {
+    const [m, n] = randomMode(1);
+    expect(m).not.toBe(n);
+    expect(m).toBeGreaterThanOrEqual(2);
+    expect(n).toBeGreaterThanOrEqual(2);
   });
 });

@@ -78,6 +78,26 @@ export function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
 }
 
+/** Clamp a value between min and max (inclusive). */
+export function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
+
+/**
+ * Generate a random Chladni mode pair (m, n) with both components in
+ * [2, max] and m !== n. Useful for auto-cycling and randomize buttons.
+ * If max is too small for a non-trivial pair, returns [2, 3].
+ */
+export function randomMode(max = 12): [number, number] {
+  const cap = Math.max(3, Math.floor(max));
+  const m = Math.floor(Math.random() * (cap - 1)) + 2;
+  let n = Math.floor(Math.random() * (cap - 1)) + 2;
+  while (n === m) {
+    n = Math.floor(Math.random() * (cap - 1)) + 2;
+  }
+  return [m, n];
+}
+
 /**
  * Convert a CSS custom property color value to an RGB array (0..1) for use
  * as WebGL/Three.js uniforms. Accepts hex, rgb(), and rgba() strings.
