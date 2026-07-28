@@ -169,8 +169,11 @@ Production hosting is **Vercel Hobby** + **Convex Free** + **Clerk development**
    | `NEXT_PUBLIC_CLERK_SIGN_IN_URL` | `/sign-in` |
    | `NEXT_PUBLIC_CLERK_SIGN_UP_URL` | `/sign-up` |
    | `NEXT_PUBLIC_CLERK_*_FALLBACK_REDIRECT_URL` | `/` |
+   | `NEXT_PUBLIC_AUTH_DISABLED` | `true` on Production/Preview for now (see Notes) |
 
    `NEXT_PUBLIC_CONVEX_URL` is injected at build time by `npx convex deploy`.
+
+   Because `NEXT_PUBLIC_*` vars are baked at build time, change this flag and **redeploy** (a new Production build) before expecting Tools/Articles to open without Clerk.
 
    **`CONVEX_DEPLOY_KEY` must be split by environment.** Convex rejects a production deploy key on Vercel Preview builds:
 
@@ -190,7 +193,8 @@ Production hosting is **Vercel Hobby** + **Convex Free** + **Clerk development**
 
 ### Notes
 
-- Hobby is for non-commercial use. A custom domain + Clerk production keys can come later.
+- Hobby is for non-commercial use.
+- **Temporary auth bypass:** Production and Preview currently set `NEXT_PUBLIC_AUTH_DISABLED=true`. Clerk **development** keys on `*.vercel.app` make `auth.protect()` rewrite unsigned (and some post-login) hits to a bare **404** when the Clerk `dev-browser` handshake is missing — Firefox Enhanced Tracking Protection often triggers this. The bypass opens Tools/Articles without that middleware 404; Convex saves still require a real Clerk session. Longer-term: attach a **custom domain** and switch to Clerk **production** keys (`pk_live`), then remove the bypass and redeploy.
 - GitHub auto-connect may require installing the Vercel GitHub app on the repo; CLI deploys work without it.
 - After opening a PR, use the Vercel **Visit Preview** link (agents should print it and open it once — see `AGENTS.md`).
 

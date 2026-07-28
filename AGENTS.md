@@ -22,7 +22,7 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `hooks/useThemeCssVars.ts` | Read theme CSS custom properties and watch for theme changes; useful for Canvas/WebGL visuals |
 | `hooks/useAuthAccess.ts` | Shared Clerk gate: `canAccess` / `canPersist`, respects `NEXT_PUBLIC_AUTH_DISABLED` |
 | `hooks/useToolUserReady.ts` | Ensures Convex user row when signed in; ready immediately when auth is disabled |
-| `lib/auth-disabled.ts` | `isAuthDisabled()` helper for middleware and API routes |
+| `lib/auth-disabled.ts` | `isAuthDisabled()` helper for middleware and API routes; Hobby Vercel may set the env temporarily (see README Deploy) |
 | `components/drills/drill-shell.tsx` | Shared layout wrapper for every tool page |
 
 ## Rules for tool pages
