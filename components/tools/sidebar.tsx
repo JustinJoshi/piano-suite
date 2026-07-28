@@ -14,6 +14,7 @@ import {
   Waves,
   Sparkles,
   Infinity,
+  Hexagon,
 } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { AppUserButton } from "@/components/app-user-button";
@@ -30,6 +31,7 @@ const toolLinks = [
   { name: "Chladni Lab", href: "/tools/chladni", icon: Waves },
   { name: "Julia Lab", href: "/tools/julia", icon: Sparkles },
   { name: "Lissajous Lab", href: "/tools/lissajous", icon: Infinity },
+  { name: "Quasiperiodic Lab", href: "/tools/quasiperiodic", icon: Hexagon },
 ];
 
 export function Sidebar() {

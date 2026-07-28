@@ -11,6 +11,7 @@ import {
   Waves,
   Sparkles,
   Infinity,
+  Hexagon,
 } from "lucide-react";
 import { AppUserButton } from "@/components/app-user-button";
 import { ToolCard } from "@/components/tools/tool-card";
@@ -87,6 +88,13 @@ const tools = [
       "Interactive frequency-ratio curve explorer mapped to musical intervals.",
     icon: Infinity,
     href: "/tools/lissajous",
+  },
+  {
+    title: "Quasiperiodic Lab",
+    description:
+      "Interactive N-fold wave interference explorer with Apply-to-home atmosphere.",
+    icon: Hexagon,
+    href: "/tools/quasiperiodic",
   },
 ];
 

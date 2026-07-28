@@ -4,88 +4,71 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChladniVisualization } from "@/components/welcome/chladni-visualization";
-import { useHeroChladniSettings } from "@/hooks/useHeroChladniSettings";
+import { QuasiperiodicVisualization } from "@/components/drills/quasiperiodic/quasiperiodic-visualization";
+import { useHeroQuasiperiodicSettings } from "@/hooks/useHeroQuasiperiodicSettings";
 import { useHeroAtmosphereKind } from "@/hooks/useHeroAtmosphereKind";
 import {
-  DEFAULT_HERO_CHLADNI_SETTINGS,
-  type ModePair,
-} from "@/lib/chladni-hero-settings";
+  DEFAULT_HERO_QUASIPERIODIC_SETTINGS,
+  DEFAULT_LAB_QUASIPERIODIC_SNAPSHOT,
+} from "@/lib/quasiperiodic-hero-settings";
+import {
+  QUASIPERIODIC_PRESETS,
+  normalizeRecipe,
+  randomRecipe,
+  type WaveRecipe,
+} from "@/lib/quasiperiodic";
 import { Pause, Play, RotateCcw, Shuffle, Home } from "lucide-react";
-import { randomMode } from "@/lib/chladni";
 
 // ============================================================
-// CHLADNI PATTERN LAB
+// QUASIPERIODIC PATTERN LAB
 // ============================================================
-// Interactive parameter explorer for the square-plate Chladni
-// shader. Users can dial in modes, morph speed, line thickness,
-// zoom, and secondary-wave blending in real time — then Apply
-// the full state to the welcome-page hero.
-// ============================================================
-
-const PRESETS: { label: string; mode: ModePair }[] = [
-  { label: "Star", mode: [4, 5] },
-  { label: "Flower", mode: [5, 7] },
-  { label: "Lattice", mode: [7, 9] },
-  { label: "Maze", mode: [6, 11] },
-  { label: "Web", mode: [8, 11] },
-];
 
 function snapLabToHeroDefaults(setters: {
-  setMode: (v: ModePair) => void;
-  setNextMode: (v: ModePair) => void;
+  setRecipe: (v: WaveRecipe) => void;
+  setNextRecipe: (v: WaveRecipe) => void;
   setMorph: (v: number) => void;
   setAutoMorph: (v: boolean) => void;
   setMorphSpeed: (v: number) => void;
   setLineThickness: (v: number) => void;
   setZoom: (v: number) => void;
-  setSecondaryOffset: (v: ModePair) => void;
-  setSecondaryBlend: (v: number) => void;
-  setSecondarySpeed: (v: number) => void;
-  setSecondaryMotion: (v: number) => void;
   setBreathe: (v: number) => void;
   setTimeScale: (v: number) => void;
 }) {
-  const d = DEFAULT_HERO_CHLADNI_SETTINGS;
-  setters.setMode(d.mode);
-  setters.setNextMode(d.nextMode);
+  const d = DEFAULT_HERO_QUASIPERIODIC_SETTINGS;
+  setters.setRecipe(d.recipe);
+  setters.setNextRecipe(d.nextRecipe);
   setters.setMorph(0);
   setters.setAutoMorph(d.autoMorph);
   setters.setMorphSpeed(d.morphSpeed);
   setters.setLineThickness(d.lineThickness);
   setters.setZoom(d.zoom);
-  setters.setSecondaryOffset(d.secondaryOffset);
-  setters.setSecondaryBlend(d.secondaryBlend);
-  setters.setSecondarySpeed(d.secondarySpeed);
-  setters.setSecondaryMotion(d.secondaryMotion);
   setters.setBreathe(d.breathe);
   setters.setTimeScale(d.timeScale);
 }
 
-export function ChladniLab() {
+export function QuasiperiodicLab() {
   const { settings, applyFromLab, updateSettings, resetSettings } =
-    useHeroChladniSettings();
+    useHeroQuasiperiodicSettings();
   const { setKind } = useHeroAtmosphereKind();
 
-  const [mode, setMode] = useState<ModePair>([5, 7]);
-  const [nextMode, setNextMode] = useState<ModePair>([7, 9]);
+  const labDefaults = DEFAULT_LAB_QUASIPERIODIC_SNAPSHOT;
+  const [recipe, setRecipe] = useState<WaveRecipe>(labDefaults.recipe);
+  const [nextRecipe, setNextRecipe] = useState<WaveRecipe>(
+    labDefaults.nextRecipe
+  );
   const [morph, setMorph] = useState(0);
   const [autoMorph, setAutoMorph] = useState(true);
-  const [morphSpeed, setMorphSpeed] = useState(8); // seconds per transition
+  const [morphSpeed, setMorphSpeed] = useState(8);
   const [lineThickness, setLineThickness] = useState(30);
   const [zoom, setZoom] = useState(2.33);
-  const [secondaryOffset, setSecondaryOffset] = useState<ModePair>([1, 2]);
-  const [secondaryBlend, setSecondaryBlend] = useState(0.15);
-  const [secondarySpeed, setSecondarySpeed] = useState(1);
-  const [secondaryMotion, setSecondaryMotion] = useState(2);
   const [breathe, setBreathe] = useState(0.2);
   const [timeScale, setTimeScale] = useState(1);
   const [applyMessage, setApplyMessage] = useState<string | null>(null);
 
   const autoMorphRef = useRef(autoMorph);
   const morphSpeedRef = useRef(morphSpeed);
-  const modeRef = useRef(mode);
-  const nextModeRef = useRef(nextMode);
+  const recipeRef = useRef(recipe);
+  const nextRecipeRef = useRef(nextRecipe);
   const morphRef = useRef(morph);
 
   useEffect(() => {
@@ -97,18 +80,17 @@ export function ChladniLab() {
   }, [morphSpeed]);
 
   useEffect(() => {
-    modeRef.current = mode;
-  }, [mode]);
+    recipeRef.current = recipe;
+  }, [recipe]);
 
   useEffect(() => {
-    nextModeRef.current = nextMode;
-  }, [nextMode]);
+    nextRecipeRef.current = nextRecipe;
+  }, [nextRecipe]);
 
   useEffect(() => {
     morphRef.current = morph;
   }, [morph]);
 
-  // Auto-morph animation loop.
   useEffect(() => {
     let rafId = 0;
     let lastTime = performance.now();
@@ -122,13 +104,13 @@ export function ChladniLab() {
         let nextMorph = morphRef.current + step;
 
         if (nextMorph >= 1) {
-          const arrived = nextModeRef.current;
-          const fresh = randomMode();
-          modeRef.current = arrived;
-          nextModeRef.current = fresh;
+          const arrived = nextRecipeRef.current;
+          const fresh = randomRecipe();
+          recipeRef.current = arrived;
+          nextRecipeRef.current = fresh;
           nextMorph = 0;
-          setMode(arrived);
-          setNextMode(fresh);
+          setRecipe(arrived);
+          setNextRecipe(fresh);
         }
 
         morphRef.current = nextMorph;
@@ -148,75 +130,53 @@ export function ChladniLab() {
     return () => window.clearTimeout(id);
   }, [applyMessage]);
 
-  function applyPreset(preset: (typeof PRESETS)[number]) {
-    const fresh = randomMode();
-    setMode(preset.mode);
-    setNextMode(fresh);
+  function applyPreset(preset: (typeof QUASIPERIODIC_PRESETS)[number]) {
+    setRecipe(preset.recipe);
+    setNextRecipe(randomRecipe());
     setMorph(0);
   }
 
   function randomize() {
-    const a = randomMode();
-    const b = randomMode();
-    setMode(a);
-    setNextMode(b);
+    setRecipe(randomRecipe());
+    setNextRecipe(randomRecipe());
     setMorph(0);
   }
 
-  function updateMode(index: 0 | 1, value: number) {
-    const next = [...mode] as ModePair;
-    next[index] = value;
-    setMode(next);
-  }
-
-  function updateNextMode(index: 0 | 1, value: number) {
-    const next = [...nextMode] as ModePair;
-    next[index] = value;
-    setNextMode(next);
-  }
-
-  function updateSecondaryOffset(index: 0 | 1, value: number) {
-    const next = [...secondaryOffset] as ModePair;
-    next[index] = value;
-    setSecondaryOffset(next);
+  function patchRecipe(
+    current: WaveRecipe,
+    patch: Partial<WaveRecipe>
+  ): WaveRecipe {
+    return normalizeRecipe({ ...current, ...patch });
   }
 
   function handleApplyToHome() {
     applyFromLab({
-      mode,
-      nextMode,
+      recipe,
+      nextRecipe,
       morphSpeed,
       autoMorph,
       lineThickness,
       zoom,
-      secondaryOffset,
-      secondaryBlend,
-      secondarySpeed,
-      secondaryMotion,
       breathe,
       timeScale,
       lineIntensity: 1,
       colorSoftness: 0,
     });
-    setKind("chladni");
+    setKind("quasiperiodic");
     setApplyMessage("Applied to the welcome page.");
   }
 
   function handleResetHome() {
     resetSettings();
-    setKind("chladni");
+    setKind("quasiperiodic");
     snapLabToHeroDefaults({
-      setMode,
-      setNextMode,
+      setRecipe,
+      setNextRecipe,
       setMorph,
       setAutoMorph,
       setMorphSpeed,
       setLineThickness,
       setZoom,
-      setSecondaryOffset,
-      setSecondaryBlend,
-      setSecondarySpeed,
-      setSecondaryMotion,
       setBreathe,
       setTimeScale,
     });
@@ -230,18 +190,13 @@ export function ChladniLab() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
-      {/* Visualization */}
       <Card className="relative min-h-[400px] overflow-hidden border-border bg-card">
-        <ChladniVisualization
-          mode={mode}
-          nextMode={nextMode}
+        <QuasiperiodicVisualization
+          recipe={recipe}
+          nextRecipe={nextRecipe}
           morph={morph}
           lineThickness={lineThickness}
           zoom={zoom}
-          secondaryOffset={secondaryOffset}
-          secondaryBlend={secondaryBlend}
-          secondarySpeed={secondarySpeed}
-          secondaryMotion={secondaryMotion}
           breathe={breathe}
           timeScale={timeScale}
           patternColor={settings.patternColor}
@@ -250,7 +205,6 @@ export function ChladniLab() {
         <div className="pointer-events-none absolute inset-0 hero-glow opacity-30" />
       </Card>
 
-      {/* Controls */}
       <Card className="border-border bg-card">
         <CardHeader className="pb-4">
           <CardTitle className="font-heading text-base font-semibold text-foreground">
@@ -258,7 +212,6 @@ export function ChladniLab() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-5">
-          {/* Home appearance */}
           <div className="space-y-3 rounded-lg border border-border/80 bg-muted/30 p-3">
             <div className="flex flex-wrap gap-2">
               <Button
@@ -282,7 +235,10 @@ export function ChladniLab() {
             {applyMessage && (
               <p className="text-xs text-muted-foreground" role="status">
                 {applyMessage}{" "}
-                <Link href="/" className="text-primary underline-offset-2 hover:underline">
+                <Link
+                  href="/"
+                  className="text-primary underline-offset-2 hover:underline"
+                >
                   View welcome page
                 </Link>
               </p>
@@ -340,9 +296,8 @@ export function ChladniLab() {
             </p>
           </div>
 
-          {/* Presets */}
           <div className="flex flex-wrap gap-2">
-            {PRESETS.map((preset) => (
+            {QUASIPERIODIC_PRESETS.map((preset) => (
               <Button
                 key={preset.label}
                 variant="outline"
@@ -358,39 +313,60 @@ export function ChladniLab() {
             </Button>
           </div>
 
-          {/* Primary mode */}
-          <ControlGroup label="Primary mode (m, n)">
+          <ControlGroup label="Primary (folds, freq, phase)">
             <NumberInput
-              value={mode[0]}
-              onChange={(v) => updateMode(0, v)}
-              min={1}
-              max={20}
+              value={recipe.folds}
+              onChange={(v) => setRecipe(patchRecipe(recipe, { folds: v }))}
+              min={3}
+              max={12}
             />
             <NumberInput
-              value={mode[1]}
-              onChange={(v) => updateMode(1, v)}
-              min={1}
-              max={20}
-            />
-          </ControlGroup>
-
-          {/* Next mode */}
-          <ControlGroup label="Next mode (m, n)">
-            <NumberInput
-              value={nextMode[0]}
-              onChange={(v) => updateNextMode(0, v)}
-              min={1}
-              max={20}
+              value={recipe.frequency}
+              onChange={(v) =>
+                setRecipe(patchRecipe(recipe, { frequency: v }))
+              }
+              min={0.5}
+              max={16}
+              step={0.1}
             />
             <NumberInput
-              value={nextMode[1]}
-              onChange={(v) => updateNextMode(1, v)}
-              min={1}
-              max={20}
+              value={recipe.phase}
+              onChange={(v) => setRecipe(patchRecipe(recipe, { phase: v }))}
+              min={-12}
+              max={12}
+              step={0.1}
             />
           </ControlGroup>
 
-          {/* Morph */}
+          <ControlGroup label="Next (folds, freq, phase)">
+            <NumberInput
+              value={nextRecipe.folds}
+              onChange={(v) =>
+                setNextRecipe(patchRecipe(nextRecipe, { folds: v }))
+              }
+              min={3}
+              max={12}
+            />
+            <NumberInput
+              value={nextRecipe.frequency}
+              onChange={(v) =>
+                setNextRecipe(patchRecipe(nextRecipe, { frequency: v }))
+              }
+              min={0.5}
+              max={16}
+              step={0.1}
+            />
+            <NumberInput
+              value={nextRecipe.phase}
+              onChange={(v) =>
+                setNextRecipe(patchRecipe(nextRecipe, { phase: v }))
+              }
+              min={-12}
+              max={12}
+              step={0.1}
+            />
+          </ControlGroup>
+
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label>Morph</Label>
@@ -445,50 +421,6 @@ export function ChladniLab() {
             min={0.5}
             max={8}
             step={0.01}
-          />
-
-          <RangeControl
-            label="Secondary blend"
-            value={secondaryBlend}
-            onChange={setSecondaryBlend}
-            min={0}
-            max={0.8}
-            step={0.01}
-          />
-
-          <ControlGroup label="Secondary offset">
-            <NumberInput
-              value={secondaryOffset[0]}
-              onChange={(v) => updateSecondaryOffset(0, v)}
-              min={-10}
-              max={10}
-              step={0.1}
-            />
-            <NumberInput
-              value={secondaryOffset[1]}
-              onChange={(v) => updateSecondaryOffset(1, v)}
-              min={-10}
-              max={10}
-              step={0.1}
-            />
-          </ControlGroup>
-
-          <RangeControl
-            label="Secondary motion speed"
-            value={secondarySpeed}
-            onChange={setSecondarySpeed}
-            min={0}
-            max={5}
-            step={0.1}
-          />
-
-          <RangeControl
-            label="Secondary motion amount"
-            value={secondaryMotion}
-            onChange={setSecondaryMotion}
-            min={0}
-            max={6}
-            step={0.1}
           />
 
           <RangeControl
@@ -585,9 +517,7 @@ function RangeControl({
       <div className="flex items-center justify-between">
         <Label>{label}</Label>
         <span className="text-xs tabular-nums text-muted-foreground">
-          {Number.isInteger(step) || step >= 1
-            ? value
-            : value.toFixed(2)}
+          {Number.isInteger(step) || step >= 1 ? value : value.toFixed(2)}
           {suffix}
         </span>
       </div>

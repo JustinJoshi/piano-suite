@@ -4,11 +4,10 @@ import type { CSSProperties } from "react";
 import { Button } from "@/components/ui/button";
 import { Play } from "lucide-react";
 import { scrimStrengthCss } from "@/lib/chladni-hero-settings";
-import type { HeroChladniSettings } from "@/lib/chladni-hero-settings";
 
-function scrimStyleFromSettings(settings: HeroChladniSettings): CSSProperties {
-  const strength = scrimStrengthCss(settings.scrimDarkness);
-  const topStrength = scrimStrengthCss(settings.scrimDarkness * (40 / 70));
+function scrimStyleFromDarkness(scrimDarkness: number): CSSProperties {
+  const strength = scrimStrengthCss(scrimDarkness);
+  const topStrength = scrimStrengthCss(scrimDarkness * (40 / 70));
   return {
     "--hero-scrim-strength": strength,
     "--hero-scrim-top-strength": topStrength,
@@ -18,14 +17,14 @@ function scrimStyleFromSettings(settings: HeroChladniSettings): CSSProperties {
 export function HeroSection({
   settings,
 }: {
-  settings: HeroChladniSettings;
+  settings: { scrimDarkness: number };
 }) {
   return (
     <section className="relative flex min-h-svh">
       {/* Quiet pocket for copy — pattern continues under later sections */}
       <div
         className="pointer-events-none absolute inset-0 z-[1] hero-scrim"
-        style={scrimStyleFromSettings(settings)}
+        style={scrimStyleFromDarkness(settings.scrimDarkness)}
       />
       <div className="pointer-events-none absolute inset-0 z-[1] hero-glow opacity-30" />
 
