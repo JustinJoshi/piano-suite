@@ -151,11 +151,11 @@ Production hosting is **Vercel Hobby** + **Convex Free** + **Clerk development**
    npx convex deploy --cmd-url-env-var-name NEXT_PUBLIC_CONVEX_URL --cmd 'npm run build'
    ```
 
-4. Add these **Production** environment variables in Vercel:
+4. Add these environment variables in Vercel for **Production** and **Preview** (same values for both, except `CONVEX_DEPLOY_KEY` — see below):
 
    | Variable | Notes |
    |----------|--------|
-   | `CONVEX_DEPLOY_KEY` | Production deploy key (`deployment:deploy`) |
+   | `CONVEX_DEPLOY_KEY` | **Separate values per target** (required) |
    | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk **dev** publishable key |
    | `CLERK_SECRET_KEY` | Clerk **dev** secret |
    | `CLERK_FRONTEND_API_URL` | Clerk Frontend API URL |
@@ -167,17 +167,27 @@ Production hosting is **Vercel Hobby** + **Convex Free** + **Clerk development**
 
    `NEXT_PUBLIC_CONVEX_URL` is injected at build time by `npx convex deploy`.
 
+   **`CONVEX_DEPLOY_KEY` must be split by environment.** Convex rejects a production deploy key on Vercel Preview builds:
+
+   | Vercel target | Key type |
+   |---------------|----------|
+   | Production | Production deploy key from the Convex **production** deployment (`deployment:deploy`) |
+   | Preview | A non-production Convex deploy key (project **Preview Deploy Key** from Convex project settings, or a deploy key for a shared preview deployment). Do not reuse the production key. |
+
+   Clerk / Kimi / allowlist vars should be enabled for **Preview** as well so PR preview URLs actually run.
+
 5. In Clerk (development instance):
    - Ensure a JWT template named `convex` with `aud: "convex"`.
    - Set instance `allowed_origins` to include `https://piano-suite.vercel.app` (and `http://localhost:3000`).
    - Add redirect URLs for `https://piano-suite.vercel.app` (and `/sign-in`, `/sign-up`, `/tools`, `/chat` as needed).
 
-6. Deploy with `vercel deploy --prod` (or connect the GitHub repo in the Vercel dashboard for push-to-deploy).
+6. Deploy with `vercel deploy --prod` (or connect the GitHub repo in the Vercel dashboard for push-to-deploy). PR branches get automatic Preview deployments once the GitHub app is installed and Preview env vars are set.
 
 ### Notes
 
 - Hobby is for non-commercial use. A custom domain + Clerk production keys can come later.
 - GitHub auto-connect may require installing the Vercel GitHub app on the repo; CLI deploys work without it.
+- After opening a PR, use the Vercel **Visit Preview** link (agents should print it and open it once — see `AGENTS.md`).
 
 ## Testing
 
