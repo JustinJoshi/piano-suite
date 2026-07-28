@@ -4,9 +4,14 @@ import { isAuthDisabled } from "@/lib/auth-disabled";
 /**
  * Clerk proxy middleware for Next.js 16+.
  *
- * Public routes: home, sign-in, sign-up, API routes, and Clerk's frontend API.
- * All other routes (including /tools and /tools/*) require authentication,
+ * Public routes: home, Pattern Lab (homepage hero editor), sign-in/up, API,
+ * and Clerk's frontend API. Other /tools/* routes require authentication,
  * unless `NEXT_PUBLIC_AUTH_DISABLED=true`.
+ *
+ * Pattern Lab is public so visitors can customize the welcome hero without
+ * signing in (prefs still sync to Convex when authenticated). Clerk's
+ * `auth.protect()` otherwise rewrites unsigned tool hits to a bare 404
+ * under development keys (`dev-browser-missing`).
  *
  * @see https://clerk.com/docs/reference/nextjs/clerk-middleware
  */
@@ -19,6 +24,7 @@ export default clerkMiddleware(async (auth, request) => {
 
   const isPublicRoute =
     pathname === "/" ||
+    pathname === "/tools/chladni" ||
     pathname.startsWith("/sign-in") ||
     pathname.startsWith("/sign-up") ||
     pathname.startsWith("/api") ||
