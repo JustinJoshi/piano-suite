@@ -79,6 +79,7 @@ A shared **primitive layer** has been extracted from the original Reflex Drill E
 - `hooks/useThemePreference.ts` — active theme state, localStorage, and Convex sync
 - `hooks/useHeroChladniSettings.ts` — home Chladni appearance (localStorage + Convex)
 - `hooks/useHeroQuasiperiodicSettings.ts` — home Quasiperiodic appearance (localStorage + Convex)
+- `hooks/useHeroMultigridSettings.ts` — home Multigrid appearance (localStorage + Convex)
 - `hooks/useHeroAtmosphereKind.ts` — welcome hero visual kind (localStorage + Convex)
 - `hooks/useAmbientEffects.ts` — ambient backgrounds + float panel (provider + hook; localStorage + Convex)
 - `convex/settings.ts` — generic per-user settings persistence

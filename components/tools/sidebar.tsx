@@ -38,6 +38,7 @@ const toolLinks = [
   { name: "Julia Lab", href: "/tools/julia", icon: Sparkles },
   { name: "Lissajous Lab", href: "/tools/lissajous", icon: Infinity },
   { name: "Quasiperiodic Lab", href: "/tools/quasiperiodic", icon: Hexagon },
+  { name: "Multigrid Lab", href: "/tools/multigrid", icon: LayoutGrid },
 ];
 
 export function Sidebar() {

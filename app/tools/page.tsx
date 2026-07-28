@@ -105,6 +105,13 @@ const tools = [
     icon: Hexagon,
     href: "/tools/quasiperiodic",
   },
+  {
+    title: "Multigrid Lab",
+    description:
+      "De Bruijn multigrid dual tiling explorer — crisp grids and colored rhombus tilings.",
+    icon: LayoutGrid,
+    href: "/tools/multigrid",
+  },
 ];
 
 export default function ToolsPage() {

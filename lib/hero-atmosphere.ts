@@ -9,7 +9,7 @@ export const HERO_ATMOSPHERE_SETTINGS_KEY = "hero-atmosphere-v1";
 export const HERO_ATMOSPHERE_LOCAL_STORAGE_KEY =
   "piano-suite-hero-atmosphere-v1";
 
-export type HeroAtmosphereKind = "chladni" | "quasiperiodic";
+export type HeroAtmosphereKind = "chladni" | "quasiperiodic" | "multigrid";
 
 export type HeroAtmosphereSettings = {
   kind: HeroAtmosphereKind;
@@ -20,7 +20,9 @@ export const DEFAULT_HERO_ATMOSPHERE: HeroAtmosphereSettings = {
 };
 
 export function isHeroAtmosphereKind(value: unknown): value is HeroAtmosphereKind {
-  return value === "chladni" || value === "quasiperiodic";
+  return (
+    value === "chladni" || value === "quasiperiodic" || value === "multigrid"
+  );
 }
 
 export function normalizeHeroAtmosphere(

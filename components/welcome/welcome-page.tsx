@@ -20,6 +20,7 @@ export function WelcomePage() {
   const { settings: ambient, backgroundFor } = useAmbientEffects();
   const { settings: chladniSettings } = useHeroChladniSettings();
   const { settings: quasiperiodicSettings } = useHeroQuasiperiodicSettings();
+  const { settings: multigridSettings } = useHeroMultigridSettings();
 
   const kind = backgroundFor("/");
   const heroScrimSettings =
