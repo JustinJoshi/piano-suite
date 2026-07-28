@@ -10,6 +10,8 @@ export type MidiInputInfo = {
 export type MidiNoteEventDetail = {
   note: number;
   pc: number;
+  /** MIDI velocity 0–127. Present on note-on; 0 on note-off. */
+  velocity: number;
 };
 
 /**
@@ -59,14 +61,22 @@ export function useMidi() {
         heldSetRef.current.add(note);
         window.dispatchEvent(
           new CustomEvent<MidiNoteEventDetail>("midi-note-on", {
-            detail: { note, pc: ((note % 12) + 12) % 12 },
+            detail: {
+              note,
+              pc: ((note % 12) + 12) % 12,
+              velocity,
+            },
           })
         );
       } else if (isNoteOff) {
         heldSetRef.current.delete(note);
         window.dispatchEvent(
           new CustomEvent<MidiNoteEventDetail>("midi-note-off", {
-            detail: { note, pc: ((note % 12) + 12) % 12 },
+            detail: {
+              note,
+              pc: ((note % 12) + 12) % 12,
+              velocity: 0,
+            },
           })
         );
       } else {

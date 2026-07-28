@@ -172,6 +172,15 @@ describe("useMidi", () => {
       expect(listener).toHaveBeenCalled();
     });
 
+    const event = listener.mock.calls[0][0] as CustomEvent<
+      import("@/hooks/useMidi").MidiNoteEventDetail
+    >;
+    expect(event.detail).toMatchObject({
+      note: 60,
+      pc: 0,
+      velocity: 100,
+    });
+
     window.removeEventListener("midi-note-on", listener as EventListener);
   });
 

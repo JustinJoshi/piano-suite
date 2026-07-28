@@ -12,6 +12,7 @@ import {
   Sparkles,
   Infinity,
   Hexagon,
+  Activity,
 } from "lucide-react";
 import { AppUserButton } from "@/components/app-user-button";
 import { ToolCard } from "@/components/tools/tool-card";
@@ -74,6 +75,13 @@ const tools = [
       "Interactive square-plate waveform explorer for the hero background shader.",
     icon: Waves,
     href: "/tools/chladni",
+  },
+  {
+    title: "Chladni Ripple",
+    description:
+      "Drive Chladni nodal patterns from live MIDI notes — pitch, octave, and velocity.",
+    icon: Activity,
+    href: "/tools/chladni-ripple",
   },
   {
     title: "Julia Lab",
