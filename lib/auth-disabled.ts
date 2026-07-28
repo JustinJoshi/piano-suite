@@ -1,12 +1,12 @@
 /**
- * Local/dev switch to bypass Clerk route and page gates.
+ * Switch to bypass Clerk route and page gates.
  *
- * Set `NEXT_PUBLIC_AUTH_DISABLED=true` in `.env.local` and restart Next.js.
+ * Auth bypass is **on by default**. Set `NEXT_PUBLIC_AUTH_DISABLED=false` in
+ * `.env.local` (and restart Next.js) to require sign-in again.
+ *
  * Convex persistence still requires a real Clerk session — unsigned use is
  * local-only (defaults, no saved history).
- *
- * Never enable this in production.
  */
 export function isAuthDisabled(): boolean {
-  return process.env.NEXT_PUBLIC_AUTH_DISABLED === "true";
+  return process.env.NEXT_PUBLIC_AUTH_DISABLED !== "false";
 }
