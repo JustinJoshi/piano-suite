@@ -29,6 +29,7 @@ This repository now contains:
 - A migrated **Technique habit tracker** (`/tools/technique`) ported from Reflex Drill EXT, including a built-in metronome, BPM logging, streak counter, 28-day practice grid, and a one-time import from the original `technique-habit-log-v1` localStorage key.
 - A **Chladni Pattern Lab** (`/tools/chladni`) — an interactive square-plate waveform explorer for the landing-page hero shader, with live controls for modes, morph speed, line thickness, zoom, and secondary-wave blending.
 - A **Julia Set Lab** (`/tools/julia`) — an interactive escape-time Julia set explorer with curated complex-parameter presets, morph between two `c` values, zoom, iterations, escape radius, and theme-aware coloring.
+- A **Lissajous Harmonic Lab** (`/tools/lissajous`) — an interactive frequency-ratio curve explorer with musical interval presets, phase/morph controls, and theme-aware Canvas trails.
 - A migrated **Tracking dashboard** (`/tools/tracking`) ported from Reflex Drill EXT, including:
   - Chord Drill first-chord timing history
   - Arpeggio transition and miss logging
@@ -54,6 +55,7 @@ A shared **primitive layer** has been extracted from the original Reflex Drill E
 - `lib/anki.ts` — typed AnkiConnect client
 - `lib/themes.ts` — theme registry and helpers for the theming system
 - `lib/julia.ts` — Julia-set escape-time math, curated presets, and complex helpers
+- `lib/lissajous.ts` — Lissajous parametric math, interval presets, and ratio helpers
 - `hooks/useMidi.ts` — Web MIDI device selection and held-note tracking
 - `hooks/useAudio.ts` — Web Audio chimes, ticks, and metronome
 - `hooks/useDrillTimer.ts` — generic drill timer state machine (single- or multi-rep)
