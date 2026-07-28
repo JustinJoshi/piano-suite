@@ -19,6 +19,7 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `hooks/useAudio.ts` | Web Audio chimes, ticks, metronome |
 | `hooks/useDrillTimer.ts` | Generic drill timer state machine |
 | `hooks/useAnkiSync.ts` | Poll Anki for current card and parse its chord |
+| `hooks/useThemeCssVars.ts` | Read theme CSS custom properties and watch for theme changes; useful for Canvas/WebGL visuals |
 | `components/drills/drill-shell.tsx` | Shared layout wrapper for every tool page |
 
 ## Rules for tool pages
@@ -74,6 +75,8 @@ Before making styling changes, read `DESIGN-PRINCIPLES.md` for the visual conven
 - Adding one-off Tailwind color utilities like `text-blue-500` for branded UI; use the semantic tokens.
 
 If a component genuinely needs a color that is not covered by the existing tokens, add a new semantic token to `app/globals.css` rather than hard-coding it.
+
+For Canvas or WebGL visuals that cannot use Tailwind utilities, read the CSS custom properties with `getComputedStyle` and use `hooks/useThemeCssVars.ts` to react to theme changes.
 
 ## Testing
 
