@@ -9,7 +9,9 @@
     "lint": "eslint",
     "test:e2e": "playwright test",
     "test:unit": "vitest",
-    "test:unit:run": "vitest run"
+    "test:unit:run": "vitest run",
+    "snyk:test": "npx snyk test --severity-threshold=high",
+    "snyk:code": "npx snyk code test --severity-threshold=high"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.20",

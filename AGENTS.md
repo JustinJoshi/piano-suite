@@ -168,6 +168,8 @@ Most new work fits cleanly inside one of these areas. Keep all related changes i
    ```
 5. If e2e tests cover the changed flow, run `npm run test:e2e` as well.
 
+Security scanning (Snyk Open Source + Snyk Code) runs in GitHub Actions via `.github/workflows/snyk.yml` and is **not** part of the local lint/unit/build gate. Before dependency bumps, agents may optionally run `npm run snyk:test` (requires `npx snyk auth` or `SNYK_TOKEN`).
+
 ### Shared resources across worktrees
 
 Worktrees isolate the working directory and Git state, but they do **not** isolate running services. Be aware of the following shared resources:

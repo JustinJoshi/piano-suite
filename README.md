@@ -220,6 +220,30 @@ npx playwright test --workers=1
 
 Test credentials are stored in `.env.local` as `E2E_CLERK_USER_EMAIL` and `E2E_CLERK_USER_PASSWORD`.
 
+## Security / Snyk
+
+Dependency and source-code scanning run via [Snyk](https://snyk.io) on every pull request and every push to `main` (see `.github/workflows/snyk.yml`). The workflow fails on **high** or **critical** findings. Pushes to `main` also run `snyk monitor` so the Snyk dashboard can alert on newly disclosed CVEs.
+
+### One-time GitHub setup
+
+1. Create a Snyk account at [snyk.io](https://snyk.io).
+2. Copy your API token from [Account settings](https://app.snyk.io/account).
+3. In this GitHub repo, go to **Settings → Secrets and variables → Actions** and add a secret named `SNYK_TOKEN`.
+
+Without `SNYK_TOKEN`, the Snyk workflow cannot authenticate.
+
+### Local scans
+
+Authenticate once with `npx snyk auth`, then:
+
+```bash
+# Open Source (npm dependencies)
+npm run snyk:test
+
+# Snyk Code (SAST)
+npm run snyk:code
+```
+
 ## Migrating from Reflex Drill EXT
 
 Because browser `localStorage` is scoped to each origin, the Piano Suite app cannot directly read the tracking data stored by Reflex Drill EXT (which runs on a different port or `file://` origin). Instead, use the export/import flow:
