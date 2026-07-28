@@ -64,7 +64,8 @@ A shared **primitive layer** has been extracted from the original Reflex Drill E
 - `lib/quasiperiodic.ts` — N-fold quasiperiodic wave field math, presets, and helpers
 - `lib/quasiperiodic-hero-settings.ts` — serializable home-hero Quasiperiodic appearance
 - `lib/hero-atmosphere.ts` — which math visual drives the welcome hero (`chladni` | `quasiperiodic`)
-- `hooks/useMidi.ts` — Web MIDI device selection and held-note tracking (note-on events include velocity)
+- `lib/midi-session.ts` — tab-scoped Web MIDI session (connect once, stay connected across tools)
+- `hooks/useMidi.ts` — React subscription to the MIDI session; note-on events include velocity
 - `hooks/useChladniRipple.ts` — decaying MIDI impulses → Chladni visualization props
 - `hooks/useAudio.ts` — Web Audio chimes, ticks, and metronome
 - `hooks/useDrillTimer.ts` — generic drill timer state machine (single- or multi-rep)
@@ -88,7 +89,7 @@ Piano Suite has a token-driven theming system. Colors are defined as CSS custom 
 
 When adding new UI, use the theme tokens instead of hard-coded colors. See `AGENTS.md` for the full theming conventions and `DESIGN-PRINCIPLES.md` for the broader visual design system.
 
-A `/tools/midi-test` page is included for manually verifying MIDI input and audio output during development.
+A `/tools/midi-test` page is included for manually verifying MIDI input and audio output during development. After you connect MIDI once in a tab, the session stays connected across tool pages for that tab (and silently restores after a reload via `sessionStorage`).
 
 ## Tech Stack
 

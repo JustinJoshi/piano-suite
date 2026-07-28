@@ -15,7 +15,8 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `lib/music-theory.ts` | Note names, pitch classes, chord parsing, chord building, quality definitions |
 | `lib/scoring.ts` | Comparing held MIDI notes to target pitch-class sets and sequences |
 | `lib/anki.ts` | Typed AnkiConnect HTTP client and helpers |
-| `hooks/useMidi.ts` | Web MIDI access, device list, selected input, held notes; note-on events include velocity |
+| `lib/midi-session.ts` | Tab-scoped Web MIDI session store (access, devices, held notes); survives tool-page navigation |
+| `hooks/useMidi.ts` | React subscription to `midi-session`; note-on events include velocity |
 | `hooks/useChladniRipple.ts` | MIDI impulses + held notes → Chladni viz props (Ripple Lab) |
 | `lib/chladni-ripple.ts` | Pitch-class → mode table, octave density, velocity decay mapping |
 | `hooks/useAudio.ts` | Web Audio chimes, ticks, metronome |
@@ -30,7 +31,7 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 
 ## Rules for tool pages
 
-1. **Use the primitives.** Do not add new inline Web MIDI, Web Audio, or AnkiConnect code. If a tool needs behavior the primitives don't support, extend the primitive layer first.
+1. **Use the primitives.** Do not add new inline Web MIDI, Web Audio, or AnkiConnect code. If a tool needs behavior the primitives don't support, extend the primitive layer first. MIDI access lives in `lib/midi-session.ts` (tab-scoped); tools must use `useMidi()` rather than calling `navigator.requestMIDIAccess` themselves.
 2. **Wrap every tool page in `DrillShell`.** Keep the page component thin; the actual drill logic belongs in a component under `components/drills/<tool-name>/`.
 3. **Log practice events to Convex.** The `practiceEvents` and `missEvents` tables are the source of truth for tracking. Do not store drill history only in component state or localStorage.
 4. **Keep Anki integration optional.** All Anki features must degrade gracefully when AnkiConnect is not running.
