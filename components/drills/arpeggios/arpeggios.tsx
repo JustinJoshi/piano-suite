@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { MidiConnectionBar } from "@/components/drills/midi-connection-bar";
 import { useArpeggios } from "@/hooks/useArpeggios";
+import { useAuthAccess } from "@/hooks/useAuthAccess";
 import { cn } from "@/lib/utils";
 import { ChevronUp, ChevronDown, RotateCcw } from "lucide-react";
 
@@ -72,7 +73,8 @@ function SettingRow({
 }
 
 export function Arpeggios() {
-  const drill = useArpeggios(true);
+  const { canPersist } = useAuthAccess();
+  const drill = useArpeggios(canPersist);
   const [customizeOpen, setCustomizeOpen] = useState(false);
 
   const {

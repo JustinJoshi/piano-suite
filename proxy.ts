@@ -1,14 +1,20 @@
 import { clerkMiddleware } from "@clerk/nextjs/server";
+import { isAuthDisabled } from "@/lib/auth-disabled";
 
 /**
  * Clerk proxy middleware for Next.js 16+.
  *
  * Public routes: home, sign-in, sign-up, API routes, and Clerk's frontend API.
- * All other routes (including /tools and /tools/*) require authentication.
+ * All other routes (including /tools and /tools/*) require authentication,
+ * unless `NEXT_PUBLIC_AUTH_DISABLED=true`.
  *
  * @see https://clerk.com/docs/reference/nextjs/clerk-middleware
  */
 export default clerkMiddleware(async (auth, request) => {
+  if (isAuthDisabled()) {
+    return;
+  }
+
   const pathname = request.nextUrl.pathname;
 
   const isPublicRoute =

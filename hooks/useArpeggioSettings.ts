@@ -25,22 +25,25 @@ export function useArpeggioSettings(enabled: boolean) {
   const [settings, setSettings] = useState<ArpeggioSettings>(() =>
     normalizeArpeggioSettings({})
   );
-  const [loaded, setLoaded] = useState(false);
+  const [loadedRemote, setLoadedRemote] = useState(false);
+  const loaded = !enabled || loadedRemote;
 
   useEffect(() => {
+    if (!enabled) return;
     if (rawSettings !== undefined) {
       setSettings(normalizeArpeggioSettings((rawSettings as Partial<ArpeggioSettings>) ?? {}));
-      setLoaded(true);
+      setLoadedRemote(true);
     }
-  }, [rawSettings]);
+  }, [enabled, rawSettings]);
 
   const persistSettings = useCallback(
     (next: ArpeggioSettings) => {
+      if (!enabled) return;
       setSetting({ key: ARPEGGIO_SETTINGS_KEY, value: next }).catch((err) => {
         console.error("Failed to save arpeggio settings", err);
       });
     },
-    [setSetting]
+    [enabled, setSetting]
   );
 
   const updateSettings = useCallback(

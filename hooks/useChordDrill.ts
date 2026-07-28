@@ -176,8 +176,18 @@ export function useChordDrill(enabled: boolean): ChordDrillEngine {
     settings.countdownSeconds
   );
 
-  const logEvent = useMutation(api.tracking.logChordDrillEvent);
-  const updateGrade = useMutation(api.tracking.updateChordDrillGrade);
+  const logEventMutation = useMutation(api.tracking.logChordDrillEvent);
+  const updateGradeMutation = useMutation(api.tracking.updateChordDrillGrade);
+  const logEvent = useCallback(
+    (args: Parameters<typeof logEventMutation>[0]) =>
+      enabled ? logEventMutation(args) : Promise.resolve(null),
+    [enabled, logEventMutation]
+  );
+  const updateGrade = useCallback(
+    (args: Parameters<typeof updateGradeMutation>[0]) =>
+      enabled ? updateGradeMutation(args) : Promise.resolve(undefined),
+    [enabled, updateGradeMutation]
+  );
 
   // -------------------------------------------------------------------------
   // Refs for callbacks (avoid stale closures)

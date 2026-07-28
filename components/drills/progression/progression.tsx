@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { MidiConnectionBar } from "@/components/drills/midi-connection-bar";
 import { useProgression } from "@/hooks/useProgression";
+import { useAuthAccess } from "@/hooks/useAuthAccess";
 import { PROGRESSION_KEYS, PROGRESSION_TYPES, chordSymbol } from "@/lib/progression";
 import { cn } from "@/lib/utils";
 import { RotateCcw } from "lucide-react";
@@ -66,7 +67,8 @@ function SettingRow({
 }
 
 export function Progression() {
-  const drill = useProgression(true);
+  const { canPersist } = useAuthAccess();
+  const drill = useProgression(canPersist);
 
   const {
     midiSupported,
