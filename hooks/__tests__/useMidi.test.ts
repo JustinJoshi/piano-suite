@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useMidi } from "@/hooks/useMidi";
+import { __resetMidiSessionForTests } from "@/lib/midi-session";
 
 function createMockMidiInput(id: string, name: string) {
   return {
@@ -37,25 +38,32 @@ class MockMidiMessageEvent extends Event {
 
 describe("useMidi", () => {
   beforeEach(() => {
-    vi.stubGlobal(
-      "navigator",
-      {
-        requestMIDIAccess: vi.fn(),
-      }
-    );
+    sessionStorage.clear();
+    vi.stubGlobal("navigator", {
+      requestMIDIAccess: vi.fn(),
+    });
+    __resetMidiSessionForTests();
   });
 
   afterEach(() => {
+    __resetMidiSessionForTests();
     vi.unstubAllGlobals();
+    sessionStorage.clear();
   });
 
-  it("reports unsupported when requestMIDIAccess is missing", () => {
+  it("reports unsupported when requestMIDIAccess is missing", async () => {
     vi.unstubAllGlobals();
     vi.stubGlobal("navigator", {});
+    __resetMidiSessionForTests();
 
     const { result } = renderHook(() => useMidi());
-    expect(result.current.supported).toBe(false);
-    expect(result.current.error).toBe("Web MIDI is not supported in this browser.");
+
+    await waitFor(() => {
+      expect(result.current.supported).toBe(false);
+      expect(result.current.error).toBe(
+        "Web MIDI is not supported in this browser."
+      );
+    });
   });
 
   it("connects and lists MIDI inputs", async () => {
@@ -65,7 +73,9 @@ describe("useMidi", () => {
     ];
     const access = createMockMidiAccess(inputs);
 
-    vi.mocked(navigator.requestMIDIAccess).mockResolvedValueOnce(access as unknown as MIDIAccess);
+    vi.mocked(navigator.requestMIDIAccess).mockResolvedValueOnce(
+      access as unknown as MIDIAccess
+    );
 
     const { result } = renderHook(() => useMidi());
 
@@ -79,11 +89,48 @@ describe("useMidi", () => {
     expect(result.current.selectedInputId).toBe("input-1");
   });
 
+  it("shares connection state across multiple hook instances", async () => {
+    const inputs = [createMockMidiInput("input-1", "Roland Digital Piano")];
+    const access = createMockMidiAccess(inputs);
+
+    vi.mocked(navigator.requestMIDIAccess).mockResolvedValueOnce(
+      access as unknown as MIDIAccess
+    );
+
+    const first = renderHook(() => useMidi());
+    const second = renderHook(() => useMidi());
+
+    await act(async () => {
+      await first.result.current.connect();
+    });
+
+    await waitFor(() => {
+      expect(first.result.current.connected).toBe(true);
+      expect(second.result.current.connected).toBe(true);
+    });
+
+    act(() => {
+      inputs[0].onmidimessage?.(createMockMidiMessage([0x90, 64, 90]));
+    });
+
+    await waitFor(() => {
+      expect(first.result.current.heldNotes).toEqual([64]);
+      expect(second.result.current.heldNotes).toEqual([64]);
+    });
+
+    first.unmount();
+
+    expect(inputs[0].onmidimessage).not.toBeNull();
+    expect(second.result.current.connected).toBe(true);
+  });
+
   it("tracks held notes from note on/off messages", async () => {
     const inputs = [createMockMidiInput("input-1", "Roland Digital Piano")];
     const access = createMockMidiAccess(inputs);
 
-    vi.mocked(navigator.requestMIDIAccess).mockResolvedValueOnce(access as unknown as MIDIAccess);
+    vi.mocked(navigator.requestMIDIAccess).mockResolvedValueOnce(
+      access as unknown as MIDIAccess
+    );
 
     const { result } = renderHook(() => useMidi());
 
@@ -122,7 +169,9 @@ describe("useMidi", () => {
     const inputs = [createMockMidiInput("input-1", "Roland Digital Piano")];
     const access = createMockMidiAccess(inputs);
 
-    vi.mocked(navigator.requestMIDIAccess).mockResolvedValueOnce(access as unknown as MIDIAccess);
+    vi.mocked(navigator.requestMIDIAccess).mockResolvedValueOnce(
+      access as unknown as MIDIAccess
+    );
 
     const { result } = renderHook(() => useMidi());
 
@@ -153,7 +202,9 @@ describe("useMidi", () => {
     const inputs = [createMockMidiInput("input-1", "Roland Digital Piano")];
     const access = createMockMidiAccess(inputs);
 
-    vi.mocked(navigator.requestMIDIAccess).mockResolvedValueOnce(access as unknown as MIDIAccess);
+    vi.mocked(navigator.requestMIDIAccess).mockResolvedValueOnce(
+      access as unknown as MIDIAccess
+    );
 
     const listener = vi.fn();
     window.addEventListener("midi-note-on", listener as EventListener);
@@ -191,7 +242,9 @@ describe("useMidi", () => {
     ];
     const access = createMockMidiAccess(inputs);
 
-    vi.mocked(navigator.requestMIDIAccess).mockResolvedValueOnce(access as unknown as MIDIAccess);
+    vi.mocked(navigator.requestMIDIAccess).mockResolvedValueOnce(
+      access as unknown as MIDIAccess
+    );
 
     const { result } = renderHook(() => useMidi());
 
