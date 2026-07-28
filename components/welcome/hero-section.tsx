@@ -1,20 +1,10 @@
-"use client";
-
-import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Play } from "lucide-react";
 
-const ChladniBackground = dynamic(
-  () => import("./chladni-background").then((mod) => mod.ChladniBackground),
-  { ssr: false }
-);
-
 export function HeroSection() {
   return (
-    <section className="relative flex min-h-svh overflow-hidden">
-      <ChladniBackground />
-
-      {/* Quiet pocket for copy + fade into the next section */}
+    <section className="relative flex min-h-svh">
+      {/* Quiet pocket for copy — pattern continues under later sections */}
       <div className="pointer-events-none absolute inset-0 z-[1] hero-scrim" />
       <div className="pointer-events-none absolute inset-0 z-[1] hero-glow opacity-30" />
 

@@ -100,13 +100,13 @@ The effect separates navigation from content without introducing solid bars that
 
 ## 8. Hero Visual Language
 
-The landing hero is a **full-viewport** atmospheric field that sits behind the translucent sticky navbar (`min-h-svh`). A soft, slow Three.js Chladni figure fills the first screen edge-to-edge; sparse copy (eyebrow, headline, one sentence, one CTA) sits above a token-driven scrim.
+The landing page keeps a **fixed, full-viewport** Three.js Chladni atmosphere pinned behind the translucent sticky navbar and all marketing content. Sparse hero copy (eyebrow, headline, one sentence, one CTA) sits in the first `min-h-svh` screen above a token-driven scrim; below the fold, opaque feature cards float over the same live pattern with transparent section shells.
 
-- `.hero-scrim` — radial + vertical gradients using `--color-background` via `color-mix`, creating a quiet pocket behind the text and fading the pattern into the next section. Kept light enough that pattern edges remain visible under/around the nav.
+- `.hero-scrim` — radial + vertical gradients using `--color-background` via `color-mix`, creating a quiet pocket behind hero text without fading to a solid page background, so the pattern continues under later sections. Kept light enough that pattern edges remain visible under/around the nav.
 - `.hero-glow` — layered radial accents using `hero-glow-*` tokens, kept light so it does not fight the scrim.
 - `.hero-orb` / `.beam` — retained as theme utilities for secondary marketing motifs elsewhere; they are no longer the primary hero composition.
 
-Line color on the landing hero is a **muted primary-into-background** tint (`colorSoftness` + `lineIntensity` on `ChladniVisualization`): theme primary / orb tokens are mixed toward `--color-background` so the field complements headline accents without competing with `text-foreground`. The Chladni Pattern Lab (`/tools/chladni`) keeps vivid exploration defaults (full intensity, no softness). All colors still follow the active theme.
+Line color on the landing atmosphere is a **muted primary-into-background** tint (`colorSoftness` + `lineIntensity` on `ChladniVisualization`): theme primary / orb tokens are mixed toward `--color-background` so the field complements headline accents without competing with `text-foreground`. The Chladni Pattern Lab (`/tools/chladni`) keeps vivid exploration defaults (full intensity, no softness). All colors still follow the active theme.
 
 ---
 
