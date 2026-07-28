@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as savedPatterns from "../savedPatterns.js";
 import type * as settings from "../settings.js";
 import type * as technique from "../technique.js";
 import type * as tracking from "../tracking.js";
@@ -20,6 +21,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  savedPatterns: typeof savedPatterns;
   settings: typeof settings;
   technique: typeof technique;
   tracking: typeof tracking;

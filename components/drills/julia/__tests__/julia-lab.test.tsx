@@ -6,6 +6,10 @@ vi.mock("@/components/drills/julia/julia-visualization", () => ({
   JuliaVisualization: () => <div data-testid="julia-visualization" />,
 }));
 
+vi.mock("@/components/drills/saved-patterns-panel", () => ({
+  SavedPatternsPanel: () => <div data-testid="saved-patterns-panel" />,
+}));
+
 describe("JuliaLab", () => {
   it("renders the parameter controls and presets", () => {
     render(<JuliaLab />);

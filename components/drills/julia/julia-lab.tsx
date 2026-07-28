@@ -4,8 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { JuliaVisualization } from "@/components/drills/julia/julia-visualization";
+import { SavedPatternsPanel } from "@/components/drills/saved-patterns-panel";
 import { Pause, Play, Shuffle } from "lucide-react";
 import { JULIA_PRESETS, randomC, type Complex } from "@/lib/julia";
+import {
+  normalizeJuliaLabParams,
+  type JuliaLabParams,
+} from "@/lib/lab-patterns";
 
 // ============================================================
 // JULIA SET LAB
@@ -110,7 +115,37 @@ export function JuliaLab() {
     setNextC(next);
   }
 
+  function snapshotParams(): JuliaLabParams {
+    return {
+      c,
+      nextC,
+      morph,
+      autoMorph,
+      morphSpeed,
+      zoom,
+      maxIterations,
+      escapeRadius,
+      colorSoftness,
+      timeScale,
+    };
+  }
+
+  function loadParams(raw: unknown) {
+    const next = normalizeJuliaLabParams(raw, snapshotParams());
+    setC(next.c);
+    setNextC(next.nextC);
+    setMorph(next.morph);
+    setAutoMorph(next.autoMorph);
+    setMorphSpeed(next.morphSpeed);
+    setZoom(next.zoom);
+    setMaxIterations(next.maxIterations);
+    setEscapeRadius(next.escapeRadius);
+    setColorSoftness(next.colorSoftness);
+    setTimeScale(next.timeScale);
+  }
+
   return (
+    <div className="space-y-6">
     <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
       <Card className="relative min-h-[400px] overflow-hidden border-border bg-card">
         <JuliaVisualization
@@ -269,6 +304,13 @@ export function JuliaLab() {
           />
         </CardContent>
       </Card>
+    </div>
+
+    <SavedPatternsPanel
+      tool="julia"
+      getParams={snapshotParams}
+      onLoad={loadParams}
+    />
     </div>
   );
 }
