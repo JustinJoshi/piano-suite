@@ -60,7 +60,9 @@ export async function POST(req: Request) {
 
   try {
     const result = streamText({
-      model: kimikode(modelId),
+      // Kimi Code exposes OpenAI-compatible chat completions, not the
+      // Responses API that @ai-sdk/openai uses by default for kimikode().
+      model: kimikode.chat(modelId),
       system: buildSystemPrompt(),
       messages,
     });

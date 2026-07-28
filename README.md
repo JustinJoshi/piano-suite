@@ -134,6 +134,48 @@ A `/tools/midi-test` page is included for manually verifying MIDI input and audi
 
 8. Open [http://localhost:3000](http://localhost:3000).
 
+## Deploy (Vercel Hobby)
+
+Production hosting is **Vercel Hobby** + **Convex Free** + **Clerk development** keys (fine for personal `*.vercel.app` use). Live site: [https://piano-suite.vercel.app](https://piano-suite.vercel.app).
+
+### One-time setup
+
+1. Create a Convex **cloud** project and production deployment (`npx convex deployment create … --type prod --default`), then deploy functions with a production deploy key (`CONVEX_DEPLOY_KEY`).
+2. On the Convex **production** deployment, set `CLERK_FRONTEND_API_URL` to the same Clerk Frontend API URL used locally (e.g. `https://<app>.clerk.accounts.dev`).
+3. In Vercel, create/import the project and set the **Build Command** to:
+
+   ```bash
+   npx convex deploy --cmd-url-env-var-name NEXT_PUBLIC_CONVEX_URL --cmd 'npm run build'
+   ```
+
+4. Add these **Production** environment variables in Vercel:
+
+   | Variable | Notes |
+   |----------|--------|
+   | `CONVEX_DEPLOY_KEY` | Production deploy key (`deployment:deploy`) |
+   | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk **dev** publishable key |
+   | `CLERK_SECRET_KEY` | Clerk **dev** secret |
+   | `CLERK_FRONTEND_API_URL` | Clerk Frontend API URL |
+   | `KIMI_CODE_API_KEY` / `KIMI_CODE_BASE_URL` / `KIMI_CODE_MODEL` | Same as local |
+   | `ALLOWED_CLERK_USER_ID` | Your Clerk user id for `/chat` |
+   | `NEXT_PUBLIC_CLERK_SIGN_IN_URL` | `/sign-in` |
+   | `NEXT_PUBLIC_CLERK_SIGN_UP_URL` | `/sign-up` |
+   | `NEXT_PUBLIC_CLERK_*_FALLBACK_REDIRECT_URL` | `/` |
+
+   `NEXT_PUBLIC_CONVEX_URL` is injected at build time by `npx convex deploy`.
+
+5. In Clerk (development instance):
+   - Ensure a JWT template named `convex` with `aud: "convex"`.
+   - Set instance `allowed_origins` to include `https://piano-suite.vercel.app` (and `http://localhost:3000`).
+   - Add redirect URLs for `https://piano-suite.vercel.app` (and `/sign-in`, `/sign-up`, `/tools`, `/chat` as needed).
+
+6. Deploy with `vercel deploy --prod` (or connect the GitHub repo in the Vercel dashboard for push-to-deploy).
+
+### Notes
+
+- Hobby is for non-commercial use. A custom domain + Clerk production keys can come later.
+- GitHub auto-connect may require installing the Vercel GitHub app on the repo; CLI deploys work without it.
+
 ## Testing
 
 Unit tests run with Vitest and React Testing Library. They cover the primitive layer (music theory, scoring, Anki client) and the React hooks.
