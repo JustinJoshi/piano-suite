@@ -8,9 +8,9 @@ import { ChladniVisualization } from "./chladni-visualization";
 // ============================================================
 // CHLADNI ANIMATED BACKGROUND — Piano Suite Edition
 // ============================================================
-// Soft, slow, full-bleed hero atmosphere by default. Pattern Lab
-// can Apply a full parameter set (plus color / scrim) that the
-// parent reads from useHeroChladniSettings and passes in.
+// Soft, slow, full-bleed fixed page atmosphere by default.
+// Pattern Lab can Apply a full parameter set (plus color / scrim)
+// that the parent reads from useHeroChladniSettings and passes in.
 // Remounts when `settings.generation` changes (Apply / Reset).
 // ============================================================
 
@@ -104,7 +104,7 @@ function ChladniBackgroundInner({
       lineIntensity={settings.lineIntensity}
       colorSoftness={settings.colorSoftness}
       patternColor={settings.patternColor}
-      className="absolute inset-0 z-0 h-full w-full"
+      className="h-full w-full"
     />
   );
 }

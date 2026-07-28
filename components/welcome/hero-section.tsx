@@ -1,17 +1,10 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import type { CSSProperties } from "react";
 import { Button } from "@/components/ui/button";
 import { Play } from "lucide-react";
-import { useHeroChladniSettings } from "@/hooks/useHeroChladniSettings";
 import { scrimStrengthCss } from "@/lib/chladni-hero-settings";
 import type { HeroChladniSettings } from "@/lib/chladni-hero-settings";
-
-const ChladniBackground = dynamic(
-  () => import("./chladni-background").then((mod) => mod.ChladniBackground),
-  { ssr: false }
-);
 
 function scrimStyleFromSettings(settings: HeroChladniSettings): CSSProperties {
   const strength = scrimStrengthCss(settings.scrimDarkness);
@@ -22,14 +15,14 @@ function scrimStyleFromSettings(settings: HeroChladniSettings): CSSProperties {
   } as CSSProperties;
 }
 
-export function HeroSection() {
-  const { settings } = useHeroChladniSettings();
-
+export function HeroSection({
+  settings,
+}: {
+  settings: HeroChladniSettings;
+}) {
   return (
-    <section className="relative flex min-h-svh overflow-hidden">
-      <ChladniBackground settings={settings} />
-
-      {/* Quiet pocket for copy + fade into the next section */}
+    <section className="relative flex min-h-svh">
+      {/* Quiet pocket for copy — pattern continues under later sections */}
       <div
         className="pointer-events-none absolute inset-0 z-[1] hero-scrim"
         style={scrimStyleFromSettings(settings)}
