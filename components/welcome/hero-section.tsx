@@ -1,11 +1,20 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Play } from "lucide-react";
+
+const ChladniBackground = dynamic(
+  () => import("./chladni-background").then((mod) => mod.ChladniBackground),
+  { ssr: false }
+);
 
 export function HeroSection() {
   return (
     <section className="relative overflow-hidden">
+      {/* Animated Chladni figure background */}
+      <ChladniBackground />
+
       {/* Background glow layer */}
       <div className="absolute inset-0 hero-glow opacity-70" />
 
