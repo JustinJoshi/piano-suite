@@ -12,6 +12,7 @@ import {
   Timer,
   Palette,
   Waves,
+  Sparkles,
 } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { AppUserButton } from "@/components/app-user-button";
@@ -26,6 +27,7 @@ const toolLinks = [
   { name: "Technique", href: "/tools/technique", icon: Timer },
   { name: "Tracking", href: "/tools/tracking", icon: BarChart3 },
   { name: "Chladni Lab", href: "/tools/chladni", icon: Waves },
+  { name: "Julia Lab", href: "/tools/julia", icon: Sparkles },
 ];
 
 export function Sidebar() {

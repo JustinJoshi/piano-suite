@@ -9,6 +9,7 @@ import {
   Search,
   Bell,
   Waves,
+  Sparkles,
 } from "lucide-react";
 import { AppUserButton } from "@/components/app-user-button";
 import { ToolCard } from "@/components/tools/tool-card";
@@ -71,6 +72,13 @@ const tools = [
       "Interactive square-plate waveform explorer for the hero background shader.",
     icon: Waves,
     href: "/tools/chladni",
+  },
+  {
+    title: "Julia Lab",
+    description:
+      "Interactive escape-time Julia set explorer with morphing complex parameters.",
+    icon: Sparkles,
+    href: "/tools/julia",
   },
 ];
 
