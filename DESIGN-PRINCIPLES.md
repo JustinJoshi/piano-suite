@@ -100,13 +100,13 @@ The effect separates navigation from content without introducing solid bars that
 
 ## 8. Hero Visual Language
 
-The landing page uses an abstract “glowing orb” motif defined as reusable CSS utilities in `app/globals.css`:
+The landing hero is a full-viewport atmospheric field: a soft, slow Three.js Chladni figure behind sparse copy (eyebrow, headline, one sentence, one CTA). Readability comes from token-driven overlays in `app/globals.css`, not from competing decorative chrome.
 
-- `.hero-glow` — layered radial gradients using `hero-glow-*` tokens.
-- `.hero-orb` — radial gradient sphere with `hero-orb-*` tokens and an inset shadow.
-- `.beam` — horizontal light streaks using `beam-mid` / `beam-highlight`.
+- `.hero-scrim` — radial + vertical gradients using `--color-background` via `color-mix`, creating a quiet pocket behind the text and fading the pattern into the next section.
+- `.hero-glow` — layered radial accents using `hero-glow-*` tokens, kept light so it does not fight the scrim.
+- `.hero-orb` / `.beam` — retained as theme utilities for secondary marketing motifs elsewhere; they are no longer the primary hero composition.
 
-These utilities read from the active theme, so the hero recolors automatically when the user switches presets. Concentric rings and floating chips reinforce the idea of orbit / repetition / cycles, tying back to the practice-loop concept.
+The Chladni Pattern Lab (`/tools/chladni`) keeps vivid exploration defaults. The landing hero wrapper deliberately slows morph cadence and lowers secondary-wave strength so the pattern reads as atmosphere. All colors still follow the active theme.
 
 ---
 
