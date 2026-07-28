@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { streamText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { getAllArticles } from "@/lib/articles";
+import { isAuthDisabled } from "@/lib/auth-disabled";
 
 export const runtime = "nodejs";
 
@@ -28,15 +29,17 @@ ${articleContext}`;
 }
 
 export async function POST(req: Request) {
-  const { userId } = await auth();
+  if (!isAuthDisabled()) {
+    const { userId } = await auth();
 
-  if (!userId) {
-    return new Response("Unauthorized", { status: 401 });
-  }
+    if (!userId) {
+      return new Response("Unauthorized", { status: 401 });
+    }
 
-  const allowedUserId = process.env.ALLOWED_CLERK_USER_ID;
-  if (!allowedUserId || userId !== allowedUserId) {
-    return new Response("Forbidden", { status: 403 });
+    const allowedUserId = process.env.ALLOWED_CLERK_USER_ID;
+    if (!allowedUserId || userId !== allowedUserId) {
+      return new Response("Forbidden", { status: 403 });
+    }
   }
 
   const apiKey = process.env.KIMI_CODE_API_KEY;

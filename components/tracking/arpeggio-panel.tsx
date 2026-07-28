@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { TrackingChart } from "./tracking-chart";
 import { cn } from "@/lib/utils";
 import { useCachedTrackingQuery } from "@/hooks/useCachedTrackingQuery";
+import { useAuthAccess } from "@/hooks/useAuthAccess";
 import { Loader2 } from "lucide-react";
 
 function transitionKey(chord: string, fromDeg: string, toDeg: string) {
@@ -15,8 +16,15 @@ function transitionKey(chord: string, fromDeg: string, toDeg: string) {
 }
 
 export function ArpeggioPanel() {
-  const liveEvents = useQuery(api.tracking.listArpeggioEvents);
-  const liveMisses = useQuery(api.tracking.listArpeggioMissEvents);
+  const { canPersist } = useAuthAccess();
+  const liveEvents = useQuery(
+    api.tracking.listArpeggioEvents,
+    canPersist ? {} : "skip"
+  );
+  const liveMisses = useQuery(
+    api.tracking.listArpeggioMissEvents,
+    canPersist ? {} : "skip"
+  );
   const clearMutation = useMutation(api.tracking.clearArpeggioEventsByTransition);
   const { data: events, isLoading: eventsLoading, clear: clearEventsCache } = useCachedTrackingQuery(
     "arpeggioEvents",
@@ -94,7 +102,7 @@ export function ArpeggioPanel() {
   }, [activeKey, missesList]);
 
   async function handleClear() {
-    if (!activeKey) return;
+    if (!canPersist || !activeKey) return;
     const [chord, transition] = activeKey.split(" · ");
     const [fromDeg, toDeg] = transition.split("→");
     await clearMutation({ chord, fromDeg, toDeg });
@@ -103,7 +111,7 @@ export function ArpeggioPanel() {
     setSelectedKey(null);
   }
 
-  if (eventsLoading && missesLoading) {
+  if (canPersist && eventsLoading && missesLoading) {
     return (
       <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
         <Loader2 className="mx-auto mb-2 h-5 w-5 animate-spin" />

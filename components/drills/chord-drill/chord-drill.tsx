@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { MidiConnectionBar } from "@/components/drills/midi-connection-bar";
 import { useChordDrill } from "@/hooks/useChordDrill";
+import { useAuthAccess } from "@/hooks/useAuthAccess";
 import {
   ROOTS,
   QUALITY_GROUPS,
@@ -204,7 +205,8 @@ function PerChordRepsModal({
 }
 
 export function ChordDrill() {
-  const drill = useChordDrill(true);
+  const { canPersist } = useAuthAccess();
+  const drill = useChordDrill(canPersist);
   const [perChordModalOpen, setPerChordModalOpen] = useState(false);
 
   const {

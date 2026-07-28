@@ -100,7 +100,12 @@ export function useRootCycling(enabled: boolean): RootCyclingEngine {
   } = useMidi();
 
   const { playChime } = useAudio();
-  const logEvent = useMutation(api.tracking.logRootCycleEvent);
+  const logEventMutation = useMutation(api.tracking.logRootCycleEvent);
+  const logEvent = useCallback(
+    (args: Parameters<typeof logEventMutation>[0]) =>
+      enabled ? logEventMutation(args) : Promise.resolve(undefined),
+    [enabled, logEventMutation]
+  );
 
   // -------------------------------------------------------------------------
   // Refs for callbacks

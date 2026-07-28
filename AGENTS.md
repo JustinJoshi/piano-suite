@@ -20,6 +20,9 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `hooks/useDrillTimer.ts` | Generic drill timer state machine |
 | `hooks/useAnkiSync.ts` | Poll Anki for current card and parse its chord |
 | `hooks/useThemeCssVars.ts` | Read theme CSS custom properties and watch for theme changes; useful for Canvas/WebGL visuals |
+| `hooks/useAuthAccess.ts` | Shared Clerk gate: `canAccess` / `canPersist`, respects `NEXT_PUBLIC_AUTH_DISABLED` |
+| `hooks/useToolUserReady.ts` | Ensures Convex user row when signed in; ready immediately when auth is disabled |
+| `lib/auth-disabled.ts` | `isAuthDisabled()` helper for middleware and API routes |
 | `components/drills/drill-shell.tsx` | Shared layout wrapper for every tool page |
 
 ## Rules for tool pages
@@ -165,6 +168,8 @@ Most new work fits cleanly inside one of these areas. Keep all related changes i
    ```
 5. If e2e tests cover the changed flow, run `npm run test:e2e` as well.
 
+Security scanning (Snyk Open Source + Snyk Code) runs in GitHub Actions via `.github/workflows/snyk.yml` and is **not** part of the local lint/unit/build gate. Before dependency bumps, agents may optionally run `npm run snyk:test` (requires `npx snyk auth` or `SNYK_TOKEN`).
+
 ### Shared resources across worktrees
 
 Worktrees isolate the working directory and Git state, but they do **not** isolate running services. Be aware of the following shared resources:
@@ -199,6 +204,10 @@ When you complete a task, follow this checklist before telling the user you are 
    ```bash
    git push origin <branch>
    ```
+6. **Open a PR when the user asks (or when finishing a feature branch).** Use `gh pr create` as usual. After `gh pr create` or a push that creates/updates a PR preview deployment:
+   - Print the **Vercel Preview** URL in your reply (from the PR checks / deployments, or `gh pr view --json statusCheckRollup` / the Vercel deployment for that branch). Prefer the GitHub PR “Visit Preview” link when available.
+   - Open it **once** in the user’s browser with `xdg-open <preview-url>` (or the platform equivalent). Do not keep re-opening on every follow-up message.
+   - Do **not** spin up a separate local/CLI host just for PR review when a Vercel Preview already exists. If the Preview build failed, say so and link the failed deployment instead of improvising a second host.
 
 If you are working in a git worktree, push from the worktree branch. If you are on `main` in the main worktree, push directly.
 

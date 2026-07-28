@@ -28,6 +28,8 @@ This repository now contains:
 - A migrated **Root Cycling** (`/tools/root-cycling`) ported from Reflex Drill EXT, including chord mode with any quality and arpeggio mode with the canonical minor-11th shape, customizable root pools, per-attempt timing, and tracking aggregated by fixed idea across random keys.
 - A migrated **Technique habit tracker** (`/tools/technique`) ported from Reflex Drill EXT, including a built-in metronome, BPM logging, streak counter, 28-day practice grid, and a one-time import from the original `technique-habit-log-v1` localStorage key.
 - A **Chladni Pattern Lab** (`/tools/chladni`) — an interactive square-plate waveform explorer for the landing-page hero shader, with live controls for modes, morph speed, line thickness, zoom, and secondary-wave blending. **Apply to home** copies the full Lab pattern onto the welcome hero; you can also set a pattern color and hero-scrim shade, or **Reset home** to the soft shipping defaults. Preferences persist in `localStorage` and sync to Convex when signed in.
+- A **Julia Set Lab** (`/tools/julia`) — an interactive escape-time Julia set explorer with curated complex-parameter presets, morph between two `c` values, zoom, iterations, escape radius, and theme-aware coloring.
+- A **Lissajous Harmonic Lab** (`/tools/lissajous`) — an interactive frequency-ratio curve explorer with musical interval presets, phase/morph controls, and theme-aware Canvas trails.
 - A migrated **Tracking dashboard** (`/tools/tracking`) ported from Reflex Drill EXT, including:
   - Chord Drill first-chord timing history
   - Arpeggio transition and miss logging
@@ -54,6 +56,8 @@ A shared **primitive layer** has been extracted from the original Reflex Drill E
 - `lib/articles.ts` — Markdown article parsing, frontmatter handling, and listing helpers
 - `lib/anki.ts` — typed AnkiConnect client
 - `lib/themes.ts` — theme registry and helpers for the theming system
+- `lib/julia.ts` — Julia-set escape-time math, curated presets, and complex helpers
+- `lib/lissajous.ts` — Lissajous parametric math, interval presets, and ratio helpers
 - `hooks/useMidi.ts` — Web MIDI device selection and held-note tracking
 - `hooks/useAudio.ts` — Web Audio chimes, ticks, and metronome
 - `hooks/useDrillTimer.ts` — generic drill timer state machine (single- or multi-rep)
@@ -107,6 +111,7 @@ A `/tools/midi-test` page is included for manually verifying MIDI input and audi
    - `NEXT_PUBLIC_CONVEX_URL` from your Convex project
    - `KIMI_CODE_API_KEY`, `KIMI_CODE_BASE_URL`, and `KIMI_CODE_MODEL` from the [Kimi Code Console](https://www.kimi.com/code/console)
    - `ALLOWED_CLERK_USER_ID` — the Clerk user ID that is permitted to use `/chat`
+   - Optional local bypass: `NEXT_PUBLIC_AUTH_DISABLED=true` opens `/tools` without signing in (local/dev only; Convex saves still need a session). Restart `npm run dev` after changing it.
 
 3. Configure Clerk authentication for email and password only:
 
@@ -217,6 +222,30 @@ npx playwright test --workers=1
 ```
 
 Test credentials are stored in `.env.local` as `E2E_CLERK_USER_EMAIL` and `E2E_CLERK_USER_PASSWORD`.
+
+## Security / Snyk
+
+Dependency and source-code scanning run via [Snyk](https://snyk.io) on every pull request and every push to `main` (see `.github/workflows/snyk.yml`). The workflow fails on **high** or **critical** findings. Pushes to `main` also run `snyk monitor` so the Snyk dashboard can alert on newly disclosed CVEs.
+
+### One-time GitHub setup
+
+1. Create a Snyk account at [snyk.io](https://snyk.io).
+2. Copy your API token from [Account settings](https://app.snyk.io/account).
+3. In this GitHub repo, go to **Settings → Secrets and variables → Actions** and add a secret named `SNYK_TOKEN`.
+
+Without `SNYK_TOKEN`, the Snyk workflow cannot authenticate.
+
+### Local scans
+
+Authenticate once with `npx snyk auth`, then:
+
+```bash
+# Open Source (npm dependencies)
+npm run snyk:test
+
+# Snyk Code (SAST)
+npm run snyk:code
+```
 
 ## Migrating from Reflex Drill EXT
 

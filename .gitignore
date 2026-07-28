@@ -49,6 +49,7 @@ next-env.d.ts
 
 # launcher log
 .launcher.log
+/logs/
 
 # convex dev server log
 .convex-dev.log

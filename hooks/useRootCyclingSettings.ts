@@ -25,26 +25,29 @@ export function useRootCyclingSettings(enabled: boolean) {
   const [settings, setSettings] = useState<RootCyclingSettings>(() =>
     normalizeRootCyclingSettings({})
   );
-  const [loaded, setLoaded] = useState(false);
+  const [loadedRemote, setLoadedRemote] = useState(false);
+  const loaded = !enabled || loadedRemote;
 
   useEffect(() => {
+    if (!enabled) return;
     if (rawSettings !== undefined) {
       setSettings(
         normalizeRootCyclingSettings(
           (rawSettings as Partial<RootCyclingSettings>) ?? {}
         )
       );
-      setLoaded(true);
+      setLoadedRemote(true);
     }
-  }, [rawSettings]);
+  }, [enabled, rawSettings]);
 
   const persistSettings = useCallback(
     (next: RootCyclingSettings) => {
+      if (!enabled) return;
       setSetting({ key: ROOT_CYCLING_SETTINGS_KEY, value: next }).catch((err) => {
         console.error("Failed to save root-cycling settings", err);
       });
     },
-    [setSetting]
+    [enabled, setSetting]
   );
 
   const updateSettings = useCallback(
