@@ -1,77 +1,64 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { buildModeSequence, lerp, smoothstep } from "@/lib/chladni";
+import { randomMode } from "@/lib/chladni";
 import { ChladniVisualization } from "./chladni-visualization";
 
 // ============================================================
 // CHLADNI ANIMATED BACKGROUND — Piano Suite Edition
 // ============================================================
-// A self-cycling Chladni background for the hero section. It
-// randomly morphs between curated (m, n) modes and renders them
-// through the reusable ChladniVisualization shader component.
+// Hero background that matches the Chladni Pattern Lab defaults
+// and morph behavior: discrete (m, n) pairs blended via morph,
+// with the same secondary-wave / breathe settings.
 // ============================================================
 
-const MORPH_SPEED = 25;
-const LINE_THICKNESS = 30;
-const ZOOM_SCALE = 233;
-const COMPLEXITY = 15;
+/** Seconds per mode transition — matches ChladniLab default. */
+const MORPH_SECONDS = 8;
 
 export function ChladniBackground() {
   const [mode, setMode] = useState<[number, number]>([5, 7]);
-  const [nextMode, setNextMode] = useState<[number, number]>([5, 7]);
+  const [nextMode, setNextMode] = useState<[number, number]>([7, 9]);
   const [morph, setMorph] = useState(0);
 
-  const modeSequenceRef = useRef<[number, number][]>([]);
-  const modeIndexRef = useRef(0);
-  const currentModeRef = useRef<[number, number]>([5, 7]);
-  const targetModeRef = useRef<[number, number]>([5, 7]);
-  const transitionProgressRef = useRef(0);
+  const modeRef = useRef(mode);
+  const nextModeRef = useRef(nextMode);
+  const morphRef = useRef(0);
 
   useEffect(() => {
-    modeSequenceRef.current = buildModeSequence(COMPLEXITY);
-    if (modeSequenceRef.current.length === 0) return;
+    modeRef.current = mode;
+  }, [mode]);
 
-    const first = modeSequenceRef.current[0];
-    currentModeRef.current = first;
-    targetModeRef.current = first;
-    setMode(first);
-    setNextMode(first);
+  useEffect(() => {
+    nextModeRef.current = nextMode;
+  }, [nextMode]);
 
-    const transitionSpeed = 0.0003 + (MORPH_SPEED / 100) * 0.006;
-
-    function pickNextMode() {
-      modeIndexRef.current =
-        (modeIndexRef.current + 1) % modeSequenceRef.current.length;
-      const next = modeSequenceRef.current[modeIndexRef.current];
-      targetModeRef.current = next;
-      transitionProgressRef.current = 0;
-      setNextMode(next);
-    }
-
+  useEffect(() => {
     let rafId = 0;
+    let lastTime = performance.now();
 
-    function animate() {
-      transitionProgressRef.current += transitionSpeed;
-      if (transitionProgressRef.current >= 1) {
-        currentModeRef.current = targetModeRef.current;
-        pickNextMode();
-        transitionProgressRef.current = 0;
+    function animate(now: number) {
+      const delta = now - lastTime;
+      lastTime = now;
+
+      let nextMorph = morphRef.current + delta / (MORPH_SECONDS * 1000);
+
+      if (nextMorph >= 1) {
+        const arrived = nextModeRef.current;
+        const fresh = randomMode();
+        modeRef.current = arrived;
+        nextModeRef.current = fresh;
+        nextMorph = 0;
+        setMode(arrived);
+        setNextMode(fresh);
       }
 
-      const t = smoothstep(transitionProgressRef.current);
-      const current = currentModeRef.current;
-      const target = targetModeRef.current;
-
-      setMode([lerp(current[0], target[0], t), lerp(current[1], target[1], t)]);
-      setNextMode(target);
-      setMorph(t);
+      morphRef.current = nextMorph;
+      setMorph(nextMorph);
 
       rafId = requestAnimationFrame(animate);
     }
 
     rafId = requestAnimationFrame(animate);
-
     return () => cancelAnimationFrame(rafId);
   }, []);
 
@@ -80,8 +67,14 @@ export function ChladniBackground() {
       mode={mode}
       nextMode={nextMode}
       morph={morph}
-      lineThickness={LINE_THICKNESS}
-      zoom={ZOOM_SCALE / 100}
+      lineThickness={30}
+      zoom={2.33}
+      secondaryOffset={[1, 2]}
+      secondaryBlend={0.15}
+      secondarySpeed={1}
+      secondaryMotion={2}
+      breathe={0.2}
+      timeScale={1}
       className="absolute inset-0 -z-10"
     />
   );
