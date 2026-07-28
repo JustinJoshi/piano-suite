@@ -1,5 +1,33 @@
 import { test, expect } from "@playwright/test";
 import { signInAsTestUser } from "./auth-helper";
+import { themeIds, type ThemeId } from "@/lib/themes";
+
+const EXPECTED_PRIMARY: Record<ThemeId, string> = {
+  amber: "#c9a227",
+  rose: "#e11d48",
+  emerald: "#10b981",
+  ocean: "#06b6d4",
+  violet: "#8b5cf6",
+  slate: "#94a3b8",
+};
+
+async function expectExclusiveTheme(page: import("@playwright/test").Page, themeId: ThemeId) {
+  const html = page.locator("html");
+  await expect(html).toHaveClass(new RegExp(`(?:^|\\s)${themeId}(?:\\s|$)`));
+
+  for (const other of themeIds) {
+    if (other === themeId) continue;
+    await expect(html).not.toHaveClass(new RegExp(`(?:^|\\s)${other}(?:\\s|$)`));
+  }
+
+  const primary = await page.evaluate(() =>
+    getComputedStyle(document.documentElement)
+      .getPropertyValue("--primary")
+      .trim()
+      .toLowerCase()
+  );
+  expect(primary).toBe(EXPECTED_PRIMARY[themeId]);
+}
 
 test.describe("/settings/theme", () => {
   test("lets an authenticated user switch themes", async ({ page }) => {
@@ -13,13 +41,18 @@ test.describe("/settings/theme", () => {
 
     // Select a non-default theme.
     await page.getByTestId("theme-card-rose").click();
+    await expectExclusiveTheme(page, "rose");
 
-    // The <html> element should gain the theme class.
-    await expect(page.locator("html")).toHaveClass(/rose/);
+    // A later-in-CSS theme, then back to an earlier one — this is the
+    // regression that failed when ThemeProvider omitted `themes={themeIds}`.
+    await page.getByTestId("theme-card-slate").click();
+    await expectExclusiveTheme(page, "slate");
 
-    // Switch back to the default.
+    await page.getByTestId("theme-card-ocean").click();
+    await expectExclusiveTheme(page, "ocean");
+
     await page.getByTestId("theme-card-amber").click();
-    await expect(page.locator("html")).toHaveClass(/amber/);
+    await expectExclusiveTheme(page, "amber");
   });
 
   test("sidebar links to the theme settings page", async ({ page }) => {

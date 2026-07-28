@@ -24,7 +24,10 @@ function ThemeCard({
   return (
     <button
       onClick={() => onSelect(theme.id)}
+      // Apply this preset's CSS class locally so swatches/preview chrome
+      // show that theme's tokens even when a different global theme is active.
       className={cn(
+        theme.id,
         "group relative flex flex-col gap-3 rounded-xl border bg-card p-4 text-left transition-all",
         "hover:border-primary/50 hover:bg-card/80",
         isActive && "ring-1 ring-primary border-primary/50"

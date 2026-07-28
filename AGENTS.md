@@ -64,9 +64,10 @@ Before making styling changes, read `DESIGN-PRINCIPLES.md` for the visual conven
 
 ### Adding a new preset theme
 
-1. Add the theme id and metadata to `lib/themes.ts`.
+1. Add the theme id and metadata to `lib/themes.ts` (`themeIds` and `themes`).
 2. Add a matching CSS class in `app/globals.css` that overrides the relevant tokens (see existing `.rose`, `.emerald`, etc.).
 3. Make sure the class name matches the `id` exactly — `next-themes` applies it to `<html>`.
+4. Keep `ThemeProvider` in `app/layout.tsx` wired as `themes={[...themeIds]}`. Without that list, `next-themes` only removes `light`/`dark` on switch, leftover preset classes accumulate on `<html>`, and later rules in `globals.css` win over the selected theme.
 
 ### Anti-patterns to avoid
 

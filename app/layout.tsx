@@ -4,7 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { shadcn } from "@clerk/ui/themes";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import { ThemeProvider } from "@/components/theme-provider";
-import { defaultTheme } from "@/lib/themes";
+import { defaultTheme, themeIds } from "@/lib/themes";
 import "./globals.css";
 
 const inter = Inter({
@@ -38,6 +38,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${inter.variable} ${fraunces.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <ThemeProvider
@@ -45,6 +46,7 @@ export default function RootLayout({
           defaultTheme={defaultTheme}
           enableSystem={false}
           storageKey="piano-suite-theme"
+          themes={[...themeIds]}
         >
           <ClerkProvider appearance={{ theme: shadcn }}>
             <ConvexClientProvider>{children}</ConvexClientProvider>
