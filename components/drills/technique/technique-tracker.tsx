@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useAudio } from "@/hooks/useAudio";
+import { useAuthAccess } from "@/hooks/useAuthAccess";
 import {
   todayStr,
   computeStreak,
@@ -31,7 +32,11 @@ function sessionsToLog(
 
 export function TechniqueTracker() {
   const { ready, startMetronome, stopMetronome, metronomeRunning } = useAudio();
-  const sessions = useQuery(api.technique.listTechniqueSessions);
+  const { canPersist } = useAuthAccess();
+  const sessions = useQuery(
+    api.technique.listTechniqueSessions,
+    canPersist ? {} : "skip"
+  );
   const logSession = useMutation(api.technique.logTechniqueSession);
   const clearSessions = useMutation(api.technique.clearTechniqueSessions);
 
@@ -64,6 +69,7 @@ export function TechniqueTracker() {
   }, [bpm, metronomeRunning, startMetronome]);
 
   async function markDoneToday() {
+    if (!canPersist) return;
     setSaving(true);
     try {
       await logSession({
@@ -78,6 +84,7 @@ export function TechniqueTracker() {
   }
 
   async function handleClearAll() {
+    if (!canPersist) return;
     if (!window.confirm("Clear all technique history? This cannot be undone.")) {
       return;
     }
@@ -94,6 +101,11 @@ export function TechniqueTracker() {
 
   return (
     <div className="mx-auto grid max-w-xl gap-6">
+      {!canPersist ? (
+        <p className="text-center text-sm text-muted-foreground">
+          Local practice mode — metronome works; session history needs sign-in.
+        </p>
+      ) : null}
       <Card>
         <CardHeader>
           <CardTitle>Today&apos;s session</CardTitle>

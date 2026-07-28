@@ -8,10 +8,15 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { TrackingChart } from "./tracking-chart";
 import { cn } from "@/lib/utils";
 import { useCachedTrackingQuery } from "@/hooks/useCachedTrackingQuery";
+import { useAuthAccess } from "@/hooks/useAuthAccess";
 import { Loader2 } from "lucide-react";
 
 export function ChordDrillPanel() {
-  const liveEvents = useQuery(api.tracking.listChordDrillEvents);
+  const { canPersist } = useAuthAccess();
+  const liveEvents = useQuery(
+    api.tracking.listChordDrillEvents,
+    canPersist ? {} : "skip"
+  );
   const clearMutation = useMutation(api.tracking.clearChordDrillEventsByChord);
   const { data: events, isLoading, clear: clearCache } = useCachedTrackingQuery(
     "chordDrillEvents",
@@ -59,13 +64,13 @@ export function ChordDrillPanel() {
   }, [groups, activeChord]);
 
   async function handleClear() {
-    if (!activeChord) return;
+    if (!canPersist || !activeChord) return;
     await clearMutation({ chord: activeChord });
     clearCache();
     setSelectedChord(null);
   }
 
-  if (isLoading) {
+  if (canPersist && isLoading) {
     return (
       <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
         <Loader2 className="mx-auto mb-2 h-5 w-5 animate-spin" />

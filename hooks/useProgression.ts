@@ -94,7 +94,12 @@ export function useProgression(enabled: boolean): ProgressionEngine {
   } = useMidi();
 
   const { playChime } = useAudio();
-  const logEvent = useMutation(api.tracking.logProgressionEvent);
+  const logEventMutation = useMutation(api.tracking.logProgressionEvent);
+  const logEvent = useCallback(
+    (args: Parameters<typeof logEventMutation>[0]) =>
+      enabled ? logEventMutation(args) : Promise.resolve(undefined),
+    [enabled, logEventMutation]
+  );
 
   // -------------------------------------------------------------------------
   // Refs for callbacks (avoid stale closures in the MIDI handler)

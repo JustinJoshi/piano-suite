@@ -33,32 +33,36 @@ export function useChordDrillSettings(enabled: boolean) {
     normalizeSettings({})
   );
   const [history, setHistory] = useState<ChordDrillHistory>({});
-  const [loaded, setLoaded] = useState(false);
+  const [loadedRemote, setLoadedRemote] = useState(false);
+  const loaded = !enabled || loadedRemote;
 
   useEffect(() => {
+    if (!enabled) return;
     if (rawSettings !== undefined && rawHistory !== undefined) {
       setSettings(normalizeSettings((rawSettings as Partial<ChordDrillSettings>) ?? {}));
       setHistory((rawHistory as ChordDrillHistory) ?? {});
-      setLoaded(true);
+      setLoadedRemote(true);
     }
-  }, [rawSettings, rawHistory]);
+  }, [enabled, rawSettings, rawHistory]);
 
   const persistSettings = useCallback(
     (next: ChordDrillSettings) => {
+      if (!enabled) return;
       setSetting({ key: CHORD_DRILL_SETTINGS_KEY, value: next }).catch((err) => {
         console.error("Failed to save chord drill settings", err);
       });
     },
-    [setSetting]
+    [enabled, setSetting]
   );
 
   const persistHistory = useCallback(
     (next: ChordDrillHistory) => {
+      if (!enabled) return;
       setSetting({ key: CHORD_DRILL_HISTORY_KEY, value: next }).catch((err) => {
         console.error("Failed to save chord drill history", err);
       });
     },
-    [setSetting]
+    [enabled, setSetting]
   );
 
   const updateSettings = useCallback(

@@ -129,8 +129,18 @@ export function useArpeggios(enabled: boolean): ArpeggioEngine {
 
   const { playChime, playTick } = useAudio();
 
-  const logTransition = useMutation(api.tracking.logArpeggioTransition);
-  const logMiss = useMutation(api.tracking.logArpeggioMiss);
+  const logTransitionMutation = useMutation(api.tracking.logArpeggioTransition);
+  const logMissMutation = useMutation(api.tracking.logArpeggioMiss);
+  const logTransition = useCallback(
+    (args: Parameters<typeof logTransitionMutation>[0]) =>
+      enabled ? logTransitionMutation(args) : Promise.resolve(undefined),
+    [enabled, logTransitionMutation]
+  );
+  const logMiss = useCallback(
+    (args: Parameters<typeof logMissMutation>[0]) =>
+      enabled ? logMissMutation(args) : Promise.resolve(undefined),
+    [enabled, logMissMutation]
+  );
 
   // -------------------------------------------------------------------------
   // Refs for callbacks (avoid stale closures)

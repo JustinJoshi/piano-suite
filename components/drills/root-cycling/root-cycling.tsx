@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { MidiConnectionBar } from "@/components/drills/midi-connection-bar";
 import { useRootCycling } from "@/hooks/useRootCycling";
+import { useAuthAccess } from "@/hooks/useAuthAccess";
 import { ROOTS, SINGLE_QUALITIES } from "@/lib/music-theory";
 import { cn } from "@/lib/utils";
 import { RotateCcw } from "lucide-react";
@@ -38,7 +39,8 @@ function SettingRow({
 }
 
 export function RootCycling() {
-  const drill = useRootCycling(true);
+  const { canPersist } = useAuthAccess();
+  const drill = useRootCycling(canPersist);
   const [customizeOpen, setCustomizeOpen] = useState(false);
 
   const {

@@ -33,9 +33,11 @@ export function useProgressionSettings(enabled: boolean) {
     normalizeProgressionSettings({})
   );
   const [history, setHistory] = useState<ProgressionHistory>({});
-  const [loaded, setLoaded] = useState(false);
+  const [loadedRemote, setLoadedRemote] = useState(false);
+  const loaded = !enabled || loadedRemote;
 
   useEffect(() => {
+    if (!enabled) return;
     if (rawSettings !== undefined && rawHistory !== undefined) {
       setSettings(
         normalizeProgressionSettings(
@@ -43,26 +45,28 @@ export function useProgressionSettings(enabled: boolean) {
         )
       );
       setHistory((rawHistory as ProgressionHistory) ?? {});
-      setLoaded(true);
+      setLoadedRemote(true);
     }
-  }, [rawSettings, rawHistory]);
+  }, [enabled, rawSettings, rawHistory]);
 
   const persistSettings = useCallback(
     (next: ProgressionSettings) => {
+      if (!enabled) return;
       setSetting({ key: PROGRESSION_SETTINGS_KEY, value: next }).catch((err) => {
         console.error("Failed to save progression settings", err);
       });
     },
-    [setSetting]
+    [enabled, setSetting]
   );
 
   const persistHistory = useCallback(
     (next: ProgressionHistory) => {
+      if (!enabled) return;
       setSetting({ key: PROGRESSION_HISTORY_KEY, value: next }).catch((err) => {
         console.error("Failed to save progression history", err);
       });
     },
-    [setSetting]
+    [enabled, setSetting]
   );
 
   const updateSettings = useCallback(

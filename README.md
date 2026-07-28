@@ -108,6 +108,7 @@ A `/tools/midi-test` page is included for manually verifying MIDI input and audi
    - `NEXT_PUBLIC_CONVEX_URL` from your Convex project
    - `KIMI_CODE_API_KEY`, `KIMI_CODE_BASE_URL`, and `KIMI_CODE_MODEL` from the [Kimi Code Console](https://www.kimi.com/code/console)
    - `ALLOWED_CLERK_USER_ID` — the Clerk user ID that is permitted to use `/chat`
+   - Optional local bypass: `NEXT_PUBLIC_AUTH_DISABLED=true` opens `/tools` without signing in (local/dev only; Convex saves still need a session). Restart `npm run dev` after changing it.
 
 3. Configure Clerk authentication for email and password only:
 

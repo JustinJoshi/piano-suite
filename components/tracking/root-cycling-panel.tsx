@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { TrackingChart } from "./tracking-chart";
 import { cn } from "@/lib/utils";
 import { useCachedTrackingQuery } from "@/hooks/useCachedTrackingQuery";
+import { useAuthAccess } from "@/hooks/useAuthAccess";
 import { Loader2 } from "lucide-react";
 
 function rcGroupKey(
@@ -23,7 +24,11 @@ function rcGroupKey(
 }
 
 export function RootCyclingPanel() {
-  const liveEvents = useQuery(api.tracking.listRootCycleEvents);
+  const { canPersist } = useAuthAccess();
+  const liveEvents = useQuery(
+    api.tracking.listRootCycleEvents,
+    canPersist ? {} : "skip"
+  );
   const clearMutation = useMutation(api.tracking.clearRootCycleEventsByGroup);
   const { data: events, isLoading, clear: clearCache } = useCachedTrackingQuery(
     "rootCycleEvents",
@@ -82,7 +87,7 @@ export function RootCyclingPanel() {
   }, [groups, activeKey]);
 
   async function handleClear() {
-    if (!activeKey) return;
+    if (!canPersist || !activeKey) return;
     const mode = activeKey.startsWith("Chord") ? "chord" : "arpeggio";
     let quality: string | undefined;
     let fromDeg: string | undefined;
@@ -98,7 +103,7 @@ export function RootCyclingPanel() {
     setSelectedKey(null);
   }
 
-  if (isLoading) {
+  if (canPersist && isLoading) {
     return (
       <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
         <Loader2 className="mx-auto mb-2 h-5 w-5 animate-spin" />

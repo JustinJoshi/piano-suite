@@ -1,15 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useUser } from "@clerk/nextjs";
-import { useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { useState } from "react";
 import { Music, Zap, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ChordDrillPanel } from "@/components/tracking/chord-drill-panel";
 import { ArpeggioPanel } from "@/components/tracking/arpeggio-panel";
 import { RootCyclingPanel } from "@/components/tracking/root-cycling-panel";
 import { ImportLocalStorage } from "@/components/tracking/import-local-storage";
+import { useToolUserReady } from "@/hooks/useToolUserReady";
 
 const tabs = [
   { id: "chords", label: "Chord Drill", icon: Music },
@@ -19,20 +17,7 @@ const tabs = [
 
 export default function TrackingPage() {
   const [activeTab, setActiveTab] = useState("chords");
-  const [userReady, setUserReady] = useState(false);
-  const { isSignedIn } = useUser();
-  const ensureUser = useMutation(api.users.ensureCurrentUser);
-
-  useEffect(() => {
-    if (isSignedIn) {
-      ensureUser()
-        .then(() => setUserReady(true))
-        .catch((err) => {
-          console.error(err);
-          setUserReady(true);
-        });
-    }
-  }, [isSignedIn, ensureUser]);
+  const { canAccess, canPersist, userReady } = useToolUserReady();
 
   return (
     <div className="flex min-h-full flex-col">
@@ -46,7 +31,7 @@ export default function TrackingPage() {
       </header>
 
       <div className="p-6 lg:p-8">
-        {!isSignedIn ? (
+        {!canAccess ? (
           <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
             Sign in to view your practice history.
           </div>
@@ -56,6 +41,11 @@ export default function TrackingPage() {
           </div>
         ) : (
           <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col">
+            {!canPersist ? (
+              <p className="mb-4 text-center text-sm text-muted-foreground">
+                Local practice mode — charts stay empty until you sign in.
+              </p>
+            ) : null}
             <div className="flex-1">
               <div className="mb-6 flex flex-wrap gap-2">
                 {tabs.map((tab) => {
@@ -83,7 +73,7 @@ export default function TrackingPage() {
               {activeTab === "rootcycle" && <RootCyclingPanel />}
             </div>
 
-            <ImportLocalStorage />
+            {canPersist ? <ImportLocalStorage /> : null}
           </div>
         )}
       </div>
