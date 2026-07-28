@@ -3,6 +3,8 @@
 import dynamic from "next/dynamic";
 import { Navbar } from "@/components/navbar";
 import { useHeroChladniSettings } from "@/hooks/useHeroChladniSettings";
+import { useHeroQuasiperiodicSettings } from "@/hooks/useHeroQuasiperiodicSettings";
+import { useHeroAtmosphereKind } from "@/hooks/useHeroAtmosphereKind";
 import { HeroSection } from "./hero-section";
 import { FeatureSection } from "./feature-section";
 import { FlowSection } from "./flow-section";
@@ -14,19 +16,36 @@ const ChladniBackground = dynamic(
   { ssr: false }
 );
 
+const QuasiperiodicBackground = dynamic(
+  () =>
+    import("./quasiperiodic-background").then(
+      (mod) => mod.QuasiperiodicBackground
+    ),
+  { ssr: false }
+);
+
 export function WelcomePage() {
-  const { settings } = useHeroChladniSettings();
+  const { kind } = useHeroAtmosphereKind();
+  const { settings: chladniSettings } = useHeroChladniSettings();
+  const { settings: quasiperiodicSettings } = useHeroQuasiperiodicSettings();
+
+  const activeSettings =
+    kind === "quasiperiodic" ? quasiperiodicSettings : chladniSettings;
 
   return (
     <div className="relative flex min-h-screen flex-col">
       <div className="pointer-events-none fixed inset-0 z-0">
-        <ChladniBackground settings={settings} />
+        {kind === "quasiperiodic" ? (
+          <QuasiperiodicBackground settings={quasiperiodicSettings} />
+        ) : (
+          <ChladniBackground settings={chladniSettings} />
+        )}
       </div>
 
       <div className="relative z-10 flex min-h-screen flex-col">
         <Navbar />
         <main className="flex-1">
-          <HeroSection settings={settings} />
+          <HeroSection settings={activeSettings} />
 
           <FeatureSection
             number="01"

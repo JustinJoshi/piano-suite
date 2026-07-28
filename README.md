@@ -30,6 +30,7 @@ This repository now contains:
 - A **Chladni Pattern Lab** (`/tools/chladni`) — a public interactive square-plate waveform explorer for the landing-page hero shader, with live controls for modes, morph speed, line thickness, zoom, and secondary-wave blending. **Apply to home** copies the full Lab pattern onto the welcome hero; you can also set a pattern color and hero-scrim shade, or **Reset home** to the soft shipping defaults. Preferences persist in `localStorage` and sync to Convex when signed in (no account required to explore or apply locally).
 - A **Julia Set Lab** (`/tools/julia`) — an interactive escape-time Julia set explorer with curated complex-parameter presets, morph between two `c` values, zoom, iterations, escape radius, and theme-aware coloring.
 - A **Lissajous Harmonic Lab** (`/tools/lissajous`) — an interactive frequency-ratio curve explorer with musical interval presets, phase/morph controls, and theme-aware Canvas trails.
+- A **Quasiperiodic Pattern Lab** (`/tools/quasiperiodic`) — an interactive N-fold plane-wave interference explorer with morphing recipes, zoom, and soft nodal contours. **Apply to home** switches the welcome atmosphere to the quasiperiodic field (Chladni Apply switches it back); pattern color and hero-scrim shade persist in `localStorage` and sync to Convex when signed in.
 - A migrated **Tracking dashboard** (`/tools/tracking`) ported from Reflex Drill EXT, including:
   - Chord Drill first-chord timing history
   - Arpeggio transition and miss logging
@@ -58,6 +59,9 @@ A shared **primitive layer** has been extracted from the original Reflex Drill E
 - `lib/themes.ts` — theme registry and helpers for the theming system
 - `lib/julia.ts` — Julia-set escape-time math, curated presets, and complex helpers
 - `lib/lissajous.ts` — Lissajous parametric math, interval presets, and ratio helpers
+- `lib/quasiperiodic.ts` — N-fold quasiperiodic wave field math, presets, and helpers
+- `lib/quasiperiodic-hero-settings.ts` — serializable home-hero Quasiperiodic appearance
+- `lib/hero-atmosphere.ts` — which math visual drives the welcome hero (`chladni` | `quasiperiodic`)
 - `hooks/useMidi.ts` — Web MIDI device selection and held-note tracking
 - `hooks/useAudio.ts` — Web Audio chimes, ticks, and metronome
 - `hooks/useDrillTimer.ts` — generic drill timer state machine (single- or multi-rep)
@@ -68,6 +72,8 @@ A shared **primitive layer** has been extracted from the original Reflex Drill E
 - `hooks/useRootCycling.ts` — composed random-root chord/arpeggio engine
 - `hooks/useThemePreference.ts` — active theme state, localStorage, and Convex sync
 - `hooks/useHeroChladniSettings.ts` — home Chladni appearance (localStorage + Convex)
+- `hooks/useHeroQuasiperiodicSettings.ts` — home Quasiperiodic appearance (localStorage + Convex)
+- `hooks/useHeroAtmosphereKind.ts` — welcome hero visual kind (localStorage + Convex)
 - `convex/settings.ts` — generic per-user settings persistence
 - `components/drills/drill-shell.tsx` — shared layout wrapper for tool pages
 - `components/drills/midi-connection-bar.tsx` — reusable MIDI input bar
