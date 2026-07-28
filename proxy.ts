@@ -6,8 +6,7 @@ import { isAuthDisabled } from "@/lib/auth-disabled";
  *
  * Public routes: home, sign-in, sign-up, API routes, and Clerk's frontend API.
  * All other routes (including /tools and /tools/*) require authentication,
- * unless auth bypass is enabled (default; set `NEXT_PUBLIC_AUTH_DISABLED=false`
- * to require sign-in).
+ * unless `NEXT_PUBLIC_AUTH_DISABLED=true`.
  *
  * @see https://clerk.com/docs/reference/nextjs/clerk-middleware
  */

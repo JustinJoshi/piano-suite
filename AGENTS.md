@@ -20,7 +20,7 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `hooks/useDrillTimer.ts` | Generic drill timer state machine |
 | `hooks/useAnkiSync.ts` | Poll Anki for current card and parse its chord |
 | `hooks/useThemeCssVars.ts` | Read theme CSS custom properties and watch for theme changes; useful for Canvas/WebGL visuals |
-| `hooks/useAuthAccess.ts` | Shared Clerk gate: `canAccess` / `canPersist`; bypass on unless `NEXT_PUBLIC_AUTH_DISABLED=false` |
+| `hooks/useAuthAccess.ts` | Shared Clerk gate: `canAccess` / `canPersist`, respects `NEXT_PUBLIC_AUTH_DISABLED` |
 | `hooks/useToolUserReady.ts` | Ensures Convex user row when signed in; ready immediately when auth is disabled |
 | `lib/auth-disabled.ts` | `isAuthDisabled()` helper for middleware and API routes |
 | `components/drills/drill-shell.tsx` | Shared layout wrapper for every tool page |

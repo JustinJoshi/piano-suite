@@ -12,19 +12,19 @@ describe("isAuthDisabled", () => {
     }
   });
 
-  it("is true when the env var is unset", () => {
+  it("is false when the env var is unset", () => {
     delete process.env.NEXT_PUBLIC_AUTH_DISABLED;
-    expect(isAuthDisabled()).toBe(true);
+    expect(isAuthDisabled()).toBe(false);
   });
 
-  it("is false only when set to the string 'false'", () => {
-    process.env.NEXT_PUBLIC_AUTH_DISABLED = "false";
-    expect(isAuthDisabled()).toBe(false);
-
+  it("is true only when set to the string 'true'", () => {
     process.env.NEXT_PUBLIC_AUTH_DISABLED = "true";
     expect(isAuthDisabled()).toBe(true);
 
     process.env.NEXT_PUBLIC_AUTH_DISABLED = "1";
-    expect(isAuthDisabled()).toBe(true);
+    expect(isAuthDisabled()).toBe(false);
+
+    process.env.NEXT_PUBLIC_AUTH_DISABLED = "false";
+    expect(isAuthDisabled()).toBe(false);
   });
 });
