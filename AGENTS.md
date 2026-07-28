@@ -199,6 +199,10 @@ When you complete a task, follow this checklist before telling the user you are 
    ```bash
    git push origin <branch>
    ```
+6. **Open a PR when the user asks (or when finishing a feature branch).** Use `gh pr create` as usual. After `gh pr create` or a push that creates/updates a PR preview deployment:
+   - Print the **Vercel Preview** URL in your reply (from the PR checks / deployments, or `gh pr view --json statusCheckRollup` / the Vercel deployment for that branch). Prefer the GitHub PR “Visit Preview” link when available.
+   - Open it **once** in the user’s browser with `xdg-open <preview-url>` (or the platform equivalent). Do not keep re-opening on every follow-up message.
+   - Do **not** spin up a separate local/CLI host just for PR review when a Vercel Preview already exists. If the Preview build failed, say so and link the failed deployment instead of improvising a second host.
 
 If you are working in a git worktree, push from the worktree branch. If you are on `main` in the main worktree, push directly.
 
