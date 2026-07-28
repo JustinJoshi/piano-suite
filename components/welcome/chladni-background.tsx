@@ -7,9 +7,9 @@ import { ChladniVisualization } from "./chladni-visualization";
 // ============================================================
 // CHLADNI ANIMATED BACKGROUND — Piano Suite Edition
 // ============================================================
-// Soft, slow, full-bleed hero atmosphere. Pattern Lab keeps the
+// Soft, slow, full-bleed page atmosphere. Pattern Lab keeps the
 // vivid exploration defaults; this wrapper calms motion, softens
-// line color into the background, and fills the first viewport.
+// line color into the background, and fills a fixed viewport layer.
 // ============================================================
 
 /** Seconds per mode transition — slower than the Lab default. */
@@ -77,7 +77,7 @@ export function ChladniBackground() {
       timeScale={0.7}
       lineIntensity={0.5}
       colorSoftness={0.7}
-      className="absolute inset-0 z-0 h-full w-full"
+      className="h-full w-full"
     />
   );
 }

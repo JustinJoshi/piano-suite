@@ -247,7 +247,8 @@
     radial-gradient(circle at 50% 50%, var(--hero-glow-3) 0%, transparent 55%);
 }
 
-/* Softens the Chladni field behind copy and fades into the next section.
+/* Softens the Chladni field behind hero copy without ending the pattern.
+   Bottom stays transparent so the fixed field continues under later sections.
    Center pocket is lighter so full-bleed edges stay visible under the nav. */
 .hero-scrim {
   background:
@@ -260,8 +261,7 @@
       to bottom,
       color-mix(in oklab, var(--color-background) 40%, transparent) 0%,
       transparent 28%,
-      transparent 68%,
-      var(--color-background) 100%
+      transparent 100%
     );
 }
 
