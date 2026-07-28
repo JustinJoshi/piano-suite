@@ -2,27 +2,42 @@
 
 import { useEffect, useRef, useState } from "react";
 import { randomMode } from "@/lib/chladni";
+import type { HeroChladniSettings } from "@/lib/chladni-hero-settings";
 import { ChladniVisualization } from "./chladni-visualization";
 
 // ============================================================
 // CHLADNI ANIMATED BACKGROUND — Piano Suite Edition
 // ============================================================
-// Soft, slow, full-bleed hero atmosphere. Pattern Lab keeps the
-// vivid exploration defaults; this wrapper calms motion, softens
-// line color into the background, and fills the first viewport.
+// Soft, slow, full-bleed hero atmosphere by default. Pattern Lab
+// can Apply a full parameter set (plus color / scrim) that the
+// parent reads from useHeroChladniSettings and passes in.
+// Remounts when `settings.generation` changes (Apply / Reset).
 // ============================================================
 
-/** Seconds per mode transition — slower than the Lab default. */
-const MORPH_SECONDS = 16;
+export function ChladniBackground({
+  settings,
+}: {
+  settings: HeroChladniSettings;
+}) {
+  return (
+    <ChladniBackgroundInner key={settings.generation} settings={settings} />
+  );
+}
 
-export function ChladniBackground() {
-  const [mode, setMode] = useState<[number, number]>([5, 7]);
-  const [nextMode, setNextMode] = useState<[number, number]>([7, 9]);
+function ChladniBackgroundInner({
+  settings,
+}: {
+  settings: HeroChladniSettings;
+}) {
+  const [mode, setMode] = useState(settings.mode);
+  const [nextMode, setNextMode] = useState(settings.nextMode);
   const [morph, setMorph] = useState(0);
 
   const modeRef = useRef(mode);
   const nextModeRef = useRef(nextMode);
   const morphRef = useRef(0);
+  const morphSpeedRef = useRef(settings.morphSpeed);
+  const autoMorphRef = useRef(settings.autoMorph);
 
   useEffect(() => {
     modeRef.current = mode;
@@ -33,6 +48,14 @@ export function ChladniBackground() {
   }, [nextMode]);
 
   useEffect(() => {
+    morphSpeedRef.current = settings.morphSpeed;
+  }, [settings.morphSpeed]);
+
+  useEffect(() => {
+    autoMorphRef.current = settings.autoMorph;
+  }, [settings.autoMorph]);
+
+  useEffect(() => {
     let rafId = 0;
     let lastTime = performance.now();
 
@@ -40,20 +63,23 @@ export function ChladniBackground() {
       const delta = now - lastTime;
       lastTime = now;
 
-      let nextMorph = morphRef.current + delta / (MORPH_SECONDS * 1000);
+      if (autoMorphRef.current && morphSpeedRef.current > 0) {
+        let nextMorph =
+          morphRef.current + delta / (morphSpeedRef.current * 1000);
 
-      if (nextMorph >= 1) {
-        const arrived = nextModeRef.current;
-        const fresh = randomMode();
-        modeRef.current = arrived;
-        nextModeRef.current = fresh;
-        nextMorph = 0;
-        setMode(arrived);
-        setNextMode(fresh);
+        if (nextMorph >= 1) {
+          const arrived = nextModeRef.current;
+          const fresh = randomMode();
+          modeRef.current = arrived;
+          nextModeRef.current = fresh;
+          nextMorph = 0;
+          setMode(arrived);
+          setNextMode(fresh);
+        }
+
+        morphRef.current = nextMorph;
+        setMorph(nextMorph);
       }
-
-      morphRef.current = nextMorph;
-      setMorph(nextMorph);
 
       rafId = requestAnimationFrame(animate);
     }
@@ -67,16 +93,17 @@ export function ChladniBackground() {
       mode={mode}
       nextMode={nextMode}
       morph={morph}
-      lineThickness={48}
-      zoom={1.6}
-      secondaryOffset={[1, 2]}
-      secondaryBlend={0.08}
-      secondarySpeed={0.6}
-      secondaryMotion={1}
-      breathe={0.1}
-      timeScale={0.7}
-      lineIntensity={0.5}
-      colorSoftness={0.7}
+      lineThickness={settings.lineThickness}
+      zoom={settings.zoom}
+      secondaryOffset={settings.secondaryOffset}
+      secondaryBlend={settings.secondaryBlend}
+      secondarySpeed={settings.secondarySpeed}
+      secondaryMotion={settings.secondaryMotion}
+      breathe={settings.breathe}
+      timeScale={settings.timeScale}
+      lineIntensity={settings.lineIntensity}
+      colorSoftness={settings.colorSoftness}
+      patternColor={settings.patternColor}
       className="absolute inset-0 z-0 h-full w-full"
     />
   );

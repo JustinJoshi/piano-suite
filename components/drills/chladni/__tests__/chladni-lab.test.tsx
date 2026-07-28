@@ -1,30 +1,78 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { ChladniLab } from "../chladni-lab";
+import { DEFAULT_HERO_CHLADNI_SETTINGS } from "@/lib/chladni-hero-settings";
+
+const applyFromLab = vi.fn();
+const updateSettings = vi.fn();
+const resetSettings = vi.fn();
 
 vi.mock("@/components/welcome/chladni-visualization", () => ({
   ChladniVisualization: () => <div data-testid="chladni-visualization" />,
 }));
 
+vi.mock("@/hooks/useHeroChladniSettings", () => ({
+  useHeroChladniSettings: () => ({
+    settings: DEFAULT_HERO_CHLADNI_SETTINGS,
+    applyFromLab,
+    updateSettings,
+    resetSettings,
+    setSettings: vi.fn(),
+  }),
+}));
+
 describe("ChladniLab", () => {
+  beforeEach(() => {
+    applyFromLab.mockClear();
+    updateSettings.mockClear();
+    resetSettings.mockClear();
+  });
+
   it("renders the parameter controls and presets", () => {
     render(<ChladniLab />);
 
     expect(screen.getByText("Parameters")).toBeInTheDocument();
     expect(screen.getByTestId("chladni-visualization")).toBeInTheDocument();
 
-    // Preset buttons.
     for (const label of ["Star", "Flower", "Lattice", "Maze", "Web"]) {
       expect(screen.getByRole("button", { name: label })).toBeInTheDocument();
     }
     expect(screen.getByRole("button", { name: /Random/i })).toBeInTheDocument();
 
-    // Play/pause morph toggle.
     expect(screen.getByRole("button", { name: /Pause morph/i })).toBeInTheDocument();
 
-    // Range inputs for continuous parameters.
     expect(screen.getByLabelText("Morph", { exact: true })).toBeInTheDocument();
     expect(screen.getByLabelText("Line thickness")).toBeInTheDocument();
     expect(screen.getByLabelText("Zoom")).toBeInTheDocument();
+  });
+
+  it("applies the full lab pattern to home", () => {
+    render(<ChladniLab />);
+
+    fireEvent.click(screen.getByTestId("apply-to-home"));
+
+    expect(applyFromLab).toHaveBeenCalledTimes(1);
+    const snapshot = applyFromLab.mock.calls[0][0];
+    expect(snapshot.mode).toEqual([5, 7]);
+    expect(snapshot.lineIntensity).toBe(1);
+    expect(snapshot.colorSoftness).toBe(0);
+    expect(screen.getByRole("status")).toHaveTextContent(/Applied to the welcome page/i);
+  });
+
+  it("resets home settings", () => {
+    render(<ChladniLab />);
+
+    fireEvent.click(screen.getByTestId("reset-home"));
+
+    expect(resetSettings).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("status")).toHaveTextContent(/reset to the default/i);
+  });
+
+  it("can clear pattern color back to theme", () => {
+    render(<ChladniLab />);
+
+    fireEvent.click(screen.getByTestId("use-theme-color"));
+
+    expect(updateSettings).toHaveBeenCalledWith({ patternColor: null });
   });
 });

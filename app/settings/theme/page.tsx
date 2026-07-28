@@ -1,6 +1,7 @@
 "use client";
 
 import { Check } from "lucide-react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { themes, type ThemeId } from "@/lib/themes";
 import { useThemePreference } from "@/hooks/useThemePreference";
@@ -95,6 +96,17 @@ export default function ThemeSettingsPage() {
             </div>
           </CardContent>
         </Card>
+
+        <p className="text-sm text-muted-foreground">
+          Customize the home Chladni pattern in{" "}
+          <Link
+            href="/tools/chladni"
+            className="text-primary underline-offset-2 hover:underline"
+          >
+            Pattern Lab
+          </Link>
+          .
+        </p>
       </div>
     </div>
   );

@@ -1,21 +1,39 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import type { CSSProperties } from "react";
 import { Button } from "@/components/ui/button";
 import { Play } from "lucide-react";
+import { useHeroChladniSettings } from "@/hooks/useHeroChladniSettings";
+import { scrimStrengthCss } from "@/lib/chladni-hero-settings";
+import type { HeroChladniSettings } from "@/lib/chladni-hero-settings";
 
 const ChladniBackground = dynamic(
   () => import("./chladni-background").then((mod) => mod.ChladniBackground),
   { ssr: false }
 );
 
+function scrimStyleFromSettings(settings: HeroChladniSettings): CSSProperties {
+  const strength = scrimStrengthCss(settings.scrimDarkness);
+  const topStrength = scrimStrengthCss(settings.scrimDarkness * (40 / 70));
+  return {
+    "--hero-scrim-strength": strength,
+    "--hero-scrim-top-strength": topStrength,
+  } as CSSProperties;
+}
+
 export function HeroSection() {
+  const { settings } = useHeroChladniSettings();
+
   return (
     <section className="relative flex min-h-svh overflow-hidden">
-      <ChladniBackground />
+      <ChladniBackground settings={settings} />
 
       {/* Quiet pocket for copy + fade into the next section */}
-      <div className="pointer-events-none absolute inset-0 z-[1] hero-scrim" />
+      <div
+        className="pointer-events-none absolute inset-0 z-[1] hero-scrim"
+        style={scrimStyleFromSettings(settings)}
+      />
       <div className="pointer-events-none absolute inset-0 z-[1] hero-glow opacity-30" />
 
       <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-center px-4 pb-16 pt-24 sm:px-6 lg:px-8">

@@ -27,7 +27,7 @@ This repository now contains:
 - A migrated **Progression** (`/tools/progression`) ported from Reflex Drill EXT, including ii-V-I and 12-bar blues drills in C/G/D/A/E, per-chord transition timing, auto-looping, step and loop chimes, optional Anki card flip on loop completion, and personal-best stats persisted via Convex.
 - A migrated **Root Cycling** (`/tools/root-cycling`) ported from Reflex Drill EXT, including chord mode with any quality and arpeggio mode with the canonical minor-11th shape, customizable root pools, per-attempt timing, and tracking aggregated by fixed idea across random keys.
 - A migrated **Technique habit tracker** (`/tools/technique`) ported from Reflex Drill EXT, including a built-in metronome, BPM logging, streak counter, 28-day practice grid, and a one-time import from the original `technique-habit-log-v1` localStorage key.
-- A **Chladni Pattern Lab** (`/tools/chladni`) — an interactive square-plate waveform explorer for the landing-page hero shader, with live controls for modes, morph speed, line thickness, zoom, and secondary-wave blending.
+- A **Chladni Pattern Lab** (`/tools/chladni`) — an interactive square-plate waveform explorer for the landing-page hero shader, with live controls for modes, morph speed, line thickness, zoom, and secondary-wave blending. **Apply to home** copies the full Lab pattern onto the welcome hero; you can also set a pattern color and hero-scrim shade, or **Reset home** to the soft shipping defaults. Preferences persist in `localStorage` and sync to Convex when signed in.
 - A migrated **Tracking dashboard** (`/tools/tracking`) ported from Reflex Drill EXT, including:
   - Chord Drill first-chord timing history
   - Arpeggio transition and miss logging
@@ -49,6 +49,8 @@ A shared **primitive layer** has been extracted from the original Reflex Drill E
 - `lib/arpeggios.ts` — the 12 minor-11th arpeggio cells and persisted settings schema
 - `lib/progression.ts` — ii-V-I and 12-bar blues progression builders, history reducer, and settings schema
 - `lib/root-cycling.ts` — random-root picker, canonical minor-11th shape, and settings schema
+- `lib/chladni.ts` — square-plate Chladni math and color helpers for the hero shader
+- `lib/chladni-hero-settings.ts` — serializable home-hero Chladni appearance (Apply / Reset from Pattern Lab)
 - `lib/articles.ts` — Markdown article parsing, frontmatter handling, and listing helpers
 - `lib/anki.ts` — typed AnkiConnect client
 - `lib/themes.ts` — theme registry and helpers for the theming system
@@ -61,6 +63,7 @@ A shared **primitive layer** has been extracted from the original Reflex Drill E
 - `hooks/useProgression.ts` — composed looping progression engine
 - `hooks/useRootCycling.ts` — composed random-root chord/arpeggio engine
 - `hooks/useThemePreference.ts` — active theme state, localStorage, and Convex sync
+- `hooks/useHeroChladniSettings.ts` — home Chladni appearance (localStorage + Convex)
 - `convex/settings.ts` — generic per-user settings persistence
 - `components/drills/drill-shell.tsx` — shared layout wrapper for tool pages
 - `components/drills/midi-connection-bar.tsx` — reusable MIDI input bar

@@ -1,10 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChladniVisualization } from "@/components/welcome/chladni-visualization";
-import { Pause, Play, Shuffle } from "lucide-react";
+import { useHeroChladniSettings } from "@/hooks/useHeroChladniSettings";
+import {
+  DEFAULT_HERO_CHLADNI_SETTINGS,
+  type ModePair,
+} from "@/lib/chladni-hero-settings";
+import { Pause, Play, RotateCcw, Shuffle, Home } from "lucide-react";
 import { randomMode } from "@/lib/chladni";
 
 // ============================================================
@@ -12,10 +18,11 @@ import { randomMode } from "@/lib/chladni";
 // ============================================================
 // Interactive parameter explorer for the square-plate Chladni
 // shader. Users can dial in modes, morph speed, line thickness,
-// zoom, and secondary-wave blending in real time.
+// zoom, and secondary-wave blending in real time — then Apply
+// the full state to the welcome-page hero.
 // ============================================================
 
-const PRESETS: { label: string; mode: [number, number] }[] = [
+const PRESETS: { label: string; mode: ModePair }[] = [
   { label: "Star", mode: [4, 5] },
   { label: "Flower", mode: [5, 7] },
   { label: "Lattice", mode: [7, 9] },
@@ -23,20 +30,55 @@ const PRESETS: { label: string; mode: [number, number] }[] = [
   { label: "Web", mode: [8, 11] },
 ];
 
+function snapLabToHeroDefaults(setters: {
+  setMode: (v: ModePair) => void;
+  setNextMode: (v: ModePair) => void;
+  setMorph: (v: number) => void;
+  setAutoMorph: (v: boolean) => void;
+  setMorphSpeed: (v: number) => void;
+  setLineThickness: (v: number) => void;
+  setZoom: (v: number) => void;
+  setSecondaryOffset: (v: ModePair) => void;
+  setSecondaryBlend: (v: number) => void;
+  setSecondarySpeed: (v: number) => void;
+  setSecondaryMotion: (v: number) => void;
+  setBreathe: (v: number) => void;
+  setTimeScale: (v: number) => void;
+}) {
+  const d = DEFAULT_HERO_CHLADNI_SETTINGS;
+  setters.setMode(d.mode);
+  setters.setNextMode(d.nextMode);
+  setters.setMorph(0);
+  setters.setAutoMorph(d.autoMorph);
+  setters.setMorphSpeed(d.morphSpeed);
+  setters.setLineThickness(d.lineThickness);
+  setters.setZoom(d.zoom);
+  setters.setSecondaryOffset(d.secondaryOffset);
+  setters.setSecondaryBlend(d.secondaryBlend);
+  setters.setSecondarySpeed(d.secondarySpeed);
+  setters.setSecondaryMotion(d.secondaryMotion);
+  setters.setBreathe(d.breathe);
+  setters.setTimeScale(d.timeScale);
+}
+
 export function ChladniLab() {
-  const [mode, setMode] = useState<[number, number]>([5, 7]);
-  const [nextMode, setNextMode] = useState<[number, number]>([7, 9]);
+  const { settings, applyFromLab, updateSettings, resetSettings } =
+    useHeroChladniSettings();
+
+  const [mode, setMode] = useState<ModePair>([5, 7]);
+  const [nextMode, setNextMode] = useState<ModePair>([7, 9]);
   const [morph, setMorph] = useState(0);
   const [autoMorph, setAutoMorph] = useState(true);
   const [morphSpeed, setMorphSpeed] = useState(8); // seconds per transition
   const [lineThickness, setLineThickness] = useState(30);
   const [zoom, setZoom] = useState(2.33);
-  const [secondaryOffset, setSecondaryOffset] = useState<[number, number]>([1, 2]);
+  const [secondaryOffset, setSecondaryOffset] = useState<ModePair>([1, 2]);
   const [secondaryBlend, setSecondaryBlend] = useState(0.15);
   const [secondarySpeed, setSecondarySpeed] = useState(1);
   const [secondaryMotion, setSecondaryMotion] = useState(2);
   const [breathe, setBreathe] = useState(0.2);
   const [timeScale, setTimeScale] = useState(1);
+  const [applyMessage, setApplyMessage] = useState<string | null>(null);
 
   const autoMorphRef = useRef(autoMorph);
   const morphSpeedRef = useRef(morphSpeed);
@@ -98,6 +140,12 @@ export function ChladniLab() {
     return () => cancelAnimationFrame(rafId);
   }, []);
 
+  useEffect(() => {
+    if (!applyMessage) return;
+    const id = window.setTimeout(() => setApplyMessage(null), 2500);
+    return () => window.clearTimeout(id);
+  }, [applyMessage]);
+
   function applyPreset(preset: (typeof PRESETS)[number]) {
     const fresh = randomMode();
     setMode(preset.mode);
@@ -114,22 +162,67 @@ export function ChladniLab() {
   }
 
   function updateMode(index: 0 | 1, value: number) {
-    const next = [...mode] as [number, number];
+    const next = [...mode] as ModePair;
     next[index] = value;
     setMode(next);
   }
 
   function updateNextMode(index: 0 | 1, value: number) {
-    const next = [...nextMode] as [number, number];
+    const next = [...nextMode] as ModePair;
     next[index] = value;
     setNextMode(next);
   }
 
   function updateSecondaryOffset(index: 0 | 1, value: number) {
-    const next = [...secondaryOffset] as [number, number];
+    const next = [...secondaryOffset] as ModePair;
     next[index] = value;
     setSecondaryOffset(next);
   }
+
+  function handleApplyToHome() {
+    applyFromLab({
+      mode,
+      nextMode,
+      morphSpeed,
+      autoMorph,
+      lineThickness,
+      zoom,
+      secondaryOffset,
+      secondaryBlend,
+      secondarySpeed,
+      secondaryMotion,
+      breathe,
+      timeScale,
+      lineIntensity: 1,
+      colorSoftness: 0,
+    });
+    setApplyMessage("Applied to the welcome page.");
+  }
+
+  function handleResetHome() {
+    resetSettings();
+    snapLabToHeroDefaults({
+      setMode,
+      setNextMode,
+      setMorph,
+      setAutoMorph,
+      setMorphSpeed,
+      setLineThickness,
+      setZoom,
+      setSecondaryOffset,
+      setSecondaryBlend,
+      setSecondarySpeed,
+      setSecondaryMotion,
+      setBreathe,
+      setTimeScale,
+    });
+    setApplyMessage("Home pattern reset to the default look.");
+  }
+
+  const patternColorValue =
+    settings.patternColor && /^#[0-9a-fA-F]{6}$/.test(settings.patternColor)
+      ? settings.patternColor
+      : "#888888";
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
@@ -147,6 +240,7 @@ export function ChladniLab() {
           secondaryMotion={secondaryMotion}
           breathe={breathe}
           timeScale={timeScale}
+          patternColor={settings.patternColor}
           className="absolute inset-0"
         />
         <div className="pointer-events-none absolute inset-0 hero-glow opacity-30" />
@@ -160,6 +254,88 @@ export function ChladniLab() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-5">
+          {/* Home appearance */}
+          <div className="space-y-3 rounded-lg border border-border/80 bg-muted/30 p-3">
+            <div className="flex flex-wrap gap-2">
+              <Button
+                size="sm"
+                onClick={handleApplyToHome}
+                data-testid="apply-to-home"
+              >
+                <Home className="mr-1 h-3.5 w-3.5" />
+                Apply to home
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleResetHome}
+                data-testid="reset-home"
+              >
+                <RotateCcw className="mr-1 h-3.5 w-3.5" />
+                Reset home
+              </Button>
+            </div>
+            {applyMessage && (
+              <p className="text-xs text-muted-foreground" role="status">
+                {applyMessage}{" "}
+                <Link href="/" className="text-primary underline-offset-2 hover:underline">
+                  View welcome page
+                </Link>
+              </p>
+            )}
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <Label>Pattern color</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 text-xs"
+                  onClick={() => updateSettings({ patternColor: null })}
+                  data-testid="use-theme-color"
+                >
+                  Use theme
+                </Button>
+              </div>
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  aria-label="Pattern color"
+                  value={patternColorValue}
+                  onChange={(e) =>
+                    updateSettings({ patternColor: e.target.value })
+                  }
+                  className="h-9 w-12 cursor-pointer rounded border border-border bg-background"
+                />
+                <input
+                  type="text"
+                  aria-label="Pattern color hex"
+                  value={settings.patternColor ?? ""}
+                  placeholder="Theme default"
+                  onChange={(e) => {
+                    const v = e.target.value.trim();
+                    updateSettings({ patternColor: v || null });
+                  }}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring"
+                />
+              </div>
+            </div>
+
+            <RangeControl
+              label="Hero shade"
+              value={settings.scrimDarkness}
+              onChange={(v) => updateSettings({ scrimDarkness: v })}
+              min={0}
+              max={1}
+              step={0.01}
+            />
+            <p className="text-[11px] leading-snug text-muted-foreground">
+              Hero shade darkens the welcome-page scrim only — not this Lab
+              preview.
+            </p>
+          </div>
+
           {/* Presets */}
           <div className="flex flex-wrap gap-2">
             {PRESETS.map((preset) => (
@@ -405,7 +581,9 @@ function RangeControl({
       <div className="flex items-center justify-between">
         <Label>{label}</Label>
         <span className="text-xs tabular-nums text-muted-foreground">
-          {value}
+          {Number.isInteger(step) || step >= 1
+            ? value
+            : value.toFixed(2)}
           {suffix}
         </span>
       </div>

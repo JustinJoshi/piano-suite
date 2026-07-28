@@ -106,7 +106,7 @@ The landing hero is a **full-viewport** atmospheric field that sits behind the t
 - `.hero-glow` — layered radial accents using `hero-glow-*` tokens, kept light so it does not fight the scrim.
 - `.hero-orb` / `.beam` — retained as theme utilities for secondary marketing motifs elsewhere; they are no longer the primary hero composition.
 
-Line color on the landing hero is a **muted primary-into-background** tint (`colorSoftness` + `lineIntensity` on `ChladniVisualization`): theme primary / orb tokens are mixed toward `--color-background` so the field complements headline accents without competing with `text-foreground`. The Chladni Pattern Lab (`/tools/chladni`) keeps vivid exploration defaults (full intensity, no softness). All colors still follow the active theme.
+Line color on the landing hero is a **muted primary-into-background** tint (`colorSoftness` + `lineIntensity` on `ChladniVisualization`): theme primary / orb tokens are mixed toward `--color-background` so the field complements headline accents without competing with `text-foreground`. The Chladni Pattern Lab (`/tools/chladni`) keeps vivid exploration defaults (full intensity, no softness). Users may override hero params (full Lab snapshot, optional pattern color, scrim darkness via `--hero-scrim-strength`) from Pattern Lab; **Reset home** restores the soft shipping defaults. Unless overridden, all colors still follow the active theme.
 
 ---
 

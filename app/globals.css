@@ -250,15 +250,18 @@
 /* Softens the Chladni field behind copy and fades into the next section.
    Center pocket is lighter so full-bleed edges stay visible under the nav. */
 .hero-scrim {
+  /* Pattern Lab “Hero shade” sets these from scrimDarkness (default 70% / ~40%). */
+  --hero-scrim-strength: 70%;
+  --hero-scrim-top-strength: 40%;
   background:
     radial-gradient(
       ellipse 65% 55% at 32% 48%,
-      color-mix(in oklab, var(--color-background) 70%, transparent) 0%,
+      color-mix(in oklab, var(--color-background) var(--hero-scrim-strength), transparent) 0%,
       transparent 72%
     ),
     linear-gradient(
       to bottom,
-      color-mix(in oklab, var(--color-background) 40%, transparent) 0%,
+      color-mix(in oklab, var(--color-background) var(--hero-scrim-top-strength), transparent) 0%,
       transparent 28%,
       transparent 68%,
       var(--color-background) 100%

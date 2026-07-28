@@ -60,6 +60,11 @@ export type ChladniVisualizationProps = {
    * before upload (0 = vivid theme colors, 1 = fully background).
    */
   colorSoftness?: number;
+  /**
+   * Optional CSS color override for line/glow uniforms. When null/undefined,
+   * colors come from theme tokens (`--hero-orb-inner`, `--color-primary`, etc.).
+   */
+  patternColor?: string | null;
   className?: string;
 };
 
@@ -149,6 +154,7 @@ export function ChladniVisualization({
   timeScale = 1,
   lineIntensity = 1,
   colorSoftness = 0,
+  patternColor = null,
   className,
 }: ChladniVisualizationProps) {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -288,17 +294,18 @@ export function ChladniVisualization({
     lineIntensity,
   ]);
 
-  // Sync theme colors whenever the CSS custom properties change.
+  // Sync theme (or override) colors whenever CSS props / patternColor change.
   useEffect(() => {
     const material = materialRef.current;
     if (!material) return;
 
     const background = cssColorToRgb(backgroundCss || "#0c0a08");
-    const inner = cssColorToRgb(innerCss || "#e8cf7a");
-    const outer = cssColorToRgb(outerCss || "#c9a227");
-    const glow = cssColorToRgb(glowCss || "#c9a227");
+    const override = patternColor?.trim() ? cssColorToRgb(patternColor) : null;
+    const inner = override ?? cssColorToRgb(innerCss || "#e8cf7a");
+    const outer = override ?? cssColorToRgb(outerCss || "#c9a227");
+    const glow = override ?? cssColorToRgb(glowCss || "#c9a227");
 
-    // Softness pulls theme line colors toward the page background so the
+    // Softness pulls line colors toward the page background so the
     // pattern complements primary accents without competing with text.
     const softInner = mixRgb(inner, background, colorSoftness * 0.85);
     const softOuter = mixRgb(outer, background, colorSoftness);
@@ -308,7 +315,14 @@ export function ChladniVisualization({
     material.uniforms.uLineInner.value.set(...softInner);
     material.uniforms.uLineOuter.value.set(...softOuter);
     material.uniforms.uGlow.value.set(...softGlow);
-  }, [backgroundCss, innerCss, outerCss, glowCss, colorSoftness]);
+  }, [
+    backgroundCss,
+    innerCss,
+    outerCss,
+    glowCss,
+    colorSoftness,
+    patternColor,
+  ]);
 
   return (
     <div
