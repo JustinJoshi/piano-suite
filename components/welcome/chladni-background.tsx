@@ -83,7 +83,7 @@ const fragmentShader = /* glsl */ `
     float breathe = sin(uTime * 0.0008) * 0.2;
     vec2 current = uMode + vec2(breathe);
     vec2 next = uNextMode + vec2(breathe * 0.6);
-    float t = smoothstep(uMorph);
+    float t = smoothstep(0.0, 1.0, uMorph);
     vec2 mode = mix(current, next, t);
 
     vec2 secondary = mode + vec2(1.0, 2.0)
