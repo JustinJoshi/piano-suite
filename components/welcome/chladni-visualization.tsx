@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { cssColorToRgb } from "@/lib/chladni";
+import { cssColorToRgb, mixRgb } from "@/lib/chladni";
 import { useThemeCssVars } from "@/hooks/useThemeCssVars";
 
 // ============================================================
@@ -50,6 +50,16 @@ export type ChladniVisualizationProps = {
   breathe?: number;
   /** Multiplier for all internal time-based animation speeds. */
   timeScale?: number;
+  /**
+   * How strongly lines lift off the background (0..1+). Lab keeps 1;
+   * the hero uses a lower value so the field reads as atmosphere.
+   */
+  lineIntensity?: number;
+  /**
+   * How far theme line/glow colors are mixed toward the background
+   * before upload (0 = vivid theme colors, 1 = fully background).
+   */
+  colorSoftness?: number;
   className?: string;
 };
 
@@ -79,6 +89,7 @@ const fragmentShader = /* glsl */ `
   uniform float uSecondaryMotion;
   uniform float uBreathe;
   uniform float uTimeScale;
+  uniform float uLineIntensity;
 
   varying vec2 vUv;
 
@@ -115,9 +126,9 @@ const fragmentShader = /* glsl */ `
     float edge = clamp(length(uv) * 0.5, 0.0, 1.0);
     vec3 lineColor = mix(uLineInner, uLineOuter, edge * 0.3);
 
-    vec3 color = mix(uBackground, lineColor, line);
+    vec3 color = mix(uBackground, lineColor, line * uLineIntensity);
 
-    float glow = exp(-length(uv) * 3.0) * 0.08;
+    float glow = exp(-length(uv) * 3.0) * 0.08 * uLineIntensity;
     color += uGlow * glow;
 
     gl_FragColor = vec4(color, 1.0);
@@ -136,6 +147,8 @@ export function ChladniVisualization({
   secondaryMotion = 2,
   breathe = 0.2,
   timeScale = 1,
+  lineIntensity = 1,
+  colorSoftness = 0,
   className,
 }: ChladniVisualizationProps) {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -149,8 +162,8 @@ export function ChladniVisualization({
     if (!mountRef.current) return;
 
     const mount = mountRef.current;
-    const width = mount.clientWidth;
-    const height = mount.clientHeight;
+    const width = Math.max(mount.clientWidth, 1);
+    const height = Math.max(mount.clientHeight, 1);
 
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
@@ -163,9 +176,13 @@ export function ChladniVisualization({
       return;
     }
 
-    renderer.setSize(width, height);
+    renderer.setSize(width, height, false);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    mount.appendChild(renderer.domElement);
+    const canvas = renderer.domElement;
+    canvas.style.display = "block";
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
+    mount.appendChild(canvas);
 
     const geometry = new THREE.PlaneGeometry(2, 2);
     const material = new THREE.ShaderMaterial({
@@ -189,6 +206,7 @@ export function ChladniVisualization({
         uSecondaryMotion: { value: secondaryMotion },
         uBreathe: { value: breathe },
         uTimeScale: { value: timeScale },
+        uLineIntensity: { value: lineIntensity },
       },
     });
     materialRef.current = material;
@@ -210,13 +228,15 @@ export function ChladniVisualization({
     rafId = requestAnimationFrame(animate);
 
     function handleResize() {
-      const w = mount.clientWidth;
-      const h = mount.clientHeight;
-      renderer.setSize(w, h);
+      const w = Math.max(mount.clientWidth, 1);
+      const h = Math.max(mount.clientHeight, 1);
+      renderer.setSize(w, h, false);
       material.uniforms.uResolution.value.set(w, h);
     }
 
     window.addEventListener("resize", handleResize);
+    // Catch late layout after fonts/nav settle.
+    handleResize();
 
     return () => {
       cancelAnimationFrame(rafId);
@@ -224,8 +244,8 @@ export function ChladniVisualization({
       geometry.dispose();
       material.dispose();
       renderer.dispose();
-      if (renderer.domElement.parentElement === mount) {
-        mount.removeChild(renderer.domElement);
+      if (canvas.parentElement === mount) {
+        mount.removeChild(canvas);
       }
       materialRef.current = null;
     };
@@ -252,6 +272,7 @@ export function ChladniVisualization({
     material.uniforms.uSecondaryMotion.value = secondaryMotion;
     material.uniforms.uBreathe.value = breathe;
     material.uniforms.uTimeScale.value = timeScale;
+    material.uniforms.uLineIntensity.value = lineIntensity;
   }, [
     mode,
     nextMode,
@@ -264,6 +285,7 @@ export function ChladniVisualization({
     secondaryMotion,
     breathe,
     timeScale,
+    lineIntensity,
   ]);
 
   // Sync theme colors whenever the CSS custom properties change.
@@ -271,19 +293,22 @@ export function ChladniVisualization({
     const material = materialRef.current;
     if (!material) return;
 
-    material.uniforms.uBackground.value.set(
-      ...cssColorToRgb(backgroundCss || "#0c0a08")
-    );
-    material.uniforms.uLineInner.value.set(
-      ...cssColorToRgb(innerCss || "#e8cf7a")
-    );
-    material.uniforms.uLineOuter.value.set(
-      ...cssColorToRgb(outerCss || "#c9a227")
-    );
-    material.uniforms.uGlow.value.set(
-      ...cssColorToRgb(glowCss || "#c9a227")
-    );
-  }, [backgroundCss, innerCss, outerCss, glowCss]);
+    const background = cssColorToRgb(backgroundCss || "#0c0a08");
+    const inner = cssColorToRgb(innerCss || "#e8cf7a");
+    const outer = cssColorToRgb(outerCss || "#c9a227");
+    const glow = cssColorToRgb(glowCss || "#c9a227");
+
+    // Softness pulls theme line colors toward the page background so the
+    // pattern complements primary accents without competing with text.
+    const softInner = mixRgb(inner, background, colorSoftness * 0.85);
+    const softOuter = mixRgb(outer, background, colorSoftness);
+    const softGlow = mixRgb(glow, background, colorSoftness);
+
+    material.uniforms.uBackground.value.set(...background);
+    material.uniforms.uLineInner.value.set(...softInner);
+    material.uniforms.uLineOuter.value.set(...softOuter);
+    material.uniforms.uGlow.value.set(...softGlow);
+  }, [backgroundCss, innerCss, outerCss, glowCss, colorSoftness]);
 
   return (
     <div

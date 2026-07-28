@@ -8,6 +8,7 @@ import {
   cssColorToRgb,
   clamp,
   randomMode,
+  mixRgb,
 } from "@/lib/chladni";
 
 describe("chladni", () => {
@@ -150,6 +151,22 @@ describe("cssColorToRgb", () => {
 
   it("returns black for unsupported strings", () => {
     expect(cssColorToRgb("not-a-color")).toEqual([0, 0, 0]);
+  });
+});
+
+describe("mixRgb", () => {
+  it("returns the first color when t is 0", () => {
+    expect(mixRgb([0, 0, 0], [1, 1, 1], 0)).toEqual([0, 0, 0]);
+  });
+
+  it("returns the second color when t is 1", () => {
+    expect(mixRgb([0, 0, 0], [1, 0.5, 0.25], 1)).toEqual([1, 0.5, 0.25]);
+  });
+
+  it("interpolates midpoints and clamps t", () => {
+    expect(mixRgb([0, 0, 0], [1, 1, 1], 0.5)).toEqual([0.5, 0.5, 0.5]);
+    expect(mixRgb([0, 0, 0], [1, 1, 1], -1)).toEqual([0, 0, 0]);
+    expect(mixRgb([0, 0, 0], [1, 1, 1], 2)).toEqual([1, 1, 1]);
   });
 });
 

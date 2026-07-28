@@ -99,6 +99,23 @@ export function randomMode(max = 12): [number, number] {
 }
 
 /**
+ * Linearly mix two normalized RGB triples. `t` is 0..1 where 0 returns `a`
+ * and 1 returns `b`.
+ */
+export function mixRgb(
+  a: [number, number, number],
+  b: [number, number, number],
+  t: number
+): [number, number, number] {
+  const k = clamp(t, 0, 1);
+  return [
+    a[0] + (b[0] - a[0]) * k,
+    a[1] + (b[1] - a[1]) * k,
+    a[2] + (b[2] - a[2]) * k,
+  ];
+}
+
+/**
  * Convert a CSS custom property color value to an RGB array (0..1) for use
  * as WebGL/Three.js uniforms. Accepts hex, rgb(), and rgba() strings.
  */
