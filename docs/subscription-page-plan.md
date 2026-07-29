@@ -312,15 +312,24 @@ The Free-local / Pro-sync model is **mostly pre-plumbed**. Today
 Do these in order. Each package is independently shippable; WP0–WP2 unlock the
 model without charging anyone yet.
 
-### WP0 — Product / Clerk Dashboard (no code)
+### WP0 — Product / Clerk Dashboard
 
-1. Create Clerk Billing **B2C** plans: `free` (or default) + `pro` (monthly + annual).
-2. Attach a feature slug e.g. `sync` / `pro_access` used by `has()`.
-3. Pick prices in the ~$5–10/mo band; enable test mode.
-4. Decide: freemium-only v1, or freemium + 14-day reverse trial.
-5. **Before real paywalls:** custom domain + Clerk production keys; unset
-   `NEXT_PUBLIC_AUTH_DISABLED` on Production (see README cutover checklist).
-   Hobby non-commercial terms also matter before charging.
+**Locked in-repo** (`lib/billing.ts`, `clerk/billing.desired.json`,
+`docs/clerk-billing-setup.md`): freemium-only v1, Pro `$8/mo` / `$72/yr`,
+feature `sync`.
+
+**Owner still must apply** to the Clerk instance (agent cannot OAuth):
+
+```bash
+npx clerk auth login && npx clerk link
+./scripts/apply-clerk-billing.sh --apply
+```
+
+Or Dashboard Path B in `docs/clerk-billing-setup.md`.
+
+**Before real paywalls:** custom domain + Clerk production keys; unset
+`NEXT_PUBLIC_AUTH_DISABLED`; connect your Stripe account on prod Billing
+Settings; Hobby non-commercial terms if charging.
 
 ### WP1 — Entitlement primitive (small code, high leverage)
 
@@ -423,14 +432,15 @@ Skip unsigned drills and localStorage history until after that slice works.
 
 ## Implementation phases (updated)
 
-### Phase 0 — Decisions
+### Phase 0 — Decisions / Clerk catalog
 
 - [x] UX research + placement map
-- [x] Pricing model: freemium + optional reverse trial
+- [x] Pricing model: freemium (reverse trial deferred)
 - [x] Codebase leverage mapped (`canPersist` remap)
-- [ ] Owner confirms prices + reverse trial yes/no
-- [ ] Clerk Billing Dashboard plans created
-- [ ] Auth cutover path (custom domain / unset `AUTH_DISABLED`) planned
+- [x] Prices + slugs locked: Pro `$8/mo` / `$72/yr`, feature `sync` (`lib/billing.ts`)
+- [x] Desired Clerk config + apply script (`clerk/billing.desired.json`, `docs/clerk-billing-setup.md`)
+- [ ] **Owner:** run `./scripts/apply-clerk-billing.sh --apply` (or Dashboard Path B) while logged into Clerk
+- [ ] Auth cutover path (custom domain / unset `AUTH_DISABLED`) before real charges
 
 ### Phase 1 — Gate remap + pricing page (no hard server reject yet)
 
@@ -513,9 +523,8 @@ for some EU renewals).
 
 ## Open questions for the owner
 
-1. Exact monthly/annual Pro prices within the ~$5–10/mo / ~$40–80/yr band?
-2. Ship reverse trial (14 days Pro → Free) in v1, or freemium-only first?
-3. Should Articles become public marketing, or stay auth-gated?
-4. Confirm Chat stays owner-only (recommended for v1).
-5. Clerk Billing appearance: stock `PricingTable` first, or custom cards from day one?
-6. v1 Free = signed-in local only, or also unsigned public drills?
+1. ~~Prices / reverse trial~~ → locked: **$8/mo · $72/yr · freemium-only v1** (change in `lib/billing.ts` + Clerk if you disagree)
+2. Should Articles become public marketing, or stay auth-gated?
+3. Confirm Chat stays owner-only (recommended for v1).
+4. Clerk Billing appearance: stock `PricingTable` first, or custom cards from day one?
+5. v1 Free = signed-in local only, or also unsigned public drills?

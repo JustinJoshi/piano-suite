@@ -58,3 +58,6 @@ next-env.d.ts
 
 # per-agent git worktrees
 .worktrees/
+clerk/billing.pulled.json
+.agents/
+skills-lock.json

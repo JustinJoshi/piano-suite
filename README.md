@@ -426,6 +426,8 @@ npm run build
 - [x] Add article pages under `/articles/[slug]`
 - [x] Add token-driven theming system with `/settings/theme`
 - [x] Implement real LLM chat grounded on articles (Kimi Code API, owner-only access)
+- [ ] Clerk Billing freemium (Free local / Pro sync) — catalog locked in `lib/billing.ts`; enable via `docs/clerk-billing-setup.md`
+- [ ] Public `/pricing` page + `canPersist` remap to Pro
 
 ### Post-v1 follow-ons
 
