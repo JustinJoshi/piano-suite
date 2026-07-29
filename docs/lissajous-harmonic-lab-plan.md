@@ -1,5 +1,11 @@
 # Lissajous Harmonic Lab — Integration Plan
 
+> **Status: shipped** in `3f9105a` (`feat: add Lissajous Harmonic Lab as interval-ratio curve explorer`).
+> Kept as a historical record of the original plan. For current behavior see `README.md`
+> and the code under `app/tools/lissajous/` and `lib/lissajous.ts`. Lissajous is now also
+> available as an ambient background via `/settings/atmosphere`, which the original
+> "out of scope" list did not anticipate.
+
 ## Goal
 
 Add a **Lissajous Harmonic Lab** at `/tools/lissajous` that mirrors Chladni and Julia Labs: an interactive, theme-aware parameter explorer for a third mathematical visual concept. Frequency ratios map to musical intervals (stronger pedagogy link than Julia). No MIDI, Anki, or Convex practice logging in v1.

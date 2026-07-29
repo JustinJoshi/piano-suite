@@ -1,5 +1,9 @@
 # Quasiperiodic Pattern Lab — Integration Plan
 
+> **Status: shipped** in `faba4b3` (`feat: add Quasiperiodic Pattern Lab with Apply-to-home atmosphere`).
+> Kept as a historical record of the original plan. For current behavior see `README.md`
+> and the code under `app/tools/quasiperiodic/` and `lib/quasiperiodic.ts`.
+
 ## Goal
 
 Add a **Quasiperiodic Pattern Lab** at `/tools/quasiperiodic` that mirrors the Chladni Pattern Lab: an interactive, theme-aware WebGL parameter explorer for N-fold plane-wave interference, with **Apply to home** / **Reset home**, pattern color, and hero-scrim persistence (localStorage + Convex). No MIDI, Anki, or Convex practice logging in v1.

@@ -374,8 +374,8 @@ Because browser `localStorage` is scoped to each origin, the Piano Suite app can
 
 A desktop launcher is included so you can start the dev server from your taskbar or app menu:
 
-- Launcher script: `/home/justin/piano-suite/launch.sh`
-- Desktop entry: `~/.local/share/applications/piano-suite.desktop`
+- Launcher script: `launch.sh` in the repo root (it resolves the project directory from its own location, so any clone path works)
+- Desktop entry: `~/.local/share/applications/piano-suite.desktop` — point its `Exec` at your clone's `launch.sh`
 
 Clicking the icon will:
 
@@ -403,7 +403,7 @@ npm run build
 - [x] Port welcome-page content with Lunar-style layout
 - [x] Add Clerk authentication and route protection
 - [x] Add Convex data persistence and user sync
-- [x] Add Vercel AI SDK streaming chat route stub
+- [x] Add Vercel AI SDK streaming chat route
 - [x] Add Vercel-dashboard-style Tools hub with sidebar
 - [x] Port Reflex Drill EXT Tracking tab with Recharts visualizations
 - [x] Add one-time migration from Reflex Drill EXT tracking data
