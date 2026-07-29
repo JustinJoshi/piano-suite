@@ -276,102 +276,240 @@ feature dumps (“Access Convex `practiceEvents`”).
 
 ---
 
+## Codebase readiness — what already fits
+
+The Free-local / Pro-sync model is **mostly pre-plumbed**. Today
+`canPersist === isSignedIn`. Remapping that flag to Pro is the shortest path.
+
+### Already aligned (reuse)
+
+| Piece | Path | Why it helps |
+|-------|------|--------------|
+| Access vs persist split | `hooks/useAuthAccess.ts` | Drills already no-op Convex when `canPersist` is false |
+| Drill engines take `enabled` | `useChordDrill`, `useArpeggios`, `useProgression`, `useRootCycling` | Pass `canPersist` straight through |
+| Technique / tracking UI | `technique-tracker.tsx`, `*-panel.tsx` | Skip queries + hide import when `!canPersist` |
+| Safe Convex queries | `convex/lib/auth.ts` `optionalUserId` | Return `null`/`[]` — won’t blank the app |
+| Mutations upsert user | `ensureUserId` | Natural place to add Pro checks after identity |
+| Public demo | `/`, `/tools/chladni` | Keep as Free acquisition surface |
+| User bootstrap | `ensure-signed-in-user.tsx` | Can stay; Free accounts still need a `users` row if signed in |
+
+### Gaps vs the recommended model
+
+| Gap | Today | Needed |
+|-----|-------|--------|
+| Persist = Pro | `canPersist = isSignedIn` | `canPersist = hasPro` (or reverse-trial) |
+| Unsigned drills | `proxy.ts` blocks `/tools/*` (except Chladni) | Public (or Free-account) drill routes |
+| Theme/atmosphere sync | Any signed-in user syncs | Gate Convex on Pro if Free prefs stay local |
+| Free local history | Session-only when `!canPersist` | Optional localStorage so Tracking isn’t empty |
+| Server trust | Any Clerk JWT can write tracking | Reject non-Pro mutations |
+| Billing UI | None | `/pricing` + Clerk Billing |
+| Hobby bypass | `AUTH_DISABLED` opens everything | Must not be the Free product path |
+
+---
+
+## What you can do — ordered work packages
+
+Do these in order. Each package is independently shippable; WP0–WP2 unlock the
+model without charging anyone yet.
+
+### WP0 — Product / Clerk Dashboard (no code)
+
+1. Create Clerk Billing **B2C** plans: `free` (or default) + `pro` (monthly + annual).
+2. Attach a feature slug e.g. `sync` / `pro_access` used by `has()`.
+3. Pick prices in the ~$5–10/mo band; enable test mode.
+4. Decide: freemium-only v1, or freemium + 14-day reverse trial.
+5. **Before real paywalls:** custom domain + Clerk production keys; unset
+   `NEXT_PUBLIC_AUTH_DISABLED` on Production (see README cutover checklist).
+   Hobby non-commercial terms also matter before charging.
+
+### WP1 — Entitlement primitive (small code, high leverage)
+
+Remap the existing gate — do **not** invent a parallel system.
+
+```
+hooks/useAuthAccess.ts
+  canAccess  → true for drills you want Free (signed-in Free, and later unsigned)
+  canPersist → true only when Pro (or AUTH_DISABLED for local Hobby)
+
+lib/billing.ts          ← plan/feature helpers, slug constants
+hooks/usePlanAccess.ts  ← thin wrapper around Clerk has() if preferred
+```
+
+- When `AUTH_DISABLED=true`, treat as Pro locally so cloud agents / Hobby preview
+  keep working.
+- Unit-test the pure helpers (`lib/__tests__/billing.test.ts`).
+- Soft copy: replace “Sign in to save” with “Upgrade to Pro to sync…” where
+  `isSignedIn && !canPersist`.
+
+Touch: `useAuthAccess.ts`, drill page banners, `technique-tracker.tsx`,
+tracking page banner, `README.md` auth table.
+
+### WP2 — Server-side Pro enforcement (required before charging)
+
+Client gates are not enough — a Free signed-in user can still call mutations.
+
+- In `convex/tracking.ts` and `convex/technique.ts` (and optionally
+  `convex/settings.ts`): after `ensureUserId`, verify Pro entitlement.
+- Prefer verifying via Clerk JWT template claims / `ctx.auth.getUserIdentity()`
+  public metadata or Clerk’s documented Billing claim shape — avoid trusting
+  only the client.
+- Queries stay soft: Free users get `[]` / `null`.
+- Add `convex-test` cases: signed-in Free cannot insert; Pro can.
+
+### WP3 — Open Free practice routes
+
+Once WP1 is plan-aware:
+
+- Expand `proxy.ts` public list: `/pricing`, drill routes you want try-before-account
+  (or keep account-required Free, public only `/pricing` + Pattern Lab — simpler).
+- **Recommended simpler v1:** keep drills behind sign-in (Free account), make
+  `/pricing` (+ maybe `/articles`) public. Unsigned “local drills” can wait.
+- Update `e2e/auth-protection.spec.ts` + README public-route table.
+
+### WP4 — Billing / marketing surface
+
+Can parallel WP1 once Dashboard plans exist:
+
+| Deliverable | Path |
+|-------------|------|
+| Pricing page | `app/pricing/page.tsx` + `components/pricing/*` |
+| Manage billing | `app/settings/billing/page.tsx` |
+| Nav link | `components/navbar.tsx` |
+| Welcome secondary CTA | `cta-section.tsx` / optional teaser |
+| Public `/pricing` | `proxy.ts` |
+
+Use Clerk `<PricingTable />` first; theme-wrap later if chrome clashes.
+
+### WP5 — Free local continuity (makes the upgrade moment real)
+
+Today `!canPersist` = **session-only** (lost on refresh). For the Pro pitch
+(“keep your PBs”), Free needs durable browser history:
+
+- localStorage (or IndexedDB) writers beside the Convex `enabled` branch in
+  drill hooks / technique.
+- Tracking panels read local when Free, Convex when Pro.
+- Upgrade path: one-shot “Upload local history to Pro” (extend patterns from
+  `import-local-storage.tsx` / `bulkImportTracking`).
+
+### WP6 — Align settings sync with Free/Pro (optional polish)
+
+Theme / atmosphere hooks currently sync on any `isSignedIn`
+(`useThemePreference`, `useAmbientEffects`, hero settings). Flip Convex sync
+to `canPersist` if Free prefs must stay device-local per the packaging table.
+
+### Explicitly defer
+
+- Chat as a Pro feature (owner allowlist + LLM cost).
+- Hard-paywall Pattern Lab / welcome.
+- Schema `plan` fields unless Clerk claims aren’t enough.
+- Lifetime SKU until subscription retention is known.
+
+---
+
+## Suggested first week of coding (minimal path)
+
+If you want the smallest useful slice that points in this direction:
+
+1. **WP0** — create Pro plan in Clerk Dashboard (test mode).
+2. **WP1** — `canPersist = hasPro || authDisabled` (signed-in Free = local drills).
+3. **WP4** — public `/pricing` with `PricingTable` + navbar link (even if checkout
+   is test-only).
+4. Soft upgrade banners on Tracking / Technique when Free.
+5. **WP2** before taking real payments.
+
+Skip unsigned drills and localStorage history until after that slice works.
+
+---
+
+## Implementation phases (updated)
+
+### Phase 0 — Decisions
+
+- [x] UX research + placement map
+- [x] Pricing model: freemium + optional reverse trial
+- [x] Codebase leverage mapped (`canPersist` remap)
+- [ ] Owner confirms prices + reverse trial yes/no
+- [ ] Clerk Billing Dashboard plans created
+- [ ] Auth cutover path (custom domain / unset `AUTH_DISABLED`) planned
+
+### Phase 1 — Gate remap + pricing page (no hard server reject yet)
+
+- WP1 + WP4
+- Soft upgrade UI only
+
+### Phase 2 — Enforce + harden
+
+- WP2 server checks, e2e, optional WP3 public articles
+- Remove reliance on `AUTH_DISABLED` for “Free”
+
+### Phase 3 — Continuity + polish
+
+- WP5 local history + Free→Pro import
+- WP6 settings sync alignment
+- Reverse trial if chosen
+- Clerk appearance / FAQ polish
+
+---
+
 ## Technical architecture (when implementing)
 
 ### Billing provider
 
-**Clerk Billing for B2C** — already on `@clerk/nextjs`, Stripe under the hood for
-payments, Plans/Features configured in Clerk Dashboard. Annual plans supported.
-Known limits to surface in FAQ/copy: USD-only today, no built-in VAT, refunds via
-Stripe not reflected in Clerk MRR, no 3DS (relevant for some EU renewals).
+**Clerk Billing for B2C** — already on `@clerk/nextjs` (`^7.6.1`), Stripe under
+the hood for payments, Plans/Features configured in Clerk Dashboard. Annual
+plans supported. Known limits to surface in FAQ/copy: USD-only today, no
+built-in VAT, refunds via Stripe not reflected in Clerk MRR, no 3DS (relevant
+for some EU renewals).
 
 ### File layout (proposed)
 
 | Concern | Path |
 |---------|------|
 | Public pricing page | `app/pricing/page.tsx` |
-| Page sections | `components/pricing/*` (hero, plan-grid, faq, teaser) |
+| Page sections | `components/pricing/*` |
 | Welcome teaser | `components/welcome/pricing-teaser.tsx` (optional) |
 | Manage billing | `app/settings/billing/page.tsx` |
-| Entitlement helpers | `lib/billing.ts` + `hooks/usePlanAccess.ts` |
+| Entitlement helpers | `lib/billing.ts` (+ optional `hooks/usePlanAccess.ts`) |
+| Remap persist gate | `hooks/useAuthAccess.ts` |
+| Server checks | `convex/tracking.ts`, `convex/technique.ts`, maybe `settings.ts` |
 | Public route | `proxy.ts` — add `/pricing` |
-| Nav | `components/navbar.tsx` — Pricing link |
-| Docs | README + this plan |
-| Tests | unit for entitlement helpers; e2e that `/pricing` is public |
+| Nav | `components/navbar.tsx` |
+| Docs / tests | README, this plan, unit + e2e |
 
 ### Hotspots (single-writer awareness)
 
-- `proxy.ts` (public routes)
-- `components/navbar.tsx`
-- `components/welcome/welcome-page.tsx` / `cta-section.tsx` (teaser + secondary CTA)
-- Possibly `components/tools/sidebar.tsx` for upgrade affordance
-- `README.md` / auth tables
-- **Not** required for v1 UI: `convex/schema.ts`, `package.json` (unless enabling
-  a Clerk Billing feature flag / new package), `app/globals.css` (only if new
-  semantic tokens are needed for plan badges)
+- `proxy.ts`, `components/navbar.tsx`, welcome CTA files
+- `hooks/useAuthAccess.ts` (central — coordinate)
+- Theme/atmosphere hooks if WP6
+- Possibly `package.json` only if Billing needs extra packages
+- Avoid `convex/schema.ts` unless storing plan cache
 
 ### Auth & entitlement flow
 
 1. `/pricing` public — browse without login.
-2. Subscribe CTA → if signed out, sign-up with return to checkout / pricing.
-3. After active Pro subscription, `has()` / Clerk plan checks gate paid
-   capabilities in tools (and optionally Convex mutations).
-4. Queries still use `optionalUserId`; never throw from root providers when a
-   plan check is missing.
-5. `NEXT_PUBLIC_AUTH_DISABLED` bypass: decide explicitly whether billing checks
-   are skipped in that mode (recommend: skip gates when bypass is on, for local
-   Hobby parity).
+2. Subscribe CTA → if signed out, sign-up → checkout.
+3. `canPersist` true only for Pro (or reverse-trial / `AUTH_DISABLED`).
+4. Server mutations reject non-Pro; queries stay soft.
+5. Queries never throw from root providers when plan is missing.
 
 ### Out of scope (v1)
 
 - B2B / Organizations billing
-- Custom enterprise quotes
-- Tax/VAT UI
-- Replacing Clerk with raw Stripe Billing
-- Hard-paywalling the welcome hero or Pattern Lab
-- Moving Chat off the owner allowlist solely because Pro exists
-
----
-
-## Implementation phases
-
-### Phase 0 — Decisions (this plan)
-
-- [x] UX research + placement map
-- [x] Pricing model recommendation: freemium + optional reverse trial
-- [ ] Owner confirms Free vs Pro entitlements and exact price points
-- [ ] Owner confirms Clerk Billing vs custom Stripe
-- [ ] Owner confirms whether v1 includes the 14-day reverse trial
-
-### Phase 1 — Marketing surface (no hard gates yet)
-
-- Public `/pricing` page styled to design system
-- Navbar + welcome secondary links / optional teaser
-- Clerk `PricingTable` (or custom cards) wired to Dashboard plans
-- `/settings/billing` manage entry for signed-in users
-
-### Phase 2 — Entitlements
-
-- `lib/billing` helpers + soft upgrade UI when a Pro-only action is hit
-- E2E: public `/pricing`, signed-in checkout smoke (test mode), gate behavior
-
-### Phase 3 — Polish
-
-- Annual default A/B later if needed
-- FAQ copy from real support questions
-- Appearance tuning so Clerk checkout matches theme tokens
+- Custom enterprise quotes / Tax/VAT UI
+- Raw Stripe Billing instead of Clerk
+- Hard-paywalling welcome / Pattern Lab
+- Chat as Pro pillar
 
 ---
 
 ## Success criteria
 
-- First welcome viewport unchanged in spirit: brand, one headline, one sentence,
-  one primary drill CTA, atmosphere intact.
-- Visitors can reach pricing from navbar and from below the value story without
-  hunting.
-- Pricing page answers who / cost / what-you-get above the fold on mobile.
-- All colors come from theme tokens; page still looks correct on every preset.
-- Unsigned users can view `/pricing` with auth enabled (no bare 404).
+- First welcome viewport unchanged in spirit.
+- Visitors reach `/pricing` from navbar + welcome secondary path.
+- Signed-in Free users can drill; Convex tracking writes only for Pro.
+- Soft upgrade copy on Tracking when Free (not a hard crash).
+- All colors from theme tokens.
+- Real paywall only after Clerk production + `AUTH_DISABLED` off.
 
 ## Open questions for the owner
 
@@ -380,3 +518,4 @@ Stripe not reflected in Clerk MRR, no 3DS (relevant for some EU renewals).
 3. Should Articles become public marketing, or stay auth-gated?
 4. Confirm Chat stays owner-only (recommended for v1).
 5. Clerk Billing appearance: stock `PricingTable` first, or custom cards from day one?
+6. v1 Free = signed-in local only, or also unsigned public drills?
