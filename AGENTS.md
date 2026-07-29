@@ -115,6 +115,10 @@ For Canvas or WebGL visuals that cannot use Tailwind utilities, read the CSS cus
 - E2E tests: `npm run test:e2e`
 - All new primitives must have unit tests before a tool migration is considered complete.
 
+Vitest collects specs from `lib/`, `hooks/`, `components/`, **and `convex/`**. Convex functions are tested with [`convex-test`](https://docs.convex.dev/testing/convex-test) — see `convex/__tests__/settings-auth.test.ts`, which uses `t.withIdentity()` to simulate a Clerk session and guards the auth edge cases (no identity, signed in with no `users` row, first write creating the row).
+
+Auth E2E specs (`e2e/auth-protection.spec.ts`, `e2e/chat-auth.spec.ts`) assert real Clerk gating, so global setup **fails fast when `NEXT_PUBLIC_AUTH_DISABLED=true`** unless you set `E2E_ALLOW_AUTH_DISABLED=true`. Shared assertions live in `e2e/auth-assertions.ts` — reuse `expectRedirectedToSignIn`, `expectNotBare404`, and `expectNoApplicationError` rather than writing new URL/error checks.
+
 ## Parallel Work & Git Worktrees
 
 **Always use a git worktree for any code change.** Do not edit files directly in `/home/justin/piano-suite` on `main`. Other agents may be active in parallel, and worktrees are the only reliable way to avoid file collisions. Each worktree is an independent working directory backed by the same repository.

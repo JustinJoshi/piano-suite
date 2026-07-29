@@ -300,7 +300,14 @@ When a custom domain + Clerk **production** keys are ready:
 
 ## Testing
 
-Unit tests run with Vitest and React Testing Library. They cover the primitive layer (music theory, scoring, Anki client) and the React hooks.
+Unit tests run with Vitest and React Testing Library. `vitest.config.ts` collects specs from `lib/`, `hooks/`, `components/`, and `convex/`:
+
+| Location | Covers |
+|----------|--------|
+| `lib/**/*.test.ts` | Primitive layer — music theory, scoring, Anki client, auth bypass, chat allowlist |
+| `hooks/**/*.test.ts` | Hook behavior via React Testing Library |
+| `components/**/*.test.tsx` | Component rendering |
+| `convex/**/*.test.ts` | Convex functions via [`convex-test`](https://docs.convex.dev/testing/convex-test), which runs schema and queries in-memory with `t.withIdentity()` for fake Clerk sessions |
 
 ```bash
 # Run unit tests in watch mode
@@ -309,15 +316,23 @@ npm run test:unit
 # Run unit tests once
 npm run test:unit:run
 
-# Auth bypass + chat allowlist unit tests
-npm run test:unit:run -- lib/__tests__/auth-disabled.test.ts lib/__tests__/chat-auth.test.ts
+# Auth bypass, chat allowlist, and Convex auth-resilience tests
+npm run test:unit:run -- lib/__tests__/auth-disabled.test.ts lib/__tests__/chat-auth.test.ts convex/__tests__/settings-auth.test.ts
 ```
+
+`convex/__tests__/settings-auth.test.ts` is the regression guard for the post-login crash: it asserts `getSetting` returns `null` (rather than throwing) with no identity and with a signed-in user who has no `users` row yet, and that `setSetting` creates the row on first write.
 
 End-to-end tests run with Playwright. A deterministic test user is created automatically during global setup.
 
 Make sure the **Convex dev server is running** before starting tests, because the authenticated tracking tests hit the local Convex backend.
 
-**Auth verification e2e** (`e2e/auth-protection.spec.ts`, `e2e/chat-auth.spec.ts`) require `NEXT_PUBLIC_AUTH_DISABLED` to be **unset** (not `true`). Global setup fails fast if bypass is on unless `E2E_ALLOW_AUTH_DISABLED=true`.
+**Auth verification e2e** requires `NEXT_PUBLIC_AUTH_DISABLED` to be **unset** (not `true`), because these specs assert real Clerk gating. Global setup fails fast if the bypass is on unless `E2E_ALLOW_AUTH_DISABLED=true`.
+
+| Spec | Asserts |
+|------|---------|
+| `e2e/auth-protection.spec.ts` | Every protected route redirects to `/sign-in`; `/` and `/tools/chladni` stay public; signed-in `/tools`, homepage, and a tracking deep link render without a crash |
+| `e2e/chat-auth.spec.ts` | `POST /api/chat` without a session returns 401 |
+| `e2e/auth-assertions.ts` | Shared helpers — `expectRedirectedToSignIn`, `expectNotBare404`, `expectNoApplicationError`, and the bypass guard |
 
 ```bash
 # Terminal 1: start Convex
