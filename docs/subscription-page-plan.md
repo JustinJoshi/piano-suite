@@ -338,8 +338,10 @@ Stripe not reflected in Clerk MRR, no 3DS (relevant for some EU renewals).
 ### Phase 0 — Decisions (this plan)
 
 - [x] UX research + placement map
-- [ ] Owner confirms Free vs Pro entitlements and price points
+- [x] Pricing model recommendation: freemium + optional reverse trial
+- [ ] Owner confirms Free vs Pro entitlements and exact price points
 - [ ] Owner confirms Clerk Billing vs custom Stripe
+- [ ] Owner confirms whether v1 includes the 14-day reverse trial
 
 ### Phase 1 — Marketing surface (no hard gates yet)
 
@@ -373,8 +375,8 @@ Stripe not reflected in Clerk MRR, no 3DS (relevant for some EU renewals).
 
 ## Open questions for the owner
 
-1. Exact Free vs Pro feature split and monthly/annual prices?
-2. Free forever with limits, or free trial of Pro?
-3. Should Articles stay auth-gated, or become a Free marketing channel?
-4. Is Chat ever a Pro feature, or stay owner-only?
+1. Exact monthly/annual Pro prices within the ~$5–10/mo / ~$40–80/yr band?
+2. Ship reverse trial (14 days Pro → Free) in v1, or freemium-only first?
+3. Should Articles become public marketing, or stay auth-gated?
+4. Confirm Chat stays owner-only (recommended for v1).
 5. Clerk Billing appearance: stock `PricingTable` first, or custom cards from day one?
