@@ -17,6 +17,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+# Desired PLAPI patch only — no comment/meta keys (Clerk rejects unknown keys).
 DESIRED="$ROOT/clerk/billing.desired.json"
 APPLY=0
 INSTANCE_ARGS=()

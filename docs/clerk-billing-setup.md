@@ -51,6 +51,8 @@ Production requires connecting your Stripe account under
 
 If `config patch` rejects the JSON shape, open `clerk/billing.pulled.json`
 (created by the script, gitignored), align field names, and re-run — or use Path B.
+Do **not** add comment keys like `$schema_note` to the JSON — Clerk rejects unknown
+config keys with HTTP 400.
 
 ---
 
