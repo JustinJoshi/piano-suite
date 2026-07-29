@@ -30,12 +30,21 @@ vi.mock("@/hooks/useHeroAtmosphereKind", () => ({
   }),
 }));
 
+const setRouteBackground = vi.fn();
+
+vi.mock("@/hooks/useAmbientEffects", () => ({
+  useAmbientEffects: () => ({
+    setRouteBackground,
+  }),
+}));
+
 describe("ChladniLab", () => {
   beforeEach(() => {
     applyFromLab.mockClear();
     updateSettings.mockClear();
     resetSettings.mockClear();
     setKind.mockClear();
+    setRouteBackground.mockClear();
   });
 
   it("renders the parameter controls and presets", () => {
@@ -67,6 +76,7 @@ describe("ChladniLab", () => {
     expect(snapshot.lineIntensity).toBe(1);
     expect(snapshot.colorSoftness).toBe(0);
     expect(setKind).toHaveBeenCalledWith("chladni");
+    expect(setRouteBackground).toHaveBeenCalledWith("/", "chladni");
     expect(screen.getByRole("status")).toHaveTextContent(/Applied to the welcome page/i);
   });
 
@@ -77,6 +87,7 @@ describe("ChladniLab", () => {
 
     expect(resetSettings).toHaveBeenCalledTimes(1);
     expect(setKind).toHaveBeenCalledWith("chladni");
+    expect(setRouteBackground).toHaveBeenCalledWith("/", "chladni");
     expect(screen.getByRole("status")).toHaveTextContent(/reset to the default/i);
   });
 

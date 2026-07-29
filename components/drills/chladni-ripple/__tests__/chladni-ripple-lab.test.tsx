@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { ChladniRippleLab } from "../chladni-ripple-lab";
 
 vi.mock("@/components/welcome/chladni-visualization", () => ({
@@ -42,7 +42,25 @@ vi.mock("@/hooks/useChladniRipple", () => ({
   }),
 }));
 
+const setRouteBackground = vi.fn();
+const applyAsAmbientBackground = vi.fn();
+const openFloat = vi.fn();
+
+vi.mock("@/hooks/useAmbientEffects", () => ({
+  useAmbientEffects: () => ({
+    setRouteBackground,
+    applyAsAmbientBackground,
+    openFloat,
+  }),
+}));
+
 describe("ChladniRippleLab", () => {
+  beforeEach(() => {
+    setRouteBackground.mockClear();
+    applyAsAmbientBackground.mockClear();
+    openFloat.mockClear();
+  });
+
   it("renders MIDI bar, viz, and ripple controls", () => {
     render(<ChladniRippleLab />);
 
@@ -52,5 +70,18 @@ describe("ChladniRippleLab", () => {
     expect(screen.getByLabelText("Octave complexity")).toBeInTheDocument();
     expect(screen.getByTestId("active-mode")).toHaveTextContent(/Idle/i);
     expect(screen.getByText("Pitch-class map")).toBeInTheDocument();
+  });
+
+  it("exposes ambient actions", () => {
+    render(<ChladniRippleLab />);
+
+    fireEvent.click(screen.getByTestId("ripple-use-on-home"));
+    expect(setRouteBackground).toHaveBeenCalledWith("/", "chladni-ripple");
+
+    fireEvent.click(screen.getByTestId("ripple-use-everywhere"));
+    expect(applyAsAmbientBackground).toHaveBeenCalledWith("chladni-ripple");
+
+    fireEvent.click(screen.getByTestId("ripple-open-float"));
+    expect(openFloat).toHaveBeenCalledWith("chladni-ripple");
   });
 });

@@ -105,6 +105,13 @@ export default function ThemeSettingsPage() {
           >
             Pattern Lab
           </Link>
+          . Assign backgrounds per route in{" "}
+          <Link
+            href="/settings/atmosphere"
+            className="text-primary underline-offset-2 hover:underline"
+          >
+            Atmosphere
+          </Link>
           .
         </p>
       </div>

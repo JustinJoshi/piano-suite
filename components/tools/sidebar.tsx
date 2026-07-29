@@ -16,6 +16,7 @@ import {
   Infinity,
   Hexagon,
   Activity,
+  Aperture,
 } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { AppUserButton } from "@/components/app-user-button";
@@ -114,6 +115,27 @@ export function Sidebar() {
                 )}
               />
               Theme
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/settings/atmosphere"
+              className={cn(
+                "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                pathname === "/settings/atmosphere"
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              )}
+            >
+              <Aperture
+                className={cn(
+                  "h-4 w-4 transition-colors",
+                  pathname === "/settings/atmosphere"
+                    ? "text-primary"
+                    : "text-muted-foreground group-hover:text-foreground"
+                )}
+              />
+              Atmosphere
             </Link>
           </li>
         </ul>

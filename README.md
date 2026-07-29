@@ -19,7 +19,7 @@ The goal is to give piano players a single place to:
 This repository now contains:
 
 - A **Next.js 16+ App Router** application with TypeScript.
-- A **Lunar.dev-inspired landing page** that ports the original Reflex Drill EXT welcome content into a polished, modern marketing layout, with a fixed full-viewport soft Three.js Chladni atmosphere behind sparse hero copy and floating feature cards, theme-aware scrims, and resonant modes that morph slowly with the active theme. Pattern Lab can **Apply to home** / **Reset home** to customize that atmosphere (localStorage + Convex when signed in).
+- A **Lunar.dev-inspired landing page** that ports the original Reflex Drill EXT welcome content into a polished, modern marketing layout, with a fixed full-viewport soft Three.js atmosphere (Chladni by default) behind sparse hero copy and floating feature cards, theme-aware scrims, and resonant modes that morph slowly with the active theme. Pattern Lab can **Apply to home** / **Reset home** to customize that atmosphere (localStorage + Convex when signed in). Atmosphere settings at `/settings/atmosphere` can also switch the Welcome background to MIDI Ripple, Julia, or Lissajous.
 - An **Articles section** (`/articles`) with a listing page and statically generated article pages (`/articles/[slug]`). Articles are authored in Markdown with YAML frontmatter, rendered with `react-markdown`, and styled with reusable Tailwind utility classes. The shared site navbar is included on article pages so readers can navigate back to the home page and other sections at any time. A floating chat bubble on article pages links directly to the Practice Assistant so readers can ask questions about the content.
 - A **Vercel-dashboard-inspired Tools hub** (`/tools`) with a sidebar navigation drawn from the original Reflex Drill EXT tabs.
 - A migrated **Chord Drill** (`/tools/chord-drill`) ported from Reflex Drill EXT, including Single Shape / Family Cycle / Extended Family modes, root/quality selection, reps, per-chord rep overrides, Anki Sync with auto-timer and auto-grade, break-before-grading, and personal-best stats persisted via Convex.
@@ -28,10 +28,11 @@ This repository now contains:
 - A migrated **Root Cycling** (`/tools/root-cycling`) ported from Reflex Drill EXT, including chord mode with any quality and arpeggio mode with the canonical minor-11th shape, customizable root pools, per-attempt timing, and tracking aggregated by fixed idea across random keys.
 - A migrated **Technique habit tracker** (`/tools/technique`) ported from Reflex Drill EXT, including a built-in metronome, BPM logging, streak counter, 28-day practice grid, and a one-time import from the original `technique-habit-log-v1` localStorage key.
 - A **Chladni Pattern Lab** (`/tools/chladni`) — a public interactive square-plate waveform explorer for the landing-page hero shader, with live controls for modes, morph speed, line thickness, zoom, and secondary-wave blending. **Apply to home** copies the full Lab pattern onto the welcome hero; you can also set a pattern color and hero-scrim shade, or **Reset home** to the soft shipping defaults. Preferences persist in `localStorage` and sync to Convex when signed in (no account required to explore or apply locally).
-- A **Chladni Ripple** tool (`/tools/chladni-ripple`) — drives the Chladni visualization from live MIDI: pitch class → mode identity, octave → denser patterns, velocity → decaying intensity pulse, chords → secondary blend. Separate from the parameter explorer; no Apply-to-home in v1.
+- A **Chladni Ripple** tool (`/tools/chladni-ripple`) — drives the Chladni visualization from live MIDI: pitch class → mode identity, octave → denser patterns, velocity → decaying intensity pulse, chords → secondary blend. Separate from the parameter explorer; Ambient actions can set Ripple as a Welcome / app-wide background or open a float panel.
 - A **Julia Set Lab** (`/tools/julia`) — an interactive escape-time Julia set explorer with curated complex-parameter presets, morph between two `c` values, zoom, iterations, escape radius, and theme-aware coloring.
 - A **Lissajous Harmonic Lab** (`/tools/lissajous`) — an interactive frequency-ratio curve explorer with musical interval presets, phase/morph controls, and theme-aware Canvas trails.
 - A **Quasiperiodic Pattern Lab** (`/tools/quasiperiodic`) — an interactive N-fold plane-wave interference explorer with morphing recipes, zoom, and soft nodal contours. **Apply to home** switches the welcome atmosphere to the quasiperiodic field (Chladni Apply switches it back); pattern color and hero-scrim shade persist in `localStorage` and sync to Convex when signed in.
+- **Atmosphere settings** (`/settings/atmosphere`) — assign any shipped visualization (Chladni, Quasiperiodic, MIDI Ripple, Julia, Lissajous) as a full-page background per route, apply a default everywhere, and optionally show a draggable / resizable float panel of the same effects. Preferences persist in `localStorage` and sync to Convex when signed in.
 - A migrated **Tracking dashboard** (`/tools/tracking`) ported from Reflex Drill EXT, including:
   - Chord Drill first-chord timing history
   - Arpeggio transition and miss logging
@@ -64,6 +65,7 @@ A shared **primitive layer** has been extracted from the original Reflex Drill E
 - `lib/quasiperiodic.ts` — N-fold quasiperiodic wave field math, presets, and helpers
 - `lib/quasiperiodic-hero-settings.ts` — serializable home-hero Quasiperiodic appearance
 - `lib/hero-atmosphere.ts` — which math visual drives the welcome hero (`chladni` | `quasiperiodic`)
+- `lib/ambient-effects.ts` — per-route ambient backgrounds + float panel settings, route resolution, soft viz defaults
 - `lib/midi-session.ts` — tab-scoped Web MIDI session (connect once, stay connected across tools)
 - `hooks/useMidi.ts` — React subscription to the MIDI session; note-on events include velocity
 - `hooks/useChladniRipple.ts` — decaying MIDI impulses → Chladni visualization props
@@ -78,6 +80,7 @@ A shared **primitive layer** has been extracted from the original Reflex Drill E
 - `hooks/useHeroChladniSettings.ts` — home Chladni appearance (localStorage + Convex)
 - `hooks/useHeroQuasiperiodicSettings.ts` — home Quasiperiodic appearance (localStorage + Convex)
 - `hooks/useHeroAtmosphereKind.ts` — welcome hero visual kind (localStorage + Convex)
+- `hooks/useAmbientEffects.ts` — ambient backgrounds + float panel (provider + hook; localStorage + Convex)
 - `convex/settings.ts` — generic per-user settings persistence
 - `components/drills/drill-shell.tsx` — shared layout wrapper for tool pages
 - `components/drills/midi-connection-bar.tsx` — reusable MIDI input bar

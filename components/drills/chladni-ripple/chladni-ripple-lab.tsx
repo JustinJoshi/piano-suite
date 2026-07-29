@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MidiConnectionBar } from "@/components/drills/midi-connection-bar";
 import { ChladniVisualization } from "@/components/welcome/chladni-visualization";
 import { useMidi } from "@/hooks/useMidi";
 import { useChladniRipple } from "@/hooks/useChladniRipple";
+import { useAmbientEffects } from "@/hooks/useAmbientEffects";
 import { noteName } from "@/lib/music-theory";
 import { PC_MODE_TABLE } from "@/lib/chladni-ripple";
 
@@ -57,10 +60,13 @@ function RangeControl({
 
 export function ChladniRippleLab() {
   const midi = useMidi();
+  const { applyAsAmbientBackground, openFloat, setRouteBackground } =
+    useAmbientEffects();
   const [decayMs, setDecayMs] = useState(1200);
   const [octaveComplexity, setOctaveComplexity] = useState(0.35);
   const [baseLineThickness, setBaseLineThickness] = useState(28);
   const [baseIntensity, setBaseIntensity] = useState(0.45);
+  const [ambientMessage, setAmbientMessage] = useState<string | null>(null);
 
   const { viz } = useChladniRipple({
     heldNotes: midi.heldNotes,
@@ -81,6 +87,23 @@ export function ChladniRippleLab() {
     viz.activePc == null
       ? "Idle"
       : `${noteName(viz.activePc)} → (${viz.activeMode[0]}, ${viz.activeMode[1]})`;
+
+  function handleUseOnHome() {
+    setRouteBackground("/", "chladni-ripple");
+    setAmbientMessage("Chladni Ripple set as the Welcome background.");
+  }
+
+  function handleUseEverywhere() {
+    applyAsAmbientBackground("chladni-ripple");
+    setAmbientMessage(
+      "Chladni Ripple applied as the default ambient background."
+    );
+  }
+
+  function handleOpenFloat() {
+    openFloat("chladni-ripple");
+    setAmbientMessage("Float panel opened with Chladni Ripple.");
+  }
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
@@ -125,7 +148,10 @@ export function ChladniRippleLab() {
             <div className="grid gap-2 text-sm">
               <div className="flex justify-between gap-2">
                 <span className="text-muted-foreground">Held</span>
-                <span className="font-mono text-foreground" data-testid="held-notes">
+                <span
+                  className="font-mono text-foreground"
+                  data-testid="held-notes"
+                >
                   {heldLabel}
                 </span>
               </div>
@@ -139,6 +165,59 @@ export function ChladniRippleLab() {
                 </span>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        <Card className="ring-1 ring-foreground/10">
+          <CardHeader className="pb-3">
+            <CardTitle className="font-heading text-base">Ambient</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              Use this MIDI-reactive pattern as a page background or float
+              panel. Fine-tune routes in{" "}
+              <Link
+                href="/settings/atmosphere"
+                className="text-primary underline-offset-2 hover:underline"
+              >
+                Atmosphere settings
+              </Link>
+              .
+            </p>
+            <div className="flex flex-col gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={handleUseOnHome}
+                data-testid="ripple-use-on-home"
+              >
+                Use on Welcome
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={handleUseEverywhere}
+                data-testid="ripple-use-everywhere"
+              >
+                Use as ambient default
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={handleOpenFloat}
+                data-testid="ripple-open-float"
+              >
+                Open float panel
+              </Button>
+            </div>
+            {ambientMessage ? (
+              <p className="text-xs text-primary" role="status">
+                {ambientMessage}
+              </p>
+            ) : null}
           </CardContent>
         </Card>
 
