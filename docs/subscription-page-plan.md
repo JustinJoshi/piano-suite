@@ -202,18 +202,74 @@ plan definitions in the Clerk Dashboard.
 
 ---
 
-## Suggested plan packaging (v1 product hypothesis)
+## Pricing model recommendation (research)
 
-Open question for the owner before implementation — recommend starting simple:
+### What this product actually is
 
-| | Free | Pro |
-|--|------|-----|
-| Pattern Lab / welcome atmosphere | ✓ | ✓ |
-| Core drills (chord, arpeggios, …) | Limited (e.g. one mode) **or** full with local-only | Full + Convex history |
-| Tracking / PBs | Local or hidden | Synced |
-| Theme + atmosphere sync | Local | Synced |
-| Articles | ✓ (or gated with auth as today) | ✓ |
-| Chat | Keep owner-allowlist until productized | TBD |
+Piano Suite is **not** a mass-market lesson library (Simply Piano / Musora). It is a
+**niche utility** for pianists who already have Anki + a MIDI keyboard:
+
+| Trait | Implication for pricing |
+|-------|-------------------------|
+| Small, educated audience (jazz / theory drillers) | Freemium needs *huge* volume to work on conversion % alone — you won’t get Simply Piano scale |
+| High setup friction (AnkiConnect + MIDI) | Hard trial cutoffs punish users still wiring hardware |
+| Core loop is client-side Web MIDI | Marginal cost of a free practicer is low until they sync |
+| Sticky value is **history / PBs / streaks across devices** | Natural paid wedge already exists as `canPersist` vs local |
+| No song/content FOMO | Musora-style hard paywall is the wrong psychology |
+| Solo tool, weak network effects | Pure freemium-for-virality doesn’t apply |
+| Chat is owner-allowlisted + LLM-costly | Do **not** hang v1 Pro on Chat |
+
+### Models considered
+
+| Model | Fit | Why |
+|-------|-----|-----|
+| **Hard free trial → paywall** (Musora) | Poor | Content-library FOMO; kills habit during Anki/MIDI setup |
+| **Pure paid / no free** | Poor | Hardware + Anki already filter hard; adding pay before “aha” shrinks funnel to near zero |
+| **Classic freemium** (Free forever limited + Pro) | **Good** | Matches architecture; Piano Marvel pattern; keeps non-payers practicing |
+| **Opt-in free trial of Pro only** | Mediocre alone | Higher trial→paid %, but after expiry users leave forever — bad for a habit tool |
+| **Reverse trial → Free forever** | **Best hybrid** | Full Pro for 7–14 days on signup, then land on Free; users *felt* sync before upgrade |
+| **One-time / lifetime** | Weak as primary | Fits musician “buy a tool” instinct, but Convex + future AI are ongoing costs; Clerk Billing is subscription-first. Offer later as promo, not v1 spine |
+| **Usage / seat / org billing** | Poor for v1 | Solo B2C product |
+
+### Verdict
+
+**Ship: Freemium (Free forever + Pro subscription), optionally with a 7–14 day reverse trial of Pro on first signup.**
+
+Why this beats alternatives for *this* app:
+
+1. **The paid product is sync + continuity**, not “more songs.” That maps cleanly to Free = local practice, Pro = Convex history / cross-device / full tracking — the split the codebase already has (`canAccess` vs `canPersist`).
+2. **Niche + setup friction** means you must leave a durable free path after any trial, or you churn people mid-onboarding. Reverse trial → Free forever does that; a hard wall does not.
+3. **Market analogs:** Piano Marvel uses freemium (useful free tier, pay for depth). Anki itself monetizes **sync** (AnkiWeb), not flashcards — the closest conceptual cousin to Piano Suite’s Pro wedge.
+4. **Economics:** Client-side drills are cheap; you pay Convex mainly when users persist. Gate *persistence and multi-device continuity*, not the ability to play a chord once.
+5. **Price positioning:** Charge like a **practice utility**, not a curriculum app. Simply Piano / Musora sit ~$15–30/mo for libraries. Indie sync tools sit lower. Target band for Pro: about **$5–10/mo or ~$40–80/yr** (exact numbers TBD) — enough to matter, not “another Simply Piano.”
+
+### What Free vs Pro should mean (decisive packaging)
+
+Prefer **full local drills on Free** over “one mode only.” Limiting drill *modes* before the user finishes MIDI/Anki setup creates false “broken app” signals. Limit what they **keep**.
+
+| Capability | Free (forever) | Pro |
+|------------|----------------|-----|
+| Welcome + Pattern Lab | ✓ | ✓ |
+| Companion Anki deck downloads | ✓ | ✓ |
+| All core drills (chord, arpeggios, progression, root cycling, technique) | ✓ **local-only** | ✓ |
+| Tracking / PBs / miss history | Browser-local or session | **Synced** (Convex) |
+| Theme + atmosphere prefs | localStorage | **Synced** |
+| Cross-device restore | ✗ | ✓ |
+| Articles | Prefer **public or Free** (marketing) | ✓ |
+| AI Chat | Stay owner-only until productized | Not a v1 Pro pillar |
+
+Upgrade moment copy: *“Your reps are staying on this browser. Unlock Pro to keep personal bests and history across devices.”* — not *“Buy more drills.”*
+
+### Optional Phase 1.5 — reverse trial
+
+On first account creation, grant Pro features for **14 days** (no card required). When it ends, silently continue as Free (local drills still work). Prompt upgrade only when they hit a sync-worthy action (view Tracking across sessions, new device, export/import). This is the 2026 “reverse trial” pattern adapted to a habit product.
+
+### Explicit non-recommendations
+
+- Do **not** use a Musora-style hard paywall before any practice.
+- Do **not** make Pattern Lab or the welcome atmosphere paid (they are the demo).
+- Do **not** sell Chat as Pro until the allowlist and cost model change.
+- Do **not** lead with lifetime pricing until subscription retention is proven.
 
 Prefer **value-based** bullets (“Sync practice history across devices”) over
 feature dumps (“Access Convex `practiceEvents`”).
