@@ -442,23 +442,23 @@ Skip unsigned drills and localStorage history until after that slice works.
 - [x] **Owner:** Pro `$8`/`$72` + `sync` applied on Clerk **dev** (Dashboard Path B; verified via BAPI)
 - [ ] Auth cutover path (custom domain / unset `AUTH_DISABLED`) before real charges
 
-### Phase 1 — Gate remap + pricing page (no hard server reject yet)
+### Phase 1 — Gate remap + pricing page
 
 - [x] WP1 — `canPersist` remapped to Pro/`sync` (or `AUTH_DISABLED`); soft upgrade banners
 - [x] WP4 — public `/pricing` + navbar + `/settings/billing` + welcome “See plans”
-- Soft upgrade UI only (no hard server reject yet)
 
 ### Phase 2 — Enforce + harden
 
-- WP2 server checks, e2e, optional WP3 public articles
-- Remove reliance on `AUTH_DISABLED` for “Free”
+- [x] WP2 — `ensureUserIdWithSync` on tracking/technique mutations; JWT `pla`/`fea` via `hasSyncFromClerkClaims`
+- [ ] e2e Pro/Free checkout smoke; optional WP3 public articles
+- [ ] Remove reliance on `AUTH_DISABLED` for “Free”
 
 ### Phase 3 — Continuity + polish
 
-- WP5 local history + Free→Pro import
-- WP6 settings sync alignment
-- Reverse trial if chosen
-- Clerk appearance / FAQ polish
+- [x] WP5 — Free localStorage practice history + Tracking/Technique readers + Pro upload import
+- [ ] WP6 settings sync alignment
+- [ ] Reverse trial if chosen
+- [ ] Clerk appearance / FAQ polish
 
 ---
 

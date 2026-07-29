@@ -35,7 +35,10 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `components/ensure-signed-in-user.tsx` | Bootstraps Convex `users` row on Clerk sign-in (homepage settings before tools) |
 | `lib/auth-disabled.ts` | Opt-in `isAuthDisabled()` (`=== "true"` only); Hobby Vercel may set temporarily (see README Deploy) |
 | `lib/clerk-authorized-parties.ts` | Parse `CLERK_AUTHORIZED_PARTIES` for `clerkMiddleware` `authorizedParties` (Phase A / production) |
-| `lib/billing.ts` | Clerk Billing plan/feature slugs (`pro`, `sync`) + `canPersistFromEntitlements`; apply Dashboard catalog via `docs/clerk-billing-setup.md` |
+| `lib/billing.ts` | Clerk Billing plan/feature slugs (`pro`, `sync`) + `canPersistFromEntitlements` + JWT `pla`/`fea` helpers; apply Dashboard catalog via `docs/clerk-billing-setup.md` |
+| `lib/local-practice-history.ts` | Free-tier browser practice history (Reflex-compatible keys); drills write when `!canPersist` |
+| `convex/lib/entitlements.ts` | `ensureUserIdWithSync` — Pro/`sync` JWT gate for tracking/technique mutations |
+| `hooks/useLocalPracticeHistory.ts` | Version bump when local history changes (Tracking/Technique refresh) |
 | `components/pricing/*` | Public `/pricing` marketing page (Clerk `PricingTable`) |
 | `app/settings/billing/page.tsx` | Signed-in plan management (Clerk `PricingTable`) |
 | `lib/chat-auth.ts` | Chat API allowlist decisions (`authorizeChatAccess`) |

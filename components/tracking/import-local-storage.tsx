@@ -282,21 +282,23 @@ export function ImportLocalStorage() {
   return (
     <Card className="mb-6 border-primary/30 bg-primary/5">
       <CardHeader>
-        <CardTitle className="text-base">Import practice history</CardTitle>
+        <CardTitle className="text-base">Upload practice history to Pro</CardTitle>
         <CardDescription>
-          Bring your Reflex Drill EXT tracking data into Piano Suite so it syncs across devices.
+          Import Free-tier browser history or a Reflex Drill EXT export so personal bests sync
+          across devices.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {found && totalEntries(found) > 0 && (
           <div className="rounded-xl border border-border/50 bg-card p-4">
             <p className="mb-3 text-sm text-muted-foreground">
-              Found {totalEntries(found)} legacy practice {totalEntries(found) === 1 ? "entry" : "entries"} from
-              Reflex Drill EXT in this browser.
+              Found {totalEntries(found)} practice{" "}
+              {totalEntries(found) === 1 ? "entry" : "entries"} in this browser
+              (Free local history and/or Reflex Drill EXT).
             </p>
             <div className="flex flex-wrap gap-3">
               <Button onClick={handleImportLocal} disabled={status === "importing"}>
-                {status === "importing" ? "Importing…" : "Import from this browser"}
+                {status === "importing" ? "Uploading…" : "Upload to Pro sync"}
               </Button>
               <Button variant="ghost" onClick={handleSkip} disabled={status === "importing"}>
                 Skip and delete local data

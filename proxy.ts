@@ -32,21 +32,11 @@ export default clerkMiddleware(
       return;
     }
 
-<<<<<<< HEAD
     const pathname = request.nextUrl.pathname;
-=======
-  const isPublicRoute =
-    pathname === "/" ||
-    pathname === "/pricing" ||
-    pathname === "/tools/chladni" ||
-    pathname.startsWith("/sign-in") ||
-    pathname.startsWith("/sign-up") ||
-    pathname.startsWith("/api") ||
-    pathname.startsWith("/__clerk");
->>>>>>> 44ff2eb (feat: add public /pricing and settings billing (WP4))
 
     const isPublicRoute =
       pathname === "/" ||
+      pathname === "/pricing" ||
       pathname === "/tools/chladni" ||
       pathname.startsWith("/sign-in") ||
       pathname.startsWith("/sign-up") ||

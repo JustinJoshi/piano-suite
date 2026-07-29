@@ -156,7 +156,7 @@ Setting `NEXT_PUBLIC_AUTH_DISABLED=true` makes the proxy skip protection for **e
 | Flag | Meaning |
 |------|---------|
 | `canAccess` | May the tool UI render? True when signed in **or** when the bypass is on |
-| `canPersist` | May we write practice history to Convex? True for **Pro** (`has({ feature: "sync" })` / `has({ plan: "pro" })`) **or** when `NEXT_PUBLIC_AUTH_DISABLED=true`. Signed-in Free users drill locally only. |
+| `canPersist` | May we write practice history to Convex? True for **Pro** (`has({ feature: "sync" })` / `has({ plan: "pro" })`) **or** when `NEXT_PUBLIC_AUTH_DISABLED=true`. Signed-in Free users keep durable **browser** history (`lib/local-practice-history.ts`); Tracking/Technique read that locally, and Convex practice mutations reject Free JWTs (`ensureUserIdWithSync`). Upgrade → upload local history from the Tracking/Technique import panels. |
 
 `hooks/useToolUserReady.ts` additionally waits for the Convex `users` row on tool pages, and `components/ensure-signed-in-user.tsx` (mounted inside `ConvexClientProvider`) creates that row as soon as Clerk reports a session, so homepage theme and atmosphere queries do not race it.
 
@@ -428,8 +428,8 @@ npm run build
 - [x] Add article pages under `/articles/[slug]`
 - [x] Add token-driven theming system with `/settings/theme`
 - [x] Implement real LLM chat grounded on articles (Kimi Code API, owner-only access)
-- [ ] Clerk Billing freemium (Free local / Pro sync) — catalog locked in `lib/billing.ts`; enable via `docs/clerk-billing-setup.md`
-- [ ] Public `/pricing` page + `canPersist` remap to Pro
+- [x] Clerk Billing freemium (Free local / Pro sync) — WP0–WP2 + WP4–WP5; cutover / WP6 still open (`docs/subscription-page-plan.md`)
+- [x] Public `/pricing` + `canPersist` remap to Pro/`sync`
 
 ### Post-v1 follow-ons
 

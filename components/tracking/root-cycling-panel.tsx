@@ -9,6 +9,11 @@ import { TrackingChart } from "./tracking-chart";
 import { cn } from "@/lib/utils";
 import { useCachedTrackingQuery } from "@/hooks/useCachedTrackingQuery";
 import { useAuthAccess } from "@/hooks/useAuthAccess";
+import { useLocalPracticeHistoryVersion } from "@/hooks/useLocalPracticeHistory";
+import {
+  clearLocalRootCycleByGroup,
+  listLocalRootCycleEvents,
+} from "@/lib/local-practice-history";
 import { Loader2 } from "lucide-react";
 
 function rcGroupKey(
@@ -25,15 +30,20 @@ function rcGroupKey(
 
 export function RootCyclingPanel() {
   const { canPersist } = useAuthAccess();
+  const localVersion = useLocalPracticeHistoryVersion();
   const liveEvents = useQuery(
     api.tracking.listRootCycleEvents,
     canPersist ? {} : "skip"
   );
   const clearMutation = useMutation(api.tracking.clearRootCycleEventsByGroup);
-  const { data: events, isLoading, clear: clearCache } = useCachedTrackingQuery(
-    "rootCycleEvents",
-    liveEvents
+  const localEvents = useMemo(
+    () => (canPersist ? undefined : listLocalRootCycleEvents()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [canPersist, localVersion]
   );
+  const { data: cachedEvents, isLoading, clear: clearCache } =
+    useCachedTrackingQuery("rootCycleEvents", liveEvents);
+  const events = canPersist ? cachedEvents : localEvents;
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
   const groups = useMemo(() => {
@@ -87,7 +97,7 @@ export function RootCyclingPanel() {
   }, [groups, activeKey]);
 
   async function handleClear() {
-    if (!canPersist || !activeKey) return;
+    if (!activeKey) return;
     const mode = activeKey.startsWith("Chord") ? "chord" : "arpeggio";
     let quality: string | undefined;
     let fromDeg: string | undefined;
@@ -98,8 +108,12 @@ export function RootCyclingPanel() {
       const transition = activeKey.slice("Arpeggio · ".length);
       [fromDeg, toDeg] = transition.split("→");
     }
-    await clearMutation({ mode, quality, fromDeg, toDeg });
-    clearCache();
+    if (canPersist) {
+      await clearMutation({ mode, quality, fromDeg, toDeg });
+      clearCache();
+    } else {
+      clearLocalRootCycleByGroup({ mode, quality, fromDeg, toDeg });
+    }
     setSelectedKey(null);
   }
 

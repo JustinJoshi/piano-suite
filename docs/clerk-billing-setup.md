@@ -117,6 +117,23 @@ In the app (after WP1/WP4 code):
 - `/pricing` shows Free + Pro
 - `has({ feature: 'sync' })` is true only after a successful Pro checkout (test card)
 
+### Convex JWT claims (WP2)
+
+Practice mutations read Billing entitlements from the session JWT via
+`ctx.auth.getUserIdentity()`:
+
+| Claim | Shape | Example |
+|-------|--------|---------|
+| `pla` | comma-separated `u:slug` / `o:slug` | `u:pro` |
+| `fea` | same | `u:sync` |
+
+`lib/billing.ts` → `hasSyncFromClerkClaims` / `splitClerkBillingClaim`.
+`convex/lib/entitlements.ts` → `ensureUserIdWithSync` rejects Free with
+“Pro required…”. Theme/atmosphere settings are **not** gated yet (WP6).
+
+Confirm a real Pro checkout JWT includes `pla`/`fea` in the Convex dashboard
+identity payload (or by temporarily logging claim keys in a mutation).
+
 Test cards: [Stripe testing](https://docs.stripe.com/testing)
 
 ---
@@ -125,7 +142,9 @@ Test cards: [Stripe testing](https://docs.stripe.com/testing)
 
 | Path | Role |
 |------|------|
-| `lib/billing.ts` | Slugs + display prices + `canPersistFromEntitlements` |
+| `lib/billing.ts` | Slugs, display prices, client + JWT claim helpers |
+| `lib/local-practice-history.ts` | Free-tier browser history (import-compatible keys) |
+| `convex/lib/entitlements.ts` | `ensureUserIdWithSync` for practice mutations |
 | `clerk/billing.desired.json` | Desired PLAPI billing patch |
 | `scripts/apply-clerk-billing.sh` | Enable + patch helper |
 | `docs/subscription-page-plan.md` | Full freemium plan |

@@ -9,6 +9,12 @@ import { TrackingChart } from "./tracking-chart";
 import { cn } from "@/lib/utils";
 import { useCachedTrackingQuery } from "@/hooks/useCachedTrackingQuery";
 import { useAuthAccess } from "@/hooks/useAuthAccess";
+import { useLocalPracticeHistoryVersion } from "@/hooks/useLocalPracticeHistory";
+import {
+  clearLocalArpeggioByTransition,
+  listLocalArpeggioEvents,
+  listLocalArpeggioMissEvents,
+} from "@/lib/local-practice-history";
 import { Loader2 } from "lucide-react";
 
 function transitionKey(chord: string, fromDeg: string, toDeg: string) {
@@ -17,6 +23,7 @@ function transitionKey(chord: string, fromDeg: string, toDeg: string) {
 
 export function ArpeggioPanel() {
   const { canPersist } = useAuthAccess();
+  const localVersion = useLocalPracticeHistoryVersion();
   const liveEvents = useQuery(
     api.tracking.listArpeggioEvents,
     canPersist ? {} : "skip"
@@ -26,14 +33,28 @@ export function ArpeggioPanel() {
     canPersist ? {} : "skip"
   );
   const clearMutation = useMutation(api.tracking.clearArpeggioEventsByTransition);
-  const { data: events, isLoading: eventsLoading, clear: clearEventsCache } = useCachedTrackingQuery(
-    "arpeggioEvents",
-    liveEvents
+  const localEvents = useMemo(
+    () => (canPersist ? undefined : listLocalArpeggioEvents()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [canPersist, localVersion]
   );
-  const { data: misses, isLoading: missesLoading, clear: clearMissesCache } = useCachedTrackingQuery(
-    "arpeggioMissEvents",
-    liveMisses
+  const localMisses = useMemo(
+    () => (canPersist ? undefined : listLocalArpeggioMissEvents()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [canPersist, localVersion]
   );
+  const {
+    data: cachedEvents,
+    isLoading: eventsLoading,
+    clear: clearEventsCache,
+  } = useCachedTrackingQuery("arpeggioEvents", liveEvents);
+  const {
+    data: cachedMisses,
+    isLoading: missesLoading,
+    clear: clearMissesCache,
+  } = useCachedTrackingQuery("arpeggioMissEvents", liveMisses);
+  const events = canPersist ? cachedEvents : localEvents;
+  const misses = canPersist ? cachedMisses : localMisses;
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
   const groups = useMemo(() => {
@@ -102,12 +123,16 @@ export function ArpeggioPanel() {
   }, [activeKey, missesList]);
 
   async function handleClear() {
-    if (!canPersist || !activeKey) return;
+    if (!activeKey) return;
     const [chord, transition] = activeKey.split(" · ");
     const [fromDeg, toDeg] = transition.split("→");
-    await clearMutation({ chord, fromDeg, toDeg });
-    clearEventsCache();
-    clearMissesCache();
+    if (canPersist) {
+      await clearMutation({ chord, fromDeg, toDeg });
+      clearEventsCache();
+      clearMissesCache();
+    } else {
+      clearLocalArpeggioByTransition(chord, fromDeg, toDeg);
+    }
     setSelectedKey(null);
   }
 

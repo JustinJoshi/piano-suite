@@ -14,8 +14,9 @@ import {
  * - `canAccess`: open the tool UI (true when signed in, or when auth is disabled)
  * - `canPersist`: write practice history to Convex — Pro (`sync`) or AUTH_DISABLED
  *
- * Signed-in Free users keep drilling locally; drills already no-op Convex when
- * `canPersist` is false. Server-side Pro rejection is WP2.
+ * Signed-in Free users keep drilling locally (browser history via
+ * `lib/local-practice-history.ts`). Convex practice mutations reject Free JWTs
+ * via `ensureUserIdWithSync`.
  */
 export function useAuthAccess() {
   const { isSignedIn } = useUser();

@@ -25,6 +25,7 @@ import {
   CANONICAL_ARPEGGIO_RH_DEGREES,
   pickRandomRoot,
 } from "@/lib/root-cycling";
+import { appendLocalRootCycleEvent } from "@/lib/local-practice-history";
 
 export type RootCyclingPhase =
   | "idle"
@@ -102,8 +103,19 @@ export function useRootCycling(enabled: boolean): RootCyclingEngine {
   const { playChime } = useAudio();
   const logEventMutation = useMutation(api.tracking.logRootCycleEvent);
   const logEvent = useCallback(
-    (args: Parameters<typeof logEventMutation>[0]) =>
-      enabled ? logEventMutation(args) : Promise.resolve(undefined),
+    (args: Parameters<typeof logEventMutation>[0]) => {
+      if (enabled) return logEventMutation(args);
+      appendLocalRootCycleEvent({
+        mode: args.mode,
+        label: args.label,
+        root: args.root,
+        quality: args.quality,
+        fromDeg: args.fromDeg,
+        toDeg: args.toDeg,
+        reactionTimeMs: args.reactionTimeMs,
+      });
+      return Promise.resolve(undefined);
+    },
     [enabled, logEventMutation]
   );
 
