@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Music, Zap, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DashboardMenuButton } from "@/components/tools/dashboard-nav";
@@ -51,7 +52,13 @@ export default function TrackingPage() {
           <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col">
             {!canPersist ? (
               <p className="mb-4 text-center text-sm text-muted-foreground">
-                {localPracticeBanner("tracking")}
+                {localPracticeBanner("tracking")}{" "}
+                <Link
+                  href="/pricing"
+                  className="font-medium text-primary underline-offset-2 hover:underline"
+                >
+                  See plans
+                </Link>
               </p>
             ) : null}
             <div className="flex-1">

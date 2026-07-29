@@ -33,6 +33,7 @@ This repository now contains:
 - A **Lissajous Harmonic Lab** (`/tools/lissajous`) — an interactive frequency-ratio curve explorer with musical interval presets, phase/morph controls, and theme-aware Canvas trails.
 - A **Quasiperiodic Pattern Lab** (`/tools/quasiperiodic`) — an interactive N-fold plane-wave interference explorer with morphing recipes, zoom, and soft nodal contours. **Apply to home** switches the welcome atmosphere to the quasiperiodic field (Chladni Apply switches it back); pattern color and hero-scrim shade persist in `localStorage` and sync to Convex when signed in.
 - A **Multigrid Lab** (`/tools/multigrid`) — a Canvas de Bruijn multigrid → dual rhombus tiling explorer (Penrose/Ammann/Socolar/Dense presets). **Apply to home** switches the welcome ambient background to Multigrid; preferences persist in `localStorage` and sync to Convex when signed in.
+- A public **Pricing** page (`/pricing`) with Clerk `<PricingTable />` for Free vs Pro (cloud sync). Manage subscriptions at `/settings/billing`.
 - **Atmosphere settings** (`/settings/atmosphere`) — assign any shipped visualization (Chladni, Quasiperiodic, Multigrid, MIDI Ripple, Julia, Lissajous) as a full-page background per route, apply a default everywhere, and optionally show a draggable / resizable float panel of the same effects. Preferences persist in `localStorage` and sync to Convex when signed in.
 - A migrated **Tracking dashboard** (`/tools/tracking`) ported from Reflex Drill EXT, including:
   - Chord Drill first-chord timing history
@@ -131,6 +132,7 @@ Clerk owns identity, Convex owns per-user data, and the two are joined by a Cler
 | Route | Public when auth is on? |
 |-------|--------------------------|
 | `/` | Yes |
+| `/pricing` | Yes — Free vs Pro + Clerk checkout |
 | `/tools/chladni` (Pattern Lab) | Yes — edits the public welcome hero |
 | `/sign-in/*`, `/sign-up/*` | Yes |
 | `/api/*` | Yes at the proxy; each handler authenticates itself |

@@ -36,6 +36,8 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `lib/auth-disabled.ts` | Opt-in `isAuthDisabled()` (`=== "true"` only); Hobby Vercel may set temporarily (see README Deploy) |
 | `lib/clerk-authorized-parties.ts` | Parse `CLERK_AUTHORIZED_PARTIES` for `clerkMiddleware` `authorizedParties` (Phase A / production) |
 | `lib/billing.ts` | Clerk Billing plan/feature slugs (`pro`, `sync`) + `canPersistFromEntitlements`; apply Dashboard catalog via `docs/clerk-billing-setup.md` |
+| `components/pricing/*` | Public `/pricing` marketing page (Clerk `PricingTable`) |
+| `app/settings/billing/page.tsx` | Signed-in plan management (Clerk `PricingTable`) |
 | `lib/chat-auth.ts` | Chat API allowlist decisions (`authorizeChatAccess`) |
 | `convex/lib/auth.ts` | `optionalUserId` (queries), `ensureUserId` (mutations, upserts the row), `requireUserId` (throws) |
 | `proxy.ts` | Clerk route gate (Next 16 proxy convention); public-route list + `unauthenticatedUrl` redirect |

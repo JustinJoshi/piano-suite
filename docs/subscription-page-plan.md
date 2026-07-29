@@ -445,7 +445,7 @@ Skip unsigned drills and localStorage history until after that slice works.
 ### Phase 1 — Gate remap + pricing page (no hard server reject yet)
 
 - [x] WP1 — `canPersist` remapped to Pro/`sync` (or `AUTH_DISABLED`); soft upgrade banners
-- [ ] WP4 — public `/pricing` + navbar + manage billing
+- [x] WP4 — public `/pricing` + navbar + `/settings/billing` + welcome “See plans”
 - Soft upgrade UI only (no hard server reject yet)
 
 ### Phase 2 — Enforce + harden

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
+import Link from "next/link";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useAudio } from "@/hooks/useAudio";
@@ -104,7 +105,13 @@ export function TechniqueTracker() {
     <div className="mx-auto grid max-w-xl gap-6">
       {!canPersist ? (
         <p className="text-center text-sm text-muted-foreground">
-          {localPracticeBanner("technique")}
+          {localPracticeBanner("technique")}{" "}
+          <Link
+            href="/pricing"
+            className="font-medium text-primary underline-offset-2 hover:underline"
+          >
+            See plans
+          </Link>
         </p>
       ) : null}
       <Card>

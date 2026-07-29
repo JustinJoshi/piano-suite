@@ -47,6 +47,19 @@ test.describe("auth protection (bypass off)", () => {
     ).toBeVisible();
   });
 
+  test("unsigned /pricing stays public", async ({ page }) => {
+    await page.goto("/pricing");
+    await expect(page).toHaveURL("/pricing");
+    await expectNotBare404(page);
+    await expectNoApplicationError(page);
+    await expect(
+      page.getByRole("heading", {
+        name: /Practice free\. Sync when you're ready\./i,
+      })
+    ).toBeVisible();
+    await expect(page.getByRole("link", { name: "Pricing" })).toBeVisible();
+  });
+
   test("signed-in user can open /tools after sign-in", async ({ page }) => {
     await signInAsTestUser(page);
     await page.goto("/tools");

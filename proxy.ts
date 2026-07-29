@@ -5,10 +5,11 @@ import { getAuthorizedPartiesFromEnv } from "@/lib/clerk-authorized-parties";
 /**
  * Clerk proxy middleware for Next.js 16+.
  *
- * Public routes: home, Pattern Lab (homepage hero editor), sign-in/up, API,
- * and Clerk's frontend API. Other /tools/* routes require authentication,
+ * Public routes: home, Pricing, Pattern Lab (homepage hero editor), sign-in/up,
+ * API, and Clerk's frontend API. Other /tools/* routes require authentication,
  * unless `NEXT_PUBLIC_AUTH_DISABLED=true`.
  *
+ * Pricing is public so visitors can evaluate Free vs Pro before signing up.
  * Pattern Lab is public so visitors can customize the welcome hero without
  * signing in (prefs still sync to Convex when authenticated).
  *
@@ -31,7 +32,18 @@ export default clerkMiddleware(
       return;
     }
 
+<<<<<<< HEAD
     const pathname = request.nextUrl.pathname;
+=======
+  const isPublicRoute =
+    pathname === "/" ||
+    pathname === "/pricing" ||
+    pathname === "/tools/chladni" ||
+    pathname.startsWith("/sign-in") ||
+    pathname.startsWith("/sign-up") ||
+    pathname.startsWith("/api") ||
+    pathname.startsWith("/__clerk");
+>>>>>>> 44ff2eb (feat: add public /pricing and settings billing (WP4))
 
     const isPublicRoute =
       pathname === "/" ||
