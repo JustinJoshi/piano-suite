@@ -5,6 +5,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useAudio } from "@/hooks/useAudio";
 import { useAuthAccess } from "@/hooks/useAuthAccess";
+import { localPracticeBanner } from "@/lib/billing";
 import {
   todayStr,
   computeStreak,
@@ -103,7 +104,7 @@ export function TechniqueTracker() {
     <div className="mx-auto grid max-w-xl gap-6">
       {!canPersist ? (
         <p className="text-center text-sm text-muted-foreground">
-          Local practice mode — metronome works; session history needs sign-in.
+          {localPracticeBanner("technique")}
         </p>
       ) : null}
       <Card>

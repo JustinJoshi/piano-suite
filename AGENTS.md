@@ -30,7 +30,7 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `lib/ambient-effects.ts` | Per-route ambient backgrounds + float panel settings, soft viz defaults |
 | `hooks/useAmbientEffects.ts` | `AmbientEffectsProvider` + hook for ambient backgrounds / float (localStorage + Convex) |
 | `components/ambient/*` | Root ambient host, renderer, background, float panel |
-| `hooks/useAuthAccess.ts` | Shared Clerk gate: `canAccess` / `canPersist`, respects `NEXT_PUBLIC_AUTH_DISABLED` |
+| `hooks/useAuthAccess.ts` | Shared Clerk gate: `canAccess` / `canPersist` (Pro `sync` or `AUTH_DISABLED`) |
 | `hooks/useToolUserReady.ts` | Ensures Convex user row when signed in; ready immediately when auth is disabled |
 | `components/ensure-signed-in-user.tsx` | Bootstraps Convex `users` row on Clerk sign-in (homepage settings before tools) |
 | `lib/auth-disabled.ts` | Opt-in `isAuthDisabled()` (`=== "true"` only); Hobby Vercel may set temporarily (see README Deploy) |

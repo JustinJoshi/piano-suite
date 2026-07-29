@@ -76,3 +76,17 @@ export function canPersistFromEntitlements(args: {
   if (args.authDisabled) return true;
   return args.hasSyncFeature || args.hasProPlan;
 }
+
+/**
+ * Soft upgrade copy when the UI is open but Convex sync is gated (signed-in Free).
+ * Keep Tracking / Technique messaging aligned with the Pro wedge (sync, not more drills).
+ */
+export function localPracticeBanner(
+  surface: "tracking" | "technique"
+): string {
+  if (surface === "tracking") {
+    return "Local practice mode — upgrade to Pro to sync personal bests and history across devices.";
+  }
+  return "Local practice mode — metronome works; upgrade to Pro to sync session history.";
+}
+

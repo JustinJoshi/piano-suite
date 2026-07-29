@@ -439,13 +439,14 @@ Skip unsigned drills and localStorage history until after that slice works.
 - [x] Codebase leverage mapped (`canPersist` remap)
 - [x] Prices + slugs locked: Pro `$8/mo` / `$72/yr`, feature `sync` (`lib/billing.ts`)
 - [x] Desired Clerk config + apply script (`clerk/billing.desired.json`, `docs/clerk-billing-setup.md`)
-- [ ] **Owner:** run `./scripts/apply-clerk-billing.sh --apply` (or Dashboard Path B) while logged into Clerk
+- [x] **Owner:** Pro `$8`/`$72` + `sync` applied on Clerk **dev** (Dashboard Path B; verified via BAPI)
 - [ ] Auth cutover path (custom domain / unset `AUTH_DISABLED`) before real charges
 
 ### Phase 1 — Gate remap + pricing page (no hard server reject yet)
 
-- WP1 + WP4
-- Soft upgrade UI only
+- [x] WP1 — `canPersist` remapped to Pro/`sync` (or `AUTH_DISABLED`); soft upgrade banners
+- [ ] WP4 — public `/pricing` + navbar + manage billing
+- Soft upgrade UI only (no hard server reject yet)
 
 ### Phase 2 — Enforce + harden
 

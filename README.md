@@ -154,7 +154,7 @@ Setting `NEXT_PUBLIC_AUTH_DISABLED=true` makes the proxy skip protection for **e
 | Flag | Meaning |
 |------|---------|
 | `canAccess` | May the tool UI render? True when signed in **or** when the bypass is on |
-| `canPersist` | May we talk to Convex with a real identity? Signed in only |
+| `canPersist` | May we write practice history to Convex? True for **Pro** (`has({ feature: "sync" })` / `has({ plan: "pro" })`) **or** when `NEXT_PUBLIC_AUTH_DISABLED=true`. Signed-in Free users drill locally only. |
 
 `hooks/useToolUserReady.ts` additionally waits for the Convex `users` row on tool pages, and `components/ensure-signed-in-user.tsx` (mounted inside `ConvexClientProvider`) creates that row as soon as Clerk reports a session, so homepage theme and atmosphere queries do not race it.
 

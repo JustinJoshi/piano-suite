@@ -9,6 +9,7 @@ import { ArpeggioPanel } from "@/components/tracking/arpeggio-panel";
 import { RootCyclingPanel } from "@/components/tracking/root-cycling-panel";
 import { ImportLocalStorage } from "@/components/tracking/import-local-storage";
 import { useToolUserReady } from "@/hooks/useToolUserReady";
+import { localPracticeBanner } from "@/lib/billing";
 
 const tabs = [
   { id: "chords", label: "Chord Drill", icon: Music },
@@ -50,7 +51,7 @@ export default function TrackingPage() {
           <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col">
             {!canPersist ? (
               <p className="mb-4 text-center text-sm text-muted-foreground">
-                Local practice mode — charts stay empty until you sign in.
+                {localPracticeBanner("tracking")}
               </p>
             ) : null}
             <div className="flex-1">

@@ -5,6 +5,7 @@ import {
   PRO_PRICING,
   canPersistFromEntitlements,
   formatUsdFromCents,
+  localPracticeBanner,
   proAnnualEffectiveMonthlyCents,
   proAnnualLabel,
   proAnnualSavingsPercent,
@@ -69,5 +70,14 @@ describe("canPersistFromEntitlements", () => {
         hasProPlan: false,
       })
     ).toBe(false);
+  });
+});
+
+describe("localPracticeBanner", () => {
+  it("pitches Pro sync, not sign-in, for Free local mode", () => {
+    expect(localPracticeBanner("tracking")).toMatch(/upgrade to Pro/i);
+    expect(localPracticeBanner("tracking")).toMatch(/sync/i);
+    expect(localPracticeBanner("technique")).toMatch(/upgrade to Pro/i);
+    expect(localPracticeBanner("technique")).not.toMatch(/sign-?in/i);
   });
 });
