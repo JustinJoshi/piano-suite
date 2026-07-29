@@ -84,6 +84,7 @@ A shared **primitive layer** has been extracted from the original Reflex Drill E
 - `convex/settings.ts` — generic per-user settings persistence
 - `convex/lib/auth.ts` — `optionalUserId` / `ensureUserId` / `requireUserId` for Convex auth
 - `lib/auth-disabled.ts` — opt-in `isAuthDisabled()` bypass check
+- `lib/clerk-authorized-parties.ts` — parse `CLERK_AUTHORIZED_PARTIES` for middleware `authorizedParties`
 - `lib/chat-auth.ts` — `authorizeChatAccess` owner-allowlist decisions for `/api/chat`
 - `hooks/useAuthAccess.ts` — `canAccess` / `canPersist` gate for tool pages and drills
 - `hooks/useToolUserReady.ts` — waits for the Convex user row before a tool renders
@@ -191,6 +192,7 @@ Queries must never throw for a signed-in user whose row does not exist yet. `set
    | `NEXT_PUBLIC_ANKI_CONNECT_URL` | AnkiConnect endpoint; defaults to `http://127.0.0.1:8765` |
    | `NEXT_PUBLIC_AUTH_DISABLED` | `true` opens **every** route without signing in, including `/chat`. Convex saves still need a session. Restart `npm run dev` after changing it — see [the bypass notes](#the-next_public_auth_disabled-bypass) |
    | `NEXT_PUBLIC_CLERK_SIGN_IN_URL` / `_SIGN_UP_URL` / `_FALLBACK_REDIRECT_URL` | Clerk redirect overrides |
+   | `CLERK_AUTHORIZED_PARTIES` | Optional comma-separated origins for `clerkMiddleware` `authorizedParties` (recommended on Production after custom-domain cutover; see [`docs/phase-a-auth-cutover-plan.md`](docs/phase-a-auth-cutover-plan.md)) |
    | `E2E_CLERK_USER_EMAIL` / `E2E_CLERK_USER_PASSWORD` | Playwright test user (required to run E2E; password ≥ 8 chars) |
    | `E2E_ALLOW_AUTH_DISABLED` | skips the E2E guard that refuses to run with the bypass on |
 
@@ -299,7 +301,8 @@ When a custom domain + Clerk **production** instance are ready:
 3. On Convex **production**, set `CLERK_FRONTEND_API_URL` to the production Frontend API URL (`https://clerk.<your-domain>.com`). Keep Convex **preview defaults** on the development Frontend API URL.
 4. **Unset** `NEXT_PUBLIC_AUTH_DISABLED` on Production and Preview and **redeploy** (Preview first, then Production).
 5. Create your production Clerk user and update Production `ALLOWED_CLERK_USER_ID` if chat should work.
-6. Verify with the auth suite below (local with bypass off) plus the production smoke checklist.
+6. Optionally set Production `CLERK_AUTHORIZED_PARTIES` to your custom-domain origins (and localhost if needed), then redeploy.
+7. Verify with the auth suite below (local with bypass off) plus the production smoke checklist.
 
 ## Testing
 

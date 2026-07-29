@@ -1,7 +1,10 @@
 # Phase A — Production Auth Cutover Plan
 
 > **Parent:** [`docs/missing-features-plan.md`](./missing-features-plan.md)  
-> **Status: planning** — ops-heavy cutover with a small optional code hardening PR.  
+> **Status: A0 in progress / A1–A8 blocked on operator credentials** — A0 code
+> (`authorizedParties` helper + `proxy.ts` wiring) ships in-repo. Custom domain,
+> Clerk production instance, Convex/Vercel env flips require dashboard access
+> outside this agent.  
 > **Researched against (2026):**
 >
 > - [Clerk — Deploy to production](https://clerk.com/docs/guides/development/deployment/production)
