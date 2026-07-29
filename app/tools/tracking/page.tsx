@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Music, Zap, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { DashboardMenuButton } from "@/components/tools/dashboard-nav";
 import { ChordDrillPanel } from "@/components/tracking/chord-drill-panel";
 import { ArpeggioPanel } from "@/components/tracking/arpeggio-panel";
 import { RootCyclingPanel } from "@/components/tracking/root-cycling-panel";
@@ -21,16 +22,22 @@ export default function TrackingPage() {
 
   return (
     <div className="flex min-h-full flex-col">
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border/50 bg-background/95 px-6 backdrop-blur">
-        <div>
-          <h1 className="font-heading text-lg font-semibold text-foreground">Tracking</h1>
-          <p className="text-xs text-muted-foreground">
-            Review first-chord times, transitions, misses, and random-root recall.
-          </p>
+      <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-border/50 bg-background/95 px-4 backdrop-blur sm:px-6">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+          <DashboardMenuButton />
+          <div className="min-w-0">
+            <h1 className="font-heading text-lg font-semibold text-foreground">
+              Tracking
+            </h1>
+            <p className="text-xs text-muted-foreground">
+              Review first-chord times, transitions, misses, and random-root
+              recall.
+            </p>
+          </div>
         </div>
       </header>
 
-      <div className="p-6 lg:p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         {!canAccess ? (
           <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
             Sign in to view your practice history.

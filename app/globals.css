@@ -289,6 +289,13 @@
   width: var(--sidebar-width);
 }
 
+/* Full-width main on mobile; offset for fixed sidebar from md up */
 .dashboard-main {
-  margin-left: var(--sidebar-width);
+  margin-left: 0;
+}
+
+@media (min-width: 768px) {
+  .dashboard-main {
+    margin-left: var(--sidebar-width);
+  }
 }

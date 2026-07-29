@@ -15,6 +15,7 @@ import {
   Activity,
 } from "lucide-react";
 import { AppUserButton } from "@/components/app-user-button";
+import { DashboardMenuButton } from "@/components/tools/dashboard-nav";
 import { ToolCard } from "@/components/tools/tool-card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -110,12 +111,15 @@ export default function ToolsPage() {
   return (
     <div className="flex min-h-full flex-col">
       {/* Top bar */}
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border/50 bg-background/95 px-6 backdrop-blur">
-        <div className="flex items-center gap-4">
+      <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-border/50 bg-background/95 px-4 backdrop-blur sm:px-6">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-4">
+          <DashboardMenuButton />
           <h1 className="font-heading text-lg font-semibold text-foreground">
             Tools
           </h1>
-          <span className="text-sm text-muted-foreground">justin</span>
+          <span className="hidden text-sm text-muted-foreground sm:inline">
+            justin
+          </span>
         </div>
 
         <div className="flex items-center gap-3">
@@ -135,7 +139,7 @@ export default function ToolsPage() {
       </header>
 
       {/* Content */}
-      <div className="p-6 lg:p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <div className="mx-auto max-w-6xl">
           <div className="mb-8">
             <h2 className="font-heading text-2xl font-semibold text-foreground">

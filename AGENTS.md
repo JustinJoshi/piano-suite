@@ -36,6 +36,8 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `proxy.ts` | Clerk route gate (Next 16 proxy convention); public-route list + `unauthenticatedUrl` redirect |
 | `app/error.tsx`, `app/global-error.tsx` | Error boundaries so a thrown query cannot blank the app |
 | `components/drills/drill-shell.tsx` | Shared layout wrapper for every tool page |
+| `components/tools/dashboard-nav.tsx` | Dashboard drawer open state + mobile Menu button |
+| `components/tools/dashboard-shell.tsx` | Shared tools/settings shell (provider + sidebar + main) |
 
 ## Rules for tool pages
 

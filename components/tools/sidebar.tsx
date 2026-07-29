@@ -17,9 +17,12 @@ import {
   Hexagon,
   Activity,
   Aperture,
+  X,
 } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { AppUserButton } from "@/components/app-user-button";
+import { Button } from "@/components/ui/button";
+import { useDashboardNav } from "@/components/tools/dashboard-nav";
 import { cn } from "@/lib/utils";
 
 const toolLinks = [
@@ -40,122 +43,163 @@ const toolLinks = [
 export function Sidebar() {
   const pathname = usePathname();
   const { user, isLoaded } = useUser();
+  const { open, setOpen } = useDashboardNav();
 
   return (
-    <aside className="dashboard-sidebar fixed left-0 top-0 z-40 flex h-screen flex-col border-r border-border/50 bg-sidebar-background">
-      {/* Brand */}
-      <div className="flex h-16 items-center gap-2 border-b border-border/50 px-4">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-          <Music className="h-4 w-4" />
-        </div>
-        <Link
-          href="/"
-          className="font-heading text-base font-semibold tracking-tight text-foreground"
-        >
-          Piano Suite
-        </Link>
-      </div>
+    <>
+      <div
+        role="presentation"
+        className={cn(
+          "fixed inset-0 z-40 bg-background/60 backdrop-blur-sm transition-opacity md:hidden",
+          open
+            ? "opacity-100"
+            : "pointer-events-none opacity-0"
+        )}
+        onClick={() => setOpen(false)}
+        aria-hidden={!open}
+        data-testid="dashboard-sidebar-backdrop"
+      />
 
-      {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4">
-        <div className="mb-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          Practice Tools
+      <aside
+        id="dashboard-sidebar"
+        className={cn(
+          "dashboard-sidebar fixed left-0 top-0 z-50 flex h-screen flex-col border-r border-border/50 bg-sidebar-background transition-transform duration-200 ease-out md:z-40 md:translate-x-0",
+          open ? "translate-x-0" : "-translate-x-full"
+        )}
+        data-testid="dashboard-sidebar"
+      >
+        {/* Brand */}
+        <div className="flex h-16 items-center gap-2 border-b border-border/50 px-4">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <Music className="h-4 w-4" />
+          </div>
+          <Link
+            href="/"
+            className="min-w-0 flex-1 font-heading text-base font-semibold tracking-tight text-foreground"
+            onClick={() => setOpen(false)}
+          >
+            Piano Suite
+          </Link>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="md:hidden shrink-0 text-muted-foreground hover:text-foreground"
+            aria-label="Close navigation menu"
+            onClick={() => setOpen(false)}
+          >
+            <X className="h-5 w-5" />
+          </Button>
         </div>
-        <ul className="space-y-0.5">
-          {toolLinks.map((link) => {
-            const isActive = pathname === link.href;
-            const Icon = link.icon;
 
-            return (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className={cn(
-                    "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                  )}
-                >
-                  <Icon
+        {/* Nav */}
+        <nav className="flex-1 overflow-y-auto px-3 py-4">
+          <div className="mb-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Practice Tools
+          </div>
+          <ul className="space-y-0.5">
+            {toolLinks.map((link) => {
+              const isActive = pathname === link.href;
+              const Icon = link.icon;
+
+              return (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    onClick={() => setOpen(false)}
                     className={cn(
-                      "h-4 w-4 transition-colors",
+                      "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                       isActive
-                        ? "text-primary"
-                        : "text-muted-foreground group-hover:text-foreground"
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                     )}
-                  />
-                  {link.name}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+                  >
+                    <Icon
+                      className={cn(
+                        "h-4 w-4 transition-colors",
+                        isActive
+                          ? "text-primary"
+                          : "text-muted-foreground group-hover:text-foreground"
+                      )}
+                    />
+                    {link.name}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
 
-        <div className="mb-2 mt-6 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          Settings
-        </div>
-        <ul className="space-y-0.5">
-          <li>
-            <Link
-              href="/settings/theme"
-              className={cn(
-                "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                pathname === "/settings/theme"
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-              )}
-            >
-              <Palette
+          <div className="mb-2 mt-6 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Settings
+          </div>
+          <ul className="space-y-0.5">
+            <li>
+              <Link
+                href="/settings/theme"
+                onClick={() => setOpen(false)}
                 className={cn(
-                  "h-4 w-4 transition-colors",
+                  "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                   pathname === "/settings/theme"
-                    ? "text-primary"
-                    : "text-muted-foreground group-hover:text-foreground"
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                 )}
-              />
-              Theme
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/settings/atmosphere"
-              className={cn(
-                "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                pathname === "/settings/atmosphere"
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-              )}
-            >
-              <Aperture
+              >
+                <Palette
+                  className={cn(
+                    "h-4 w-4 transition-colors",
+                    pathname === "/settings/theme"
+                      ? "text-primary"
+                      : "text-muted-foreground group-hover:text-foreground"
+                  )}
+                />
+                Theme
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/settings/atmosphere"
+                onClick={() => setOpen(false)}
                 className={cn(
-                  "h-4 w-4 transition-colors",
+                  "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                   pathname === "/settings/atmosphere"
-                    ? "text-primary"
-                    : "text-muted-foreground group-hover:text-foreground"
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                 )}
-              />
-              Atmosphere
-            </Link>
-          </li>
-        </ul>
-      </nav>
+              >
+                <Aperture
+                  className={cn(
+                    "h-4 w-4 transition-colors",
+                    pathname === "/settings/atmosphere"
+                      ? "text-primary"
+                      : "text-muted-foreground group-hover:text-foreground"
+                  )}
+                />
+                Atmosphere
+              </Link>
+            </li>
+          </ul>
+        </nav>
 
-      {/* User account */}
-      <div className="border-t border-border/50 p-3">
-        <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground">
-          <AppUserButton
-            appearance={{
-              elements: {
-                avatarBox: "h-6 w-6 rounded-full",
-              },
-            }}
-          />
-          <span className="truncate">
-            {isLoaded ? user?.fullName ?? user?.primaryEmailAddress?.emailAddress ?? "Pianist" : "Pianist"}
-          </span>
+        {/* User account */}
+        <div className="border-t border-border/50 p-3">
+          <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground">
+            <AppUserButton
+              appearance={{
+                elements: {
+                  avatarBox: "h-6 w-6 rounded-full",
+                },
+              }}
+            />
+            <span className="truncate">
+              {isLoaded
+                ? (user?.fullName ??
+                  user?.primaryEmailAddress?.emailAddress ??
+                  "Pianist")
+                : "Pianist"}
+            </span>
+          </div>
         </div>
-      </div>
-    </aside>
+      </aside>
+    </>
   );
 }

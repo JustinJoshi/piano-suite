@@ -74,4 +74,26 @@ test.describe("/tools dashboard", () => {
     await expect(page).toHaveURL("/tools/tracking");
     await expect(page.getByRole("heading", { name: "Tracking" })).toBeVisible();
   });
+
+  test("mobile menu opens the sidebar drawer and navigates", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await signInAsTestUser(page);
+    await page.goto("/tools");
+
+    await expect(page.getByTestId("dashboard-menu-button")).toBeVisible();
+
+    const trackingLink = page
+      .locator("aside nav")
+      .getByRole("link", { name: "Tracking" });
+    await expect(trackingLink).toBeHidden();
+
+    await page.getByTestId("dashboard-menu-button").click();
+    await expect(trackingLink).toBeVisible();
+
+    await trackingLink.click();
+    await expect(page).toHaveURL("/tools/tracking");
+    await expect(page.getByRole("heading", { name: "Tracking" })).toBeVisible();
+  });
 });
