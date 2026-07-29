@@ -1,5 +1,10 @@
 # Julia Set Lab — Integration Plan
 
+> **Status: shipped** in `4a3a89e` (`feat: add Julia Set Lab as Chladni sibling math explorer`).
+> Kept as a historical record of the original plan. For current behavior see `README.md`
+> and the code under `app/tools/julia/` and `lib/julia.ts`. The "next steps" section below
+> is obsolete — the Lissajous Harmonic Lab has also shipped.
+
 ## Goal
 
 Add a **Julia Set Lab** at `/tools/julia` that mirrors the Chladni Pattern Lab: an interactive, theme-aware WebGL parameter explorer for a second mathematical visual concept. No MIDI, Anki, or Convex practice logging in v1.

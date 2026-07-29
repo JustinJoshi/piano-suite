@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PROJECT_DIR="/home/justin/piano-suite"
+# Resolve the repo root from this script's own location so the launcher works
+# from any clone path (checkouts, worktrees, cloud workspaces).
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOG_FILE="$PROJECT_DIR/.launcher.log"
 URL="http://localhost:3000"
 

@@ -100,7 +100,9 @@ The effect separates navigation from content without introducing solid bars that
 
 ## 8. Hero Visual Language
 
-The landing page keeps a **fixed, full-viewport** Three.js Chladni atmosphere pinned behind the translucent sticky navbar and all marketing content. Sparse hero copy (eyebrow, headline, one sentence, one CTA) sits in the first `min-h-svh` screen above a token-driven scrim; below the fold, opaque feature cards float over the same live pattern with transparent section shells.
+The landing page keeps a **fixed, full-viewport** Three.js math atmosphere pinned behind the translucent sticky navbar and all marketing content. Sparse hero copy (eyebrow, headline, one sentence, one CTA) sits in the first `min-h-svh` screen above a token-driven scrim; below the fold, opaque feature cards float over the same live pattern with transparent section shells.
+
+The hero visual is not fixed to one concept. `lib/hero-atmosphere.ts` defines the hero kind as `chladni | quasiperiodic` (Chladni is the default; Pattern Lab and Quasiperiodic Lab each switch it via **Apply to home**). Beyond the hero, `lib/ambient-effects.ts` lets any shipped visualization — Chladni, Quasiperiodic, MIDI Ripple, Julia, Lissajous — act as a per-route background or a floating panel, configured at `/settings/atmosphere`. Every variant follows the same restraint below: soft, theme-derived color and a scrim that never fades to a solid page background.
 
 - `.hero-scrim` — radial + vertical gradients using `--color-background` via `color-mix`, creating a quiet pocket behind hero text without fading to a solid page background, so the pattern continues under later sections. Kept light enough that pattern edges remain visible under/around the nav.
 - `.hero-glow` — layered radial accents using `hero-glow-*` tokens, kept light so it does not fight the scrim.

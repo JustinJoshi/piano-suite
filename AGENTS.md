@@ -88,6 +88,8 @@ Before making styling changes, read `DESIGN-PRINCIPLES.md` for the visual conven
 | `--color-accent` / `bg-accent`, `text-accent` | Accent highlights | `text-accent` |
 | `--color-background`, `--color-foreground`, `--color-card`, `--color-muted` | Surfaces and text | `bg-card text-foreground` |
 | `--color-grade-again`, `--grade-hard`, `--grade-good`, `--grade-easy`, `--grade-ungraded` | Anki-style grade badges/dots | `bg-grade-good` |
+| `--color-success` / `bg-success`, `text-success`, `border-success` | Positive feedback (MIDI connected, drill phase complete, success flash) | `bg-success/10 text-success` |
+| `--color-destructive` / `bg-destructive`, `text-destructive` | Errors and unsupported states | `text-destructive` |
 | `--hero-glow-*`, `--hero-orb-*`, `--beam-mid`, `--beam-highlight` | Hero section graphics | used by `.hero-glow`, `.hero-orb`, `.beam` |
 | `--color-sidebar-background` / `bg-sidebar-background` | Dashboard sidebar | `bg-sidebar-background` |
 | `--primary-glow` | Primary glow shadows | `shadow-[0_0_12px_2px_var(--primary-glow)]` |
@@ -121,12 +123,17 @@ Auth E2E specs (`e2e/auth-protection.spec.ts`, `e2e/chat-auth.spec.ts`) assert r
 
 ## Parallel Work & Git Worktrees
 
-**Always use a git worktree for any code change.** Do not edit files directly in `/home/justin/piano-suite` on `main`. Other agents may be active in parallel, and worktrees are the only reliable way to avoid file collisions. Each worktree is an independent working directory backed by the same repository.
+**Always use a git worktree for any code change** when working on a shared local checkout. Do not edit files directly in the main worktree on `main`. Other agents may be active in parallel, and worktrees are the only reliable way to avoid file collisions. Each worktree is an independent working directory backed by the same repository.
+
+Paths below use `$REPO_ROOT` for the main checkout (on the primary dev machine this is `~/piano-suite`; cloud agents get their own isolated clone, typically `/workspace`).
+
+> **Cloud agents:** you already have a dedicated VM and clone, so a worktree adds nothing. Create a branch in place instead and skip this section.
 
 ### Quick setup
 
 ```bash
-cd /home/justin/piano-suite
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
 mkdir -p .worktrees
 
 # Create a worktree + branch for the new task
@@ -144,15 +151,15 @@ cd .worktrees/kimi-arpeggios
 Work inside that directory only. Commit incrementally. When done, merge the branch into `main` from the main worktree and remove the worktree:
 
 ```bash
-cd /home/justin/piano-suite
+cd "$REPO_ROOT"
 git merge kimi/arpeggios
 git worktree remove .worktrees/kimi-arpeggios
 ```
 
 ### What to avoid
 
-- **Do not edit files directly in `/home/justin/piano-suite` on `main`.** Always create a worktree first, even if no other agent is visibly active.
-- **Do not run multiple agents in `/home/justin/piano-suite` at the same time.** They will overwrite each other's edits.
+- **Do not edit files directly in the main worktree on `main`.** Always create a worktree first, even if no other agent is visibly active.
+- **Do not run multiple agents in the same working directory at the same time.** They will overwrite each other's edits.
 - **Do not reuse branches across worktrees.** Git only allows one worktree per branch.
 - **Do not leave worktrees around after merging.** Remove them with `git worktree remove` so branch names stay available.
 
