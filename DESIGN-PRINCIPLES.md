@@ -116,12 +116,13 @@ Line color on the landing atmosphere is a **muted primary-into-background** tint
 
 The tools and settings sections follow a Vercel-style dashboard pattern:
 
-- Fixed left sidebar (`dashboard-sidebar`, `260px`) with `bg-sidebar-background`.
-- Main content offset by `dashboard-main margin-left: var(--sidebar-width)`.
-- Each tool is wrapped in `DrillShell`, which provides a sticky top header with title, subtitle, and optional right actions.
+- Fixed left sidebar (`dashboard-sidebar`, `260px`) with `bg-sidebar-background` on `md` and up.
+- Main content offset by `dashboard-main margin-left: var(--sidebar-width)` from `md` up; full-width below `md`.
+- Below `md`, the sidebar is an off-canvas drawer (slide over content) with a glass backdrop (`bg-background/60 backdrop-blur-sm`). Open it from the Menu control in sticky dashboard headers (`DrillShell`, Tools hub, Tracking) or the settings mobile top bar. Close via link navigation, backdrop tap, Escape, or the drawer close control.
+- Each tool is wrapped in `DrillShell`, which provides a sticky top header with title, subtitle, optional right actions, and the mobile Menu control.
 - Content is centered within `max-w-6xl` or `max-w-3xl` containers.
 
-This separates marketing pages (`/`, `/articles`, `/chat`) — which use the top `Navbar` — from the application workspace (`/tools/*`, `/settings/*`) — which uses the sidebar.
+This separates marketing pages (`/`, `/articles`, `/chat`) — which use the top `Navbar` — from the application workspace (`/tools/*`, `/settings/*`) — which uses the sidebar (fixed on desktop, drawer on mobile).
 
 ---
 
