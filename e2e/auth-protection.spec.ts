@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import { signInAsTestUser } from "./auth-helper";
 import {
   assertAuthBypassOffForE2E,
+  expectNoApplicationError,
   expectNotBare404,
   expectRedirectedToSignIn,
 } from "./auth-assertions";
@@ -50,7 +51,17 @@ test.describe("auth protection (bypass off)", () => {
     await signInAsTestUser(page);
     await page.goto("/tools");
     await expectNotBare404(page);
+    await expectNoApplicationError(page);
     await expect(page.getByRole("heading", { name: "Tools" })).toBeVisible();
+  });
+
+  test("signed-in homepage loads without application error", async ({ page }) => {
+    await signInAsTestUser(page);
+    await page.goto("/");
+    await expect(page).toHaveURL("/");
+    await expectNotBare404(page);
+    await expectNoApplicationError(page);
+    await expect(page.locator("body")).toContainText("Anki MIDI Chord Trainer");
   });
 
   test("deep link to tracking after sign-in reaches the tool", async ({
@@ -59,6 +70,7 @@ test.describe("auth protection (bypass off)", () => {
     await signInAsTestUser(page);
     await page.goto("/tools/tracking");
     await expectNotBare404(page);
+    await expectNoApplicationError(page);
     await expect(page).toHaveURL(/\/tools\/tracking/);
     await expect(page.getByRole("heading", { name: "Tracking" })).toBeVisible();
   });

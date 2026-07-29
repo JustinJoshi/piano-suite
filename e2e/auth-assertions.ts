@@ -12,6 +12,17 @@ export async function expectNotBare404(page: Page) {
 }
 
 /**
+ * Assert Next.js did not render the generic application error shell.
+ */
+export async function expectNoApplicationError(page: Page) {
+  await expect(
+    page.getByText("Application error: a client-side exception has occurred")
+  ).toHaveCount(0);
+  await expect(page.getByText("Something went wrong")).toHaveCount(0);
+  await expect(page.getByText(/this page could(n'?t| not) load/i)).toHaveCount(0);
+}
+
+/**
  * Assert an unauthenticated visit was sent to Clerk sign-in (not a bare 404).
  */
 export async function expectRedirectedToSignIn(page: Page) {

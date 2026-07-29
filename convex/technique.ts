@@ -1,25 +1,14 @@
-import { query, mutation, type QueryCtx, type MutationCtx } from "./_generated/server";
+import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-
-async function currentUserId(ctx: QueryCtx | MutationCtx) {
-  const identity = await ctx.auth.getUserIdentity();
-  if (!identity) {
-    throw new Error("Not authenticated");
-  }
-  const user = await ctx.db
-    .query("users")
-    .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-    .unique();
-  if (!user) {
-    throw new Error("User not found");
-  }
-  return user._id;
-}
+import { ensureUserId, optionalUserId } from "./lib/auth";
 
 export const listTechniqueSessions = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await currentUserId(ctx);
+    const userId = await optionalUserId(ctx);
+    if (!userId) {
+      return [];
+    }
     return await ctx.db
       .query("techniqueSessions")
       .withIndex("by_user", (q) => q.eq("userId", userId))
@@ -35,7 +24,7 @@ export const logTechniqueSession = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const userId = await currentUserId(ctx);
+    const userId = await ensureUserId(ctx);
     const existing = await ctx.db
       .query("techniqueSessions")
       .withIndex("by_user_date", (q) => q.eq("userId", userId).eq("date", args.date))
@@ -75,7 +64,7 @@ export const bulkImportTechniqueSessions = mutation({
     ),
   },
   handler: async (ctx, args) => {
-    const userId = await currentUserId(ctx);
+    const userId = await ensureUserId(ctx);
     let count = 0;
 
     for (const s of args.sessions) {
@@ -111,7 +100,7 @@ export const bulkImportTechniqueSessions = mutation({
 export const clearTechniqueSessions = mutation({
   args: {},
   handler: async (ctx) => {
-    const userId = await currentUserId(ctx);
+    const userId = await ensureUserId(ctx);
     const sessions = await ctx.db
       .query("techniqueSessions")
       .withIndex("by_user", (q) => q.eq("userId", userId))

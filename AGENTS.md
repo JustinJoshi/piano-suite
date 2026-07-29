@@ -32,6 +32,7 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `components/ensure-signed-in-user.tsx` | Bootstraps Convex `users` row on Clerk sign-in (homepage settings before tools) |
 | `lib/auth-disabled.ts` | Opt-in `isAuthDisabled()` (`=== "true"` only); Hobby Vercel may set temporarily (see README Deploy) |
 | `lib/chat-auth.ts` | Chat API allowlist decisions (`authorizeChatAccess`) |
+| `convex/lib/auth.ts` | `optionalUserId` / `ensureUserId` — queries return null/empty instead of throwing on missing user row |
 | `components/drills/drill-shell.tsx` | Shared layout wrapper for every tool page |
 
 ## Rules for tool pages

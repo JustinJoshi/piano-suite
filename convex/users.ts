@@ -1,7 +1,21 @@
 import { query, mutation } from "./_generated/server";
+import { v } from "convex/values";
+import { ensureUserId } from "./lib/auth";
 
 export const currentUser = query({
   args: {},
+  returns: v.union(
+    v.object({
+      _id: v.id("users"),
+      _creationTime: v.number(),
+      clerkId: v.string(),
+      email: v.optional(v.string()),
+      name: v.optional(v.string()),
+      imageUrl: v.optional(v.string()),
+      createdAt: v.number(),
+    }),
+    v.null()
+  ),
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return null;
@@ -14,39 +28,8 @@ export const currentUser = query({
 
 export const ensureCurrentUser = mutation({
   args: {},
+  returns: v.id("users"),
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Not authenticated");
-    }
-
-    const existing = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (existing) {
-      // Keep profile metadata in sync if it changed in Clerk.
-      if (
-        existing.email !== identity.email ||
-        existing.name !== identity.name ||
-        existing.imageUrl !== identity.pictureUrl
-      ) {
-        await ctx.db.patch(existing._id, {
-          email: identity.email,
-          name: identity.name,
-          imageUrl: identity.pictureUrl,
-        });
-      }
-      return existing._id;
-    }
-
-    return await ctx.db.insert("users", {
-      clerkId: identity.subject,
-      email: identity.email,
-      name: identity.name,
-      imageUrl: identity.pictureUrl,
-      createdAt: Date.now(),
-    });
+    return await ensureUserId(ctx);
   },
 });

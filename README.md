@@ -195,6 +195,14 @@ Production hosting is **Vercel Hobby** + **Convex Free** + **Clerk development**
    | Production | Production deploy key from the Convex **production** deployment (`deployment:deploy`) |
    | Preview | A non-production Convex deploy key (project **Preview Deploy Key** from Convex project settings, or a deploy key for a shared preview deployment). Do not reuse the production key. |
 
+   **Convex Preview deployments are empty and need Clerk config.** Each Vercel Preview build deploys to a fresh Convex preview deployment. In the Convex dashboard → **Project Settings → Preview deployments**, set default environment variables for preview deployments — at minimum:
+
+   | Variable | Notes |
+   |----------|--------|
+   | `CLERK_FRONTEND_API_URL` | Same Clerk Frontend API URL as production/dev (required for signed-in Convex queries) |
+
+   Without `CLERK_FRONTEND_API_URL` on preview deployments, Clerk sign-in can succeed in the browser while Convex rejects the JWT (`Not authenticated`), which previously crashed the homepage after login.
+
    Clerk / Kimi / allowlist vars should be enabled for **Preview** as well so PR preview URLs actually run.
 
 5. In Clerk (development instance):
