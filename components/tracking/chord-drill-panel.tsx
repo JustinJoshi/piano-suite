@@ -32,12 +32,22 @@ export function ChordDrillPanel() {
   );
   const { data: cachedEvents, isLoading, clear: clearCache } =
     useCachedTrackingQuery("chordDrillEvents", liveEvents);
-  const events = canPersist ? cachedEvents : localEvents;
+  type ChordRow = {
+    _id: string;
+    chord?: string;
+    reactionTimeMs: number;
+    grade?: string;
+    redo: boolean;
+    timestamp: number;
+  };
+  const events: ChordRow[] | undefined = canPersist
+    ? cachedEvents
+    : localEvents;
   const [selectedChord, setSelectedChord] = useState<string | null>(null);
 
   const groups = useMemo(() => {
     const eventsList = events ?? [];
-    const map = new Map<string, typeof eventsList>();
+    const map = new Map<string, ChordRow[]>();
     for (const e of eventsList) {
       if (!e.chord) continue;
       const list = map.get(e.chord) ?? [];

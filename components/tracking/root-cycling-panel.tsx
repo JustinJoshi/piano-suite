@@ -43,12 +43,24 @@ export function RootCyclingPanel() {
   );
   const { data: cachedEvents, isLoading, clear: clearCache } =
     useCachedTrackingQuery("rootCycleEvents", liveEvents);
-  const events = canPersist ? cachedEvents : localEvents;
+  type RootCycleRow = {
+    _id: string;
+    mode?: string;
+    quality?: string;
+    fromDeg?: string;
+    toDeg?: string;
+    root?: string;
+    reactionTimeMs: number;
+    timestamp: number;
+  };
+  const events: RootCycleRow[] | undefined = canPersist
+    ? cachedEvents
+    : localEvents;
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
   const groups = useMemo(() => {
     const eventsList = events ?? [];
-    const map = new Map<string, typeof eventsList>();
+    const map = new Map<string, RootCycleRow[]>();
     for (const e of eventsList) {
       const k = rcGroupKey(e.mode ?? "", e.quality, e.fromDeg, e.toDeg);
       const list = map.get(k) ?? [];

@@ -33,7 +33,6 @@ describe("local practice history", () => {
   });
 
   afterEach(() => {
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete (globalThis as { window?: unknown }).window;
   });
 

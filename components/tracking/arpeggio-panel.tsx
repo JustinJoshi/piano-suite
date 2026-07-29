@@ -53,14 +53,34 @@ export function ArpeggioPanel() {
     isLoading: missesLoading,
     clear: clearMissesCache,
   } = useCachedTrackingQuery("arpeggioMissEvents", liveMisses);
-  const events = canPersist ? cachedEvents : localEvents;
-  const misses = canPersist ? cachedMisses : localMisses;
+  type ArpeggioRow = {
+    _id: string;
+    chord?: string;
+    fromDeg?: string;
+    toDeg?: string;
+    reactionTimeMs: number;
+    timestamp: number;
+  };
+  type ArpeggioMissRow = {
+    _id: string;
+    chord: string;
+    fromDeg: string;
+    toDeg: string;
+    played: string;
+    timestamp: number;
+  };
+  const events: ArpeggioRow[] | undefined = canPersist
+    ? cachedEvents
+    : localEvents;
+  const misses: ArpeggioMissRow[] | undefined = canPersist
+    ? cachedMisses
+    : localMisses;
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
   const groups = useMemo(() => {
     const eventsList = events ?? [];
     const missesList = misses ?? [];
-    const map = new Map<string, typeof eventsList>();
+    const map = new Map<string, ArpeggioRow[]>();
     for (const e of eventsList) {
       if (!e.chord || !e.fromDeg || !e.toDeg) continue;
       const k = transitionKey(e.chord, e.fromDeg, e.toDeg);
