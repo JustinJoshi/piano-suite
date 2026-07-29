@@ -1,8 +1,13 @@
-import { test, expect } from "@playwright/test";
+import { test } from "@playwright/test";
+import {
+  assertAuthBypassOffForE2E,
+  expectRedirectedToSignIn,
+} from "./auth-assertions";
 
 test.describe("/tools/tracking unauthenticated", () => {
   test("redirects unauthenticated visitors to sign-in", async ({ page }) => {
+    assertAuthBypassOffForE2E();
     await page.goto("/tools/tracking");
-    await expect(page).toHaveURL(/.*sign-in.*/);
+    await expectRedirectedToSignIn(page);
   });
 });

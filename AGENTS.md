@@ -29,7 +29,9 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `components/ambient/*` | Root ambient host, renderer, background, float panel |
 | `hooks/useAuthAccess.ts` | Shared Clerk gate: `canAccess` / `canPersist`, respects `NEXT_PUBLIC_AUTH_DISABLED` |
 | `hooks/useToolUserReady.ts` | Ensures Convex user row when signed in; ready immediately when auth is disabled |
-| `lib/auth-disabled.ts` | `isAuthDisabled()` helper for middleware and API routes; Hobby Vercel may set the env temporarily (see README Deploy) |
+| `components/ensure-signed-in-user.tsx` | Bootstraps Convex `users` row on Clerk sign-in (homepage settings before tools) |
+| `lib/auth-disabled.ts` | Opt-in `isAuthDisabled()` (`=== "true"` only); Hobby Vercel may set temporarily (see README Deploy) |
+| `lib/chat-auth.ts` | Chat API allowlist decisions (`authorizeChatAccess`) |
 | `components/drills/drill-shell.tsx` | Shared layout wrapper for every tool page |
 
 ## Rules for tool pages

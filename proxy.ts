@@ -9,9 +9,11 @@ import { isAuthDisabled } from "@/lib/auth-disabled";
  * unless `NEXT_PUBLIC_AUTH_DISABLED=true`.
  *
  * Pattern Lab is public so visitors can customize the welcome hero without
- * signing in (prefs still sync to Convex when authenticated). Clerk's
- * `auth.protect()` otherwise rewrites unsigned tool hits to a bare 404
- * under development keys (`dev-browser-missing`).
+ * signing in (prefs still sync to Convex when authenticated).
+ *
+ * Always pass `unauthenticatedUrl` so document requests redirect to
+ * `/sign-in` instead of collapsing into a bare Next.js 404 (Clerk-dev +
+ * missing `dev-browser` handshake on `*.vercel.app` can otherwise do that).
  *
  * @see https://clerk.com/docs/reference/nextjs/clerk-middleware
  */
@@ -31,7 +33,8 @@ export default clerkMiddleware(async (auth, request) => {
     pathname.startsWith("/__clerk");
 
   if (!isPublicRoute) {
-    await auth.protect();
+    const signInUrl = new URL("/sign-in", request.url).href;
+    await auth.protect({ unauthenticatedUrl: signInUrl });
   }
 });
 

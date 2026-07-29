@@ -211,6 +211,16 @@ Production hosting is **Vercel Hobby** + **Convex Free** + **Clerk development**
 - GitHub auto-connect may require installing the Vercel GitHub app on the repo; CLI deploys work without it.
 - After opening a PR, use the Vercel **Visit Preview** link (agents should print it and open it once — see `AGENTS.md`).
 
+### Auth cutover checklist (remove bypass)
+
+When a custom domain + Clerk **production** keys are ready:
+
+1. Point the domain at Vercel; add it to Clerk allowed origins / redirect URLs.
+2. Set Vercel Production (and Preview) to `pk_live` / `sk_live` and the matching `CLERK_FRONTEND_API_URL`.
+3. On Convex production, set `CLERK_FRONTEND_API_URL` to that same Frontend API URL; keep the `convex` JWT template (`aud: "convex"`).
+4. **Unset** `NEXT_PUBLIC_AUTH_DISABLED` (or set `false`) on Production/Preview and **redeploy**.
+5. Verify with the auth suite below (local with bypass off) plus the production smoke checklist.
+
 ## Testing
 
 Unit tests run with Vitest and React Testing Library. They cover the primitive layer (music theory, scoring, Anki client) and the React hooks.
@@ -221,22 +231,40 @@ npm run test:unit
 
 # Run unit tests once
 npm run test:unit:run
+
+# Auth bypass + chat allowlist unit tests
+npm run test:unit:run -- lib/__tests__/auth-disabled.test.ts lib/__tests__/chat-auth.test.ts
 ```
 
 End-to-end tests run with Playwright. A deterministic test user is created automatically during global setup.
 
 Make sure the **Convex dev server is running** before starting tests, because the authenticated tracking tests hit the local Convex backend.
 
+**Auth verification e2e** (`e2e/auth-protection.spec.ts`, `e2e/chat-auth.spec.ts`) require `NEXT_PUBLIC_AUTH_DISABLED` to be **unset** (not `true`). Global setup fails fast if bypass is on unless `E2E_ALLOW_AUTH_DISABLED=true`.
+
 ```bash
 # Terminal 1: start Convex
 npx convex dev
 
-# Terminal 2: run tests
+# Terminal 2: run tests (bypass must be off)
 npm run test:e2e
+
+# Auth protection + chat gate only
+npx playwright test e2e/auth-protection.spec.ts e2e/chat-auth.spec.ts
 
 # Run with a single worker (useful for debugging)
 npx playwright test --workers=1
 ```
+
+### Production auth smoke (after cutover)
+
+On the **custom domain** (not only `*.vercel.app`):
+
+1. Incognito: `/tools` → redirect to sign-in (not a bare 404).
+2. Sign in → `/tools` and a drill page load.
+3. Firefox (default ETP): same as (1)–(2).
+4. Unsigned `/` and `/tools/chladni` still work.
+5. Confirm Vercel Production does **not** have `NEXT_PUBLIC_AUTH_DISABLED=true`.
 
 Test credentials are stored in `.env.local` as `E2E_CLERK_USER_EMAIL` and `E2E_CLERK_USER_PASSWORD`.
 
