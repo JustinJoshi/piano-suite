@@ -2,36 +2,25 @@
   "billing": {
     "user_enabled": true,
     "organization_enabled": false,
-    "features": [
-      {
-        "slug": "sync",
+    "features": {
+      "sync": {
         "name": "Cloud sync",
         "description": "Save practice history, personal bests, and preferences across devices via Convex."
       }
-    ],
-    "plans": [
-      {
-        "slug": "pro",
+    },
+    "plans": {
+      "pro": {
         "name": "Pro",
         "description": "Full drills with synced tracking, personal bests, and cross-device settings.",
-        "for_payer_type": "user",
+        "amount": 800,
+        "annual_monthly_amount": 600,
+        "currency": "usd",
+        "payer_type": "user",
         "is_recurring": true,
         "publicly_visible": true,
-        "fee": {
-          "amount": 800,
-          "currency": "usd"
-        },
-        "annual_fee": {
-          "amount": 7200,
-          "currency": "usd"
-        },
-        "annual_monthly_fee": {
-          "amount": 600,
-          "currency": "usd"
-        },
         "features": ["sync"],
         "free_trial_enabled": false
       }
-    ]
+    }
   }
 }

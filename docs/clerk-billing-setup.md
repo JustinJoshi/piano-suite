@@ -49,31 +49,46 @@ Dev instances use Clerk’s shared Stripe **test** gateway (no Stripe account).
 Production requires connecting your Stripe account under
 [Billing → Settings](https://dashboard.clerk.com/last-active?path=billing/settings).
 
-If `config patch` rejects the JSON shape, open `clerk/billing.pulled.json`
-(created by the script, gitignored), align field names, and re-run — or use Path B.
-Do **not** add comment keys like `$schema_note` to the JSON — Clerk rejects unknown
-config keys with HTTP 400.
+If `config patch` rejects the JSON shape, **use Path B (Dashboard)** — that is the
+reliable unblock. Optionally open `clerk/billing.pulled.json` (gitignored; written
+by the script), align field names with that pull shape, and re-run.
+
+Shape notes (PLAPI pull vs our desired patch):
+
+- Plans/features are **slug-keyed objects** in the pulled config (not arrays).
+- Plan money fields are flat: `amount`, `annual_monthly_amount`, `currency`,
+  `payer_type` — not nested `fee` / `for_payer_type` objects.
+- Do **not** add comment keys like `$schema_note` — Clerk rejects unknown keys
+  with HTTP 400.
 
 ---
 
-## Path B — Dashboard (manual)
+## Path B — Dashboard (manual) — use this if the CLI patch 400s
 
-1. Open [Billing → Settings](https://dashboard.clerk.com/last-active?path=billing/settings)  
-   Enable Billing for **Users**. Confirm the development gateway in dev.
-2. Open [Billing → Plans](https://dashboard.clerk.com/last-active?path=billing/plans) → **Plans for Users**.
-3. Keep / confirm **Free** (`free_user`).
-4. **Add Plan** → Pro  
+Billing for users may already be enabled (the script’s `enable billing` step
+succeeded). You only need to create Pro + `sync`:
+
+1. Open [Billing → Plans](https://dashboard.clerk.com/last-active?path=billing/plans) → **Plans for Users** (not Organizations).
+2. Keep / confirm **Free** (`free_user`).
+3. **Add Plan** → Pro  
    - Slug: `pro` (must match `PRO_PLAN_SLUG`)  
    - Publicly available: on  
    - Monthly: `$8.00`  
    - Annual: `$72.00` (or monthly equivalent `$6.00` if the UI asks that way)  
    - Free trial: off  
-5. On the Pro plan → **Add Feature**  
+4. On the Pro plan → **Add Feature**  
    - Name: Cloud sync  
    - Slug: `sync` (must match `SYNC_FEATURE_SLUG`)  
    - Description: Save practice history, personal bests, and preferences across devices.  
    - Publicly available: on (so it appears on the pricing table)
-6. Confirm Pro appears under **User** plans (wrong tab → empty `<PricingTable />`).
+5. Confirm Pro appears under **User** plans (wrong tab → empty `<PricingTable />`).
+
+Optional verify after creating:
+
+```bash
+npx clerk api /billing/plans
+# or: cat clerk/billing.pulled.json after re-running the script’s pull step
+```
 
 ---
 
