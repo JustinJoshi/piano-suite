@@ -5,11 +5,13 @@ import {
   PRO_PRICING,
   canPersistFromEntitlements,
   formatUsdFromCents,
+  hasSyncFromClerkClaims,
   localPracticeBanner,
   proAnnualEffectiveMonthlyCents,
   proAnnualLabel,
   proAnnualSavingsPercent,
   proMonthlyLabel,
+  splitClerkBillingClaim,
 } from "@/lib/billing";
 
 describe("billing catalog", () => {
@@ -79,5 +81,27 @@ describe("localPracticeBanner", () => {
     expect(localPracticeBanner("tracking")).toMatch(/sync/i);
     expect(localPracticeBanner("technique")).toMatch(/upgrade to Pro/i);
     expect(localPracticeBanner("technique")).not.toMatch(/sign-?in/i);
+  });
+});
+
+describe("Clerk Billing claim parsing", () => {
+  it("splits u:/o: scoped pla and fea claims", () => {
+    expect(splitClerkBillingClaim("u:pro")).toEqual({
+      user: ["pro"],
+      org: [],
+    });
+    expect(splitClerkBillingClaim("u:sync,o:dashboard")).toEqual({
+      user: ["sync"],
+      org: ["dashboard"],
+    });
+  });
+
+  it("detects Pro from fea sync or pla pro", () => {
+    expect(hasSyncFromClerkClaims({ fea: "u:sync", pla: "u:free_user" })).toBe(
+      true
+    );
+    expect(hasSyncFromClerkClaims({ pla: "u:pro" })).toBe(true);
+    expect(hasSyncFromClerkClaims({ pla: "u:free_user", fea: "" })).toBe(false);
+    expect(hasSyncFromClerkClaims({})).toBe(false);
   });
 });

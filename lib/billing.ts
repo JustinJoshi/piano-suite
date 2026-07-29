@@ -90,3 +90,53 @@ export function localPracticeBanner(
   return "Local practice mode — metronome works; upgrade to Pro to sync session history.";
 }
 
+/**
+ * Parse Clerk Billing session claims (`pla` / `fea`).
+ * Format: comma-separated `u:slug` / `o:slug` (user / org scope).
+ * @see https://clerk.com/docs/guides/secure/session-tokens
+ */
+export function splitClerkBillingClaim(
+  claim: string | null | undefined
+): { user: string[]; org: string[] } {
+  const user: string[] = [];
+  const org: string[] = [];
+  if (!claim || typeof claim !== "string") {
+    return { user, org };
+  }
+  for (const part of claim.split(",")) {
+    const trimmed = part.trim();
+    const colon = trimmed.indexOf(":");
+    if (colon === -1) continue;
+    const scope = trimmed.slice(0, colon);
+    const value = trimmed.slice(colon + 1);
+    if (!value) continue;
+    if (scope === "u" || scope === "user") user.push(value);
+    else if (scope === "o" || scope === "org" || scope === "organization") {
+      org.push(value);
+    } else if (scope === "ou" || scope === "uo") {
+      user.push(value);
+      org.push(value);
+    }
+  }
+  return { user, org };
+}
+
+/** True when JWT `pla`/`fea` (or camelCase aliases) grant Pro sync. */
+export function hasSyncFromClerkClaims(
+  claims: Record<string, unknown> | null | undefined
+): boolean {
+  if (!claims) return false;
+  const fea = claims.fea ?? claims.features;
+  const pla = claims.pla ?? claims.plans;
+  const features = splitClerkBillingClaim(
+    typeof fea === "string" ? fea : undefined
+  );
+  const plans = splitClerkBillingClaim(
+    typeof pla === "string" ? pla : undefined
+  );
+  return (
+    features.user.includes(SYNC_FEATURE_SLUG) ||
+    plans.user.includes(PRO_PLAN_SLUG)
+  );
+}
+
