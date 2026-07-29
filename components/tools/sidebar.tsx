@@ -15,6 +15,7 @@ import {
   Sparkles,
   Infinity,
   Hexagon,
+  Activity,
 } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { AppUserButton } from "@/components/app-user-button";
@@ -29,6 +30,7 @@ const toolLinks = [
   { name: "Technique", href: "/tools/technique", icon: Timer },
   { name: "Tracking", href: "/tools/tracking", icon: BarChart3 },
   { name: "Chladni Lab", href: "/tools/chladni", icon: Waves },
+  { name: "Chladni Ripple", href: "/tools/chladni-ripple", icon: Activity },
   { name: "Julia Lab", href: "/tools/julia", icon: Sparkles },
   { name: "Lissajous Lab", href: "/tools/lissajous", icon: Infinity },
   { name: "Quasiperiodic Lab", href: "/tools/quasiperiodic", icon: Hexagon },

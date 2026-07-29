@@ -28,6 +28,7 @@ This repository now contains:
 - A migrated **Root Cycling** (`/tools/root-cycling`) ported from Reflex Drill EXT, including chord mode with any quality and arpeggio mode with the canonical minor-11th shape, customizable root pools, per-attempt timing, and tracking aggregated by fixed idea across random keys.
 - A migrated **Technique habit tracker** (`/tools/technique`) ported from Reflex Drill EXT, including a built-in metronome, BPM logging, streak counter, 28-day practice grid, and a one-time import from the original `technique-habit-log-v1` localStorage key.
 - A **Chladni Pattern Lab** (`/tools/chladni`) — a public interactive square-plate waveform explorer for the landing-page hero shader, with live controls for modes, morph speed, line thickness, zoom, and secondary-wave blending. **Apply to home** copies the full Lab pattern onto the welcome hero; you can also set a pattern color and hero-scrim shade, or **Reset home** to the soft shipping defaults. Preferences persist in `localStorage` and sync to Convex when signed in (no account required to explore or apply locally).
+- A **Chladni Ripple** tool (`/tools/chladni-ripple`) — drives the Chladni visualization from live MIDI: pitch class → mode identity, octave → denser patterns, velocity → decaying intensity pulse, chords → secondary blend. Separate from the parameter explorer; no Apply-to-home in v1.
 - A **Julia Set Lab** (`/tools/julia`) — an interactive escape-time Julia set explorer with curated complex-parameter presets, morph between two `c` values, zoom, iterations, escape radius, and theme-aware coloring.
 - A **Lissajous Harmonic Lab** (`/tools/lissajous`) — an interactive frequency-ratio curve explorer with musical interval presets, phase/morph controls, and theme-aware Canvas trails.
 - A **Quasiperiodic Pattern Lab** (`/tools/quasiperiodic`) — an interactive N-fold plane-wave interference explorer with morphing recipes, zoom, and soft nodal contours. **Apply to home** switches the welcome atmosphere to the quasiperiodic field (Chladni Apply switches it back); pattern color and hero-scrim shade persist in `localStorage` and sync to Convex when signed in.
@@ -54,6 +55,7 @@ A shared **primitive layer** has been extracted from the original Reflex Drill E
 - `lib/root-cycling.ts` — random-root picker, canonical minor-11th shape, and settings schema
 - `lib/chladni.ts` — square-plate Chladni math and color helpers for the hero shader
 - `lib/chladni-hero-settings.ts` — serializable home-hero Chladni appearance (Apply / Reset from Pattern Lab)
+- `lib/chladni-ripple.ts` — MIDI pitch/octave/velocity → Chladni mode and intensity mapping
 - `lib/articles.ts` — Markdown article parsing, frontmatter handling, and listing helpers
 - `lib/anki.ts` — typed AnkiConnect client
 - `lib/themes.ts` — theme registry and helpers for the theming system
@@ -62,7 +64,8 @@ A shared **primitive layer** has been extracted from the original Reflex Drill E
 - `lib/quasiperiodic.ts` — N-fold quasiperiodic wave field math, presets, and helpers
 - `lib/quasiperiodic-hero-settings.ts` — serializable home-hero Quasiperiodic appearance
 - `lib/hero-atmosphere.ts` — which math visual drives the welcome hero (`chladni` | `quasiperiodic`)
-- `hooks/useMidi.ts` — Web MIDI device selection and held-note tracking
+- `hooks/useMidi.ts` — Web MIDI device selection and held-note tracking (note-on events include velocity)
+- `hooks/useChladniRipple.ts` — decaying MIDI impulses → Chladni visualization props
 - `hooks/useAudio.ts` — Web Audio chimes, ticks, and metronome
 - `hooks/useDrillTimer.ts` — generic drill timer state machine (single- or multi-rep)
 - `hooks/useAnkiSync.ts` — polling Anki for the current review card

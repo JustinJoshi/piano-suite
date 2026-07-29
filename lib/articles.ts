@@ -13,7 +13,7 @@ export interface Article {
 const ARTICLES_DIR = path.join(process.cwd(), "articles");
 
 function parseFrontmatter(raw: string): Omit<Article, "slug" | "content"> {
-  const match = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+  const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/);
   if (!match) {
     throw new Error("Invalid article format: missing frontmatter");
   }
@@ -21,7 +21,7 @@ function parseFrontmatter(raw: string): Omit<Article, "slug" | "content"> {
   const frontmatter = match[1];
   const fields: Record<string, string> = {};
 
-  for (const line of frontmatter.split("\n")) {
+  for (const line of frontmatter.split(/\r?\n/)) {
     const separatorIndex = line.indexOf(":");
     if (separatorIndex === -1) continue;
     const key = line.slice(0, separatorIndex).trim();
@@ -49,7 +49,7 @@ export function getArticleBySlug(slug: string): Article | null {
 
   const raw = fs.readFileSync(filePath, "utf-8");
   const metadata = parseFrontmatter(raw);
-  const content = raw.replace(/^---\n[\s\S]*?\n---\n/, "");
+  const content = raw.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, "");
 
   return {
     slug,

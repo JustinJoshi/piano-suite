@@ -15,7 +15,9 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `lib/music-theory.ts` | Note names, pitch classes, chord parsing, chord building, quality definitions |
 | `lib/scoring.ts` | Comparing held MIDI notes to target pitch-class sets and sequences |
 | `lib/anki.ts` | Typed AnkiConnect HTTP client and helpers |
-| `hooks/useMidi.ts` | Web MIDI access, device list, selected input, held notes |
+| `hooks/useMidi.ts` | Web MIDI access, device list, selected input, held notes; note-on events include velocity |
+| `hooks/useChladniRipple.ts` | MIDI impulses + held notes → Chladni viz props (Ripple Lab) |
+| `lib/chladni-ripple.ts` | Pitch-class → mode table, octave density, velocity decay mapping |
 | `hooks/useAudio.ts` | Web Audio chimes, ticks, metronome |
 | `hooks/useDrillTimer.ts` | Generic drill timer state machine |
 | `hooks/useAnkiSync.ts` | Poll Anki for current card and parse its chord |
