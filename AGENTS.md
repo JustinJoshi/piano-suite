@@ -32,7 +32,9 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `components/ensure-signed-in-user.tsx` | Bootstraps Convex `users` row on Clerk sign-in (homepage settings before tools) |
 | `lib/auth-disabled.ts` | Opt-in `isAuthDisabled()` (`=== "true"` only); Hobby Vercel may set temporarily (see README Deploy) |
 | `lib/chat-auth.ts` | Chat API allowlist decisions (`authorizeChatAccess`) |
-| `convex/lib/auth.ts` | `optionalUserId` / `ensureUserId` — queries return null/empty instead of throwing on missing user row |
+| `convex/lib/auth.ts` | `optionalUserId` (queries), `ensureUserId` (mutations, upserts the row), `requireUserId` (throws) |
+| `proxy.ts` | Clerk route gate (Next 16 proxy convention); public-route list + `unauthenticatedUrl` redirect |
+| `app/error.tsx`, `app/global-error.tsx` | Error boundaries so a thrown query cannot blank the app |
 | `components/drills/drill-shell.tsx` | Shared layout wrapper for every tool page |
 
 ## Rules for tool pages
@@ -42,6 +44,16 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 3. **Log practice events to Convex.** The `practiceEvents` and `missEvents` tables are the source of truth for tracking. Do not store drill history only in component state or localStorage.
 4. **Keep Anki integration optional.** All Anki features must degrade gracefully when AnkiConnect is not running.
 5. **Add unit tests for pure logic.** Chord parsing, scoring, and Anki client behavior must be tested with Vitest. Hook behavior should be tested with React Testing Library.
+
+## Convex auth conventions
+
+Auth helpers live in `convex/lib/auth.ts`. Do not re-implement a local `currentUserId` in new Convex modules.
+
+1. **Queries must not throw for a signed-in user.** Use `optionalUserId(ctx)` and return a neutral value (`null`, `[]`) when it returns `null`. A signed-in user may not have a `users` row yet — that is a normal state, not an error.
+2. **Mutations use `ensureUserId(ctx)`.** It creates the `users` row on first write, so a write can never lose a race with the client-side bootstrap. Use `requireUserId(ctx)` only when creating the row would be wrong.
+3. **Never throw into a root provider.** `AmbientEffectsProvider` and the theme hooks query Convex from the root layout, so a thrown query error unmounts the entire app. This is exactly what caused the post-login blank page on preview deploys.
+4. **Add `returns` validators** to new public queries and mutations.
+5. **Cover auth edge cases with `convex-test`.** See `convex/__tests__/settings-auth.test.ts` for the no-identity / no-user-row / first-write cases.
 
 ## Naming conventions
 
