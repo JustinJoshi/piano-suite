@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChladniVisualization } from "@/components/welcome/chladni-visualization";
 import { useHeroChladniSettings } from "@/hooks/useHeroChladniSettings";
 import { useHeroAtmosphereKind } from "@/hooks/useHeroAtmosphereKind";
+import { useAmbientEffects } from "@/hooks/useAmbientEffects";
 import {
   DEFAULT_HERO_CHLADNI_SETTINGS,
   type ModePair,
@@ -66,6 +67,7 @@ export function ChladniLab() {
   const { settings, applyFromLab, updateSettings, resetSettings } =
     useHeroChladniSettings();
   const { setKind } = useHeroAtmosphereKind();
+  const { setRouteBackground } = useAmbientEffects();
 
   const [mode, setMode] = useState<ModePair>([5, 7]);
   const [nextMode, setNextMode] = useState<ModePair>([7, 9]);
@@ -199,12 +201,14 @@ export function ChladniLab() {
       colorSoftness: 0,
     });
     setKind("chladni");
+    setRouteBackground("/", "chladni");
     setApplyMessage("Applied to the welcome page.");
   }
 
   function handleResetHome() {
     resetSettings();
     setKind("chladni");
+    setRouteBackground("/", "chladni");
     snapLabToHeroDefaults({
       setMode,
       setNextMode,

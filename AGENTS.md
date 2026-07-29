@@ -24,6 +24,9 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `hooks/useAnkiSync.ts` | Poll Anki for current card and parse its chord |
 | `hooks/useThemeCssVars.ts` | Read theme CSS custom properties and watch for theme changes; useful for Canvas/WebGL visuals |
 | `hooks/useHeroAtmosphereKind.ts` | Welcome hero visual kind (`chladni` \| `quasiperiodic`); localStorage + Convex |
+| `lib/ambient-effects.ts` | Per-route ambient backgrounds + float panel settings, soft viz defaults |
+| `hooks/useAmbientEffects.ts` | `AmbientEffectsProvider` + hook for ambient backgrounds / float (localStorage + Convex) |
+| `components/ambient/*` | Root ambient host, renderer, background, float panel |
 | `hooks/useAuthAccess.ts` | Shared Clerk gate: `canAccess` / `canPersist`, respects `NEXT_PUBLIC_AUTH_DISABLED` |
 | `hooks/useToolUserReady.ts` | Ensures Convex user row when signed in; ready immediately when auth is disabled |
 | `lib/auth-disabled.ts` | `isAuthDisabled()` helper for middleware and API routes; Hobby Vercel may set the env temporarily (see README Deploy) |
@@ -56,6 +59,11 @@ Before making styling changes, read `DESIGN-PRINCIPLES.md` for the visual conven
 - `lib/themes.ts` — the registry of preset themes (`amber`, `rose`, `emerald`, `ocean`, `violet`, `slate`).
 - `hooks/useThemePreference.ts` — the hook for reading and setting the active theme.
 - `app/settings/theme/page.tsx` — the user-facing theme picker.
+- `app/settings/atmosphere/page.tsx` — per-route ambient backgrounds and float panel.
+
+### Ambient effects
+
+`AmbientEffectsProvider` in `app/layout.tsx` owns a single shared store for page backgrounds and the float panel. Use `useAmbientEffects()` — do not instantiate a second ambient store. Background ownership for Welcome (`/`) lives in `AmbientEffectsHost`; Pattern Lab **Apply to home** still writes hero param blobs and also sets the ambient `/` kind. MIDI reactivity is only wired for `chladni-ripple`. Soft ambient defaults live in `lib/ambient-effects.ts` so tools stay readable.
 
 ### Tokens you should use
 

@@ -4,6 +4,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { shadcn } from "@clerk/ui/themes";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AmbientEffectsHost } from "@/components/ambient/ambient-effects-host";
+import { AmbientEffectsProvider } from "@/hooks/useAmbientEffects";
 import { defaultTheme, themeIds } from "@/lib/themes";
 import "./globals.css";
 
@@ -49,7 +51,12 @@ export default function RootLayout({
           themes={[...themeIds]}
         >
           <ClerkProvider appearance={{ theme: shadcn }}>
-            <ConvexClientProvider>{children}</ConvexClientProvider>
+            <ConvexClientProvider>
+              <AmbientEffectsProvider>
+                <AmbientEffectsHost />
+                {children}
+              </AmbientEffectsProvider>
+            </ConvexClientProvider>
           </ClerkProvider>
         </ThemeProvider>
       </body>

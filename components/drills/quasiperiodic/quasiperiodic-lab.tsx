@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { QuasiperiodicVisualization } from "@/components/drills/quasiperiodic/quasiperiodic-visualization";
 import { useHeroQuasiperiodicSettings } from "@/hooks/useHeroQuasiperiodicSettings";
 import { useHeroAtmosphereKind } from "@/hooks/useHeroAtmosphereKind";
+import { useAmbientEffects } from "@/hooks/useAmbientEffects";
 import {
   DEFAULT_HERO_QUASIPERIODIC_SETTINGS,
   DEFAULT_LAB_QUASIPERIODIC_SNAPSHOT,
@@ -50,6 +51,7 @@ export function QuasiperiodicLab() {
   const { settings, applyFromLab, updateSettings, resetSettings } =
     useHeroQuasiperiodicSettings();
   const { setKind } = useHeroAtmosphereKind();
+  const { setRouteBackground } = useAmbientEffects();
 
   const labDefaults = DEFAULT_LAB_QUASIPERIODIC_SNAPSHOT;
   const [recipe, setRecipe] = useState<WaveRecipe>(labDefaults.recipe);
@@ -163,12 +165,14 @@ export function QuasiperiodicLab() {
       colorSoftness: 0,
     });
     setKind("quasiperiodic");
+    setRouteBackground("/", "quasiperiodic");
     setApplyMessage("Applied to the welcome page.");
   }
 
   function handleResetHome() {
     resetSettings();
     setKind("quasiperiodic");
+    setRouteBackground("/", "quasiperiodic");
     snapLabToHeroDefaults({
       setRecipe,
       setNextRecipe,

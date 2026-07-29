@@ -31,12 +31,21 @@ vi.mock("@/hooks/useHeroAtmosphereKind", () => ({
   }),
 }));
 
+const setRouteBackground = vi.fn();
+
+vi.mock("@/hooks/useAmbientEffects", () => ({
+  useAmbientEffects: () => ({
+    setRouteBackground,
+  }),
+}));
+
 describe("QuasiperiodicLab", () => {
   beforeEach(() => {
     applyFromLab.mockClear();
     updateSettings.mockClear();
     resetSettings.mockClear();
     setKind.mockClear();
+    setRouteBackground.mockClear();
   });
 
   it("renders the parameter controls and presets", () => {
@@ -76,6 +85,7 @@ describe("QuasiperiodicLab", () => {
     expect(snapshot.lineIntensity).toBe(1);
     expect(snapshot.colorSoftness).toBe(0);
     expect(setKind).toHaveBeenCalledWith("quasiperiodic");
+    expect(setRouteBackground).toHaveBeenCalledWith("/", "quasiperiodic");
     expect(screen.getByRole("status")).toHaveTextContent(
       /Applied to the welcome page/i
     );
@@ -88,6 +98,7 @@ describe("QuasiperiodicLab", () => {
 
     expect(resetSettings).toHaveBeenCalledTimes(1);
     expect(setKind).toHaveBeenCalledWith("quasiperiodic");
+    expect(setRouteBackground).toHaveBeenCalledWith("/", "quasiperiodic");
     expect(screen.getByRole("status")).toHaveTextContent(/reset to the default/i);
   });
 

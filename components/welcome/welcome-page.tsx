@@ -1,51 +1,39 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { Navbar } from "@/components/navbar";
+import { useAmbientEffects } from "@/hooks/useAmbientEffects";
 import { useHeroChladniSettings } from "@/hooks/useHeroChladniSettings";
 import { useHeroQuasiperiodicSettings } from "@/hooks/useHeroQuasiperiodicSettings";
-import { useHeroAtmosphereKind } from "@/hooks/useHeroAtmosphereKind";
 import { HeroSection } from "./hero-section";
 import { FeatureSection } from "./feature-section";
 import { FlowSection } from "./flow-section";
 import { DeckSection } from "./deck-section";
 import { CtaSection } from "./cta-section";
 
-const ChladniBackground = dynamic(
-  () => import("./chladni-background").then((mod) => mod.ChladniBackground),
-  { ssr: false }
-);
-
-const QuasiperiodicBackground = dynamic(
-  () =>
-    import("./quasiperiodic-background").then(
-      (mod) => mod.QuasiperiodicBackground
-    ),
-  { ssr: false }
-);
-
+/**
+ * Welcome / marketing page.
+ *
+ * Full-bleed atmosphere is owned by AmbientEffectsHost in the root layout.
+ * This page only supplies content + the hero scrim pocket.
+ */
 export function WelcomePage() {
-  const { kind } = useHeroAtmosphereKind();
+  const { settings: ambient, backgroundFor } = useAmbientEffects();
   const { settings: chladniSettings } = useHeroChladniSettings();
   const { settings: quasiperiodicSettings } = useHeroQuasiperiodicSettings();
 
-  const activeSettings =
-    kind === "quasiperiodic" ? quasiperiodicSettings : chladniSettings;
+  const kind = backgroundFor("/");
+  const heroScrimSettings =
+    kind === "quasiperiodic"
+      ? quasiperiodicSettings
+      : kind === "chladni"
+        ? chladniSettings
+        : { scrimDarkness: ambient.scrimDarkness };
 
   return (
-    <div className="relative flex min-h-screen flex-col">
-      <div className="pointer-events-none fixed inset-0 z-0">
-        {kind === "quasiperiodic" ? (
-          <QuasiperiodicBackground settings={quasiperiodicSettings} />
-        ) : (
-          <ChladniBackground settings={chladniSettings} />
-        )}
-      </div>
-
-      <div className="relative z-10 flex min-h-screen flex-col">
-        <Navbar />
-        <main className="flex-1">
-          <HeroSection settings={activeSettings} />
+    <div className="relative z-10 flex min-h-screen flex-col">
+      <Navbar />
+      <main className="flex-1">
+        <HeroSection settings={heroScrimSettings} />
 
           <FeatureSection
             number="01"
@@ -166,7 +154,6 @@ export function WelcomePage() {
             repetition and real keys.
           </div>
         </footer>
-      </div>
     </div>
   );
 }
