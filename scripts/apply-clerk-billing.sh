@@ -76,9 +76,11 @@ if [[ "$APPLY" -eq 1 ]]; then
 else
   "${CLERK[@]}" config patch --file "$DESIRED" --dry-run "${INSTANCE_ARGS[@]+"${INSTANCE_ARGS[@]}"}" || {
     echo ""
-    echo "Dry-run failed (schema may differ). Open docs/clerk-billing-setup.md and" >&2
-    echo "create Pro + sync manually, or edit clerk/billing.desired.json to match" >&2
-    echo "the shape in clerk/billing.pulled.json, then re-run with --apply." >&2
+    echo "Dry-run failed (schema may differ)." >&2
+    echo "Fastest unblock: create Pro (slug pro, \$8/mo / \$72/yr) + feature sync" >&2
+    echo "in Dashboard → Billing → Plans → Plans for Users." >&2
+    echo "See Path B in docs/clerk-billing-setup.md." >&2
+    echo "Or align clerk/billing.desired.json with clerk/billing.pulled.json and retry." >&2
     exit 1
   }
   echo ""
