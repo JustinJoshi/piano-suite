@@ -173,14 +173,26 @@ Queries must never throw for a signed-in user whose row does not exist yet. `set
    cp .env.example .env.local
    ```
 
-2. Fill in real credentials:
+2. Fill in real credentials. `.env.example` documents every variable the app reads; the required ones are:
 
-   - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` from [Clerk](https://clerk.dev)
-   - `CLERK_FRONTEND_API_URL` (e.g. `https://<your-app>.clerk.accounts.dev`)
-   - `NEXT_PUBLIC_CONVEX_URL` from your Convex project
-   - `KIMI_CODE_API_KEY`, `KIMI_CODE_BASE_URL`, and `KIMI_CODE_MODEL` from the [Kimi Code Console](https://www.kimi.com/code/console)
-   - `ALLOWED_CLERK_USER_ID` — the Clerk user ID that is permitted to use `/chat`
-   - Optional local bypass: `NEXT_PUBLIC_AUTH_DISABLED=true` opens **every** route without signing in, including `/chat` (local/dev only; Convex saves still need a session). Restart `npm run dev` after changing it — see [the bypass notes](#the-next_public_auth_disabled-bypass).
+   | Variable | Where it comes from |
+   |----------|---------------------|
+   | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | [Clerk](https://dashboard.clerk.com) → API keys |
+   | `CLERK_SECRET_KEY` | Clerk → API keys |
+   | `CLERK_FRONTEND_API_URL` | e.g. `https://<your-app>.clerk.accounts.dev` |
+   | `NEXT_PUBLIC_CONVEX_URL` | printed by `npx convex dev` |
+   | `KIMI_CODE_API_KEY` / `KIMI_CODE_BASE_URL` / `KIMI_CODE_MODEL` | [Kimi Code Console](https://www.kimi.com/code/console) |
+   | `ALLOWED_CLERK_USER_ID` | the one Clerk user id allowed to use `/chat` |
+
+   Optional:
+
+   | Variable | Purpose |
+   |----------|---------|
+   | `NEXT_PUBLIC_ANKI_CONNECT_URL` | AnkiConnect endpoint; defaults to `http://127.0.0.1:8765` |
+   | `NEXT_PUBLIC_AUTH_DISABLED` | `true` opens **every** route without signing in, including `/chat`. Convex saves still need a session. Restart `npm run dev` after changing it — see [the bypass notes](#the-next_public_auth_disabled-bypass) |
+   | `NEXT_PUBLIC_CLERK_SIGN_IN_URL` / `_SIGN_UP_URL` / `_FALLBACK_REDIRECT_URL` | Clerk redirect overrides |
+   | `E2E_CLERK_USER_EMAIL` / `E2E_CLERK_USER_PASSWORD` | Playwright test user (required to run E2E; password ≥ 8 chars) |
+   | `E2E_ALLOW_AUTH_DISABLED` | skips the E2E guard that refuses to run with the bypass on |
 
 3. Configure Clerk authentication for email and password only:
 
@@ -235,6 +247,7 @@ Production hosting is **Vercel Hobby** + **Convex Free** + **Clerk development**
    | `CLERK_FRONTEND_API_URL` | Clerk Frontend API URL |
    | `KIMI_CODE_API_KEY` / `KIMI_CODE_BASE_URL` / `KIMI_CODE_MODEL` | Same as local |
    | `ALLOWED_CLERK_USER_ID` | Your Clerk user id for `/chat` |
+   | `NEXT_PUBLIC_ANKI_CONNECT_URL` | Optional; only if AnkiConnect is not on the default port |
    | `NEXT_PUBLIC_CLERK_SIGN_IN_URL` | `/sign-in` |
    | `NEXT_PUBLIC_CLERK_SIGN_UP_URL` | `/sign-up` |
    | `NEXT_PUBLIC_CLERK_*_FALLBACK_REDIRECT_URL` | `/` |
