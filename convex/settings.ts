@@ -1,20 +1,6 @@
-import { query, mutation, type QueryCtx, type MutationCtx } from "./_generated/server";
+import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-
-async function currentUserId(ctx: QueryCtx | MutationCtx) {
-  const identity = await ctx.auth.getUserIdentity();
-  if (!identity) {
-    throw new Error("Not authenticated");
-  }
-  const user = await ctx.db
-    .query("users")
-    .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-    .unique();
-  if (!user) {
-    throw new Error("User not found");
-  }
-  return user._id;
-}
+import { ensureUserId, optionalUserId } from "./lib/auth";
 
 /**
  * Generic per-user settings store.
@@ -25,8 +11,13 @@ async function currentUserId(ctx: QueryCtx | MutationCtx) {
 
 export const getSetting = query({
   args: { key: v.string() },
+  returns: v.union(v.any(), v.null()),
   handler: async (ctx, args) => {
-    const userId = await currentUserId(ctx);
+    const userId = await optionalUserId(ctx);
+    if (!userId) {
+      return null;
+    }
+
     const setting = await ctx.db
       .query("settings")
       .withIndex("by_user_key", (q) => q.eq("userId", userId).eq("key", args.key))
@@ -37,8 +28,9 @@ export const getSetting = query({
 
 export const setSetting = mutation({
   args: { key: v.string(), value: v.any() },
+  returns: v.null(),
   handler: async (ctx, args) => {
-    const userId = await currentUserId(ctx);
+    const userId = await ensureUserId(ctx);
     const existing = await ctx.db
       .query("settings")
       .withIndex("by_user_key", (q) => q.eq("userId", userId).eq("key", args.key))
@@ -53,5 +45,7 @@ export const setSetting = mutation({
         value: args.value,
       });
     }
+
+    return null;
   },
 });

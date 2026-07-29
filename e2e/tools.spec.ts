@@ -1,5 +1,9 @@
 import { test, expect } from "@playwright/test";
 import { signInAsTestUser } from "./auth-helper";
+import {
+  assertAuthBypassOffForE2E,
+  expectRedirectedToSignIn,
+} from "./auth-assertions";
 
 const SIDEBAR_TOOLS = [
   "Welcome",
@@ -13,10 +17,11 @@ const SIDEBAR_TOOLS = [
 
 test.describe("/tools dashboard", () => {
   test("redirects unauthenticated visitors to sign-in", async ({ page }) => {
+    assertAuthBypassOffForE2E();
     await page.goto("/tools");
 
     // Clerk middleware will redirect to /sign-in when there is no session.
-    await expect(page).toHaveURL(/.*sign-in.*/);
+    await expectRedirectedToSignIn(page);
   });
 
   test("renders the authenticated tools page and sidebar navigation", async ({

@@ -29,7 +29,12 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `components/ambient/*` | Root ambient host, renderer, background, float panel |
 | `hooks/useAuthAccess.ts` | Shared Clerk gate: `canAccess` / `canPersist`, respects `NEXT_PUBLIC_AUTH_DISABLED` |
 | `hooks/useToolUserReady.ts` | Ensures Convex user row when signed in; ready immediately when auth is disabled |
-| `lib/auth-disabled.ts` | `isAuthDisabled()` helper for middleware and API routes; Hobby Vercel may set the env temporarily (see README Deploy) |
+| `components/ensure-signed-in-user.tsx` | Bootstraps Convex `users` row on Clerk sign-in (homepage settings before tools) |
+| `lib/auth-disabled.ts` | Opt-in `isAuthDisabled()` (`=== "true"` only); Hobby Vercel may set temporarily (see README Deploy) |
+| `lib/chat-auth.ts` | Chat API allowlist decisions (`authorizeChatAccess`) |
+| `convex/lib/auth.ts` | `optionalUserId` (queries), `ensureUserId` (mutations, upserts the row), `requireUserId` (throws) |
+| `proxy.ts` | Clerk route gate (Next 16 proxy convention); public-route list + `unauthenticatedUrl` redirect |
+| `app/error.tsx`, `app/global-error.tsx` | Error boundaries so a thrown query cannot blank the app |
 | `components/drills/drill-shell.tsx` | Shared layout wrapper for every tool page |
 
 ## Rules for tool pages
@@ -39,6 +44,16 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 3. **Log practice events to Convex.** The `practiceEvents` and `missEvents` tables are the source of truth for tracking. Do not store drill history only in component state or localStorage.
 4. **Keep Anki integration optional.** All Anki features must degrade gracefully when AnkiConnect is not running.
 5. **Add unit tests for pure logic.** Chord parsing, scoring, and Anki client behavior must be tested with Vitest. Hook behavior should be tested with React Testing Library.
+
+## Convex auth conventions
+
+Auth helpers live in `convex/lib/auth.ts`. Do not re-implement a local `currentUserId` in new Convex modules.
+
+1. **Queries must not throw for a signed-in user.** Use `optionalUserId(ctx)` and return a neutral value (`null`, `[]`) when it returns `null`. A signed-in user may not have a `users` row yet — that is a normal state, not an error.
+2. **Mutations use `ensureUserId(ctx)`.** It creates the `users` row on first write, so a write can never lose a race with the client-side bootstrap. Use `requireUserId(ctx)` only when creating the row would be wrong.
+3. **Never throw into a root provider.** `AmbientEffectsProvider` and the theme hooks query Convex from the root layout, so a thrown query error unmounts the entire app. This is exactly what caused the post-login blank page on preview deploys.
+4. **Add `returns` validators** to new public queries and mutations.
+5. **Cover auth edge cases with `convex-test`.** See `convex/__tests__/settings-auth.test.ts` for the no-identity / no-user-row / first-write cases.
 
 ## Naming conventions
 
@@ -99,6 +114,10 @@ For Canvas or WebGL visuals that cannot use Tailwind utilities, read the CSS cus
 - Unit tests: `npm run test:unit:run`
 - E2E tests: `npm run test:e2e`
 - All new primitives must have unit tests before a tool migration is considered complete.
+
+Vitest collects specs from `lib/`, `hooks/`, `components/`, **and `convex/`**. Convex functions are tested with [`convex-test`](https://docs.convex.dev/testing/convex-test) — see `convex/__tests__/settings-auth.test.ts`, which uses `t.withIdentity()` to simulate a Clerk session and guards the auth edge cases (no identity, signed in with no `users` row, first write creating the row).
+
+Auth E2E specs (`e2e/auth-protection.spec.ts`, `e2e/chat-auth.spec.ts`) assert real Clerk gating, so global setup **fails fast when `NEXT_PUBLIC_AUTH_DISABLED=true`** unless you set `E2E_ALLOW_AUTH_DISABLED=true`. Shared assertions live in `e2e/auth-assertions.ts` — reuse `expectRedirectedToSignIn`, `expectNotBare404`, and `expectNoApplicationError` rather than writing new URL/error checks.
 
 ## Parallel Work & Git Worktrees
 

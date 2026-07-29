@@ -1,19 +1,16 @@
-import { query, mutation, type QueryCtx, type MutationCtx } from "./_generated/server";
+import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { ensureUserId, optionalUserId } from "./lib/auth";
 
-async function currentUserId(ctx: QueryCtx | MutationCtx) {
-  const identity = await ctx.auth.getUserIdentity();
-  if (!identity) {
-    throw new Error("Not authenticated");
+async function listEventsForUserOrEmpty<T>(
+  ctx: Parameters<typeof optionalUserId>[0],
+  load: (userId: Awaited<ReturnType<typeof optionalUserId>> & {}) => Promise<T[]>
+): Promise<T[]> {
+  const userId = await optionalUserId(ctx);
+  if (!userId) {
+    return [];
   }
-  const user = await ctx.db
-    .query("users")
-    .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-    .unique();
-  if (!user) {
-    throw new Error("User not found");
-  }
-  return user._id;
+  return await load(userId);
 }
 
 // --------------------------------------------------------------------------
@@ -23,55 +20,60 @@ async function currentUserId(ctx: QueryCtx | MutationCtx) {
 export const listChordDrillEvents = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await currentUserId(ctx);
-    return await ctx.db
-      .query("practiceEvents")
-      .withIndex("by_user_tool", (q) => q.eq("userId", userId).eq("tool", "chord-drill"))
-      .collect();
+    return await listEventsForUserOrEmpty(ctx, async (userId) =>
+      await ctx.db
+        .query("practiceEvents")
+        .withIndex("by_user_tool", (q) => q.eq("userId", userId).eq("tool", "chord-drill"))
+        .collect()
+    );
   },
 });
 
 export const listArpeggioEvents = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await currentUserId(ctx);
-    return await ctx.db
-      .query("practiceEvents")
-      .withIndex("by_user_tool", (q) => q.eq("userId", userId).eq("tool", "arpeggios"))
-      .collect();
+    return await listEventsForUserOrEmpty(ctx, async (userId) =>
+      await ctx.db
+        .query("practiceEvents")
+        .withIndex("by_user_tool", (q) => q.eq("userId", userId).eq("tool", "arpeggios"))
+        .collect()
+    );
   },
 });
 
 export const listArpeggioMissEvents = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await currentUserId(ctx);
-    return await ctx.db
-      .query("missEvents")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .collect();
+    return await listEventsForUserOrEmpty(ctx, async (userId) =>
+      await ctx.db
+        .query("missEvents")
+        .withIndex("by_user", (q) => q.eq("userId", userId))
+        .collect()
+    );
   },
 });
 
 export const listRootCycleEvents = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await currentUserId(ctx);
-    return await ctx.db
-      .query("practiceEvents")
-      .withIndex("by_user_tool", (q) => q.eq("userId", userId).eq("tool", "root-cycling"))
-      .collect();
+    return await listEventsForUserOrEmpty(ctx, async (userId) =>
+      await ctx.db
+        .query("practiceEvents")
+        .withIndex("by_user_tool", (q) => q.eq("userId", userId).eq("tool", "root-cycling"))
+        .collect()
+    );
   },
 });
 
 export const listProgressionEvents = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await currentUserId(ctx);
-    return await ctx.db
-      .query("practiceEvents")
-      .withIndex("by_user_tool", (q) => q.eq("userId", userId).eq("tool", "progression"))
-      .collect();
+    return await listEventsForUserOrEmpty(ctx, async (userId) =>
+      await ctx.db
+        .query("practiceEvents")
+        .withIndex("by_user_tool", (q) => q.eq("userId", userId).eq("tool", "progression"))
+        .collect()
+    );
   },
 });
 
@@ -87,7 +89,7 @@ export const logChordDrillEvent = mutation({
     grade: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const userId = await currentUserId(ctx);
+    const userId = await ensureUserId(ctx);
     return await ctx.db.insert("practiceEvents", {
       userId,
       tool: "chord-drill",
@@ -106,7 +108,7 @@ export const updateChordDrillGrade = mutation({
     grade: v.string(),
   },
   handler: async (ctx, args) => {
-    const userId = await currentUserId(ctx);
+    const userId = await ensureUserId(ctx);
     const event = await ctx.db.get(args.eventId);
     if (!event || event.userId !== userId || event.tool !== "chord-drill") {
       throw new Error("Event not found");
@@ -123,7 +125,7 @@ export const logArpeggioTransition = mutation({
     reactionTimeMs: v.number(),
   },
   handler: async (ctx, args) => {
-    const userId = await currentUserId(ctx);
+    const userId = await ensureUserId(ctx);
     return await ctx.db.insert("practiceEvents", {
       userId,
       tool: "arpeggios",
@@ -145,7 +147,7 @@ export const logArpeggioMiss = mutation({
     played: v.string(),
   },
   handler: async (ctx, args) => {
-    const userId = await currentUserId(ctx);
+    const userId = await ensureUserId(ctx);
     return await ctx.db.insert("missEvents", {
       userId,
       tool: "arpeggios",
@@ -169,7 +171,7 @@ export const logRootCycleEvent = mutation({
     reactionTimeMs: v.number(),
   },
   handler: async (ctx, args) => {
-    const userId = await currentUserId(ctx);
+    const userId = await ensureUserId(ctx);
     return await ctx.db.insert("practiceEvents", {
       userId,
       tool: "root-cycling",
@@ -195,7 +197,7 @@ export const logProgressionEvent = mutation({
     reactionTimeMs: v.number(),
   },
   handler: async (ctx, args) => {
-    const userId = await currentUserId(ctx);
+    const userId = await ensureUserId(ctx);
     return await ctx.db.insert("practiceEvents", {
       userId,
       tool: "progression",
@@ -217,7 +219,7 @@ export const logProgressionEvent = mutation({
 export const clearChordDrillEventsByChord = mutation({
   args: { chord: v.string() },
   handler: async (ctx, args) => {
-    const userId = await currentUserId(ctx);
+    const userId = await ensureUserId(ctx);
     const events = await ctx.db
       .query("practiceEvents")
       .withIndex("by_user_chord", (q) => q.eq("userId", userId).eq("chord", args.chord))
@@ -237,7 +239,7 @@ export const clearArpeggioEventsByTransition = mutation({
     toDeg: v.string(),
   },
   handler: async (ctx, args) => {
-    const userId = await currentUserId(ctx);
+    const userId = await ensureUserId(ctx);
     const events = await ctx.db
       .query("practiceEvents")
       .withIndex("by_user_tool", (q) => q.eq("userId", userId).eq("tool", "arpeggios"))
@@ -268,7 +270,7 @@ export const clearRootCycleEventsByGroup = mutation({
     toDeg: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const userId = await currentUserId(ctx);
+    const userId = await ensureUserId(ctx);
     const events = await ctx.db
       .query("practiceEvents")
       .withIndex("by_user_tool", (q) => q.eq("userId", userId).eq("tool", "root-cycling"))
@@ -290,7 +292,7 @@ export const clearProgressionEventsByProgression = mutation({
     key: v.string(),
   },
   handler: async (ctx, args) => {
-    const userId = await currentUserId(ctx);
+    const userId = await ensureUserId(ctx);
     const events = await ctx.db
       .query("practiceEvents")
       .withIndex("by_user_tool", (q) => q.eq("userId", userId).eq("tool", "progression"))
@@ -352,7 +354,7 @@ export const bulkImportTracking = mutation({
     ),
   },
   handler: async (ctx, args) => {
-    const userId = await currentUserId(ctx);
+    const userId = await ensureUserId(ctx);
 
     for (const e of args.chordDrillEvents) {
       await ctx.db.insert("practiceEvents", {

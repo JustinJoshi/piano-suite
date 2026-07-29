@@ -12,7 +12,7 @@ describe("isAuthDisabled", () => {
     }
   });
 
-  it("is false when the env var is unset", () => {
+  it("is false when the env var is unset (opt-in only; no default bypass)", () => {
     delete process.env.NEXT_PUBLIC_AUTH_DISABLED;
     expect(isAuthDisabled()).toBe(false);
   });
@@ -20,10 +20,20 @@ describe("isAuthDisabled", () => {
   it("is true only when set to the string 'true'", () => {
     process.env.NEXT_PUBLIC_AUTH_DISABLED = "true";
     expect(isAuthDisabled()).toBe(true);
+  });
 
+  it("treats other truthy-looking values as off", () => {
     process.env.NEXT_PUBLIC_AUTH_DISABLED = "1";
     expect(isAuthDisabled()).toBe(false);
 
+    process.env.NEXT_PUBLIC_AUTH_DISABLED = "yes";
+    expect(isAuthDisabled()).toBe(false);
+
+    process.env.NEXT_PUBLIC_AUTH_DISABLED = "";
+    expect(isAuthDisabled()).toBe(false);
+  });
+
+  it("is false when set to the string 'false'", () => {
     process.env.NEXT_PUBLIC_AUTH_DISABLED = "false";
     expect(isAuthDisabled()).toBe(false);
   });

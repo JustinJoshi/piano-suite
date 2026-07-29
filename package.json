@@ -46,6 +46,7 @@
     "@types/react-dom": "^19",
     "@types/three": "^0.171.0",
     "@vitejs/plugin-react": "^6.0.4",
+    "convex-test": "^0.0.54",
     "eslint": "^9",
     "eslint-config-next": "16.2.12",
     "jsdom": "^29.1.1",

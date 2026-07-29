@@ -14,6 +14,20 @@ setup("global setup", async () => {
   // .env.local in playwright.config.ts so we disable duplicate loading here.
   await clerkSetup({ dotenv: false });
 
+  // Auth verification specs expect real Clerk route protection. Bypass must be
+  // off for local e2e (Production may still use the Hobby workaround until
+  // custom domain + Clerk production keys are live).
+  if (
+    process.env.NEXT_PUBLIC_AUTH_DISABLED === "true" &&
+    process.env.E2E_ALLOW_AUTH_DISABLED !== "true"
+  ) {
+    throw new Error(
+      "NEXT_PUBLIC_AUTH_DISABLED=true is set. Unset it in .env.local and restart " +
+        "so e2e can verify sign-in redirects and protected routes. " +
+        "Set E2E_ALLOW_AUTH_DISABLED=true only to skip this guard intentionally."
+    );
+  }
+
   const publishableKey =
     process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || process.env.CLERK_PUBLISHABLE_KEY;
   const secretKey = process.env.CLERK_SECRET_KEY;

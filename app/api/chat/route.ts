@@ -3,6 +3,7 @@ import { streamText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { getAllArticles } from "@/lib/articles";
 import { isAuthDisabled } from "@/lib/auth-disabled";
+import { authorizeChatAccess } from "@/lib/chat-auth";
 
 export const runtime = "nodejs";
 
@@ -29,17 +30,19 @@ ${articleContext}`;
 }
 
 export async function POST(req: Request) {
-  if (!isAuthDisabled()) {
-    const { userId } = await auth();
+  const authDisabled = isAuthDisabled();
+  const userId = authDisabled ? null : (await auth()).userId;
+  const decision = authorizeChatAccess({
+    authDisabled,
+    userId,
+    allowedUserId: process.env.ALLOWED_CLERK_USER_ID,
+  });
 
-    if (!userId) {
-      return new Response("Unauthorized", { status: 401 });
-    }
-
-    const allowedUserId = process.env.ALLOWED_CLERK_USER_ID;
-    if (!allowedUserId || userId !== allowedUserId) {
-      return new Response("Forbidden", { status: 403 });
-    }
+  if (decision === "unauthorized") {
+    return new Response("Unauthorized", { status: 401 });
+  }
+  if (decision === "forbidden") {
+    return new Response("Forbidden", { status: 403 });
   }
 
   const apiKey = process.env.KIMI_CODE_API_KEY;
