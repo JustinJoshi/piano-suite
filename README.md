@@ -417,6 +417,13 @@ npm run build
 - [x] Add token-driven theming system with `/settings/theme`
 - [x] Implement real LLM chat grounded on articles (Kimi Code API, owner-only access)
 
+### Post-v1 follow-ons
+
+The checklist above is the original product scope and is complete. Remaining work
+(production auth cutover, multi-user chat, multi-concept MIDI ripple / drill
+overlays, lab polish, more articles) is planned in
+[`docs/missing-features-plan.md`](docs/missing-features-plan.md).
+
 ## License
 
 MIT
