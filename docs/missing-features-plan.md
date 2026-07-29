@@ -64,42 +64,44 @@ Recommended order: **A → B → C → D**, with **E** and **G** parallel to B�
 
 ## Phase A — Production auth cutover
 
+> **Detailed plan:** [`docs/phase-a-auth-cutover-plan.md`](./phase-a-auth-cutover-plan.md)
+> (Clerk + Convex production docs researched; step-by-step ops + optional code).
+
 ### Goal
 
 Remove `NEXT_PUBLIC_AUTH_DISABLED=true` so Clerk actually protects routes on the live site, without the bare-404 failure mode that forced the Hobby bypass.
 
 ### Why it matters
 
-README Deploy notes: Clerk **development** keys on `*.vercel.app` make `auth.protect()` rewrite some unsigned / post-login hits to a bare **404** (especially Firefox ETP). Bypass opens Tools/Articles but is not the intended product posture.
+README Deploy notes: Clerk **development** keys on `*.vercel.app` make `auth.protect()` rewrite some unsigned / post-login hits to a bare **404** (especially Firefox ETP). Bypass opens Tools/Articles but is not the intended product posture. Clerk also **requires a custom domain** for production keys — `*.vercel.app` cannot host `pk_live`.
 
-### Work (mostly external + verification)
+### Summary (see detailed plan for full matrix)
 
-| Step | Owner | Notes |
-|------|-------|-------|
-| Custom domain → Vercel | Ops | Required for Clerk `pk_live` |
-| Clerk production instance / keys | Ops | `pk_live` / `sk_live`; JWT template `convex` with `aud: "convex"` |
-| Update Clerk allowed origins + redirects | Ops | Domain + `/sign-in`, `/sign-up`, `/tools`, `/chat` |
-| Convex prod + preview `CLERK_FRONTEND_API_URL` | Ops | Preview defaults in Convex Project Settings |
-| Unset `NEXT_PUBLIC_AUTH_DISABLED` on Vercel Production/Preview | Ops | Redeploy (value is build-time) |
-| Run auth smoke checklist | Dev | README “Auth cutover checklist” + “Production auth smoke” |
-| Confirm e2e auth suite green with bypass **off** | Dev | `e2e/auth-protection.spec.ts`, `e2e/chat-auth.spec.ts` |
+| Step | Notes |
+|------|-------|
+| A0 Preflight | Auth e2e with bypass off; optional `authorizedParties` hardening |
+| A1 Custom domain | Attach domain on Vercel + DNS/TLS |
+| A2 Clerk production instance | Clone settings; re-activate Convex JWT (integrations don’t copy); Clerk DNS CNAMEs; deploy certificates |
+| A3 Convex FAPI | Prod → `https://clerk.<domain>.com`; Preview **defaults** stay on development FAPI |
+| A4 Vercel env split | **Production:** `pk_live` / bypass unset. **Preview:** keep `pk_test` / bypass unset (do **not** put live keys on Preview) |
+| A5–A8 | Allowlists, prod user + `ALLOWED_CLERK_USER_ID`, smoke, docs |
 
-### Code changes (only if gaps appear)
+### Code changes
 
-- Keep `proxy.ts` `unauthenticatedUrl` behavior; do not regress the bare-404 fix.
-- Keep `isAuthDisabled()` opt-in (`=== "true"` only).
-- No schema changes expected.
+- Required already: keep `unauthenticatedUrl` in `proxy.ts`.
+- Recommended: `authorizedParties` on `clerkMiddleware` (env-scoped).
+- Keep `isAuthDisabled()` as break-glass; no schema changes.
 
 ### Done when
 
 - Unsigned `/tools` → `/sign-in` (not 404) on the custom domain in Chrome **and** Firefox.
-- Signed-in drills + tracking load; `/` and `/tools/chladni` stay public.
+- Signed-in drills + Convex sync; `/` and `/tools/chladni` stay public.
 - Vercel Production does **not** set `NEXT_PUBLIC_AUTH_DISABLED=true`.
-- README Deploy “Temporary auth bypass” note updated to past tense / removed.
+- README Deploy bypass note removed / corrected env matrix.
 
 ### Risk
 
-High user-facing if cutover is wrong. Prefer a Preview deploy with live keys first, then Production.
+High user-facing if cutover is wrong. Validate bypass-off on **Preview + pk_test** first, then Production + `pk_live` on the custom domain.
 
 ---
 

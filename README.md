@@ -290,13 +290,16 @@ Production hosting is **Vercel Hobby** + **Convex Free** + **Clerk development**
 
 ### Auth cutover checklist (remove bypass)
 
-When a custom domain + Clerk **production** keys are ready:
+Full step-by-step (Clerk + Convex production research): [`docs/phase-a-auth-cutover-plan.md`](docs/phase-a-auth-cutover-plan.md).
 
-1. Point the domain at Vercel; add it to Clerk allowed origins / redirect URLs.
-2. Set Vercel Production (and Preview) to `pk_live` / `sk_live` and the matching `CLERK_FRONTEND_API_URL`.
-3. On Convex production, set `CLERK_FRONTEND_API_URL` to that same Frontend API URL; keep the `convex` JWT template (`aud: "convex"`).
-4. **Unset** `NEXT_PUBLIC_AUTH_DISABLED` (or set `false`) on Production/Preview and **redeploy**.
-5. Verify with the auth suite below (local with bypass off) plus the production smoke checklist.
+When a custom domain + Clerk **production** instance are ready:
+
+1. Point the domain at Vercel; configure Clerk production Domains DNS + deploy certificates; re-activate the Convex JWT integration on the **production** instance (`aud: "convex"`).
+2. Set Vercel **Production** to `pk_live` / `sk_live`. Keep Vercel **Preview** on `pk_test` / `sk_test` (Clerk’s recommended split — do not put live keys on Preview).
+3. On Convex **production**, set `CLERK_FRONTEND_API_URL` to the production Frontend API URL (`https://clerk.<your-domain>.com`). Keep Convex **preview defaults** on the development Frontend API URL.
+4. **Unset** `NEXT_PUBLIC_AUTH_DISABLED` on Production and Preview and **redeploy** (Preview first, then Production).
+5. Create your production Clerk user and update Production `ALLOWED_CLERK_USER_ID` if chat should work.
+6. Verify with the auth suite below (local with bypass off) plus the production smoke checklist.
 
 ## Testing
 
@@ -420,9 +423,9 @@ npm run build
 ### Post-v1 follow-ons
 
 The checklist above is the original product scope and is complete. Remaining work
-(production auth cutover, multi-user chat, multi-concept MIDI ripple / drill
-overlays, lab polish, more articles) is planned in
-[`docs/missing-features-plan.md`](docs/missing-features-plan.md).
+is planned in [`docs/missing-features-plan.md`](docs/missing-features-plan.md).
+Phase A (production auth cutover) detail:
+[`docs/phase-a-auth-cutover-plan.md`](docs/phase-a-auth-cutover-plan.md).
 
 ## License
 
