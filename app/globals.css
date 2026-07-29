@@ -24,6 +24,7 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-success: var(--success);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -80,6 +81,10 @@
 
   /* Shared semantic tokens */
   --sidebar-background: #0a0a0a;
+
+  /* Positive feedback: MIDI connected, drill phase complete, success flash.
+     Matches --grade-good so "correct" reads the same everywhere. */
+  --success: #7fa37a;
 
   --hero-glow-1: rgba(201, 162, 39, 0.28);
   --hero-glow-2: rgba(201, 162, 39, 0.16);

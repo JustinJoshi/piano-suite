@@ -88,6 +88,8 @@ Before making styling changes, read `DESIGN-PRINCIPLES.md` for the visual conven
 | `--color-accent` / `bg-accent`, `text-accent` | Accent highlights | `text-accent` |
 | `--color-background`, `--color-foreground`, `--color-card`, `--color-muted` | Surfaces and text | `bg-card text-foreground` |
 | `--color-grade-again`, `--grade-hard`, `--grade-good`, `--grade-easy`, `--grade-ungraded` | Anki-style grade badges/dots | `bg-grade-good` |
+| `--color-success` / `bg-success`, `text-success`, `border-success` | Positive feedback (MIDI connected, drill phase complete, success flash) | `bg-success/10 text-success` |
+| `--color-destructive` / `bg-destructive`, `text-destructive` | Errors and unsupported states | `text-destructive` |
 | `--hero-glow-*`, `--hero-orb-*`, `--beam-mid`, `--beam-highlight` | Hero section graphics | used by `.hero-glow`, `.hero-orb`, `.beam` |
 | `--color-sidebar-background` / `bg-sidebar-background` | Dashboard sidebar | `bg-sidebar-background` |
 | `--primary-glow` | Primary glow shadows | `shadow-[0_0_12px_2px_var(--primary-glow)]` |
