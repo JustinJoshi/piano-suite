@@ -29,7 +29,7 @@ export function HeroSection({
       <div className="pointer-events-none absolute inset-0 z-[1] hero-glow opacity-30" />
 
       <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-center px-4 pb-16 pt-24 sm:px-6 lg:px-8">
-        <div className="flex max-w-2xl flex-col items-start gap-6">
+        <div className="flex max-w-2xl flex-col items-center gap-6 text-center md:items-start md:text-left">
           <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium uppercase tracking-widest text-primary">
             blocked practice — anki verified
           </span>
@@ -44,7 +44,7 @@ export function HeroSection({
             keyboard, and graded back into the same spaced-repetition loop.
           </p>
 
-          <div className="flex flex-wrap items-center gap-4 pt-2">
+          <div className="flex flex-wrap items-center justify-center gap-4 pt-2 md:justify-start">
             <Button
               size="lg"
               className="rounded-full bg-primary px-6 text-primary-foreground hover:bg-primary/90"
