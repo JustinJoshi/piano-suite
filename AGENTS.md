@@ -262,3 +262,41 @@ To remove ghost worktree entries after a crash:
 ```bash
 git worktree prune
 ```
+
+## Cursor Cloud specific instructions
+
+This environment is pre-provisioned. Clerk **development** keys, the Convex client URL, and the Playwright test-user credentials (`E2E_CLERK_USER_EMAIL` / `E2E_CLERK_USER_PASSWORD`) are injected as secrets — you do **not** need to create `.env.local` by hand or paste Clerk keys. `npx convex dev` writes the local Convex URLs to `.env.local` itself. Standard commands live in the README and `package.json` (`npm run dev`, `npm run build`, `npm run lint`, `npm run test:unit:run`, `npm run test:e2e`); this section only records the non-obvious caveats.
+
+### Services (each in its own terminal, e.g. tmux)
+
+- **Convex backend** — a *local anonymous* deployment on `:3210` (functions + HTTP actions on `:3211`). Start it with `npx convex dev` (see the CONVEX_DEPLOYMENT gotcha below). It also re-syncs functions after you edit anything under `convex/`.
+- **Next.js** — `npm run dev` on `:3000`. Reads Clerk vars from the injected env and the Convex URL from `.env.local`.
+
+### CONVEX_DEPLOYMENT gotcha (important)
+
+The injected `CONVEX_DEPLOYMENT` secret is a placeholder name that does **not** match the real local deployment, which `.env.local` records as `anonymous:anonymous-workspace`. Because a process env var overrides `.env.local`, every Convex CLI command otherwise fails with a `Could not find deployment with name …` error naming the injected placeholder. Run Convex tooling with the injected vars cleared so `.env.local` wins:
+
+```bash
+unset CONVEX_DEPLOYMENT NEXT_PUBLIC_CONVEX_URL NEXT_PUBLIC_CONVEX_SITE_URL
+npx convex dev
+```
+
+`NEXT_PUBLIC_CONVEX_URL` points at the same local backend either way (port `3210`), so `next dev` is unaffected — only the Convex CLI cares.
+
+The local deployment keeps its own env vars in its sqlite state (persisted under `.convex/local/`, gitignored). `convex/auth.config.js` requires `CLERK_FRONTEND_API_URL`; if you ever start from a fresh deployment (no snapshot / empty `.convex/local`), set it once, then re-run dev:
+
+```bash
+unset CONVEX_DEPLOYMENT NEXT_PUBLIC_CONVEX_URL NEXT_PUBLIC_CONVEX_SITE_URL
+npx convex env set CLERK_FRONTEND_API_URL "$CLERK_FRONTEND_API_URL"
+npx convex dev
+```
+
+### Auth / MIDI / chat caveats
+
+- **Manual Clerk sign-in does not work in an automation/headless browser** — it hits a Cloudflare bot CAPTCHA that never resolves. Exercise authenticated flows through the Playwright E2E suite instead (it uses `setupClerkTestingToken` + a backend sign-in token). `/` and `/tools/chladni` (Pattern Lab) are public and need no sign-in — use them for quick manual/UI checks.
+- **MIDI drills** (`chord-drill`, `arpeggios`, `progression`, `root-cycling`, `chladni-ripple`) need Web MIDI hardware, which the VM lacks. For hardware-free verification use the Technique tracker (`/tools/technique`) or the visualization labs (`/tools/chladni`, `/tools/julia`, `/tools/lissajous`, `/tools/quasiperiodic`); the E2E specs cover the drills without hardware.
+- **AI chat is not configured.** No `KIMI_CODE_API_KEY` / `KIMI_CODE_BASE_URL` / `KIMI_CODE_MODEL` / `ALLOWED_CLERK_USER_ID` secrets are provided, so `/chat` and `POST /api/chat` will not function until those are added. Everything else runs normally.
+
+### E2E browser
+
+`npm run test:e2e` needs the Playwright Chromium browser: `npx playwright install chromium` (persists in `~/.cache/ms-playwright`, so usually already present via the snapshot). Keep `NEXT_PUBLIC_AUTH_DISABLED` unset for the auth specs.
