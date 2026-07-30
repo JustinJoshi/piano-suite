@@ -13,7 +13,11 @@ import {
 const faq = [
   {
     q: "What’s free forever?",
-    a: "Local drills and Pattern Lab. You can practice without paying. Pro unlocks Convex sync — personal bests, tracking history, and preferences across devices.",
+    a: "Local drills and Pattern Lab, including exploring Chladni Ripple with MIDI. You can practice without paying. Pro unlocks Convex sync (personal bests, tracking history, preferences across devices) and the float panel that pops live resonance beside Chord Drill.",
+  },
+  {
+    q: "Can I see resonance while I practice chords?",
+    a: "Yes with Pro. Open Chladni Ripple, then Pop out while practicing — a draggable float panel shows live MIDI resonance over Chord Drill and other tools. The Ripple lab itself stays free to explore.",
   },
   {
     q: "Do I need Anki and a MIDI keyboard?",
@@ -25,7 +29,7 @@ const faq = [
   },
   {
     q: "Is there a free trial of Pro?",
-    a: "Not for v1. Free forever covers local practice; subscribe when you want sync.",
+    a: "Not for v1. Free forever covers local practice; subscribe when you want sync and the practice float panel.",
   },
 ] as const;
 
@@ -44,12 +48,13 @@ export function PricingPage() {
               Plans
             </p>
             <h1 className="mt-3 font-heading text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-              Practice free. Sync when you&apos;re ready.
+              Practice free. Pro when you&apos;re ready.
             </h1>
             <p className="mt-4 text-base text-muted-foreground sm:text-lg">
               Free forever for local drills. Pro ({proMonthlyLabel()} or{" "}
-              {proAnnualLabel()}, save {proAnnualSavingsPercent()}%) keeps
-              personal bests and history across devices.
+              {proAnnualLabel()}, save {proAnnualSavingsPercent()}%) syncs
+              personal bests across devices and lets you pop out live Chladni
+              resonance beside Chord Drill.
             </p>
           </div>
         </section>

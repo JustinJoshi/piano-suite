@@ -4,6 +4,8 @@ import {
   SYNC_FEATURE_SLUG,
   PRO_PRICING,
   canPersistFromEntitlements,
+  canUseFloatPanelFromEntitlements,
+  floatPanelUpgradeCopy,
   formatUsdFromCents,
   hasSyncFromClerkClaims,
   localPracticeBanner,
@@ -81,6 +83,40 @@ describe("localPracticeBanner", () => {
     expect(localPracticeBanner("tracking")).toMatch(/sync/i);
     expect(localPracticeBanner("technique")).toMatch(/upgrade to Pro/i);
     expect(localPracticeBanner("technique")).not.toMatch(/sign-?in/i);
+  });
+});
+
+describe("float panel Pro gate", () => {
+  it("matches canPersist entitlements", () => {
+    expect(
+      canUseFloatPanelFromEntitlements({
+        authDisabled: false,
+        hasSyncFeature: false,
+        hasProPlan: false,
+      })
+    ).toBe(false);
+    expect(
+      canUseFloatPanelFromEntitlements({
+        authDisabled: false,
+        hasSyncFeature: true,
+        hasProPlan: false,
+      })
+    ).toBe(true);
+    expect(
+      canUseFloatPanelFromEntitlements({
+        authDisabled: true,
+        hasSyncFeature: false,
+        hasProPlan: false,
+      })
+    ).toBe(true);
+  });
+
+  it("pitches practice resonance, not more drills", () => {
+    expect(floatPanelUpgradeCopy("ripple-lab")).toMatch(/resonance/i);
+    expect(floatPanelUpgradeCopy("ripple-lab")).toMatch(/Pro/i);
+    expect(floatPanelUpgradeCopy("atmosphere")).toMatch(/Chord Drill/i);
+    expect(floatPanelUpgradeCopy("chord-drill")).toMatch(/MIDI resonance/i);
+    expect(floatPanelUpgradeCopy("chord-drill")).not.toMatch(/more drills/i);
   });
 });
 

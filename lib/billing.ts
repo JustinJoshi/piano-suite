@@ -91,6 +91,34 @@ export function localPracticeBanner(
 }
 
 /**
+ * True when the user may open the ambient float / pop-out panel.
+ * Same entitlement as Convex sync for v1 (Pro or AUTH_DISABLED).
+ */
+export function canUseFloatPanelFromEntitlements(args: {
+  authDisabled: boolean;
+  hasSyncFeature: boolean;
+  hasProPlan: boolean;
+}): boolean {
+  return canPersistFromEntitlements(args);
+}
+
+/**
+ * Soft upgrade copy for the Pro-only float / pop-out resonance panel.
+ * Pitch practice accompaniment (resonance while drilling), not "more drills."
+ */
+export function floatPanelUpgradeCopy(
+  surface: "ripple-lab" | "atmosphere" | "chord-drill" = "ripple-lab"
+): string {
+  if (surface === "atmosphere") {
+    return "Float panel is Pro — pop out live Chladni resonance beside Chord Drill and other tools.";
+  }
+  if (surface === "chord-drill") {
+    return "Pro: pop out live MIDI resonance beside your drill.";
+  }
+  return "Pop out live resonance while you drill chords — upgrade to Pro.";
+}
+
+/**
  * Parse Clerk Billing session claims (`pla` / `fea`).
  * Format: comma-separated `u:slug` / `o:slug` (user / org scope).
  * @see https://clerk.com/docs/guides/secure/session-tokens

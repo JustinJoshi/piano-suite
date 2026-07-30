@@ -11,7 +11,7 @@
     "plans": {
       "pro": {
         "name": "Pro",
-        "description": "Full drills with synced tracking, personal bests, and cross-device settings.",
+        "description": "Synced tracking and personal bests across devices, plus pop-out live Chladni resonance beside Chord Drill and other tools.",
         "amount": 800,
         "annual_monthly_amount": 600,
         "currency": "usd",

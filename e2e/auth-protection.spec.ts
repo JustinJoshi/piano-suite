@@ -66,7 +66,7 @@ const SIGNED_IN_ROUTE_SMOKE: Array<{
   bodyText?: string | RegExp;
 }> = [
   { path: "/", bodyText: "Anki MIDI Chord Trainer" },
-  { path: "/pricing", heading: /Practice free\. Sync when you're ready\./i },
+  { path: "/pricing", heading: /Practice free\. Pro when you're ready\./i },
   { path: "/tools", heading: "Tools" },
   { path: "/tools/chord-drill", heading: /Chord Drill/i },
   { path: "/tools/arpeggios", heading: /Arpeggio/i },

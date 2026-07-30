@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { ChladniRippleLab } from "../chladni-ripple-lab";
+import { floatPanelUpgradeCopy } from "@/lib/billing";
 
 vi.mock("@/components/welcome/chladni-visualization", () => ({
   ChladniVisualization: () => <div data-testid="chladni-visualization" />,
@@ -45,6 +46,13 @@ vi.mock("@/hooks/useChladniRipple", () => ({
 const setRouteBackground = vi.fn();
 const applyAsAmbientBackground = vi.fn();
 const openFloat = vi.fn();
+const useAuthAccessMock = vi.fn(() => ({
+  authDisabled: false,
+  isSignedIn: true,
+  canAccess: true,
+  canPersist: true,
+  canUseFloatPanel: true,
+}));
 
 vi.mock("@/hooks/useAmbientEffects", () => ({
   useAmbientEffects: () => ({
@@ -54,11 +62,22 @@ vi.mock("@/hooks/useAmbientEffects", () => ({
   }),
 }));
 
+vi.mock("@/hooks/useAuthAccess", () => ({
+  useAuthAccess: () => useAuthAccessMock(),
+}));
+
 describe("ChladniRippleLab", () => {
   beforeEach(() => {
     setRouteBackground.mockClear();
     applyAsAmbientBackground.mockClear();
     openFloat.mockClear();
+    useAuthAccessMock.mockReturnValue({
+      authDisabled: false,
+      isSignedIn: true,
+      canAccess: true,
+      canPersist: true,
+      canUseFloatPanel: true,
+    });
   });
 
   it("renders MIDI bar, viz, and ripple controls", () => {
@@ -72,7 +91,7 @@ describe("ChladniRippleLab", () => {
     expect(screen.getByText("Pitch-class map")).toBeInTheDocument();
   });
 
-  it("exposes ambient actions", () => {
+  it("exposes ambient actions for Pro float", () => {
     render(<ChladniRippleLab />);
 
     fireEvent.click(screen.getByTestId("ripple-use-on-home"));
@@ -83,5 +102,27 @@ describe("ChladniRippleLab", () => {
 
     fireEvent.click(screen.getByTestId("ripple-open-float"));
     expect(openFloat).toHaveBeenCalledWith("chladni-ripple");
+  });
+
+  it("soft-gates float pop-out for Free users", () => {
+    useAuthAccessMock.mockReturnValue({
+      authDisabled: false,
+      isSignedIn: true,
+      canAccess: true,
+      canPersist: false,
+      canUseFloatPanel: false,
+    });
+
+    render(<ChladniRippleLab />);
+
+    fireEvent.click(screen.getByTestId("ripple-open-float"));
+    expect(openFloat).not.toHaveBeenCalled();
+    expect(screen.getByRole("status")).toHaveTextContent(
+      floatPanelUpgradeCopy("ripple-lab")
+    );
+    expect(screen.getByTestId("ripple-float-upgrade-link")).toHaveAttribute(
+      "href",
+      "/pricing"
+    );
   });
 });

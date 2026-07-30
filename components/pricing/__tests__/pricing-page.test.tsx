@@ -37,11 +37,17 @@ describe("PricingPage", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: /Practice free\. Sync when you're ready\./i,
+        name: /Practice free\. Pro when you're ready\./i,
       })
     ).toBeInTheDocument();
     expect(screen.getByTestId("pricing-table")).toBeInTheDocument();
     expect(screen.getByText("FAQ")).toBeInTheDocument();
+    expect(
+      screen.getByText(/pop out live Chladni resonance beside Chord Drill/i)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Can I see resonance while I practice chords\?/i)
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Enter the drill" })
     ).toHaveAttribute("href", "/tools");

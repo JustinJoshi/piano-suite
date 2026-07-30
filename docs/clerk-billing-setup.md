@@ -9,9 +9,10 @@ Product decisions locked in code (`lib/billing.ts`):
 | Item | Value |
 |------|--------|
 | Model | Freemium (Free forever + Pro). Reverse trial deferred |
-| Free | Clerk `free_user` (auto-created). Local drills; no Convex sync |
+| Free | Clerk `free_user` (auto-created). Local drills; no Convex sync; no float/pop-out panel |
 | Pro plan slug | `pro` |
 | Sync feature slug | `sync` |
+| Pro also unlocks | Ambient float / pop-out live Chladni resonance beside Chord Drill (client gate via `canUseFloatPanel`; same entitlement as sync for v1) |
 | Monthly | **$8.00** (`800` cents) |
 | Annual | **$72.00** (`7200` cents, ~$6/mo, **25%** off) |
 | Payer | User (B2C) — not Organizations |
@@ -72,6 +73,7 @@ succeeded). You only need to create Pro + `sync`:
 2. Keep / confirm **Free** (`free_user`).
 3. **Add Plan** → Pro  
    - Slug: `pro` (must match `PRO_PLAN_SLUG`)  
+   - Description: Synced tracking and personal bests across devices, plus pop-out live Chladni resonance beside Chord Drill and other tools.  
    - Publicly available: on  
    - Monthly: `$8.00`  
    - Annual: `$72.00` (or monthly equivalent `$6.00` if the UI asks that way)  
