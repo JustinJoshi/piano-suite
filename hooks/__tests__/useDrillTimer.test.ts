@@ -201,4 +201,86 @@ describe("useDrillTimer", () => {
     expect(onBreakComplete).toHaveBeenCalled();
     expect(onFinish).toHaveBeenCalled();
   });
+
+  it("allows finishRound from onSuccess without being overwritten back to success", () => {
+    const onFinish = vi.fn();
+    let timerApi: ReturnType<typeof useDrillTimer> | null = null;
+
+    const { result } = renderHook(() => {
+      timerApi = useDrillTimer({
+        multiRep: true,
+        breakSeconds: 2,
+        onFinish,
+        onSuccess: () => {
+          timerApi?.finishRound();
+        },
+      });
+      return timerApi;
+    });
+
+    act(() => {
+      result.current.start();
+      result.current.arm();
+      result.current.markSuccess();
+    });
+
+    expect(result.current.phase).toBe("break-before-grade");
+    expect(result.current.breakRemaining).toBe(2);
+    expect(onFinish).not.toHaveBeenCalled();
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    expect(result.current.phase).toBe("finished");
+    expect(onFinish).toHaveBeenCalled();
+  });
+
+  it("allows nextRep from onSuccess", () => {
+    let timerApi: ReturnType<typeof useDrillTimer> | null = null;
+
+    const { result } = renderHook(() => {
+      timerApi = useDrillTimer({
+        multiRep: true,
+        onSuccess: () => {
+          timerApi?.nextRep();
+        },
+      });
+      return timerApi;
+    });
+
+    act(() => {
+      result.current.start();
+      result.current.arm();
+      result.current.markSuccess();
+    });
+
+    expect(result.current.phase).toBe("armed");
+  });
+
+  it("finishes immediately from onSuccess when breakSeconds is 0", () => {
+    const onFinish = vi.fn();
+    let timerApi: ReturnType<typeof useDrillTimer> | null = null;
+
+    const { result } = renderHook(() => {
+      timerApi = useDrillTimer({
+        multiRep: true,
+        breakSeconds: 0,
+        onFinish,
+        onSuccess: () => {
+          timerApi?.finishRound();
+        },
+      });
+      return timerApi;
+    });
+
+    act(() => {
+      result.current.start();
+      result.current.arm();
+      result.current.markSuccess();
+    });
+
+    expect(result.current.phase).toBe("finished");
+    expect(onFinish).toHaveBeenCalled();
+  });
 });

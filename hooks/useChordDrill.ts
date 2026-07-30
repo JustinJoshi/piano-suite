@@ -544,8 +544,14 @@ export function useChordDrill(enabled: boolean): ChordDrillEngine {
       if (timer.phase === "armed") {
         timer.arm();
       } else if (timer.phase === "success") {
-        timer.nextRep();
-        timer.arm();
+        // Safety net: if the last-rep finishRound from onSuccess somehow
+        // missed, still complete the round instead of arming another rep.
+        if (repCountRef.current >= currentRepTargetRef.current) {
+          timer.finishRound();
+        } else {
+          timer.nextRep();
+          timer.arm();
+        }
       }
       return;
     }
@@ -566,6 +572,7 @@ export function useChordDrill(enabled: boolean): ChordDrillEngine {
     timer.phase,
     timer.arm,
     timer.nextRep,
+    timer.finishRound,
     timer.markSuccess,
   ]);
 

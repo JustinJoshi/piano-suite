@@ -28,10 +28,12 @@ export type DrillTimerOptions = {
  * Drives the lifecycle of a single drill attempt:
  *   idle -> countdown -> armed -> timing -> success -> break -> finished
  *
- * When `multiRep` is true, `markSuccess()` pauses at the "success" phase so
- * the consumer can run multiple reps per round. Call `nextRep()` to return to
- * the armed state, or `finishRound()` to complete the round (running the break
- * timer and finishing).
+ * When `multiRep` is true, `markSuccess()` enters the "success" phase *before*
+ * invoking `onSuccess`, so the consumer may call `nextRep()` or `finishRound()`
+ * synchronously from that callback. Call `nextRep()` to return to armed, or
+ * `finishRound()` to complete the round (running the break timer and finishing).
+ * If the consumer does not advance the phase, it stays at "success" until
+ * `nextRep()` / `finishRound()` is called later (e.g. on hands lifted).
  *
  * The consumer is responsible for detecting MIDI events and calling
  * `arm()` (hands lifted) and `markSuccess()` (correct input detected).
@@ -167,11 +169,17 @@ export function useDrillTimer(options: DrillTimerOptions = {}) {
 
     stopTimingLoop();
     setLiveMs(elapsed);
-    onSuccess?.(elapsed);
 
+    // Enter "success" before onSuccess so consumers can call nextRep() /
+    // finishRound() synchronously from the callback. Those APIs require
+    // phase === "success"; calling them while still on "timing" no-ops.
     if (multiRep) {
       setPhaseSync("success");
+      onSuccess?.(elapsed);
+      // If onSuccess already advanced the phase (nextRep / finishRound),
+      // do not overwrite break-before-grade / armed / finished.
     } else {
+      onSuccess?.(elapsed);
       finishRoundInternal();
     }
   }, [stopTimingLoop, onSuccess, multiRep, finishRoundInternal, setPhaseSync]);
