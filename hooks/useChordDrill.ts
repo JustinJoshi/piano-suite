@@ -170,7 +170,6 @@ export function useChordDrill(enabled: boolean): ChordDrillEngine {
     selectedInputId,
     setSelectedInputId,
     heldNotes,
-    heldPcs,
     connect: connectMidi,
   } = useMidi();
 
@@ -377,11 +376,23 @@ export function useChordDrill(enabled: boolean): ChordDrillEngine {
       updateHistoryRef.current(
         updateHistoryPure(historyRef.current, chordKey, nextRepTimes)
       );
+      // Finish immediately so break-before-grade begins (Anki) and MIDI
+      // input stops accepting further successes. Stay on "success" for
+      // intermediate reps until hands lift — calling nextRep here while
+      // keys are still held re-arms too early and double-triggers chimes.
       timerRef.current?.finishRound();
-    } else {
-      timerRef.current?.nextRep();
     }
   }, [playChime]);
+
+  const handleCountdownTick = useCallback(() => {
+    playTick({ frequency: 880 });
+  }, [playTick]);
+
+  const handleBreakTick = useCallback(() => {
+    if (settingsRef.current.breakTickSound) {
+      playTick({ frequency: 660 });
+    }
+  }, [playTick]);
 
   const handleTimerFinish = useCallback(async () => {
     setRunning(false);
@@ -416,6 +427,8 @@ export function useChordDrill(enabled: boolean): ChordDrillEngine {
     breakSeconds: settings.breakSeconds,
     multiRep: true,
     onSuccess: handleTimerSuccess,
+    onCountdownTick: handleCountdownTick,
+    onBreakTick: handleBreakTick,
     onFinish: handleTimerFinish,
   });
 
@@ -537,10 +550,26 @@ export function useChordDrill(enabled: boolean): ChordDrillEngine {
   // -------------------------------------------------------------------------
   // MIDI handling
   // -------------------------------------------------------------------------
+  // Depend on heldNotes from the MIDI session (updates only on note on/off).
+  // Do not depend on a freshly allocated heldPcs Set — liveMs RAF would
+  // re-fire this effect every frame during timing.
   useEffect(() => {
     if (!running) return;
 
-    if (heldPcs.size === 0) {
+    // Ignore input during countdown / break / finished — reps are done or
+    // the round has not started timing yet.
+    if (
+      timer.phase === "idle" ||
+      timer.phase === "countdown" ||
+      timer.phase === "break-before-grade" ||
+      timer.phase === "finished"
+    ) {
+      return;
+    }
+
+    const pcs = new Set(heldNotes.map((n) => ((n % 12) + 12) % 12));
+
+    if (pcs.size === 0) {
       if (timer.phase === "armed") {
         timer.arm();
       } else if (timer.phase === "success") {
@@ -557,7 +586,7 @@ export function useChordDrill(enabled: boolean): ChordDrillEngine {
     }
 
     if (timer.phase === "timing") {
-      const result = evaluateChordAttempt(targetPcs, heldPcs, {
+      const result = evaluateChordAttempt(targetPcs, pcs, {
         requireExact: settings.requireExactNotes,
       });
       if (result.correct) {
@@ -565,7 +594,7 @@ export function useChordDrill(enabled: boolean): ChordDrillEngine {
       }
     }
   }, [
-    heldPcs,
+    heldNotes,
     running,
     targetPcs,
     settings.requireExactNotes,
@@ -575,25 +604,6 @@ export function useChordDrill(enabled: boolean): ChordDrillEngine {
     timer.finishRound,
     timer.markSuccess,
   ]);
-
-  // -------------------------------------------------------------------------
-  // Audio feedback for countdowns
-  // -------------------------------------------------------------------------
-  useEffect(() => {
-    if (timer.phase === "countdown" && timer.countdownValue > 0) {
-      playTick({ frequency: 880 });
-    }
-  }, [timer.countdownValue, timer.phase, playTick]);
-
-  useEffect(() => {
-    if (
-      timer.phase === "break-before-grade" &&
-      timer.breakRemaining > 0 &&
-      settings.breakTickSound
-    ) {
-      playTick({ frequency: 660 });
-    }
-  }, [timer.breakRemaining, timer.phase, settings.breakTickSound, playTick]);
 
   // -------------------------------------------------------------------------
   // Actions
