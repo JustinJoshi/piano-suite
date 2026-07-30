@@ -12,9 +12,11 @@ import { randomC, type Complex } from "@/lib/julia";
 import { randomRatio, type LissajousParams } from "@/lib/lissajous";
 import { useMidi } from "@/hooks/useMidi";
 import { useChladniRipple } from "@/hooks/useChladniRipple";
+import { useExperimentalFeatures } from "@/hooks/useExperimentalFeatures";
 import { useHeroChladniSettings } from "@/hooks/useHeroChladniSettings";
 import { useHeroQuasiperiodicSettings } from "@/hooks/useHeroQuasiperiodicSettings";
 import { useHeroMultigridSettings } from "@/hooks/useHeroMultigridSettings";
+import { isExperimentalAmbientKind } from "@/lib/experimental-features";
 import { ChladniBackground } from "@/components/welcome/chladni-background";
 import { QuasiperiodicBackground } from "@/components/welcome/quasiperiodic-background";
 import { MultigridBackground } from "@/components/welcome/multigrid-background";
@@ -198,7 +200,11 @@ export function AmbientEffectRenderer({
   kind,
   className = "h-full w-full",
 }: AmbientEffectRendererProps) {
-  switch (kind) {
+  const { enabled: experimentalEnabled } = useExperimentalFeatures();
+  const effectiveKind =
+    !experimentalEnabled && isExperimentalAmbientKind(kind) ? "none" : kind;
+
+  switch (effectiveKind) {
     case "none":
       return null;
     case "chladni":

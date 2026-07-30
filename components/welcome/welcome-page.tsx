@@ -3,11 +3,13 @@
 import { Navbar } from "@/components/navbar";
 import { DevToolsLink } from "@/components/dev-tools-link";
 import { useAmbientEffects } from "@/hooks/useAmbientEffects";
+import { useExperimentalFeatures } from "@/hooks/useExperimentalFeatures";
 import { useHeroChladniSettings } from "@/hooks/useHeroChladniSettings";
 import { useHeroQuasiperiodicSettings } from "@/hooks/useHeroQuasiperiodicSettings";
 import { useHeroMultigridSettings } from "@/hooks/useHeroMultigridSettings";
 import { WelcomeConfigProvider } from "./welcome-config-provider";
 import { WelcomeContent } from "./welcome-content";
+import { isExperimentalAmbientKind } from "@/lib/experimental-features";
 import { HeroSection } from "./hero-section";
 
 /**
@@ -19,17 +21,20 @@ import { HeroSection } from "./hero-section";
  */
 export function WelcomePage() {
   const { settings: ambient, backgroundFor } = useAmbientEffects();
+  const { enabled: experimentalEnabled } = useExperimentalFeatures();
   const { settings: chladniSettings } = useHeroChladniSettings();
   const { settings: quasiperiodicSettings } = useHeroQuasiperiodicSettings();
   const { settings: multigridSettings } = useHeroMultigridSettings();
 
   const kind = backgroundFor("/");
+  const effectiveKind =
+    !experimentalEnabled && isExperimentalAmbientKind(kind) ? "none" : kind;
   const heroScrimSettings =
-    kind === "multigrid"
+    effectiveKind === "multigrid"
       ? multigridSettings
-      : kind === "quasiperiodic"
+      : effectiveKind === "quasiperiodic"
         ? quasiperiodicSettings
-        : kind === "chladni"
+        : effectiveKind === "chladni"
           ? chladniSettings
           : { scrimDarkness: ambient.scrimDarkness };
 

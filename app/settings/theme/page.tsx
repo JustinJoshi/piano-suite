@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { themes, type ThemeId } from "@/lib/themes";
 import { useThemePreference } from "@/hooks/useThemePreference";
 import { useOnboarding } from "@/hooks/useOnboarding";
+import { useExperimentalFeatures } from "@/hooks/useExperimentalFeatures";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -84,6 +85,8 @@ function OnboardingResetCard() {
 
 export default function ThemeSettingsPage() {
   const { theme, setTheme, mounted } = useThemePreference();
+  const { enabled: experimentalEnabled, setEnabled: setExperimentalEnabled } =
+    useExperimentalFeatures();
 
   return (
     <div className="p-4 sm:p-6 lg:p-10">
@@ -120,6 +123,35 @@ export default function ThemeSettingsPage() {
         </Card>
 
         <OnboardingResetCard />
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-heading text-base">
+              Experimental features
+            </CardTitle>
+            <CardDescription>
+              Early labs and unfinished surfaces. Off by default.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <label className="flex items-start gap-3 text-sm text-foreground">
+              <input
+                type="checkbox"
+                checked={experimentalEnabled}
+                onChange={(e) => setExperimentalEnabled(e.target.checked)}
+                className="mt-0.5 accent-primary"
+                data-testid="enable-experimental-features"
+              />
+              <span>
+                <span className="font-medium">Enable experimental features</span>
+                <span className="mt-1 block text-muted-foreground">
+                  Shows Multigrid Lab in Tools and Atmosphere. Preferences save
+                  in this browser and sync when signed in.
+                </span>
+              </span>
+            </label>
+          </CardContent>
+        </Card>
 
         <p className="text-sm text-muted-foreground">
           Customize the home Chladni pattern in{" "}

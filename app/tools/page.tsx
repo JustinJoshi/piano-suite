@@ -1,3 +1,5 @@
+"use client";
+
 import { Home, Search, Bell } from "lucide-react";
 import { AppUserButton } from "@/components/app-user-button";
 import { DashboardMenuButton } from "@/components/tools/dashboard-nav";
@@ -5,6 +7,8 @@ import { ToolCard } from "@/components/tools/tool-card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { tools } from "@/lib/tools";
+import { useExperimentalFeatures } from "@/hooks/useExperimentalFeatures";
+import { isExperimentalToolHref } from "@/lib/experimental-features";
 
 const welcomeTool = {
   title: "Welcome",
@@ -14,6 +18,11 @@ const welcomeTool = {
 };
 
 export default function ToolsPage() {
+  const { enabled: experimentalEnabled } = useExperimentalFeatures();
+  const visibleTools = tools.filter(
+    (tool) => experimentalEnabled || !isExperimentalToolHref(tool.href)
+  );
+
   return (
     <div className="flex min-h-full flex-col">
       {/* Top bar */}
@@ -65,7 +74,7 @@ export default function ToolsPage() {
               icon={welcomeTool.icon}
               href={welcomeTool.href}
             />
-            {tools.map((tool) => (
+            {visibleTools.map((tool) => (
               <ToolCard
                 key={tool.href}
                 title={tool.title}

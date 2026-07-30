@@ -11,6 +11,11 @@ import {
 import { floatPanelUpgradeCopy } from "@/lib/billing";
 import { useAmbientEffects } from "@/hooks/useAmbientEffects";
 import { useAuthAccess } from "@/hooks/useAuthAccess";
+import { useExperimentalFeatures } from "@/hooks/useExperimentalFeatures";
+import {
+  isExperimentalAmbientKind,
+  isExperimentalToolHref,
+} from "@/lib/experimental-features";
 import {
   Card,
   CardContent,
@@ -19,21 +24,18 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-const SELECTABLE_KINDS = AMBIENT_EFFECT_KINDS;
-const FLOAT_KINDS = AMBIENT_EFFECT_KINDS.filter(
-  (k): k is AmbientFloatKind => k !== "none"
-);
-
 function KindSelect({
   id,
   value,
   onChange,
   includeInherit,
+  kinds,
 }: {
   id: string;
   value: string;
   onChange: (value: string) => void;
   includeInherit?: boolean;
+  kinds: readonly AmbientEffectKind[];
 }) {
   return (
     <select
@@ -44,7 +46,7 @@ function KindSelect({
       data-testid={id}
     >
       {includeInherit ? <option value="inherit">Inherit</option> : null}
-      {SELECTABLE_KINDS.map((kind) => (
+      {kinds.map((kind) => (
         <option key={kind} value={kind}>
           {AMBIENT_EFFECT_LABELS[kind]}
         </option>
@@ -65,6 +67,17 @@ export default function AtmosphereSettingsPage() {
     setFloatKind,
     updateFloat,
   } = useAmbientEffects();
+  const { enabled: experimentalEnabled } = useExperimentalFeatures();
+
+  const selectableKinds = AMBIENT_EFFECT_KINDS.filter(
+    (kind) => experimentalEnabled || !isExperimentalAmbientKind(kind)
+  );
+  const floatKinds = selectableKinds.filter(
+    (k): k is AmbientFloatKind => k !== "none"
+  );
+  const routeCatalog = AMBIENT_ROUTE_CATALOG.filter(
+    (route) => experimentalEnabled || !isExperimentalToolHref(route.href)
+  );
 
   const floatRouteSet = new Set(settings.float.routes);
 
@@ -112,7 +125,12 @@ export default function AtmosphereSettingsPage() {
           <CardContent className="space-y-4">
             <KindSelect
               id="ambient-default-kind"
-              value={settings.defaultBackground}
+              value={
+                selectableKinds.includes(settings.defaultBackground)
+                  ? settings.defaultBackground
+                  : "chladni"
+              }
+              kinds={selectableKinds}
               onChange={(v) =>
                 setDefaultBackground(v as AmbientEffectKind)
               }
@@ -161,9 +179,14 @@ export default function AtmosphereSettingsPage() {
           </CardHeader>
           <CardContent>
             <ul className="divide-y divide-border/60">
-              {AMBIENT_ROUTE_CATALOG.map((route) => {
+              {routeCatalog.map((route) => {
                 const current = settings.routeBackgrounds[route.href];
-                const selectValue = current ?? "inherit";
+                const selectValue =
+                  current == null
+                    ? "inherit"
+                    : selectableKinds.includes(current)
+                      ? current
+                      : "inherit";
                 return (
                   <li
                     key={route.href}
@@ -182,6 +205,7 @@ export default function AtmosphereSettingsPage() {
                         id={`ambient-route-${route.href}`}
                         value={selectValue}
                         includeInherit
+                        kinds={selectableKinds}
                         onChange={(v) =>
                           setRouteBackground(
                             route.href,
@@ -240,7 +264,11 @@ export default function AtmosphereSettingsPage() {
             <label className="flex flex-col gap-1.5">
               <span className="text-xs text-muted-foreground">Float effect</span>
               <select
-                value={settings.float.kind}
+                value={
+                  floatKinds.includes(settings.float.kind)
+                    ? settings.float.kind
+                    : "chladni"
+                }
                 onChange={(e) => {
                   if (!canUseFloatPanel) return;
                   setFloatKind(e.target.value as AmbientFloatKind);
@@ -249,7 +277,7 @@ export default function AtmosphereSettingsPage() {
                 className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground disabled:opacity-50"
                 data-testid="ambient-float-kind"
               >
-                {FLOAT_KINDS.map((kind) => (
+                {floatKinds.map((kind) => (
                   <option key={kind} value={kind}>
                     {AMBIENT_EFFECT_LABELS[kind]}
                   </option>
@@ -261,7 +289,7 @@ export default function AtmosphereSettingsPage() {
                 Show on routes (none selected = all routes)
               </div>
               <ul className="grid gap-2 sm:grid-cols-2">
-                {AMBIENT_ROUTE_CATALOG.map((route) => (
+                {routeCatalog.map((route) => (
                   <li key={route.href}>
                     <label className="flex items-center gap-2 text-sm text-foreground">
                       <input

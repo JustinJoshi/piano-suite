@@ -43,6 +43,19 @@ Apply / Reset from Multigrid Lab sets kind to `multigrid` and writes only multig
 - Tools hub ToolCard
 - README + AGENTS primitive list
 
+## Experimental gate
+
+Multigrid Lab is **experimental** and hidden unless the user enables it under
+**Theme → Enable experimental features** (`lib/experimental-features.ts`,
+`hooks/useExperimentalFeatures.ts`). Default: **off**.
+
+When off:
+
+- Sidebar + Tools hub omit Multigrid
+- Atmosphere settings omit the Multigrid kind and Multigrid Lab route row
+- Ambient / welcome renderers treat `multigrid` as `none`
+- `/tools/multigrid` still loads (auth-gated) but shows a gate message with a link to Theme settings
+
 ## Out of scope (v1)
 
 - Click-to-select tiles / ribbons

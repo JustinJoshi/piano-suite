@@ -25,6 +25,8 @@ import { useUser } from "@clerk/nextjs";
 import { AppUserButton } from "@/components/app-user-button";
 import { Button } from "@/components/ui/button";
 import { useDashboardNav } from "@/components/tools/dashboard-nav";
+import { useExperimentalFeatures } from "@/hooks/useExperimentalFeatures";
+import { isExperimentalToolHref } from "@/lib/experimental-features";
 import { cn } from "@/lib/utils";
 
 const toolLinks = [
@@ -47,6 +49,10 @@ export function Sidebar() {
   const pathname = usePathname();
   const { user, isLoaded, isSignedIn } = useUser();
   const { open, setOpen } = useDashboardNav();
+  const { enabled: experimentalEnabled } = useExperimentalFeatures();
+  const visibleToolLinks = toolLinks.filter(
+    (link) => experimentalEnabled || !isExperimentalToolHref(link.href)
+  );
 
   const accountLabel =
     isLoaded && isSignedIn
@@ -108,7 +114,7 @@ export function Sidebar() {
             Practice Tools
           </div>
           <ul className="space-y-0.5">
-            {toolLinks.map((link) => {
+            {visibleToolLinks.map((link) => {
               const isActive = pathname === link.href;
               const Icon = link.icon;
 
