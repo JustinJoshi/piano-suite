@@ -47,6 +47,14 @@ const PUBLIC_ROUTES = [
     },
   },
   {
+    path: "/tools/logo-lab",
+    assert: async (page: import("@playwright/test").Page) => {
+      await expect(
+        page.getByRole("heading", { name: "Logo Lab" })
+      ).toBeVisible();
+    },
+  },
+  {
     path: "/pricing",
     assert: async (page: import("@playwright/test").Page) => {
       await expect(
@@ -75,6 +83,7 @@ const SIGNED_IN_ROUTE_SMOKE: Array<{
   { path: "/tools/technique", heading: /Technique/i },
   { path: "/tools/tracking", heading: "Tracking" },
   { path: "/tools/chladni", heading: "Chladni Pattern Lab" },
+  { path: "/tools/logo-lab", heading: "Logo Lab" },
   { path: "/tools/chladni-ripple", heading: /Chladni Ripple/i },
   { path: "/tools/julia", heading: /Julia/i },
   { path: "/tools/lissajous", heading: /Lissajous/i },

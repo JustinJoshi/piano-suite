@@ -58,6 +58,8 @@ Three Google fonts create a clear hierarchy:
 
 Headings are large, tight, and high-contrast (`text-foreground`). Body copy uses `leading-relaxed` and `text-muted-foreground` to reduce eye strain during longer reads (see `components/articles/article-content.tsx`).
 
+The **brand mark** is a static square-plate Chladni nodal figure (not a Lucide music note). Shipping default is mode `(3, 5)`. In-app chrome uses `components/brand/piano-suite-mark.tsx` with `currentColor` / theme tokens; Logo Lab (`/tools/logo-lab`) can **Apply logo** to persist a custom mark (localStorage always; Convex when Pro). Static favicons bake amber defaults because they cannot read CSS variables.
+
 ---
 
 ## 5. Card-Based, Bordered Surfaces

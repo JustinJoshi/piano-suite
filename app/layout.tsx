@@ -5,6 +5,7 @@ import { shadcn } from "@clerk/ui/themes";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AmbientEffectsHost } from "@/components/ambient/ambient-effects-host";
+import { FaviconHost } from "@/components/brand/favicon-host";
 import { AmbientEffectsProvider } from "@/hooks/useAmbientEffects";
 import { ExperimentalFeaturesProvider } from "@/hooks/useExperimentalFeatures";
 import { defaultTheme, themeIds } from "@/lib/themes";

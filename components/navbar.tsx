@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Menu, Music, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import {
   SignInButton,
   SignUpButton,
   Show,
 } from "@clerk/nextjs";
 import { AppUserButton } from "@/components/app-user-button";
+import { AppliedLogoMark } from "@/components/brand/applied-logo-mark";
 import { Button } from "@/components/ui/button";
 
 const navLinks = [
@@ -38,7 +39,7 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2 text-foreground">
-          <Music className="h-5 w-5 text-primary" />
+          <AppliedLogoMark className="h-7 w-7" title="Piano Suite" />
           <span className="font-heading text-lg font-semibold tracking-tight">
             Piano Suite
           </span>

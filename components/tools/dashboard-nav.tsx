@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import { Menu } from "lucide-react";
+import { AppliedLogoMark } from "@/components/brand/applied-logo-mark";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -121,6 +122,7 @@ export function DashboardMobileTopBar() {
       data-testid="dashboard-mobile-top-bar"
     >
       <DashboardMenuButton />
+      <AppliedLogoMark className="h-7 w-7" title="Piano Suite" />
       <span className="font-heading text-base font-semibold tracking-tight text-foreground">
         Piano Suite
       </span>
