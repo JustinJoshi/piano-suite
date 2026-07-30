@@ -8,6 +8,10 @@ vi.mock("@/components/drills/lissajous/lissajous-visualization", () => ({
   ),
 }));
 
+vi.mock("@/components/drills/saved-patterns-panel", () => ({
+  SavedPatternsPanel: () => <div data-testid="saved-patterns-panel" />,
+}));
+
 describe("LissajousLab", () => {
   it("renders the parameter controls and presets", () => {
     render(<LissajousLab />);

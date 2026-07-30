@@ -68,4 +68,16 @@ export default defineSchema({
     value: v.any(),
   })
     .index("by_user_key", ["userId", "key"]),
+
+  // Named parameter snapshots from pattern labs (Chladni, Julia, Lissajous, …).
+  savedPatterns: defineTable({
+    userId: v.id("users"),
+    tool: v.string(), // "chladni" | "julia" | "lissajous"
+    name: v.string(),
+    params: v.any(), // lab-specific JSON snapshot
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user_tool", ["userId", "tool"])
+    .index("by_user", ["userId"]),
 });

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LissajousVisualization } from "@/components/drills/lissajous/lissajous-visualization";
+import { SavedPatternsPanel } from "@/components/drills/saved-patterns-panel";
 import { Pause, Play, Shuffle } from "lucide-react";
 import {
   LISSAJOUS_PRESETS,
@@ -11,6 +12,10 @@ import {
   randomRatio,
   type LissajousParams,
 } from "@/lib/lissajous";
+import {
+  normalizeLissajousLabParams,
+  type LissajousLabParamsSnapshot,
+} from "@/lib/lab-patterns";
 
 // ============================================================
 // LISSAJOUS HARMONIC LAB
@@ -124,7 +129,37 @@ export function LissajousLab() {
     setNextParams((prev) => ({ ...prev, ...patch }));
   }
 
+  function snapshotParams(): LissajousLabParamsSnapshot {
+    return {
+      params,
+      nextParams,
+      morph,
+      autoMorph,
+      morphSpeed,
+      sweepSpeed,
+      trailFade,
+      lineThickness,
+      zoom,
+      colorSoftness,
+    };
+  }
+
+  function loadParams(raw: unknown) {
+    const next = normalizeLissajousLabParams(raw, snapshotParams());
+    setParams(next.params);
+    setNextParams(next.nextParams);
+    setMorph(next.morph);
+    setAutoMorph(next.autoMorph);
+    setMorphSpeed(next.morphSpeed);
+    setSweepSpeed(next.sweepSpeed);
+    setTrailFade(next.trailFade);
+    setLineThickness(next.lineThickness);
+    setZoom(next.zoom);
+    setColorSoftness(next.colorSoftness);
+  }
+
   return (
+    <div className="space-y-6">
     <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
       <Card className="relative min-h-[400px] overflow-hidden border-border bg-card">
         <LissajousVisualization
@@ -304,6 +339,13 @@ export function LissajousLab() {
           />
         </CardContent>
       </Card>
+    </div>
+
+    <SavedPatternsPanel
+      tool="lissajous"
+      getParams={snapshotParams}
+      onLoad={loadParams}
+    />
     </div>
   );
 }

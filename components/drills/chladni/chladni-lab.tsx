@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChladniVisualization } from "@/components/welcome/chladni-visualization";
+import { SavedPatternsPanel } from "@/components/drills/saved-patterns-panel";
 import { useHeroChladniSettings } from "@/hooks/useHeroChladniSettings";
 import { useHeroAtmosphereKind } from "@/hooks/useHeroAtmosphereKind";
 import { useAmbientEffects } from "@/hooks/useAmbientEffects";
@@ -12,6 +13,10 @@ import {
   DEFAULT_HERO_CHLADNI_SETTINGS,
   type ModePair,
 } from "@/lib/chladni-hero-settings";
+import {
+  normalizeChladniLabParams,
+  type ChladniLabParams,
+} from "@/lib/lab-patterns";
 import { Pause, Play, RotateCcw, Shuffle, Home } from "lucide-react";
 import { randomMode } from "@/lib/chladni";
 
@@ -227,12 +232,48 @@ export function ChladniLab() {
     setApplyMessage("Home pattern reset to the default look.");
   }
 
+  function snapshotParams(): ChladniLabParams {
+    return {
+      mode,
+      nextMode,
+      morph,
+      autoMorph,
+      morphSpeed,
+      lineThickness,
+      zoom,
+      secondaryOffset,
+      secondaryBlend,
+      secondarySpeed,
+      secondaryMotion,
+      breathe,
+      timeScale,
+    };
+  }
+
+  function loadParams(raw: unknown) {
+    const next = normalizeChladniLabParams(raw, snapshotParams());
+    setMode(next.mode);
+    setNextMode(next.nextMode);
+    setMorph(next.morph);
+    setAutoMorph(next.autoMorph);
+    setMorphSpeed(next.morphSpeed);
+    setLineThickness(next.lineThickness);
+    setZoom(next.zoom);
+    setSecondaryOffset(next.secondaryOffset);
+    setSecondaryBlend(next.secondaryBlend);
+    setSecondarySpeed(next.secondarySpeed);
+    setSecondaryMotion(next.secondaryMotion);
+    setBreathe(next.breathe);
+    setTimeScale(next.timeScale);
+  }
+
   const patternColorValue =
     settings.patternColor && /^#[0-9a-fA-F]{6}$/.test(settings.patternColor)
       ? settings.patternColor
       : "#888888";
 
   return (
+    <div className="space-y-6">
     <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
       {/* Visualization */}
       <Card className="relative min-h-[400px] overflow-hidden border-border bg-card">
@@ -514,6 +555,13 @@ export function ChladniLab() {
           />
         </CardContent>
       </Card>
+    </div>
+
+    <SavedPatternsPanel
+      tool="chladni"
+      getParams={snapshotParams}
+      onLoad={loadParams}
+    />
     </div>
   );
 }
