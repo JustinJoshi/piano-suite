@@ -82,15 +82,19 @@ test.describe("/tools dashboard", () => {
     await signInAsTestUser(page);
     await page.goto("/tools");
 
-    await expect(page.getByTestId("dashboard-menu-button")).toBeVisible();
+    const menuButton = page.getByTestId("dashboard-menu-button");
+    await expect(menuButton).toBeVisible();
+    await expect(menuButton).toHaveAttribute("aria-expanded", "false");
 
     const trackingLink = page
       .locator("aside nav")
       .getByRole("link", { name: "Tracking" });
-    await expect(trackingLink).toBeHidden();
+    // Closed drawer uses CSS translate off-screen (still "visible" to Playwright).
+    await expect(trackingLink).not.toBeInViewport();
 
-    await page.getByTestId("dashboard-menu-button").click();
-    await expect(trackingLink).toBeVisible();
+    await menuButton.click();
+    await expect(menuButton).toHaveAttribute("aria-expanded", "true");
+    await expect(trackingLink).toBeInViewport();
 
     await trackingLink.click();
     await expect(page).toHaveURL("/tools/tracking");
