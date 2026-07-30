@@ -29,8 +29,9 @@ describe("useDrillTimer", () => {
 
   it("counts down before arming", () => {
     const onCountdownComplete = vi.fn();
+    const onCountdownTick = vi.fn();
     const { result } = renderHook(() =>
-      useDrillTimer({ countdownSeconds: 3, onCountdownComplete })
+      useDrillTimer({ countdownSeconds: 3, onCountdownComplete, onCountdownTick })
     );
 
     act(() => {
@@ -39,17 +40,23 @@ describe("useDrillTimer", () => {
 
     expect(result.current.phase).toBe("countdown");
     expect(result.current.countdownValue).toBe(3);
+    expect(onCountdownTick).toHaveBeenCalledTimes(1);
+    expect(onCountdownTick).toHaveBeenLastCalledWith(3);
 
     act(() => {
       vi.advanceTimersByTime(1000);
     });
     expect(result.current.countdownValue).toBe(2);
+    expect(onCountdownTick).toHaveBeenCalledTimes(2);
+    expect(onCountdownTick).toHaveBeenLastCalledWith(2);
 
     act(() => {
       vi.advanceTimersByTime(2000);
     });
     expect(result.current.phase).toBe("armed");
     expect(onCountdownComplete).toHaveBeenCalled();
+    // Ticks at 3, 2, 1 — not at 0 (arming is silent).
+    expect(onCountdownTick).toHaveBeenCalledTimes(3);
   });
 
   it("starts timing when armed", () => {
@@ -94,8 +101,9 @@ describe("useDrillTimer", () => {
 
   it("waits for break before grading", () => {
     const onBreakComplete = vi.fn();
+    const onBreakTick = vi.fn();
     const { result } = renderHook(() =>
-      useDrillTimer({ breakSeconds: 3, onBreakComplete })
+      useDrillTimer({ breakSeconds: 3, onBreakComplete, onBreakTick })
     );
 
     act(() => {
@@ -106,13 +114,40 @@ describe("useDrillTimer", () => {
 
     expect(result.current.phase).toBe("break-before-grade");
     expect(result.current.breakRemaining).toBe(3);
+    expect(onBreakTick).toHaveBeenCalledTimes(1);
+    expect(onBreakTick).toHaveBeenLastCalledWith(3);
 
     act(() => {
-      vi.advanceTimersByTime(3000);
+      vi.advanceTimersByTime(1000);
+    });
+    expect(onBreakTick).toHaveBeenCalledTimes(2);
+    expect(onBreakTick).toHaveBeenLastCalledWith(2);
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
     });
 
     expect(result.current.phase).toBe("finished");
     expect(onBreakComplete).toHaveBeenCalled();
+    expect(onBreakTick).toHaveBeenCalledTimes(3);
+  });
+
+  it("does not arm directly from success without nextRep", () => {
+    const { result } = renderHook(() => useDrillTimer({ multiRep: true }));
+
+    act(() => {
+      result.current.start();
+      result.current.arm();
+      result.current.markSuccess();
+    });
+
+    expect(result.current.phase).toBe("success");
+
+    act(() => {
+      result.current.arm();
+    });
+
+    expect(result.current.phase).toBe("success");
   });
 
   it("cancels back to idle", () => {
@@ -199,6 +234,88 @@ describe("useDrillTimer", () => {
 
     expect(result.current.phase).toBe("finished");
     expect(onBreakComplete).toHaveBeenCalled();
+    expect(onFinish).toHaveBeenCalled();
+  });
+
+  it("allows finishRound from onSuccess without being overwritten back to success", () => {
+    const onFinish = vi.fn();
+    let timerApi: ReturnType<typeof useDrillTimer> | null = null;
+
+    const { result } = renderHook(() => {
+      timerApi = useDrillTimer({
+        multiRep: true,
+        breakSeconds: 2,
+        onFinish,
+        onSuccess: () => {
+          timerApi?.finishRound();
+        },
+      });
+      return timerApi;
+    });
+
+    act(() => {
+      result.current.start();
+      result.current.arm();
+      result.current.markSuccess();
+    });
+
+    expect(result.current.phase).toBe("break-before-grade");
+    expect(result.current.breakRemaining).toBe(2);
+    expect(onFinish).not.toHaveBeenCalled();
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    expect(result.current.phase).toBe("finished");
+    expect(onFinish).toHaveBeenCalled();
+  });
+
+  it("allows nextRep from onSuccess", () => {
+    let timerApi: ReturnType<typeof useDrillTimer> | null = null;
+
+    const { result } = renderHook(() => {
+      timerApi = useDrillTimer({
+        multiRep: true,
+        onSuccess: () => {
+          timerApi?.nextRep();
+        },
+      });
+      return timerApi;
+    });
+
+    act(() => {
+      result.current.start();
+      result.current.arm();
+      result.current.markSuccess();
+    });
+
+    expect(result.current.phase).toBe("armed");
+  });
+
+  it("finishes immediately from onSuccess when breakSeconds is 0", () => {
+    const onFinish = vi.fn();
+    let timerApi: ReturnType<typeof useDrillTimer> | null = null;
+
+    const { result } = renderHook(() => {
+      timerApi = useDrillTimer({
+        multiRep: true,
+        breakSeconds: 0,
+        onFinish,
+        onSuccess: () => {
+          timerApi?.finishRound();
+        },
+      });
+      return timerApi;
+    });
+
+    act(() => {
+      result.current.start();
+      result.current.arm();
+      result.current.markSuccess();
+    });
+
+    expect(result.current.phase).toBe("finished");
     expect(onFinish).toHaveBeenCalled();
   });
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useSyncExternalStore } from "react";
+import { useCallback, useMemo, useSyncExternalStore } from "react";
 import {
   connectMidiSession,
   getMidiSessionSnapshot,
@@ -37,8 +37,10 @@ export function useMidi() {
     await connectMidiSession();
   }, []);
 
-  const heldPcs = new Set(
-    state.heldNotes.map((n) => ((n % 12) + 12) % 12)
+  // Stable across renders that do not change held notes (avoids effect thrash).
+  const heldPcs = useMemo(
+    () => new Set(state.heldNotes.map((n) => ((n % 12) + 12) % 12)),
+    [state.heldNotes]
   );
 
   return {

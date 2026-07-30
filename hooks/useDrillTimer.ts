@@ -16,8 +16,10 @@ export type DrillTimerOptions = {
   breakSeconds?: number;
   multiRep?: boolean;
   onCountdownComplete?: () => void;
+  onCountdownTick?: (remaining: number) => void;
   onStartTiming?: () => void;
   onSuccess?: (elapsedMs: number) => void;
+  onBreakTick?: (remaining: number) => void;
   onBreakComplete?: () => void;
   onFinish?: () => void;
 };
@@ -28,10 +30,16 @@ export type DrillTimerOptions = {
  * Drives the lifecycle of a single drill attempt:
  *   idle -> countdown -> armed -> timing -> success -> break -> finished
  *
- * When `multiRep` is true, `markSuccess()` pauses at the "success" phase so
- * the consumer can run multiple reps per round. Call `nextRep()` to return to
- * the armed state, or `finishRound()` to complete the round (running the break
- * timer and finishing).
+ * When `multiRep` is true, `markSuccess()` enters the "success" phase *before*
+ * invoking `onSuccess`, so the consumer may call `nextRep()` or `finishRound()`
+ * synchronously from that callback. Call `nextRep()` to return to armed, or
+ * `finishRound()` to complete the round (running the break timer and finishing).
+ * If the consumer does not advance the phase, it stays at "success" until
+ * `nextRep()` / `finishRound()` is called later (e.g. on hands lifted).
+ *
+ * Countdown / break tick audio should use `onCountdownTick` / `onBreakTick`
+ * (fired once per second from the interval) rather than a React effect on the
+ * remaining value — effects re-fire under Strict Mode and double the sound.
  *
  * The consumer is responsible for detecting MIDI events and calling
  * `arm()` (hands lifted) and `markSuccess()` (correct input detected).
@@ -42,8 +50,10 @@ export function useDrillTimer(options: DrillTimerOptions = {}) {
     breakSeconds = 0,
     multiRep = false,
     onCountdownComplete,
+    onCountdownTick,
     onStartTiming,
     onSuccess,
+    onBreakTick,
     onBreakComplete,
     onFinish,
   } = options;
@@ -58,6 +68,25 @@ export function useDrillTimer(options: DrillTimerOptions = {}) {
   const rafRef = useRef<number | null>(null);
   const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const breakIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Keep tick/finish callbacks in refs so interval closures stay stable.
+  const onCountdownCompleteRef = useRef(onCountdownComplete);
+  const onCountdownTickRef = useRef(onCountdownTick);
+  const onBreakTickRef = useRef(onBreakTick);
+  const onBreakCompleteRef = useRef(onBreakComplete);
+  const onFinishRef = useRef(onFinish);
+  const onStartTimingRef = useRef(onStartTiming);
+  const onSuccessRef = useRef(onSuccess);
+
+  useEffect(() => {
+    onCountdownCompleteRef.current = onCountdownComplete;
+    onCountdownTickRef.current = onCountdownTick;
+    onBreakTickRef.current = onBreakTick;
+    onBreakCompleteRef.current = onBreakComplete;
+    onFinishRef.current = onFinish;
+    onStartTimingRef.current = onStartTiming;
+    onSuccessRef.current = onSuccess;
+  });
 
   const setPhaseSync = useCallback((next: DrillPhase) => {
     phaseRef.current = next;
@@ -109,6 +138,7 @@ export function useDrillTimer(options: DrillTimerOptions = {}) {
       setPhaseSync("countdown");
       setCountdownValue(countdownSeconds);
       clearCountdown();
+      onCountdownTickRef.current?.(countdownSeconds);
 
       countdownIntervalRef.current = setInterval(() => {
         setCountdownValue((prev) => {
@@ -116,29 +146,34 @@ export function useDrillTimer(options: DrillTimerOptions = {}) {
           if (next <= 0) {
             clearCountdown();
             setPhaseSync("armed");
-            onCountdownComplete?.();
+            onCountdownCompleteRef.current?.();
+            return 0;
           }
-          return Math.max(0, next);
+          onCountdownTickRef.current?.(next);
+          return next;
         });
       }, 1000);
     } else {
       setPhaseSync("armed");
     }
-  }, [countdownSeconds, clearCountdown, onCountdownComplete, setPhaseSync]);
+  }, [countdownSeconds, clearCountdown, setPhaseSync]);
 
   const arm = useCallback(() => {
-    if (phaseRef.current !== "armed" && phaseRef.current !== "success") return;
+    // Only arm from the dedicated armed state. Success must go through
+    // nextRep() first so a held chord cannot immediately re-trigger timing.
+    if (phaseRef.current !== "armed") return;
     setPhaseSync("timing");
     setLiveMs(0);
     startTimingLoop();
-    onStartTiming?.();
-  }, [startTimingLoop, onStartTiming, setPhaseSync]);
+    onStartTimingRef.current?.();
+  }, [startTimingLoop, setPhaseSync]);
 
   const finishRoundInternal = useCallback(() => {
     if (breakSeconds > 0) {
       setPhaseSync("break-before-grade");
       setBreakRemaining(breakSeconds);
       clearBreak();
+      onBreakTickRef.current?.(breakSeconds);
 
       breakIntervalRef.current = setInterval(() => {
         setBreakRemaining((prev) => {
@@ -146,17 +181,19 @@ export function useDrillTimer(options: DrillTimerOptions = {}) {
           if (next <= 0) {
             clearBreak();
             setPhaseSync("finished");
-            onBreakComplete?.();
-            onFinish?.();
+            onBreakCompleteRef.current?.();
+            onFinishRef.current?.();
+            return 0;
           }
-          return Math.max(0, next);
+          onBreakTickRef.current?.(next);
+          return next;
         });
       }, 1000);
     } else {
       setPhaseSync("finished");
-      onFinish?.();
+      onFinishRef.current?.();
     }
-  }, [breakSeconds, clearBreak, onBreakComplete, onFinish, setPhaseSync]);
+  }, [breakSeconds, clearBreak, setPhaseSync]);
 
   const markSuccess = useCallback(() => {
     if (phaseRef.current !== "timing") return;
@@ -167,14 +204,20 @@ export function useDrillTimer(options: DrillTimerOptions = {}) {
 
     stopTimingLoop();
     setLiveMs(elapsed);
-    onSuccess?.(elapsed);
 
+    // Enter "success" before onSuccess so consumers can call nextRep() /
+    // finishRound() synchronously from the callback. Those APIs require
+    // phase === "success"; calling them while still on "timing" no-ops.
     if (multiRep) {
       setPhaseSync("success");
+      onSuccessRef.current?.(elapsed);
+      // If onSuccess already advanced the phase (nextRep / finishRound),
+      // do not overwrite break-before-grade / armed / finished.
     } else {
+      onSuccessRef.current?.(elapsed);
       finishRoundInternal();
     }
-  }, [stopTimingLoop, onSuccess, multiRep, finishRoundInternal, setPhaseSync]);
+  }, [stopTimingLoop, multiRep, finishRoundInternal, setPhaseSync]);
 
   const nextRep = useCallback(() => {
     if (phaseRef.current !== "success") return;
