@@ -6,6 +6,7 @@ import {
   PRO_PLAN_SLUG,
   SYNC_FEATURE_SLUG,
   canPersistFromEntitlements,
+  canUseFloatPanelFromEntitlements,
 } from "@/lib/billing";
 
 /**
@@ -14,6 +15,7 @@ import {
  * - `canAccess`: open the tool UI (true when signed in, or when auth is disabled)
  * - `canPersist`: write practice history **and** theme/atmosphere prefs to
  *   Convex — Pro (`sync`) or AUTH_DISABLED
+ * - `canUseFloatPanel`: ambient float / pop-out resonance panel — same Pro gate
  *
  * Signed-in Free users keep drilling and prefs in the browser
  * (`lib/local-practice-history.ts` + localStorage). Convex mutations reject
@@ -34,14 +36,17 @@ export function useAuthAccess() {
       ? has({ plan: PRO_PLAN_SLUG })
       : false;
 
+  const entitlements = {
+    authDisabled,
+    hasSyncFeature,
+    hasProPlan,
+  };
+
   return {
     authDisabled,
     isSignedIn: signedIn,
     canAccess: authDisabled || signedIn,
-    canPersist: canPersistFromEntitlements({
-      authDisabled,
-      hasSyncFeature,
-      hasProPlan,
-    }),
+    canPersist: canPersistFromEntitlements(entitlements),
+    canUseFloatPanel: canUseFloatPanelFromEntitlements(entitlements),
   };
 }

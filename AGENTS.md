@@ -36,7 +36,7 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `components/ensure-signed-in-user.tsx` | Bootstraps Convex `users` row on Clerk sign-in (homepage settings before tools) |
 | `lib/auth-disabled.ts` | Opt-in `isAuthDisabled()` (`=== "true"` only); Hobby Vercel may set temporarily (see README Deploy) |
 | `lib/clerk-authorized-parties.ts` | Parse `CLERK_AUTHORIZED_PARTIES` for `clerkMiddleware` `authorizedParties` (Phase A / production) |
-| `lib/billing.ts` | Clerk Billing plan/feature slugs (`pro`, `sync`) + `canPersistFromEntitlements` + JWT `pla`/`fea` helpers; apply Dashboard catalog via `docs/clerk-billing-setup.md` |
+| `lib/billing.ts` | Clerk Billing plan/feature slugs (`pro`, `sync`) + `canPersistFromEntitlements` / `canUseFloatPanelFromEntitlements` + JWT `pla`/`fea` helpers; apply Dashboard catalog via `docs/clerk-billing-setup.md` |
 | `lib/local-practice-history.ts` | Free-tier browser practice history (Reflex-compatible keys); drills write when `!canPersist` |
 | `convex/lib/entitlements.ts` | `ensureUserIdWithSync` — Pro/`sync` JWT gate for tracking, technique, and settings writes |
 | `hooks/useLocalPracticeHistory.ts` | Version bump when local history changes (Tracking/Technique refresh) |
@@ -91,7 +91,7 @@ Before making styling changes, read `DESIGN-PRINCIPLES.md` for the visual conven
 
 ### Ambient effects
 
-`AmbientEffectsProvider` in `app/layout.tsx` owns a single shared store for page backgrounds and the float panel. Use `useAmbientEffects()` — do not instantiate a second ambient store. Background ownership for Welcome (`/`) lives in `AmbientEffectsHost`; Pattern Lab **Apply to home** still writes hero param blobs and also sets the ambient `/` kind. MIDI reactivity is only wired for `chladni-ripple`. Soft ambient defaults live in `lib/ambient-effects.ts` so tools stay readable. Theme / ambient / hero Convex sync uses `canPersist` (Pro or `AUTH_DISABLED`), not merely signed-in — Free prefs stay device-local.
+`AmbientEffectsProvider` in `app/layout.tsx` owns a single shared store for page backgrounds and the float panel. Use `useAmbientEffects()` — do not instantiate a second ambient store. Background ownership for Welcome (`/`) lives in `AmbientEffectsHost`; Pattern Lab **Apply to home** still writes hero param blobs and also sets the ambient `/` kind. MIDI reactivity is only wired for `chladni-ripple`. Soft ambient defaults live in `lib/ambient-effects.ts` so tools stay readable. Theme / ambient / hero Convex sync uses `canPersist` (Pro or `AUTH_DISABLED`), not merely signed-in — Free prefs stay device-local. The **float / pop-out panel** is Pro-only (`canUseFloatPanel` in `useAuthAccess`); `AmbientEffectsHost` must not mount it for Free even if localStorage still has `float.enabled`.
 
 ### Tokens you should use
 

@@ -33,6 +33,7 @@ describe("useAuthAccess", () => {
     const { result } = renderHook(() => useAuthAccess());
     expect(result.current.canAccess).toBe(false);
     expect(result.current.canPersist).toBe(false);
+    expect(result.current.canUseFloatPanel).toBe(false);
     expect(result.current.isSignedIn).toBe(false);
   });
 
@@ -46,6 +47,7 @@ describe("useAuthAccess", () => {
     const { result } = renderHook(() => useAuthAccess());
     expect(result.current.canAccess).toBe(true);
     expect(result.current.canPersist).toBe(false);
+    expect(result.current.canUseFloatPanel).toBe(false);
   });
 
   it("allows persist when Clerk has sync feature", () => {
@@ -58,6 +60,7 @@ describe("useAuthAccess", () => {
 
     const { result } = renderHook(() => useAuthAccess());
     expect(result.current.canPersist).toBe(true);
+    expect(result.current.canUseFloatPanel).toBe(true);
   });
 
   it("allows persist when Clerk has Pro plan (fallback)", () => {
@@ -70,6 +73,7 @@ describe("useAuthAccess", () => {
 
     const { result } = renderHook(() => useAuthAccess());
     expect(result.current.canPersist).toBe(true);
+    expect(result.current.canUseFloatPanel).toBe(true);
   });
 
   it("treats unloaded auth as not entitled", () => {
@@ -82,6 +86,7 @@ describe("useAuthAccess", () => {
     const { result } = renderHook(() => useAuthAccess());
     expect(result.current.canAccess).toBe(true);
     expect(result.current.canPersist).toBe(false);
+    expect(result.current.canUseFloatPanel).toBe(false);
   });
 
   it("treats AUTH_DISABLED as full Pro-equivalent persist", () => {
@@ -92,6 +97,7 @@ describe("useAuthAccess", () => {
     const { result } = renderHook(() => useAuthAccess());
     expect(result.current.canAccess).toBe(true);
     expect(result.current.canPersist).toBe(true);
+    expect(result.current.canUseFloatPanel).toBe(true);
     expect(result.current.authDisabled).toBe(true);
   });
 });

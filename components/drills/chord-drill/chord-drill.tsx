@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,6 +13,7 @@ import {
 import { MidiConnectionBar } from "@/components/drills/midi-connection-bar";
 import { useChordDrill } from "@/hooks/useChordDrill";
 import { useAuthAccess } from "@/hooks/useAuthAccess";
+import { floatPanelUpgradeCopy } from "@/lib/billing";
 import {
   ROOTS,
   QUALITY_GROUPS,
@@ -205,7 +207,7 @@ function PerChordRepsModal({
 }
 
 export function ChordDrill() {
-  const { canPersist } = useAuthAccess();
+  const { canPersist, canUseFloatPanel } = useAuthAccess();
   const drill = useChordDrill(canPersist);
   const [perChordModalOpen, setPerChordModalOpen] = useState(false);
 
@@ -326,6 +328,21 @@ export function ChordDrill() {
         onSelectInput={setSelectedInputId}
         onConnect={connectMidi}
       />
+
+      {!canUseFloatPanel ? (
+        <p
+          className="text-xs text-muted-foreground"
+          data-testid="chord-drill-float-teaser"
+        >
+          {floatPanelUpgradeCopy("chord-drill")}{" "}
+          <Link
+            href="/pricing"
+            className="text-primary underline-offset-2 hover:underline"
+          >
+            See plans
+          </Link>
+        </p>
+      ) : null}
 
       <Card>
         <CardHeader className="pb-3">

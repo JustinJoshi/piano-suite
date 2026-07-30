@@ -250,8 +250,10 @@ Prefer **full local drills on Free** over “one mode only.” Limiting drill *m
 | Capability | Free (forever) | Pro |
 |------------|----------------|-----|
 | Welcome + Pattern Lab | ✓ | ✓ |
+| Chladni Ripple lab (explore MIDI → modes) | ✓ | ✓ |
 | Companion Anki deck downloads | ✓ | ✓ |
 | All core drills (chord, arpeggios, progression, root cycling, technique) | ✓ **local-only** | ✓ |
+| Float / pop-out resonance beside drills | ✗ | ✓ |
 | Tracking / PBs / miss history | Browser-local or session | **Synced** (Convex) |
 | Theme + atmosphere prefs | localStorage | **Synced** |
 | Cross-device restore | ✗ | ✓ |

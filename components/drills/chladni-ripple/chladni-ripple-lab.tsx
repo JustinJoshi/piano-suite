@@ -9,6 +9,8 @@ import { ChladniVisualization } from "@/components/welcome/chladni-visualization
 import { useMidi } from "@/hooks/useMidi";
 import { useChladniRipple } from "@/hooks/useChladniRipple";
 import { useAmbientEffects } from "@/hooks/useAmbientEffects";
+import { useAuthAccess } from "@/hooks/useAuthAccess";
+import { floatPanelUpgradeCopy } from "@/lib/billing";
 import { noteName } from "@/lib/music-theory";
 import { PC_MODE_TABLE } from "@/lib/chladni-ripple";
 
@@ -60,6 +62,7 @@ function RangeControl({
 
 export function ChladniRippleLab() {
   const midi = useMidi();
+  const { canUseFloatPanel } = useAuthAccess();
   const { applyAsAmbientBackground, openFloat, setRouteBackground } =
     useAmbientEffects();
   const [decayMs, setDecayMs] = useState(1200);
@@ -101,6 +104,10 @@ export function ChladniRippleLab() {
   }
 
   function handleOpenFloat() {
+    if (!canUseFloatPanel) {
+      setAmbientMessage(floatPanelUpgradeCopy("ripple-lab"));
+      return;
+    }
     openFloat("chladni-ripple");
     setAmbientMessage("Float panel opened with Chladni Ripple.");
   }
@@ -174,8 +181,9 @@ export function ChladniRippleLab() {
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="text-xs text-muted-foreground">
-              Use this MIDI-reactive pattern as a page background or float
-              panel. Fine-tune routes in{" "}
+              Use this MIDI-reactive pattern as a page background. Pro can pop
+              out a live resonance panel beside Chord Drill and other tools.
+              Fine-tune routes in{" "}
               <Link
                 href="/settings/atmosphere"
                 className="text-primary underline-offset-2 hover:underline"
@@ -210,12 +218,27 @@ export function ChladniRippleLab() {
                 onClick={handleOpenFloat}
                 data-testid="ripple-open-float"
               >
-                Open float panel
+                {canUseFloatPanel
+                  ? "Pop out while practicing"
+                  : "Pop out while practicing (Pro)"}
               </Button>
             </div>
             {ambientMessage ? (
               <p className="text-xs text-primary" role="status">
                 {ambientMessage}
+                {!canUseFloatPanel &&
+                ambientMessage === floatPanelUpgradeCopy("ripple-lab") ? (
+                  <>
+                    {" "}
+                    <Link
+                      href="/pricing"
+                      className="underline underline-offset-2"
+                      data-testid="ripple-float-upgrade-link"
+                    >
+                      See plans
+                    </Link>
+                  </>
+                ) : null}
               </p>
             ) : null}
           </CardContent>

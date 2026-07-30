@@ -8,7 +8,9 @@ import {
   type AmbientEffectKind,
   type AmbientFloatKind,
 } from "@/lib/ambient-effects";
+import { floatPanelUpgradeCopy } from "@/lib/billing";
 import { useAmbientEffects } from "@/hooks/useAmbientEffects";
+import { useAuthAccess } from "@/hooks/useAuthAccess";
 import {
   Card,
   CardContent,
@@ -52,6 +54,7 @@ function KindSelect({
 }
 
 export default function AtmosphereSettingsPage() {
+  const { canUseFloatPanel } = useAuthAccess();
   const {
     settings,
     setDefaultBackground,
@@ -66,6 +69,7 @@ export default function AtmosphereSettingsPage() {
   const floatRouteSet = new Set(settings.float.routes);
 
   function toggleFloatRoute(href: string) {
+    if (!canUseFloatPanel) return;
     const next = new Set(floatRouteSet);
     if (next.has(href)) next.delete(href);
     else next.add(href);
@@ -80,10 +84,10 @@ export default function AtmosphereSettingsPage() {
             Atmosphere
           </h1>
           <p className="text-sm text-muted-foreground">
-            Assign math visualizations as page backgrounds per route, and
-            optionally open a movable float panel. MIDI-reactive patterns use
-            the Chladni Ripple engine. Preferences save in this browser and sync
-            when signed in.
+            Assign math visualizations as page backgrounds per route. Pro can
+            open a movable float panel for live resonance beside drills.
+            MIDI-reactive patterns use the Chladni Ripple engine. Preferences
+            save in this browser and sync with Pro.
           </p>
           <p className="mt-2 text-xs text-muted-foreground">
             Related:{" "}
@@ -199,17 +203,36 @@ export default function AtmosphereSettingsPage() {
           <CardHeader>
             <CardTitle className="font-heading text-lg">Float panel</CardTitle>
             <CardDescription>
-              Draggable, resizable card over the current page. Running float +
-              full-page MIDI ripple may cost FPS on slower devices.
+              Pro-only draggable card over drills (for example Chord Drill with
+              Chladni Ripple). Running float + full-page MIDI ripple may cost
+              FPS on slower devices.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {!canUseFloatPanel ? (
+              <p
+                className="text-sm text-muted-foreground"
+                data-testid="ambient-float-upgrade"
+              >
+                {floatPanelUpgradeCopy("atmosphere")}{" "}
+                <Link
+                  href="/pricing"
+                  className="text-primary underline-offset-2 hover:underline"
+                >
+                  See plans
+                </Link>
+              </p>
+            ) : null}
             <label className="flex items-center gap-3 text-sm text-foreground">
               <input
                 type="checkbox"
-                checked={settings.float.enabled}
-                onChange={(e) => setFloatEnabled(e.target.checked)}
-                className="accent-primary"
+                checked={canUseFloatPanel && settings.float.enabled}
+                onChange={(e) => {
+                  if (!canUseFloatPanel) return;
+                  setFloatEnabled(e.target.checked);
+                }}
+                disabled={!canUseFloatPanel}
+                className="accent-primary disabled:opacity-50"
                 data-testid="ambient-float-enabled"
               />
               Show float panel
@@ -218,10 +241,12 @@ export default function AtmosphereSettingsPage() {
               <span className="text-xs text-muted-foreground">Float effect</span>
               <select
                 value={settings.float.kind}
-                onChange={(e) =>
-                  setFloatKind(e.target.value as AmbientFloatKind)
-                }
-                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground"
+                onChange={(e) => {
+                  if (!canUseFloatPanel) return;
+                  setFloatKind(e.target.value as AmbientFloatKind);
+                }}
+                disabled={!canUseFloatPanel}
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground disabled:opacity-50"
                 data-testid="ambient-float-kind"
               >
                 {FLOAT_KINDS.map((kind) => (
@@ -243,7 +268,8 @@ export default function AtmosphereSettingsPage() {
                         type="checkbox"
                         checked={floatRouteSet.has(route.href)}
                         onChange={() => toggleFloatRoute(route.href)}
-                        className="accent-primary"
+                        disabled={!canUseFloatPanel}
+                        className="accent-primary disabled:opacity-50"
                       />
                       {route.label}
                     </label>
