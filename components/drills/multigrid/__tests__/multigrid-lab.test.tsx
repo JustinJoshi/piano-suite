@@ -7,6 +7,7 @@ const applyFromLab = vi.fn();
 const updateSettings = vi.fn();
 const resetSettings = vi.fn();
 const setKind = vi.fn();
+const setRouteBackground = vi.fn();
 
 vi.mock("@/components/drills/multigrid/multigrid-visualization", () => ({
   MultigridVisualization: () => (
@@ -30,12 +31,19 @@ vi.mock("@/hooks/useHeroAtmosphereKind", () => ({
   }),
 }));
 
+vi.mock("@/hooks/useAmbientEffects", () => ({
+  useAmbientEffects: () => ({
+    setRouteBackground,
+  }),
+}));
+
 describe("MultigridLab", () => {
   beforeEach(() => {
     applyFromLab.mockClear();
     updateSettings.mockClear();
     resetSettings.mockClear();
     setKind.mockClear();
+    setRouteBackground.mockClear();
   });
 
   it("renders presets and view modes", () => {
@@ -55,6 +63,7 @@ describe("MultigridLab", () => {
     fireEvent.click(screen.getByTestId("apply-to-home"));
     expect(applyFromLab).toHaveBeenCalledTimes(1);
     expect(setKind).toHaveBeenCalledWith("multigrid");
+    expect(setRouteBackground).toHaveBeenCalledWith("/", "multigrid");
     expect(screen.getByRole("status")).toHaveTextContent(/Applied/i);
   });
 
@@ -63,5 +72,6 @@ describe("MultigridLab", () => {
     fireEvent.click(screen.getByTestId("reset-home"));
     expect(resetSettings).toHaveBeenCalled();
     expect(setKind).toHaveBeenCalledWith("multigrid");
+    expect(setRouteBackground).toHaveBeenCalledWith("/", "multigrid");
   });
 });

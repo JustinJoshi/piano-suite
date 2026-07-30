@@ -12,6 +12,7 @@ import {
   Sparkles,
   Infinity,
   Hexagon,
+  LayoutGrid,
   Activity,
 } from "lucide-react";
 import { AppUserButton } from "@/components/app-user-button";

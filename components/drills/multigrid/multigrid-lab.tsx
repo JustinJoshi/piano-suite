@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MultigridVisualization } from "@/components/drills/multigrid/multigrid-visualization";
 import { useHeroMultigridSettings } from "@/hooks/useHeroMultigridSettings";
 import { useHeroAtmosphereKind } from "@/hooks/useHeroAtmosphereKind";
+import { useAmbientEffects } from "@/hooks/useAmbientEffects";
 import {
   DEFAULT_HERO_MULTIGRID_SETTINGS,
   DEFAULT_LAB_MULTIGRID_SNAPSHOT,
@@ -43,6 +44,7 @@ export function MultigridLab() {
   const { settings, applyFromLab, updateSettings, resetSettings } =
     useHeroMultigridSettings();
   const { setKind } = useHeroAtmosphereKind();
+  const { setRouteBackground } = useAmbientEffects();
 
   const lab = DEFAULT_LAB_MULTIGRID_SNAPSHOT;
   const [recipe, setRecipe] = useState<MultigridRecipe>(lab.recipe);
@@ -144,12 +146,14 @@ export function MultigridLab() {
       colorSoftness: 0,
     });
     setKind("multigrid");
+    setRouteBackground("/", "multigrid");
     setApplyMessage("Applied to the welcome page.");
   }
 
   function handleResetHome() {
     resetSettings();
     setKind("multigrid");
+    setRouteBackground("/", "multigrid");
     snapLabToHeroDefaults({
       setRecipe,
       setNextRecipe,

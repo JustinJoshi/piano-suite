@@ -14,8 +14,10 @@ import { useMidi } from "@/hooks/useMidi";
 import { useChladniRipple } from "@/hooks/useChladniRipple";
 import { useHeroChladniSettings } from "@/hooks/useHeroChladniSettings";
 import { useHeroQuasiperiodicSettings } from "@/hooks/useHeroQuasiperiodicSettings";
+import { useHeroMultigridSettings } from "@/hooks/useHeroMultigridSettings";
 import { ChladniBackground } from "@/components/welcome/chladni-background";
 import { QuasiperiodicBackground } from "@/components/welcome/quasiperiodic-background";
+import { MultigridBackground } from "@/components/welcome/multigrid-background";
 import { ChladniVisualization } from "@/components/welcome/chladni-visualization";
 import { JuliaVisualization } from "@/components/drills/julia/julia-visualization";
 import { LissajousVisualization } from "@/components/drills/lissajous/lissajous-visualization";
@@ -54,6 +56,11 @@ function AmbientChladniEffect() {
 function AmbientQuasiperiodicEffect() {
   const { settings } = useHeroQuasiperiodicSettings();
   return <QuasiperiodicBackground settings={settings} />;
+}
+
+function AmbientMultigridEffect() {
+  const { settings } = useHeroMultigridSettings();
+  return <MultigridBackground settings={settings} />;
 }
 
 function AmbientJuliaEffect({ className }: { className?: string }) {
@@ -198,6 +205,8 @@ export function AmbientEffectRenderer({
       return <AmbientChladniEffect />;
     case "quasiperiodic":
       return <AmbientQuasiperiodicEffect />;
+    case "multigrid":
+      return <AmbientMultigridEffect />;
     case "chladni-ripple":
       return <AmbientRippleEffect className={className} />;
     case "julia":

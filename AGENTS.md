@@ -23,7 +23,10 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `hooks/useDrillTimer.ts` | Generic drill timer state machine |
 | `hooks/useAnkiSync.ts` | Poll Anki for current card and parse its chord |
 | `hooks/useThemeCssVars.ts` | Read theme CSS custom properties and watch for theme changes; useful for Canvas/WebGL visuals |
-| `hooks/useHeroAtmosphereKind.ts` | Welcome hero visual kind (`chladni` \| `quasiperiodic`); localStorage + Convex |
+| `hooks/useHeroAtmosphereKind.ts` | Welcome hero visual kind (`chladni` \| `quasiperiodic` \| `multigrid`); localStorage + Convex |
+| `hooks/useHeroMultigridSettings.ts` | Home Multigrid appearance (localStorage + Convex) |
+| `lib/multigrid.ts` | De Bruijn multigrid → dual rhombus tiling math |
+| `lib/multigrid-hero-settings.ts` | Serializable home-hero Multigrid appearance |
 | `lib/ambient-effects.ts` | Per-route ambient backgrounds + float panel settings, soft viz defaults |
 | `hooks/useAmbientEffects.ts` | `AmbientEffectsProvider` + hook for ambient backgrounds / float (localStorage + Convex) |
 | `components/ambient/*` | Root ambient host, renderer, background, float panel |
@@ -295,7 +298,7 @@ npx convex dev
 ### Auth / MIDI / chat caveats
 
 - **Manual Clerk sign-in does not work in an automation/headless browser** — it hits a Cloudflare bot CAPTCHA that never resolves. Exercise authenticated flows through the Playwright E2E suite instead (it uses `setupClerkTestingToken` + a backend sign-in token). `/` and `/tools/chladni` (Pattern Lab) are public and need no sign-in — use them for quick manual/UI checks.
-- **MIDI drills** (`chord-drill`, `arpeggios`, `progression`, `root-cycling`, `chladni-ripple`) need Web MIDI hardware, which the VM lacks. For hardware-free verification use the Technique tracker (`/tools/technique`) or the visualization labs (`/tools/chladni`, `/tools/julia`, `/tools/lissajous`, `/tools/quasiperiodic`); the E2E specs cover the drills without hardware.
+- **MIDI drills** (`chord-drill`, `arpeggios`, `progression`, `root-cycling`, `chladni-ripple`) need Web MIDI hardware, which the VM lacks. For hardware-free verification use the Technique tracker (`/tools/technique`) or the visualization labs (`/tools/chladni`, `/tools/julia`, `/tools/lissajous`, `/tools/quasiperiodic`, `/tools/multigrid`); the E2E specs cover the drills without hardware.
 - **AI chat is not configured.** No `KIMI_CODE_API_KEY` / `KIMI_CODE_BASE_URL` / `KIMI_CODE_MODEL` / `ALLOWED_CLERK_USER_ID` secrets are provided, so `/chat` and `POST /api/chat` will not function until those are added. Everything else runs normally.
 
 ### E2E browser

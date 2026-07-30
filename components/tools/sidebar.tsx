@@ -15,6 +15,7 @@ import {
   Sparkles,
   Infinity,
   Hexagon,
+  LayoutGrid,
   Activity,
   Aperture,
   X,

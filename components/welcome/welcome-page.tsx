@@ -4,6 +4,7 @@ import { Navbar } from "@/components/navbar";
 import { useAmbientEffects } from "@/hooks/useAmbientEffects";
 import { useHeroChladniSettings } from "@/hooks/useHeroChladniSettings";
 import { useHeroQuasiperiodicSettings } from "@/hooks/useHeroQuasiperiodicSettings";
+import { useHeroMultigridSettings } from "@/hooks/useHeroMultigridSettings";
 import { HeroSection } from "./hero-section";
 import { FeatureSection } from "./feature-section";
 import { FlowSection } from "./flow-section";
@@ -24,11 +25,13 @@ export function WelcomePage() {
 
   const kind = backgroundFor("/");
   const heroScrimSettings =
-    kind === "quasiperiodic"
-      ? quasiperiodicSettings
-      : kind === "chladni"
-        ? chladniSettings
-        : { scrimDarkness: ambient.scrimDarkness };
+    kind === "multigrid"
+      ? multigridSettings
+      : kind === "quasiperiodic"
+        ? quasiperiodicSettings
+        : kind === "chladni"
+          ? chladniSettings
+          : { scrimDarkness: ambient.scrimDarkness };
 
   return (
     <div className="relative z-10 flex min-h-screen flex-col">

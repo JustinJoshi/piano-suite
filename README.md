@@ -32,7 +32,8 @@ This repository now contains:
 - A **Julia Set Lab** (`/tools/julia`) — an interactive escape-time Julia set explorer with curated complex-parameter presets, morph between two `c` values, zoom, iterations, escape radius, and theme-aware coloring.
 - A **Lissajous Harmonic Lab** (`/tools/lissajous`) — an interactive frequency-ratio curve explorer with musical interval presets, phase/morph controls, and theme-aware Canvas trails.
 - A **Quasiperiodic Pattern Lab** (`/tools/quasiperiodic`) — an interactive N-fold plane-wave interference explorer with morphing recipes, zoom, and soft nodal contours. **Apply to home** switches the welcome atmosphere to the quasiperiodic field (Chladni Apply switches it back); pattern color and hero-scrim shade persist in `localStorage` and sync to Convex when signed in.
-- **Atmosphere settings** (`/settings/atmosphere`) — assign any shipped visualization (Chladni, Quasiperiodic, MIDI Ripple, Julia, Lissajous) as a full-page background per route, apply a default everywhere, and optionally show a draggable / resizable float panel of the same effects. Preferences persist in `localStorage` and sync to Convex when signed in.
+- A **Multigrid Lab** (`/tools/multigrid`) — a Canvas de Bruijn multigrid → dual rhombus tiling explorer (Penrose/Ammann/Socolar/Dense presets). **Apply to home** switches the welcome ambient background to Multigrid; preferences persist in `localStorage` and sync to Convex when signed in.
+- **Atmosphere settings** (`/settings/atmosphere`) — assign any shipped visualization (Chladni, Quasiperiodic, Multigrid, MIDI Ripple, Julia, Lissajous) as a full-page background per route, apply a default everywhere, and optionally show a draggable / resizable float panel of the same effects. Preferences persist in `localStorage` and sync to Convex when signed in.
 - A migrated **Tracking dashboard** (`/tools/tracking`) ported from Reflex Drill EXT, including:
   - Chord Drill first-chord timing history
   - Arpeggio transition and miss logging
@@ -63,6 +64,8 @@ A shared **primitive layer** has been extracted from the original Reflex Drill E
 - `lib/julia.ts` — Julia-set escape-time math, curated presets, and complex helpers
 - `lib/lissajous.ts` — Lissajous parametric math, interval presets, and ratio helpers
 - `lib/quasiperiodic.ts` — N-fold quasiperiodic wave field math, presets, and helpers
+- `lib/multigrid.ts` — de Bruijn multigrid → dual rhombus tiling math, presets, and helpers
+- `lib/multigrid-hero-settings.ts` — serializable home-hero Multigrid appearance
 - `lib/quasiperiodic-hero-settings.ts` — serializable home-hero Quasiperiodic appearance
 - `lib/hero-atmosphere.ts` — which math visual drives the welcome hero (`chladni` | `quasiperiodic`)
 - `lib/ambient-effects.ts` — per-route ambient backgrounds + float panel settings, route resolution, soft viz defaults
