@@ -45,8 +45,15 @@ const toolLinks = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { user, isLoaded } = useUser();
+  const { user, isLoaded, isSignedIn } = useUser();
   const { open, setOpen } = useDashboardNav();
+
+  const accountLabel =
+    isLoaded && isSignedIn
+      ? (user?.fullName ??
+        user?.primaryEmailAddress?.emailAddress ??
+        "Pianist")
+      : "Anonymous pianist";
 
   return (
     <>
@@ -215,13 +222,7 @@ export function Sidebar() {
                 },
               }}
             />
-            <span className="truncate">
-              {isLoaded
-                ? (user?.fullName ??
-                  user?.primaryEmailAddress?.emailAddress ??
-                  "Pianist")
-                : "Pianist"}
-            </span>
+            <span className="truncate">{accountLabel}</span>
           </div>
         </div>
       </aside>
