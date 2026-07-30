@@ -7,6 +7,12 @@ vi.mock("@clerk/nextjs", () => ({
   SignInButton: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   SignUpButton: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   useUser: () => ({ isSignedIn: false }),
+  useAuth: () => ({ isLoaded: true, has: () => false }),
+}));
+
+vi.mock("convex/react", () => ({
+  useQuery: () => undefined,
+  useMutation: () => vi.fn(async () => undefined),
 }));
 
 vi.mock("@/components/app-user-button", () => ({
