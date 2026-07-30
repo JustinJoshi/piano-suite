@@ -22,6 +22,7 @@ export const AMBIENT_EFFECT_KINDS = [
   "none",
   "chladni",
   "quasiperiodic",
+  "multigrid",
   "chladni-ripple",
   "julia",
   "lissajous",
@@ -67,12 +68,14 @@ export const AMBIENT_ROUTE_CATALOG: readonly {
   { href: "/tools/julia", label: "Julia Lab" },
   { href: "/tools/lissajous", label: "Lissajous Lab" },
   { href: "/tools/quasiperiodic", label: "Quasiperiodic Lab" },
+  { href: "/tools/multigrid", label: "Multigrid Lab" },
 ] as const;
 
 export const AMBIENT_EFFECT_LABELS: Record<AmbientEffectKind, string> = {
   none: "None",
   chladni: "Chladni",
   quasiperiodic: "Quasiperiodic",
+  multigrid: "Multigrid",
   "chladni-ripple": "Chladni Ripple (MIDI)",
   julia: "Julia",
   lissajous: "Lissajous",
@@ -274,7 +277,9 @@ export function resolveFloatVisible(
 export function heroKindToAmbient(
   kind: HeroAtmosphereKind
 ): AmbientEffectKind {
-  return kind === "quasiperiodic" ? "quasiperiodic" : "chladni";
+  if (kind === "quasiperiodic") return "quasiperiodic";
+  if (kind === "multigrid") return "multigrid";
+  return "chladni";
 }
 
 /**
@@ -288,7 +293,11 @@ export function seedAmbientFromHeroAtmosphere(): AmbientEffectsSettings {
     const raw = window.localStorage.getItem(HERO_ATMOSPHERE_LOCAL_STORAGE_KEY);
     if (!raw) return base;
     const parsed = JSON.parse(raw) as { kind?: unknown };
-    if (parsed.kind === "chladni" || parsed.kind === "quasiperiodic") {
+    if (
+      parsed.kind === "chladni" ||
+      parsed.kind === "quasiperiodic" ||
+      parsed.kind === "multigrid"
+    ) {
       const kind = heroKindToAmbient(parsed.kind);
       return normalizeAmbientEffects({
         ...base,

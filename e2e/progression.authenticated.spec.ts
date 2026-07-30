@@ -8,6 +8,13 @@ test.describe("Progression (authenticated)", () => {
     await page.waitForSelector("[data-testid='progression-drill']", {
       timeout: 10000,
     });
+    // Parallel workers share one Clerk test user; reset to known defaults so
+    // persisted Convex/local settings from sibling tests cannot flake asserts.
+    await page.getByTestId("progression-type-ii-V-I").click();
+    await page.getByTestId("progression-key-C").click();
+    await expect(page.getByTestId("progression-current-chord")).toHaveText(
+      "Dm7"
+    );
   });
 
   test("loads the progression page", async ({ page }) => {

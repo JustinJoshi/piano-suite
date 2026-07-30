@@ -150,6 +150,7 @@ describe("heroKindToAmbient", () => {
   it("maps hero kinds", () => {
     expect(heroKindToAmbient("chladni")).toBe("chladni");
     expect(heroKindToAmbient("quasiperiodic")).toBe("quasiperiodic");
+    expect(heroKindToAmbient("multigrid")).toBe("multigrid");
   });
 });
 

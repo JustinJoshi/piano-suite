@@ -12,6 +12,7 @@ import {
   Sparkles,
   Infinity,
   Hexagon,
+  LayoutGrid,
   Activity,
 } from "lucide-react";
 import { AppUserButton } from "@/components/app-user-button";
@@ -104,6 +105,13 @@ const tools = [
       "Interactive N-fold wave interference explorer with Apply-to-home atmosphere.",
     icon: Hexagon,
     href: "/tools/quasiperiodic",
+  },
+  {
+    title: "Multigrid Lab",
+    description:
+      "De Bruijn multigrid dual tiling explorer — crisp grids and colored rhombus tilings.",
+    icon: LayoutGrid,
+    href: "/tools/multigrid",
   },
 ];
 
