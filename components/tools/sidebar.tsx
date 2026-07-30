@@ -21,9 +21,11 @@ import {
   CreditCard,
   Volume2,
   X,
+  Fingerprint,
 } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { AppUserButton } from "@/components/app-user-button";
+import { AppliedLogoMark } from "@/components/brand/applied-logo-mark";
 import { Button } from "@/components/ui/button";
 import { useDashboardNav } from "@/components/tools/dashboard-nav";
 import { useExperimentalFeatures } from "@/hooks/useExperimentalFeatures";
@@ -44,6 +46,7 @@ const toolLinks = [
   { name: "Lissajous Lab", href: "/tools/lissajous", icon: Infinity },
   { name: "Quasiperiodic Lab", href: "/tools/quasiperiodic", icon: Hexagon },
   { name: "Multigrid Lab", href: "/tools/multigrid", icon: LayoutGrid },
+  { name: "Logo Lab", href: "/tools/logo-lab", icon: Fingerprint },
 ];
 
 export function Sidebar() {
@@ -87,9 +90,7 @@ export function Sidebar() {
       >
         {/* Brand */}
         <div className="flex h-16 items-center gap-2 border-b border-border/50 px-4">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Music className="h-4 w-4" />
-          </div>
+          <AppliedLogoMark className="h-8 w-8" title="Piano Suite" />
           <Link
             href="/"
             className="min-w-0 flex-1 font-heading text-base font-semibold tracking-tight text-foreground"

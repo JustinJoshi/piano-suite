@@ -46,7 +46,7 @@ The core experience is free and runs in your browser. Sign in to sync progress a
   - Root Cycling recall stats
   - Recharts visualizations with grade colors, redo indicators, and good/hard threshold lines
   - A one-time client-side migration from Reflex Drill EXT via exported JSON file (localStorage is not shared across origins)
-- **Clerk authentication** with route protection via `proxy.ts` and shadcn-themed sign-in/sign-up pages. See [Authentication & routes](#authentication--routes) for the public-route list and the `NEXT_PUBLIC_AUTH_DISABLED` bypass.
+- **Clerk authentication** with route protection via `proxy.ts` and shadcn-themed sign-in/sign-up pages. See [Authentication & routes](#authentication--routes) for the public-route list and the `NEXT_PUBLIC_AUTH_DISABLED` bypass. <!-- pragma: allowlist secret -->
 - **Convex data persistence** for users and tracking events, with Clerk JWT integration.
 - An **AI chat assistant** (`/chat`) powered by the Kimi Code API, grounded in the site's articles, and restricted to a single owner Clerk user via `ALLOWED_CLERK_USER_ID` (the allowlist always applies — the auth bypass never opens the paid endpoint).
 - **Playwright end-to-end tests**, including auth-protection and chat-gate specs plus authenticated flows for every drill, the Tools hub, and the Tracking dashboard.

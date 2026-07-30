@@ -23,7 +23,7 @@ import { getAuthorizedPartiesFromEnv } from "@/lib/clerk-authorized-parties";
  * without requiring authentication.
  *
  * Always pass `unauthenticatedUrl` so document requests redirect to
- * `/sign-in` instead of collapsing into a bare Next.js 404 (Clerk-dev +
+ * `/sign-in` instead of collapsing into a bare Next.js 404 (Clerk-dev + // pragma: allowlist secret
  * missing `dev-browser` handshake on `*.vercel.app` can otherwise do that).
  *
  * When `CLERK_AUTHORIZED_PARTIES` is set (comma-separated origins), it is
@@ -59,7 +59,7 @@ export default clerkMiddleware(
       );
 
     if (!isPublicRoute) {
-      const signInUrl = new URL("/sign-in", request.url).href;
+      const signInUrl = new URL("/sign-in", request.url).href; // pragma: allowlist secret
       await auth.protect({ unauthenticatedUrl: signInUrl });
     }
   },
