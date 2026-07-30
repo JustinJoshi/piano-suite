@@ -34,6 +34,10 @@ import {
   updateHistory as updateHistoryPure,
 } from "@/lib/chord-drill";
 import { useChordDrillSettings } from "@/hooks/useChordDrillSettings";
+import {
+  appendLocalChordDrillEvent,
+  updateLocalChordDrillGrade,
+} from "@/lib/local-practice-history";
 
 export type ChordDrillGradeStatus = "idle" | "pending" | "sent";
 
@@ -179,13 +183,23 @@ export function useChordDrill(enabled: boolean): ChordDrillEngine {
   const logEventMutation = useMutation(api.tracking.logChordDrillEvent);
   const updateGradeMutation = useMutation(api.tracking.updateChordDrillGrade);
   const logEvent = useCallback(
-    (args: Parameters<typeof logEventMutation>[0]) =>
-      enabled ? logEventMutation(args) : Promise.resolve(null),
+    (args: Parameters<typeof logEventMutation>[0]) => {
+      if (enabled) return logEventMutation(args);
+      const id = appendLocalChordDrillEvent({
+        chord: args.chord,
+        reactionTimeMs: args.reactionTimeMs,
+        redo: args.redo,
+      });
+      return Promise.resolve(id as Id<"practiceEvents">);
+    },
     [enabled, logEventMutation]
   );
   const updateGrade = useCallback(
-    (args: Parameters<typeof updateGradeMutation>[0]) =>
-      enabled ? updateGradeMutation(args) : Promise.resolve(undefined),
+    (args: Parameters<typeof updateGradeMutation>[0]) => {
+      if (enabled) return updateGradeMutation(args);
+      updateLocalChordDrillGrade(String(args.eventId), args.grade);
+      return Promise.resolve(undefined);
+    },
     [enabled, updateGradeMutation]
   );
 

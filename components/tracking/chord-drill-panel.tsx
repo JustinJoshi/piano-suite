@@ -9,24 +9,45 @@ import { TrackingChart } from "./tracking-chart";
 import { cn } from "@/lib/utils";
 import { useCachedTrackingQuery } from "@/hooks/useCachedTrackingQuery";
 import { useAuthAccess } from "@/hooks/useAuthAccess";
+import { useLocalPracticeHistoryVersion } from "@/hooks/useLocalPracticeHistory";
+import {
+  clearLocalChordDrillByChord,
+  listLocalChordDrillEvents,
+} from "@/lib/local-practice-history";
 import { Loader2 } from "lucide-react";
 
 export function ChordDrillPanel() {
   const { canPersist } = useAuthAccess();
+  const localVersion = useLocalPracticeHistoryVersion();
   const liveEvents = useQuery(
     api.tracking.listChordDrillEvents,
     canPersist ? {} : "skip"
   );
   const clearMutation = useMutation(api.tracking.clearChordDrillEventsByChord);
-  const { data: events, isLoading, clear: clearCache } = useCachedTrackingQuery(
-    "chordDrillEvents",
-    liveEvents
+  const localEvents = useMemo(
+    () => (canPersist ? undefined : listLocalChordDrillEvents()),
+    // localVersion forces a re-read after Free-tier drill writes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [canPersist, localVersion]
   );
+  const { data: cachedEvents, isLoading, clear: clearCache } =
+    useCachedTrackingQuery("chordDrillEvents", liveEvents);
+  type ChordRow = {
+    _id: string;
+    chord?: string;
+    reactionTimeMs: number;
+    grade?: string;
+    redo: boolean;
+    timestamp: number;
+  };
+  const events: ChordRow[] | undefined = canPersist
+    ? cachedEvents
+    : localEvents;
   const [selectedChord, setSelectedChord] = useState<string | null>(null);
 
   const groups = useMemo(() => {
     const eventsList = events ?? [];
-    const map = new Map<string, typeof eventsList>();
+    const map = new Map<string, ChordRow[]>();
     for (const e of eventsList) {
       if (!e.chord) continue;
       const list = map.get(e.chord) ?? [];
@@ -64,9 +85,13 @@ export function ChordDrillPanel() {
   }, [groups, activeChord]);
 
   async function handleClear() {
-    if (!canPersist || !activeChord) return;
-    await clearMutation({ chord: activeChord });
-    clearCache();
+    if (!activeChord) return;
+    if (canPersist) {
+      await clearMutation({ chord: activeChord });
+      clearCache();
+    } else {
+      clearLocalChordDrillByChord(activeChord);
+    }
     setSelectedChord(null);
   }
 

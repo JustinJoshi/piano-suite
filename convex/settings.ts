@@ -1,12 +1,16 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { ensureUserId, optionalUserId } from "./lib/auth";
+import { optionalUserId } from "./lib/auth";
+import { ensureUserIdWithSync } from "./lib/entitlements";
 
 /**
  * Generic per-user settings store.
  *
  * Tools store JSON-serializable values under a namespaced key so each drill
  * can persist preferences without adding a dedicated table.
+ *
+ * Writes require Pro sync (`ensureUserIdWithSync`). Free users keep prefs in
+ * localStorage only (WP6). Queries stay soft for any signed-in identity.
  */
 
 export const getSetting = query({
@@ -30,7 +34,7 @@ export const setSetting = mutation({
   args: { key: v.string(), value: v.any() },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const userId = await ensureUserId(ctx);
+    const userId = await ensureUserIdWithSync(ctx);
     const existing = await ctx.db
       .query("settings")
       .withIndex("by_user_key", (q) => q.eq("userId", userId).eq("key", args.key))

@@ -23,6 +23,7 @@ import {
   historyKey,
   updateProgressionHistory,
 } from "@/lib/progression";
+import { appendLocalProgressionEvent } from "@/lib/local-practice-history";
 
 export type ProgressionPhase = "idle" | "armed" | "timing" | "success";
 
@@ -96,8 +97,17 @@ export function useProgression(enabled: boolean): ProgressionEngine {
   const { playChime } = useAudio();
   const logEventMutation = useMutation(api.tracking.logProgressionEvent);
   const logEvent = useCallback(
-    (args: Parameters<typeof logEventMutation>[0]) =>
-      enabled ? logEventMutation(args) : Promise.resolve(undefined),
+    (args: Parameters<typeof logEventMutation>[0]) => {
+      if (enabled) return logEventMutation(args);
+      appendLocalProgressionEvent({
+        progression: args.progression,
+        key: args.key,
+        stepLabel: args.stepLabel,
+        chord: args.chord,
+        reactionTimeMs: args.reactionTimeMs,
+      });
+      return Promise.resolve(undefined);
+    },
     [enabled, logEventMutation]
   );
 

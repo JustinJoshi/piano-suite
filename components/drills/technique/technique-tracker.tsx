@@ -1,10 +1,18 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
+import Link from "next/link";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useAudio } from "@/hooks/useAudio";
 import { useAuthAccess } from "@/hooks/useAuthAccess";
+import { useLocalPracticeHistoryVersion } from "@/hooks/useLocalPracticeHistory";
+import { localPracticeBanner } from "@/lib/billing";
+import {
+  clearLocalTechniqueLog,
+  readLocalTechniqueLog,
+  writeLocalTechniqueSession,
+} from "@/lib/local-practice-history";
 import {
   todayStr,
   computeStreak,
@@ -33,6 +41,7 @@ function sessionsToLog(
 export function TechniqueTracker() {
   const { ready, startMetronome, stopMetronome, metronomeRunning } = useAudio();
   const { canPersist } = useAuthAccess();
+  const localVersion = useLocalPracticeHistoryVersion();
   const sessions = useQuery(
     api.technique.listTechniqueSessions,
     canPersist ? {} : "skip"
@@ -47,11 +56,16 @@ export function TechniqueTracker() {
   const [saving, setSaving] = useState(false);
   const [clearing, setClearing] = useState(false);
 
-  const log = useMemo(() => sessionsToLog(sessions ?? []), [sessions]);
+  const log = useMemo(() => {
+    if (!canPersist) return readLocalTechniqueLog();
+    return sessionsToLog(sessions ?? []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canPersist, sessions, localVersion]);
   const today = todayStr();
   const streak = useMemo(() => computeStreak(log), [log]);
   const grid = useMemo(() => buildGrid(log, 28), [log]);
   const doneToday = !!log[today];
+  const hasHistory = Object.keys(log).length > 0;
 
   const toggleMetronome = useCallback(() => {
     if (metronomeRunning) {
@@ -69,28 +83,35 @@ export function TechniqueTracker() {
   }, [bpm, metronomeRunning, startMetronome]);
 
   async function markDoneToday() {
-    if (!canPersist) return;
     setSaving(true);
     try {
-      await logSession({
+      const payload = {
         date: today,
         exercise: exerciseName.trim() || "Technique practice",
         bpm,
         notes: notesToday.trim() || undefined,
-      });
+      };
+      if (canPersist) {
+        await logSession(payload);
+      } else {
+        writeLocalTechniqueSession(payload);
+      }
     } finally {
       setSaving(false);
     }
   }
 
   async function handleClearAll() {
-    if (!canPersist) return;
     if (!window.confirm("Clear all technique history? This cannot be undone.")) {
       return;
     }
     setClearing(true);
     try {
-      await clearSessions();
+      if (canPersist) {
+        await clearSessions();
+      } else {
+        clearLocalTechniqueLog();
+      }
       setExerciseName("Czerny 5-Finger Pattern");
       setBpm(60);
       setNotesToday("");
@@ -103,7 +124,13 @@ export function TechniqueTracker() {
     <div className="mx-auto grid max-w-xl gap-6">
       {!canPersist ? (
         <p className="text-center text-sm text-muted-foreground">
-          Local practice mode — metronome works; session history needs sign-in.
+          {localPracticeBanner("technique")}{" "}
+          <Link
+            href="/pricing"
+            className="font-medium text-primary underline-offset-2 hover:underline"
+          >
+            See plans
+          </Link>
         </p>
       ) : null}
       <Card>
@@ -264,7 +291,7 @@ export function TechniqueTracker() {
         variant="ghost"
         size="sm"
         onClick={handleClearAll}
-        disabled={clearing || !sessions?.length}
+        disabled={clearing || !hasHistory}
         className="mx-auto"
       >
         <RotateCcw className="h-4 w-4" /> Clear all history

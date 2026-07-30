@@ -18,6 +18,19 @@ test.describe("/tools/technique authenticated", () => {
     await expect(page.getByTestId("metronome-btn")).toBeVisible();
   });
 
+  test("signed-in Free user sees local practice banner (no Pro upload UI)", async ({
+    page,
+  }) => {
+    await signInAsTestUser(page);
+    await page.goto("/tools/technique");
+
+    await expect(page.locator("body")).toContainText("Local practice mode");
+    await expect(page.getByRole("link", { name: "See plans" })).toBeVisible();
+    await expect(page.locator("body")).not.toContainText(
+      "Upload technique history to Pro"
+    );
+  });
+
   test("signed-in user can log a technique session and see the streak update", async ({
     page,
   }) => {
@@ -38,7 +51,9 @@ test.describe("/tools/technique authenticated", () => {
     await expect(page.getByTestId("grid-cell-today")).toBeVisible();
   });
 
-  test("signed-in user can import legacy technique localStorage data", async ({ page }) => {
+  test("signed-in Free user reads legacy technique localStorage data", async ({
+    page,
+  }) => {
     await signInAsTestUser(page);
 
     await page.evaluate((data) => {
@@ -47,13 +62,11 @@ test.describe("/tools/technique authenticated", () => {
 
     await page.goto("/tools/technique");
 
-    await expect(page.locator("body")).toContainText("Import technique history");
-    await page.getByRole("button", { name: "Import from this browser" }).click();
-
-    await expect(page.locator("body")).toContainText("Import complete", {
-      timeout: 10000,
-    });
-
+    // Free tier reads browser history directly — no Convex import step.
+    await expect(page.locator("body")).toContainText("Local practice mode");
+    await expect(page.locator("body")).not.toContainText(
+      "Upload technique history to Pro"
+    );
     await expect(page.getByTestId("streak-number")).toContainText("1");
 
     await page.evaluate(() => {

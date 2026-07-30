@@ -2,9 +2,9 @@
 
 import { useEffect } from "react";
 import { useTheme } from "next-themes";
-import { useUser } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { useAuthAccess } from "@/hooks/useAuthAccess";
 import { defaultTheme, isThemeId, type ThemeId } from "@/lib/themes";
 
 const THEME_STORAGE_KEY = "piano-suite-theme";
@@ -13,26 +13,26 @@ const THEME_STORAGE_KEY = "piano-suite-theme";
  * Manages the active theme for the app.
  *
  * - Reads/writes the theme from localStorage via next-themes.
- * - Syncs the choice to Convex when the user is signed in.
- * - Falls back to a signed-in user's remote preference when there is no local
+ * - Syncs the choice to Convex when the user has Pro sync (`canPersist`).
+ * - Falls back to a Pro user's remote preference when there is no local
  *   value (e.g. first visit on a new device).
  */
 export function useThemePreference() {
   const { theme, setTheme, resolvedTheme } = useTheme();
-  const { isSignedIn } = useUser();
+  const { canPersist } = useAuthAccess();
 
   const remoteTheme = useQuery(
     api.settings.getSetting,
-    isSignedIn ? { key: "theme" } : "skip"
+    canPersist ? { key: "theme" } : "skip"
   );
   const setRemoteSetting = useMutation(api.settings.setSetting);
 
   const currentTheme: ThemeId =
     resolvedTheme && isThemeId(resolvedTheme) ? resolvedTheme : defaultTheme;
 
-  // Persist theme changes to Convex when signed in.
+  // Persist theme changes to Convex when Pro sync is available.
   useEffect(() => {
-    if (!isSignedIn) return;
+    if (!canPersist) return;
     if (!theme || theme === "system" || !isThemeId(theme)) return;
     if (remoteTheme === undefined) return;
     if (remoteTheme === theme) return;
@@ -40,11 +40,11 @@ export function useThemePreference() {
     setRemoteSetting({ key: "theme", value: theme }).catch((err) => {
       console.error("Failed to save theme preference", err);
     });
-  }, [isSignedIn, theme, remoteTheme, setRemoteSetting]);
+  }, [canPersist, theme, remoteTheme, setRemoteSetting]);
 
-  // If there is no local value, apply the signed-in user's remote preference.
+  // If there is no local value, apply the Pro user's remote preference.
   useEffect(() => {
-    if (!isSignedIn) return;
+    if (!canPersist) return;
     if (remoteTheme === undefined) return;
     if (typeof window === "undefined") return;
     if (localStorage.getItem(THEME_STORAGE_KEY)) return;
@@ -53,7 +53,7 @@ export function useThemePreference() {
     if (isThemeId(value)) {
       setTheme(value);
     }
-  }, [isSignedIn, remoteTheme, setTheme]);
+  }, [canPersist, remoteTheme, setTheme]);
 
   return {
     theme: currentTheme,

@@ -23,6 +23,10 @@ import {
 } from "@/lib/sequence-drill";
 import { flipCurrentCard, gradeCurrentCard, type DeckStats } from "@/lib/anki";
 import { normalizePc, parseRoot } from "@/lib/music-theory";
+import {
+  appendLocalArpeggioMiss,
+  appendLocalArpeggioTransition,
+} from "@/lib/local-practice-history";
 
 export type ArpeggioPhase =
   | "idle"
@@ -132,13 +136,29 @@ export function useArpeggios(enabled: boolean): ArpeggioEngine {
   const logTransitionMutation = useMutation(api.tracking.logArpeggioTransition);
   const logMissMutation = useMutation(api.tracking.logArpeggioMiss);
   const logTransition = useCallback(
-    (args: Parameters<typeof logTransitionMutation>[0]) =>
-      enabled ? logTransitionMutation(args) : Promise.resolve(undefined),
+    (args: Parameters<typeof logTransitionMutation>[0]) => {
+      if (enabled) return logTransitionMutation(args);
+      appendLocalArpeggioTransition({
+        chord: args.chord,
+        fromDeg: args.fromDeg,
+        toDeg: args.toDeg,
+        reactionTimeMs: args.reactionTimeMs,
+      });
+      return Promise.resolve(undefined);
+    },
     [enabled, logTransitionMutation]
   );
   const logMiss = useCallback(
-    (args: Parameters<typeof logMissMutation>[0]) =>
-      enabled ? logMissMutation(args) : Promise.resolve(undefined),
+    (args: Parameters<typeof logMissMutation>[0]) => {
+      if (enabled) return logMissMutation(args);
+      appendLocalArpeggioMiss({
+        chord: args.chord,
+        fromDeg: args.fromDeg,
+        toDeg: args.toDeg,
+        played: args.played,
+      });
+      return Promise.resolve(undefined);
+    },
     [enabled, logMissMutation]
   );
 

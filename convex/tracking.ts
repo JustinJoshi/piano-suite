@@ -1,6 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { ensureUserId, optionalUserId } from "./lib/auth";
+import { optionalUserId } from "./lib/auth";
+import { ensureUserIdWithSync } from "./lib/entitlements";
 
 async function listEventsForUserOrEmpty<T>(
   ctx: Parameters<typeof optionalUserId>[0],
@@ -89,7 +90,7 @@ export const logChordDrillEvent = mutation({
     grade: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const userId = await ensureUserId(ctx);
+    const userId = await ensureUserIdWithSync(ctx);
     return await ctx.db.insert("practiceEvents", {
       userId,
       tool: "chord-drill",
@@ -108,7 +109,7 @@ export const updateChordDrillGrade = mutation({
     grade: v.string(),
   },
   handler: async (ctx, args) => {
-    const userId = await ensureUserId(ctx);
+    const userId = await ensureUserIdWithSync(ctx);
     const event = await ctx.db.get(args.eventId);
     if (!event || event.userId !== userId || event.tool !== "chord-drill") {
       throw new Error("Event not found");
@@ -125,7 +126,7 @@ export const logArpeggioTransition = mutation({
     reactionTimeMs: v.number(),
   },
   handler: async (ctx, args) => {
-    const userId = await ensureUserId(ctx);
+    const userId = await ensureUserIdWithSync(ctx);
     return await ctx.db.insert("practiceEvents", {
       userId,
       tool: "arpeggios",
@@ -147,7 +148,7 @@ export const logArpeggioMiss = mutation({
     played: v.string(),
   },
   handler: async (ctx, args) => {
-    const userId = await ensureUserId(ctx);
+    const userId = await ensureUserIdWithSync(ctx);
     return await ctx.db.insert("missEvents", {
       userId,
       tool: "arpeggios",
@@ -171,7 +172,7 @@ export const logRootCycleEvent = mutation({
     reactionTimeMs: v.number(),
   },
   handler: async (ctx, args) => {
-    const userId = await ensureUserId(ctx);
+    const userId = await ensureUserIdWithSync(ctx);
     return await ctx.db.insert("practiceEvents", {
       userId,
       tool: "root-cycling",
@@ -197,7 +198,7 @@ export const logProgressionEvent = mutation({
     reactionTimeMs: v.number(),
   },
   handler: async (ctx, args) => {
-    const userId = await ensureUserId(ctx);
+    const userId = await ensureUserIdWithSync(ctx);
     return await ctx.db.insert("practiceEvents", {
       userId,
       tool: "progression",
@@ -219,7 +220,7 @@ export const logProgressionEvent = mutation({
 export const clearChordDrillEventsByChord = mutation({
   args: { chord: v.string() },
   handler: async (ctx, args) => {
-    const userId = await ensureUserId(ctx);
+    const userId = await ensureUserIdWithSync(ctx);
     const events = await ctx.db
       .query("practiceEvents")
       .withIndex("by_user_chord", (q) => q.eq("userId", userId).eq("chord", args.chord))
@@ -239,7 +240,7 @@ export const clearArpeggioEventsByTransition = mutation({
     toDeg: v.string(),
   },
   handler: async (ctx, args) => {
-    const userId = await ensureUserId(ctx);
+    const userId = await ensureUserIdWithSync(ctx);
     const events = await ctx.db
       .query("practiceEvents")
       .withIndex("by_user_tool", (q) => q.eq("userId", userId).eq("tool", "arpeggios"))
@@ -270,7 +271,7 @@ export const clearRootCycleEventsByGroup = mutation({
     toDeg: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const userId = await ensureUserId(ctx);
+    const userId = await ensureUserIdWithSync(ctx);
     const events = await ctx.db
       .query("practiceEvents")
       .withIndex("by_user_tool", (q) => q.eq("userId", userId).eq("tool", "root-cycling"))
@@ -292,7 +293,7 @@ export const clearProgressionEventsByProgression = mutation({
     key: v.string(),
   },
   handler: async (ctx, args) => {
-    const userId = await ensureUserId(ctx);
+    const userId = await ensureUserIdWithSync(ctx);
     const events = await ctx.db
       .query("practiceEvents")
       .withIndex("by_user_tool", (q) => q.eq("userId", userId).eq("tool", "progression"))
@@ -354,7 +355,7 @@ export const bulkImportTracking = mutation({
     ),
   },
   handler: async (ctx, args) => {
-    const userId = await ensureUserId(ctx);
+    const userId = await ensureUserIdWithSync(ctx);
 
     for (const e of args.chordDrillEvents) {
       await ctx.db.insert("practiceEvents", {

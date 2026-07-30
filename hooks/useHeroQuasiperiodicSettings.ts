@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { useAuthAccess } from "@/hooks/useAuthAccess";
 import {
   DEFAULT_HERO_QUASIPERIODIC_SETTINGS,
   HERO_QUASIPERIODIC_SETTINGS_KEY,
@@ -19,14 +19,14 @@ import {
  * Home-hero Quasiperiodic appearance preferences.
  *
  * - localStorage for everyone (instant, works signed-out)
- * - Convex `settings` key when signed in (cross-device)
+ * - Convex `settings` key when Pro sync (`canPersist`) is available
  * - Remote hydrates only when there is no local value yet
  */
 export function useHeroQuasiperiodicSettings() {
-  const { isSignedIn } = useUser();
+  const { canPersist } = useAuthAccess();
   const remote = useQuery(
     api.settings.getSetting,
-    isSignedIn ? { key: HERO_QUASIPERIODIC_SETTINGS_KEY } : "skip"
+    canPersist ? { key: HERO_QUASIPERIODIC_SETTINGS_KEY } : "skip"
   );
   const setRemoteSetting = useMutation(api.settings.setSetting);
 
@@ -57,7 +57,7 @@ export function useHeroQuasiperiodicSettings() {
 
   const pushedLocalToRemote = useRef(false);
   useEffect(() => {
-    if (!isSignedIn) return;
+    if (!canPersist) return;
     if (remote === undefined) return;
     if (remote != null) return;
     if (pushedLocalToRemote.current) return;
@@ -70,12 +70,12 @@ export function useHeroQuasiperiodicSettings() {
     }).catch((err) => {
       console.error("Failed to save hero Quasiperiodic settings", err);
     });
-  }, [isSignedIn, remote, setRemoteSetting]);
+  }, [canPersist, remote, setRemoteSetting]);
 
   const persist = useCallback(
     (next: HeroQuasiperiodicSettings) => {
       writeHeroQuasiperiodicSettingsToLocalStorage(next);
-      if (!isSignedIn) return;
+      if (!canPersist) return;
       setRemoteSetting({
         key: HERO_QUASIPERIODIC_SETTINGS_KEY,
         value: next,
@@ -83,7 +83,7 @@ export function useHeroQuasiperiodicSettings() {
         console.error("Failed to save hero Quasiperiodic settings", err);
       });
     },
-    [isSignedIn, setRemoteSetting]
+    [canPersist, setRemoteSetting]
   );
 
   const setHeroSettings = useCallback(

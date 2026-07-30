@@ -137,23 +137,23 @@ export function ImportTechnique() {
   return (
     <Card className="mb-6 border-primary/30 bg-primary/5">
       <CardHeader>
-        <CardTitle className="text-base">Import technique history</CardTitle>
+        <CardTitle className="text-base">Upload technique history to Pro</CardTitle>
         <CardDescription>
-          Bring your Reflex Drill EXT technique tracker data into Piano Suite so it syncs across
-          devices.
+          Import Free-tier browser history or a Reflex Drill EXT export so session streaks sync
+          across devices.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {found && Object.keys(found).length > 0 && (
           <div className="rounded-xl border border-border/50 bg-card p-4">
             <p className="mb-3 text-sm text-muted-foreground">
-              Found {Object.keys(found).length} legacy technique{" "}
-              {Object.keys(found).length === 1 ? "session" : "sessions"} from Reflex Drill EXT in
-              this browser.
+              Found {Object.keys(found).length} technique{" "}
+              {Object.keys(found).length === 1 ? "session" : "sessions"} in this browser (Free
+              local history and/or Reflex Drill EXT).
             </p>
             <div className="flex flex-wrap gap-3">
               <Button onClick={handleImportLocal} disabled={status === "importing"}>
-                {status === "importing" ? "Importing…" : "Import from this browser"}
+                {status === "importing" ? "Uploading…" : "Upload to Pro sync"}
               </Button>
               <Button variant="ghost" onClick={handleSkip} disabled={status === "importing"}>
                 Skip and delete local data

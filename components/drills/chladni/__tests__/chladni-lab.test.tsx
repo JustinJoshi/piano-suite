@@ -11,6 +11,10 @@ vi.mock("@/components/welcome/chladni-visualization", () => ({
   ChladniVisualization: () => <div data-testid="chladni-visualization" />,
 }));
 
+vi.mock("@/components/drills/saved-patterns-panel", () => ({
+  SavedPatternsPanel: () => <div data-testid="saved-patterns-panel" />,
+}));
+
 const setKind = vi.fn();
 
 vi.mock("@/hooks/useHeroChladniSettings", () => ({

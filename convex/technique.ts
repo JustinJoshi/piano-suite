@@ -1,6 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { ensureUserId, optionalUserId } from "./lib/auth";
+import { optionalUserId } from "./lib/auth";
+import { ensureUserIdWithSync } from "./lib/entitlements";
 
 export const listTechniqueSessions = query({
   args: {},
@@ -24,7 +25,7 @@ export const logTechniqueSession = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const userId = await ensureUserId(ctx);
+    const userId = await ensureUserIdWithSync(ctx);
     const existing = await ctx.db
       .query("techniqueSessions")
       .withIndex("by_user_date", (q) => q.eq("userId", userId).eq("date", args.date))
@@ -64,7 +65,7 @@ export const bulkImportTechniqueSessions = mutation({
     ),
   },
   handler: async (ctx, args) => {
-    const userId = await ensureUserId(ctx);
+    const userId = await ensureUserIdWithSync(ctx);
     let count = 0;
 
     for (const s of args.sessions) {
@@ -100,7 +101,7 @@ export const bulkImportTechniqueSessions = mutation({
 export const clearTechniqueSessions = mutation({
   args: {},
   handler: async (ctx) => {
-    const userId = await ensureUserId(ctx);
+    const userId = await ensureUserIdWithSync(ctx);
     const sessions = await ctx.db
       .query("techniqueSessions")
       .withIndex("by_user", (q) => q.eq("userId", userId))

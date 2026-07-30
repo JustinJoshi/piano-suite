@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { useAuthAccess } from "@/hooks/useAuthAccess";
 import {
   DEFAULT_HERO_CHLADNI_SETTINGS,
   HERO_CHLADNI_SETTINGS_KEY,
@@ -19,14 +19,14 @@ import {
  * Home-hero Chladni appearance preferences.
  *
  * - localStorage for everyone (instant, works signed-out)
- * - Convex `settings` key when signed in (cross-device)
+ * - Convex `settings` key when Pro sync (`canPersist`) is available
  * - Remote hydrates only when there is no local value yet (theme-style)
  */
 export function useHeroChladniSettings() {
-  const { isSignedIn } = useUser();
+  const { canPersist } = useAuthAccess();
   const remote = useQuery(
     api.settings.getSetting,
-    isSignedIn ? { key: HERO_CHLADNI_SETTINGS_KEY } : "skip"
+    canPersist ? { key: HERO_CHLADNI_SETTINGS_KEY } : "skip"
   );
   const setRemoteSetting = useMutation(api.settings.setSetting);
 
@@ -53,10 +53,10 @@ export function useHeroChladniSettings() {
     wroteRemoteToLocal.current = true;
   }, [localSettings, remoteSettings]);
 
-  // When signed in with local prefs but empty remote, push local once.
+  // When Pro sync is available with local prefs but empty remote, push local once.
   const pushedLocalToRemote = useRef(false);
   useEffect(() => {
-    if (!isSignedIn) return;
+    if (!canPersist) return;
     if (remote === undefined) return;
     if (remote != null) return;
     if (pushedLocalToRemote.current) return;
@@ -68,19 +68,19 @@ export function useHeroChladniSettings() {
         console.error("Failed to save hero Chladni settings", err);
       }
     );
-  }, [isSignedIn, remote, setRemoteSetting]);
+  }, [canPersist, remote, setRemoteSetting]);
 
   const persist = useCallback(
     (next: HeroChladniSettings) => {
       writeHeroChladniSettingsToLocalStorage(next);
-      if (!isSignedIn) return;
+      if (!canPersist) return;
       setRemoteSetting({ key: HERO_CHLADNI_SETTINGS_KEY, value: next }).catch(
         (err) => {
           console.error("Failed to save hero Chladni settings", err);
         }
       );
     },
-    [isSignedIn, setRemoteSetting]
+    [canPersist, setRemoteSetting]
   );
 
   const setHeroSettings = useCallback(
