@@ -47,7 +47,7 @@ Apply / Reset from Multigrid Lab sets kind to `multigrid` and writes only multig
 
 Multigrid Lab is **experimental** and hidden unless the user enables it under
 **Theme → Enable experimental features** (`lib/experimental-features.ts`,
-`hooks/useExperimentalFeatures.ts`). Default: **off**.
+`hooks/useExperimentalFeatures.tsx` provider in root layout). Default: **off**.
 
 When off:
 

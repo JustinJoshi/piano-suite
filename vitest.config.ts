@@ -12,6 +12,7 @@ export default defineConfig({
       "app/**/*.test.ts",
       "lib/**/*.test.ts",
       "hooks/**/*.test.ts",
+      "hooks/**/*.test.tsx",
       "components/**/*.test.ts",
       "components/**/*.test.tsx",
       "convex/**/*.test.ts",

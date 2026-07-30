@@ -29,7 +29,7 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `hooks/useThemeCssVars.ts` | Read theme CSS custom properties and watch for theme changes; useful for Canvas/WebGL visuals |
 | `hooks/useThemePreference.ts` | Active theme; localStorage always; Convex sync when `canPersist` (Pro) |
 | `lib/experimental-features.ts` | Opt-in experimental flag (off by default); catalogs experimental tools/kinds |
-| `hooks/useExperimentalFeatures.ts` | Experimental features toggle; localStorage + Convex when Pro |
+| `hooks/useExperimentalFeatures.tsx` | `ExperimentalFeaturesProvider` + hook; localStorage + Convex when Pro |
 | `hooks/useHeroAtmosphereKind.ts` | Welcome hero visual kind (`chladni` \| `quasiperiodic` \| `multigrid`); localStorage + Convex when Pro |
 | `hooks/useHeroMultigridSettings.ts` | Home Multigrid appearance (localStorage + Convex when Pro) |
 | `lib/multigrid.ts` | De Bruijn multigrid → dual rhombus tiling math |
@@ -105,7 +105,7 @@ Before making styling changes, read `DESIGN-PRINCIPLES.md` for the visual conven
 - `app/globals.css` — the single source of truth for all color tokens.
 - `lib/themes.ts` — the registry of preset themes (`amber`, `rose`, `emerald`, `ocean`, `violet`, `slate`).
 - `hooks/useThemePreference.ts` — the hook for reading and setting the active theme.
-- `hooks/useExperimentalFeatures.ts` — Theme settings toggle for experimental labs (Multigrid); off by default.
+- `hooks/useExperimentalFeatures.tsx` — `ExperimentalFeaturesProvider` in root layout; Theme toggle for experimental labs (Multigrid); off by default; shared so nav updates instantly.
 - `app/settings/theme/page.tsx` — the user-facing theme picker + experimental features toggle.
 - `app/settings/atmosphere/page.tsx` — per-route ambient backgrounds and float panel.
 

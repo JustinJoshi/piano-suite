@@ -6,6 +6,7 @@ import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AmbientEffectsHost } from "@/components/ambient/ambient-effects-host";
 import { AmbientEffectsProvider } from "@/hooks/useAmbientEffects";
+import { ExperimentalFeaturesProvider } from "@/hooks/useExperimentalFeatures";
 import { defaultTheme, themeIds } from "@/lib/themes";
 import "./globals.css";
 
@@ -52,10 +53,12 @@ export default function RootLayout({
         >
           <ClerkProvider appearance={{ theme: shadcn }}>
             <ConvexClientProvider>
-              <AmbientEffectsProvider>
-                <AmbientEffectsHost />
-                {children}
-              </AmbientEffectsProvider>
+              <ExperimentalFeaturesProvider>
+                <AmbientEffectsProvider>
+                  <AmbientEffectsHost />
+                  {children}
+                </AmbientEffectsProvider>
+              </ExperimentalFeaturesProvider>
             </ConvexClientProvider>
           </ClerkProvider>
         </ThemeProvider>

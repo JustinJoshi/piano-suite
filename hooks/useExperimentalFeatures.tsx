@@ -1,6 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useAuthAccess } from "@/hooks/useAuthAccess";
@@ -13,12 +22,24 @@ import {
   writeExperimentalFeaturesToLocalStorage,
 } from "@/lib/experimental-features";
 
+type ExperimentalFeaturesContextValue = {
+  enabled: boolean;
+  setEnabled: (enabled: boolean) => void;
+};
+
+const ExperimentalFeaturesContext =
+  createContext<ExperimentalFeaturesContextValue | null>(null);
+
 /**
- * Opt-in experimental features flag (off by default).
+ * Single shared experimental-features store for Theme settings + nav/labs.
  *
  * localStorage for everyone; Convex when Pro sync (`canPersist`) is available.
  */
-export function useExperimentalFeatures() {
+export function ExperimentalFeaturesProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const { canPersist } = useAuthAccess();
   const remote = useQuery(
     api.settings.getSetting,
@@ -91,8 +112,31 @@ export function useExperimentalFeatures() {
     [persist]
   );
 
-  return {
-    enabled: settings.enabled,
-    setEnabled,
-  };
+  const value = useMemo(
+    () => ({
+      enabled: settings.enabled,
+      setEnabled,
+    }),
+    [settings.enabled, setEnabled]
+  );
+
+  return (
+    <ExperimentalFeaturesContext.Provider value={value}>
+      {children}
+    </ExperimentalFeaturesContext.Provider>
+  );
+}
+
+/**
+ * Opt-in experimental features flag (off by default).
+ * Must be used under ExperimentalFeaturesProvider.
+ */
+export function useExperimentalFeatures() {
+  const ctx = useContext(ExperimentalFeaturesContext);
+  if (!ctx) {
+    throw new Error(
+      "useExperimentalFeatures must be used within ExperimentalFeaturesProvider"
+    );
+  }
+  return ctx;
 }
