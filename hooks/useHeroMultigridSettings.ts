@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { useAuthAccess } from "@/hooks/useAuthAccess";
 import {
   DEFAULT_HERO_MULTIGRID_SETTINGS,
   HERO_MULTIGRID_SETTINGS_KEY,
@@ -16,13 +16,16 @@ import {
 } from "@/lib/multigrid-hero-settings";
 
 /**
- * Home-hero Multigrid appearance preferences (localStorage + Convex).
+ * Home-hero Multigrid appearance preferences.
+ *
+ * - localStorage for everyone
+ * - Convex when Pro sync (`canPersist`) is available
  */
 export function useHeroMultigridSettings() {
-  const { isSignedIn } = useUser();
+  const { canPersist } = useAuthAccess();
   const remote = useQuery(
     api.settings.getSetting,
-    isSignedIn ? { key: HERO_MULTIGRID_SETTINGS_KEY } : "skip"
+    canPersist ? { key: HERO_MULTIGRID_SETTINGS_KEY } : "skip"
   );
   const setRemoteSetting = useMutation(api.settings.setSetting);
 
@@ -53,7 +56,7 @@ export function useHeroMultigridSettings() {
 
   const pushedLocalToRemote = useRef(false);
   useEffect(() => {
-    if (!isSignedIn) return;
+    if (!canPersist) return;
     if (remote === undefined) return;
     if (remote != null) return;
     if (pushedLocalToRemote.current) return;
@@ -66,12 +69,12 @@ export function useHeroMultigridSettings() {
     }).catch((err) => {
       console.error("Failed to save hero Multigrid settings", err);
     });
-  }, [isSignedIn, remote, setRemoteSetting]);
+  }, [canPersist, remote, setRemoteSetting]);
 
   const persist = useCallback(
     (next: HeroMultigridSettings) => {
       writeHeroMultigridSettingsToLocalStorage(next);
-      if (!isSignedIn) return;
+      if (!canPersist) return;
       setRemoteSetting({
         key: HERO_MULTIGRID_SETTINGS_KEY,
         value: next,
@@ -79,7 +82,7 @@ export function useHeroMultigridSettings() {
         console.error("Failed to save hero Multigrid settings", err);
       });
     },
-    [isSignedIn, setRemoteSetting]
+    [canPersist, setRemoteSetting]
   );
 
   const updateSettings = useCallback(
