@@ -52,7 +52,7 @@ export function MultigridLab() {
   const [morph, setMorph] = useState(0);
   const [autoMorph, setAutoMorph] = useState(true);
   const [morphSpeed, setMorphSpeed] = useState(10);
-  const [viewMode, setViewMode] = useState<MultigridViewMode>("both");
+  const [viewMode, setViewMode] = useState<MultigridViewMode>("grid");
   const [showIntersections, setShowIntersections] = useState(true);
   const [applyMessage, setApplyMessage] = useState<string | null>(null);
 
@@ -286,18 +286,7 @@ export function MultigridLab() {
             </Button>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            {(["both", "tiling", "grid"] as const).map((mode) => (
-              <Button
-                key={mode}
-                variant={viewMode === mode ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewMode(mode)}
-              >
-                {mode === "both" ? "Both" : mode === "tiling" ? "Tiling" : "Grid"}
-              </Button>
-            ))}
-          </div>
+          {/* View modes Both / Tiling marked for deletion — grid (lines) only. */}
 
           <RangeControl
             label="Symmetry"

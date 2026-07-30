@@ -41,13 +41,16 @@ export function MultigridVisualization({
   recipe,
   nextRecipe = recipe,
   morph = 0,
-  viewMode = "both",
+  viewMode = "grid",
   showIntersections = true,
   lineIntensity = 1,
   colorSoftness = 0,
   patternColor = null,
   className,
 }: MultigridVisualizationProps) {
+  // Tiling / both marked for deletion — only the grid (lines) panel is shown.
+  // `viewMode` is accepted for API compatibility with persisted settings.
+  void viewMode;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mountRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 1, h: 1 });
@@ -103,29 +106,15 @@ export function MultigridVisualization({
 
     const blended = blendRecipes(recipe, nextRecipe, morph);
 
+    // Tiling / both marked for deletion: grid-only. Tiling draw branch below
+    // remains until a follow-up hard-delete PR removes `mode: "tiling"`.
     const panels: {
       x: number;
       y: number;
       w: number;
       h: number;
       mode: "grid" | "tiling";
-    }[] = [];
-
-    if (viewMode === "both") {
-      if (width >= height) {
-        const half = width / 2;
-        panels.push({ x: 0, y: 0, w: half, h: height, mode: "grid" });
-        panels.push({ x: half, y: 0, w: half, h: height, mode: "tiling" });
-      } else {
-        const half = height / 2;
-        panels.push({ x: 0, y: 0, w: width, h: half, mode: "grid" });
-        panels.push({ x: 0, y: half, w: width, h: half, mode: "tiling" });
-      }
-    } else if (viewMode === "grid") {
-      panels.push({ x: 0, y: 0, w: width, h: height, mode: "grid" });
-    } else {
-      panels.push({ x: 0, y: 0, w: width, h: height, mode: "tiling" });
-    }
+    }[] = [{ x: 0, y: 0, w: width, h: height, mode: "grid" }];
 
     for (const panel of panels) {
       const scene = buildMultigridScene(blended, panel.w, panel.h);
@@ -204,23 +193,12 @@ export function MultigridVisualization({
       }
 
       ctx.restore();
-
-      if (viewMode === "both") {
-        ctx.fillStyle = rgbCss(softPrimary, 0.55);
-        ctx.font = "11px ui-sans-serif, system-ui, sans-serif";
-        ctx.fillText(
-          panel.mode === "grid" ? "Grid" : "Tiling",
-          panel.x + 10,
-          panel.y + 18
-        );
-      }
     }
   }, [
     size,
     recipe,
     nextRecipe,
     morph,
-    viewMode,
     showIntersections,
     lineIntensity,
     colorSoftness,

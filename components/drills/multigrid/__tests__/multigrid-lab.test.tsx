@@ -46,16 +46,18 @@ describe("MultigridLab", () => {
     setRouteBackground.mockClear();
   });
 
-  it("renders presets and view modes", () => {
+  it("renders presets without tiling view mode controls", () => {
     render(<MultigridLab />);
     expect(screen.getByText("Parameters")).toBeInTheDocument();
     expect(screen.getByTestId("multigrid-visualization")).toBeInTheDocument();
     for (const label of ["Penrose", "Ammann", "Socolar", "Dense"]) {
       expect(screen.getByRole("button", { name: label })).toBeInTheDocument();
     }
-    expect(screen.getByRole("button", { name: "Both" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Tiling" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Grid" })).toBeInTheDocument();
+    // Tiling / Both marked for deletion — not exposed in the Lab UI.
+    expect(screen.queryByRole("button", { name: "Both" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Tiling" })
+    ).not.toBeInTheDocument();
   });
 
   it("applies to home and sets atmosphere kind", () => {

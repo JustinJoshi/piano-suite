@@ -49,3 +49,11 @@ Apply / Reset from Multigrid Lab sets kind to `multigrid` and writes only multig
 - SVG export / share URLs
 - Vendoring Pattern Collider Vue/p5 code
 - MIDI / audio reactivity
+
+## Marked for deletion (not yet deleted)
+
+**Tiling view** (filled rhombus panel / `viewMode: "tiling"` | `"both"`): marked for deletion.
+
+- **User-facing:** disabled. Lab and home Multigrid show **grid (lines) only**. View-mode controls for Both / Tiling are hidden. Persisted `"tiling"` / `"both"` values are coerced to `"grid"` in `normalizeHeroMultigridSettings`.
+- **Still in code (pending hard removal):** `MultigridViewMode` union members, the tiling draw branch in `components/drills/multigrid/multigrid-visualization.tsx` (`panel.mode === "tiling"`), tile helpers in `lib/multigrid.ts`, and related hero/lab `viewMode` fields.
+- **Do not re-enable** without an explicit product decision. Follow-up PR should delete the dead paths above and narrow `MultigridViewMode` to `"grid"` (or remove the field).

@@ -23,6 +23,7 @@ export type MultigridRecipe = {
   radius: number;
 };
 
+/** `"tiling"` / `"both"` marked for deletion — coerced to grid in settings/viz. */
 export type MultigridViewMode = "both" | "tiling" | "grid";
 
 export type GridLine = {

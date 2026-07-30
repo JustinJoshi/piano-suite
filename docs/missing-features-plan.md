@@ -321,6 +321,7 @@ Independent enhancements deferred by lab plans. Order by user value:
 | Domain coloring (Quasiperiodic) | QP plan | Theme-token gradients only |
 | 3D / multi-color Lissajous | Lissajous plan | Lowest priority; easy to over-design |
 | Julia / Lissajous as **hero** atmospheres | QP out of scope; ambient already covers backgrounds | Only needed if Welcome Apply-to-home should include them; ambient `/` already can set Julia/Lissajous via Atmosphere settings |
+| Hard-delete Multigrid **tiling** view | [`docs/multigrid-lab-plan.md`](./multigrid-lab-plan.md) — Marked for deletion | Soft-disabled (grid/lines only). Remove tiling draw branch, `"tiling"`/`"both"` view modes, and related UI remnants |
 
 Ship each as its own PR. No MIDI requirement.
 

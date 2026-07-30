@@ -51,7 +51,8 @@ export const DEFAULT_HERO_MULTIGRID_SETTINGS: HeroMultigridSettings = {
   },
   morphSpeed: 18,
   autoMorph: true,
-  viewMode: "tiling",
+  // Tiling / both marked for deletion — grid (lines) only.
+  viewMode: "grid",
   showIntersections: false,
   lineIntensity: 0.55,
   colorSoftness: 0.65,
@@ -85,7 +86,8 @@ export const DEFAULT_LAB_MULTIGRID_SNAPSHOT: LabMultigridSnapshot = {
   },
   morphSpeed: 10,
   autoMorph: true,
-  viewMode: "both",
+  // Tiling / both marked for deletion — grid (lines) only.
+  viewMode: "grid",
   showIntersections: true,
   lineIntensity: 1,
   colorSoftness: 0,
@@ -108,9 +110,19 @@ function asPatternColor(value: unknown): string | null {
   return trimmed;
 }
 
-function asViewMode(value: unknown, fallback: MultigridViewMode): MultigridViewMode {
-  if (value === "both" || value === "tiling" || value === "grid") return value;
-  return fallback;
+/** Tiling / both marked for deletion — always resolve to grid (lines). */
+function asViewMode(
+  value: unknown,
+  fallback: MultigridViewMode
+): MultigridViewMode {
+  // Accept legacy values so call sites stay typed; ignore them until hard delete.
+  if (value === "grid" || value === "tiling" || value === "both") {
+    return "grid";
+  }
+  if (fallback === "grid" || fallback === "tiling" || fallback === "both") {
+    return "grid";
+  }
+  return "grid";
 }
 
 function asRecipe(value: unknown, fallback: MultigridRecipe): MultigridRecipe {

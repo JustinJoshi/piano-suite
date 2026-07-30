@@ -24,6 +24,15 @@ describe("normalizeHeroMultigridSettings", () => {
     expect(next.recipe.symmetry).toBe(16);
     expect(next.recipe.pattern).toBe(0);
   });
+
+  it("coerces tiling and both view modes to grid", () => {
+    expect(
+      normalizeHeroMultigridSettings({ viewMode: "tiling" }).viewMode
+    ).toBe("grid");
+    expect(normalizeHeroMultigridSettings({ viewMode: "both" }).viewMode).toBe(
+      "grid"
+    );
+  });
 });
 
 describe("mergeLabSnapshotIntoHeroMultigrid", () => {
@@ -51,7 +60,8 @@ describe("mergeLabSnapshotIntoHeroMultigrid", () => {
       showIntersections: true,
     });
     expect(merged.recipe.symmetry).toBe(13);
-    expect(merged.viewMode).toBe("both");
+    // Tiling / both marked for deletion — coerced to grid.
+    expect(merged.viewMode).toBe("grid");
     expect(merged.patternColor).toBe("#112233");
     expect(merged.scrimDarkness).toBe(0.3);
     expect(merged.generation).toBe(3);
