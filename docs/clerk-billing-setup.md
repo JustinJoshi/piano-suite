@@ -129,7 +129,8 @@ Practice mutations read Billing entitlements from the session JWT via
 
 `lib/billing.ts` → `hasSyncFromClerkClaims` / `splitClerkBillingClaim`.
 `convex/lib/entitlements.ts` → `ensureUserIdWithSync` rejects Free with
-“Pro required…”. Theme/atmosphere settings are **not** gated yet (WP6).
+“Pro required…”. Used by tracking, technique, and `settings.setSetting`
+(theme/atmosphere/hero — WP6). Free prefs stay in localStorage.
 
 Confirm a real Pro checkout JWT includes `pla`/`fea` in the Convex dashboard
 identity payload (or by temporarily logging claim keys in a mutation).

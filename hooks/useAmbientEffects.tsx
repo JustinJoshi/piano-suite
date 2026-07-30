@@ -10,9 +10,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { useAuthAccess } from "@/hooks/useAuthAccess";
 import {
   AMBIENT_EFFECTS_SETTINGS_KEY,
   DEFAULT_AMBIENT_EFFECTS,
@@ -59,10 +59,10 @@ const AmbientEffectsContext =
  * Single shared ambient-effects store for the whole app (host + settings + labs).
  */
 export function AmbientEffectsProvider({ children }: { children: ReactNode }) {
-  const { isSignedIn } = useUser();
+  const { canPersist } = useAuthAccess();
   const remote = useQuery(
     api.settings.getSetting,
-    isSignedIn ? { key: AMBIENT_EFFECTS_SETTINGS_KEY } : "skip"
+    canPersist ? { key: AMBIENT_EFFECTS_SETTINGS_KEY } : "skip"
   );
   const setRemoteSetting = useMutation(api.settings.setSetting);
 
@@ -95,7 +95,7 @@ export function AmbientEffectsProvider({ children }: { children: ReactNode }) {
 
   const pushedLocalToRemote = useRef(false);
   useEffect(() => {
-    if (!isSignedIn) return;
+    if (!canPersist) return;
     if (remote === undefined) return;
     if (remote != null) return;
     if (pushedLocalToRemote.current) return;
@@ -108,7 +108,7 @@ export function AmbientEffectsProvider({ children }: { children: ReactNode }) {
     }).catch((err) => {
       console.error("Failed to save ambient effects", err);
     });
-  }, [isSignedIn, remote, setRemoteSetting]);
+  }, [canPersist, remote, setRemoteSetting]);
 
   const wroteSeedToLocal = useRef(false);
   useEffect(() => {
@@ -122,7 +122,7 @@ export function AmbientEffectsProvider({ children }: { children: ReactNode }) {
   const persist = useCallback(
     (next: AmbientEffectsSettings) => {
       writeAmbientEffectsToLocalStorage(next);
-      if (!isSignedIn) return;
+      if (!canPersist) return;
       setRemoteSetting({
         key: AMBIENT_EFFECTS_SETTINGS_KEY,
         value: next,
@@ -130,7 +130,7 @@ export function AmbientEffectsProvider({ children }: { children: ReactNode }) {
         console.error("Failed to save ambient effects", err);
       });
     },
-    [isSignedIn, setRemoteSetting]
+    [canPersist, setRemoteSetting]
   );
 
   const updateSettings = useCallback(

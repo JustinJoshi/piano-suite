@@ -12,11 +12,12 @@ import {
  * Unified auth gate for tool pages and drill components.
  *
  * - `canAccess`: open the tool UI (true when signed in, or when auth is disabled)
- * - `canPersist`: write practice history to Convex — Pro (`sync`) or AUTH_DISABLED
+ * - `canPersist`: write practice history **and** theme/atmosphere prefs to
+ *   Convex — Pro (`sync`) or AUTH_DISABLED
  *
- * Signed-in Free users keep drilling locally (browser history via
- * `lib/local-practice-history.ts`). Convex practice mutations reject Free JWTs
- * via `ensureUserIdWithSync`.
+ * Signed-in Free users keep drilling and prefs in the browser
+ * (`lib/local-practice-history.ts` + localStorage). Convex mutations reject
+ * Free JWTs via `ensureUserIdWithSync`.
  */
 export function useAuthAccess() {
   const { isSignedIn } = useUser();

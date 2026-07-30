@@ -80,7 +80,7 @@ describe("practice mutation Pro enforcement (WP2)", () => {
     expect(eventId).toBeTruthy();
   });
 
-  it("still allows Free users to set theme settings (WP6 not gated)", async () => {
+  it("rejects Free users setting theme (WP6 prefs require sync)", async () => {
     const t = convexTest(schema, modules);
     const asFree = t.withIdentity({
       subject: "clerk_free_settings",
@@ -88,11 +88,28 @@ describe("practice mutation Pro enforcement (WP2)", () => {
       pla: "u:free_user",
     });
 
-    await asFree.mutation(api.settings.setSetting, {
+    await expect(
+      asFree.mutation(api.settings.setSetting, {
+        key: "theme",
+        value: "rose",
+      })
+    ).rejects.toThrow(/Pro required/i);
+  });
+
+  it("allows Pro users to set theme settings", async () => {
+    const t = convexTest(schema, modules);
+    const asPro = t.withIdentity({
+      subject: "clerk_pro_settings",
+      email: "prosettings@example.com",
+      pla: "u:pro",
+      fea: "u:sync",
+    });
+
+    await asPro.mutation(api.settings.setSetting, {
       key: "theme",
       value: "rose",
     });
-    const value = await asFree.query(api.settings.getSetting, { key: "theme" });
+    const value = await asPro.query(api.settings.getSetting, { key: "theme" });
     expect(value).toBe("rose");
   });
 });

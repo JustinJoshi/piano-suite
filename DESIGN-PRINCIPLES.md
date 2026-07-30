@@ -11,7 +11,7 @@ The entire interface is built on a single source of truth for color: CSS custom 
 - **Default theme**: Amber / piano-gold (`:root`).
 - **Alternate presets**: Rose, Emerald, Ocean, Violet, Slate — each defined as a CSS class that overrides only the brand-derived tokens.
 - **Registry**: `lib/themes.ts` lists the available presets and provides type-safe helpers (`isThemeId`, `findTheme`).
-- **Persistence**: `hooks/useThemePreference.ts` stores the choice in `localStorage` via `next-themes` and syncs it to Convex for signed-in users.
+- **Persistence**: `hooks/useThemePreference.ts` stores the choice in `localStorage` via `next-themes` and syncs it to Convex when the user has Pro sync (`canPersist`).
 - **UI entry point**: `/settings/theme` presents theme cards that preview `background`, `primary`, `accent`, and `card` swatches live.
 
 > Principle: colors are semantic and swappable; no component should hard-code a hex value.

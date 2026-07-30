@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { useAuthAccess } from "@/hooks/useAuthAccess";
 import {
   DEFAULT_HERO_ATMOSPHERE,
   HERO_ATMOSPHERE_SETTINGS_KEY,
@@ -17,13 +17,13 @@ import {
 /**
  * Which math visual drives the welcome-page hero atmosphere.
  *
- * localStorage for everyone; Convex when signed in (same pattern as Chladni).
+ * localStorage for everyone; Convex when Pro sync (`canPersist`) is available.
  */
 export function useHeroAtmosphereKind() {
-  const { isSignedIn } = useUser();
+  const { canPersist } = useAuthAccess();
   const remote = useQuery(
     api.settings.getSetting,
-    isSignedIn ? { key: HERO_ATMOSPHERE_SETTINGS_KEY } : "skip"
+    canPersist ? { key: HERO_ATMOSPHERE_SETTINGS_KEY } : "skip"
   );
   const setRemoteSetting = useMutation(api.settings.setSetting);
 
@@ -52,7 +52,7 @@ export function useHeroAtmosphereKind() {
 
   const pushedLocalToRemote = useRef(false);
   useEffect(() => {
-    if (!isSignedIn) return;
+    if (!canPersist) return;
     if (remote === undefined) return;
     if (remote != null) return;
     if (pushedLocalToRemote.current) return;
@@ -64,19 +64,19 @@ export function useHeroAtmosphereKind() {
         console.error("Failed to save hero atmosphere kind", err);
       }
     );
-  }, [isSignedIn, remote, setRemoteSetting]);
+  }, [canPersist, remote, setRemoteSetting]);
 
   const persist = useCallback(
     (next: HeroAtmosphereSettings) => {
       writeHeroAtmosphereToLocalStorage(next);
-      if (!isSignedIn) return;
+      if (!canPersist) return;
       setRemoteSetting({ key: HERO_ATMOSPHERE_SETTINGS_KEY, value: next }).catch(
         (err) => {
           console.error("Failed to save hero atmosphere kind", err);
         }
       );
     },
-    [isSignedIn, setRemoteSetting]
+    [canPersist, setRemoteSetting]
   );
 
   const setKind = useCallback(

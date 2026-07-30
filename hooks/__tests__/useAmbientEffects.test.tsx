@@ -11,9 +11,15 @@ import {
 } from "@/lib/ambient-effects";
 
 const setRemoteSetting = vi.fn(() => Promise.resolve(null));
+const useAuthAccessMock = vi.fn(() => ({
+  authDisabled: false,
+  isSignedIn: false,
+  canAccess: false,
+  canPersist: false,
+}));
 
-vi.mock("@clerk/nextjs", () => ({
-  useUser: () => ({ isSignedIn: false }),
+vi.mock("@/hooks/useAuthAccess", () => ({
+  useAuthAccess: () => useAuthAccessMock(),
 }));
 
 vi.mock("convex/react", () => ({
@@ -38,13 +44,19 @@ describe("useAmbientEffects", () => {
       },
     });
     setRemoteSetting.mockClear();
+    useAuthAccessMock.mockReturnValue({
+      authDisabled: false,
+      isSignedIn: false,
+      canAccess: false,
+      canPersist: false,
+    });
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
   });
 
-  it("seeds defaults and persists route overrides locally when signed out", () => {
+  it("seeds defaults and persists route overrides locally when not Pro", () => {
     const { result } = renderHook(() => useAmbientEffects(), { wrapper });
 
     expect(result.current.settings.defaultBackground).toBe(
@@ -68,6 +80,41 @@ describe("useAmbientEffects", () => {
     expect(JSON.parse(raw!).routeBackgrounds["/tools/chord-drill"]).toBe(
       "chladni-ripple"
     );
+  });
+
+  it("does not sync ambient prefs when signed-in Free (!canPersist)", () => {
+    useAuthAccessMock.mockReturnValue({
+      authDisabled: false,
+      isSignedIn: true,
+      canAccess: true,
+      canPersist: false,
+    });
+
+    const { result } = renderHook(() => useAmbientEffects(), { wrapper });
+
+    act(() => {
+      result.current.setDefaultBackground("julia");
+    });
+
+    expect(result.current.settings.defaultBackground).toBe("julia");
+    expect(setRemoteSetting).not.toHaveBeenCalled();
+  });
+
+  it("syncs ambient prefs to Convex when canPersist", () => {
+    useAuthAccessMock.mockReturnValue({
+      authDisabled: false,
+      isSignedIn: true,
+      canAccess: true,
+      canPersist: true,
+    });
+
+    const { result } = renderHook(() => useAmbientEffects(), { wrapper });
+
+    act(() => {
+      result.current.setDefaultBackground("lissajous");
+    });
+
+    expect(setRemoteSetting).toHaveBeenCalled();
   });
 
   it("opens the float panel", () => {

@@ -19,7 +19,7 @@ The goal is to give piano players a single place to:
 This repository now contains:
 
 - A **Next.js 16+ App Router** application with TypeScript.
-- A **Lunar.dev-inspired landing page** that ports the original Reflex Drill EXT welcome content into a polished, modern marketing layout, with a fixed full-viewport soft Three.js atmosphere (Chladni by default) behind sparse hero copy and floating feature cards, theme-aware scrims, and resonant modes that morph slowly with the active theme. Pattern Lab can **Apply to home** / **Reset home** to customize that atmosphere (localStorage + Convex when signed in). Atmosphere settings at `/settings/atmosphere` can also switch the Welcome background to MIDI Ripple, Julia, or Lissajous.
+- A **Lunar.dev-inspired landing page** that ports the original Reflex Drill EXT welcome content into a polished, modern marketing layout, with a fixed full-viewport soft Three.js atmosphere (Chladni by default) behind sparse hero copy and floating feature cards, theme-aware scrims, and resonant modes that morph slowly with the active theme. Pattern Lab can **Apply to home** / **Reset home** to customize that atmosphere (localStorage always; Convex when Pro). Atmosphere settings at `/settings/atmosphere` can also switch the Welcome background to MIDI Ripple, Julia, or Lissajous.
 - An **Articles section** (`/articles`) with a listing page and statically generated article pages (`/articles/[slug]`). Articles are authored in Markdown with YAML frontmatter, rendered with `react-markdown`, and styled with reusable Tailwind utility classes. The shared site navbar is included on article pages so readers can navigate back to the home page and other sections at any time. A floating chat bubble on article pages links directly to the Practice Assistant so readers can ask questions about the content.
 - A **Vercel-dashboard-inspired Tools hub** (`/tools`) with a sidebar navigation drawn from the original Reflex Drill EXT tabs (fixed on desktop; off-canvas drawer with menu control on mobile).
 - A migrated **Chord Drill** (`/tools/chord-drill`) ported from Reflex Drill EXT, including Single Shape / Family Cycle / Extended Family modes, root/quality selection, reps, per-chord rep overrides, Anki Sync with auto-timer and auto-grade, break-before-grading, and personal-best stats persisted via Convex.
@@ -31,10 +31,10 @@ This repository now contains:
 - A **Chladni Ripple** tool (`/tools/chladni-ripple`) — drives the Chladni visualization from live MIDI: pitch class → mode identity, octave → denser patterns, velocity → decaying intensity pulse, chords → secondary blend. Separate from the parameter explorer; Ambient actions can set Ripple as a Welcome / app-wide background or open a float panel.
 - A **Julia Set Lab** (`/tools/julia`) — an interactive escape-time Julia set explorer with curated complex-parameter presets, morph between two `c` values, zoom, iterations, escape radius, and theme-aware coloring.
 - A **Lissajous Harmonic Lab** (`/tools/lissajous`) — an interactive frequency-ratio curve explorer with musical interval presets, phase/morph controls, and theme-aware Canvas trails.
-- A **Quasiperiodic Pattern Lab** (`/tools/quasiperiodic`) — an interactive N-fold plane-wave interference explorer with morphing recipes, zoom, and soft nodal contours. **Apply to home** switches the welcome atmosphere to the quasiperiodic field (Chladni Apply switches it back); pattern color and hero-scrim shade persist in `localStorage` and sync to Convex when signed in.
-- A **Multigrid Lab** (`/tools/multigrid`) — a Canvas de Bruijn multigrid → dual rhombus tiling explorer (Penrose/Ammann/Socolar/Dense presets). **Apply to home** switches the welcome ambient background to Multigrid; preferences persist in `localStorage` and sync to Convex when signed in.
+- A **Quasiperiodic Pattern Lab** (`/tools/quasiperiodic`) — an interactive N-fold plane-wave interference explorer with morphing recipes, zoom, and soft nodal contours. **Apply to home** switches the welcome atmosphere to the quasiperiodic field (Chladni Apply switches it back); pattern color and hero-scrim shade persist in `localStorage` and sync to Convex when Pro.
+- A **Multigrid Lab** (`/tools/multigrid`) — a Canvas de Bruijn multigrid → dual rhombus tiling explorer (Penrose/Ammann/Socolar/Dense presets). **Apply to home** switches the welcome ambient background to Multigrid; preferences persist in `localStorage` and sync to Convex when Pro.
 - A public **Pricing** page (`/pricing`) with Clerk `<PricingTable />` for Free vs Pro (cloud sync). Manage subscriptions at `/settings/billing`.
-- **Atmosphere settings** (`/settings/atmosphere`) — assign any shipped visualization (Chladni, Quasiperiodic, Multigrid, MIDI Ripple, Julia, Lissajous) as a full-page background per route, apply a default everywhere, and optionally show a draggable / resizable float panel of the same effects. Preferences persist in `localStorage` and sync to Convex when signed in.
+- **Atmosphere settings** (`/settings/atmosphere`) — assign any shipped visualization (Chladni, Quasiperiodic, Multigrid, MIDI Ripple, Julia, Lissajous) as a full-page background per route, apply a default everywhere, and optionally show a draggable / resizable float panel of the same effects. Preferences persist in `localStorage` and sync to Convex when Pro.
 - A migrated **Tracking dashboard** (`/tools/tracking`) ported from Reflex Drill EXT, including:
   - Chord Drill first-chord timing history
   - Arpeggio transition and miss logging
@@ -100,7 +100,7 @@ A shared **primitive layer** has been extracted from the original Reflex Drill E
 
 ## Theming
 
-Piano Suite has a token-driven theming system. Colors are defined as CSS custom properties in `app/globals.css` and exposed as Tailwind utilities (`bg-primary`, `text-primary`, `ring-primary`, etc.). A built-in theme picker lives at `/settings/theme` and lets users switch between presets (Amber, Rose, Emerald, Ocean, Violet, Slate). The choice is saved to `localStorage` and synced to Convex for signed-in users.
+Piano Suite has a token-driven theming system. Colors are defined as CSS custom properties in `app/globals.css` and exposed as Tailwind utilities (`bg-primary`, `text-primary`, `ring-primary`, etc.). A built-in theme picker lives at `/settings/theme` and lets users switch between presets (Amber, Rose, Emerald, Ocean, Violet, Slate). The choice is saved to `localStorage` and synced to Convex when the user has Pro sync (`canPersist`).
 
 When adding new UI, use the theme tokens instead of hard-coded colors. See `AGENTS.md` for the full theming conventions and `DESIGN-PRINCIPLES.md` for the broader visual design system.
 
@@ -156,7 +156,7 @@ Setting `NEXT_PUBLIC_AUTH_DISABLED=true` makes the proxy skip protection for **e
 | Flag | Meaning |
 |------|---------|
 | `canAccess` | May the tool UI render? True when signed in **or** when the bypass is on |
-| `canPersist` | May we write practice history to Convex? True for **Pro** (`has({ feature: "sync" })` / `has({ plan: "pro" })`) **or** when `NEXT_PUBLIC_AUTH_DISABLED=true`. Signed-in Free users keep durable **browser** history (`lib/local-practice-history.ts`); Tracking/Technique read that locally, and Convex practice mutations reject Free JWTs (`ensureUserIdWithSync`). Upgrade → upload local history from the Tracking/Technique import panels. |
+| `canPersist` | May we write practice history **and** theme/atmosphere prefs to Convex? True for **Pro** (`has({ feature: "sync" })` / `has({ plan: "pro" })`) **or** when `NEXT_PUBLIC_AUTH_DISABLED=true`. Signed-in Free users keep durable **browser** history and prefs; Convex practice/settings mutations reject Free JWTs (`ensureUserIdWithSync`). Upgrade → upload local history from the Tracking/Technique import panels. |
 
 `hooks/useToolUserReady.ts` additionally waits for the Convex `users` row on tool pages, and `components/ensure-signed-in-user.tsx` (mounted inside `ConvexClientProvider`) creates that row as soon as Clerk reports a session, so homepage theme and atmosphere queries do not race it.
 
@@ -259,7 +259,7 @@ Production hosting is **Vercel Hobby** + **Convex Free** + **Clerk development**
    | `NEXT_PUBLIC_CLERK_SIGN_IN_URL` | `/sign-in` |
    | `NEXT_PUBLIC_CLERK_SIGN_UP_URL` | `/sign-up` |
    | `NEXT_PUBLIC_CLERK_*_FALLBACK_REDIRECT_URL` | `/` |
-   | `NEXT_PUBLIC_AUTH_DISABLED` | `true` on Production/Preview for now (see Notes) |
+   | `NEXT_PUBLIC_AUTH_DISABLED` | Temporary bypass only — **unset before charging** (see [Auth cutover](#auth-cutover-checklist-remove-bypass)) |
 
    `NEXT_PUBLIC_CONVEX_URL` is injected at build time by `npx convex deploy`.
 
@@ -428,8 +428,9 @@ npm run build
 - [x] Add article pages under `/articles/[slug]`
 - [x] Add token-driven theming system with `/settings/theme`
 - [x] Implement real LLM chat grounded on articles (Kimi Code API, owner-only access)
-- [x] Clerk Billing freemium (Free local / Pro sync) — WP0–WP2 + WP4–WP5; cutover / WP6 still open (`docs/subscription-page-plan.md`)
-- [x] Public `/pricing` + `canPersist` remap to Pro/`sync`
+- [x] Clerk Billing freemium (Free local / Pro sync) — WP0–WP2 + WP4–WP6; owner cutover still open (`docs/subscription-page-plan.md`)
+- [x] Public `/pricing` + `canPersist` remap to Pro/`sync` (practice + prefs)
+- [x] WP6 — theme/atmosphere/hero Convex sync requires Pro
 
 ### Post-v1 follow-ons
 

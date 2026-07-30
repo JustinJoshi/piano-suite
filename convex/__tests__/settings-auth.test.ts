@@ -20,12 +20,14 @@ describe("settings auth resilience", () => {
     expect(value).toBeNull();
   });
 
-  it("setSetting creates the user row and persists the value", async () => {
+  it("setSetting creates the user row and persists the value for Pro", async () => {
     const t = convexTest(schema, modules);
     const asUser = t.withIdentity({
       subject: "clerk_preview_set_setting",
       email: "preview@example.com",
       name: "Preview User",
+      pla: "u:pro",
+      fea: "u:sync",
     });
 
     await asUser.mutation(api.settings.setSetting, {

@@ -1,8 +1,8 @@
 # Subscription / Pricing Page — Plan
 
-> **Status: proposed.** Research + information architecture only. No billing
-> code ships in this doc. For current product surface see `README.md`,
-> `DESIGN-PRINCIPLES.md`, and the welcome layout under `components/welcome/`.
+> **Status: implemented (WP0–WP2, WP4–WP6).** Freemium Free-local / Pro-sync is
+> in code. Owner cutover (custom domain, live Clerk, unset `AUTH_DISABLED`)
+> remains before real charges — see README auth cutover + `docs/clerk-billing-setup.md`.
 
 ## Goal
 
@@ -20,8 +20,8 @@ welcome hero’s composition rules or the token-driven theme system.
 | Navbar = marketing; `/tools/*` + `/settings/*` = dashboard shell | Pricing is a **marketing** page (`Navbar`), not a `DrillShell` tool |
 | Navbar CTA is “Try it free” (sign-up) | Paid conversion should sit **downstream** of value explanation, not replace trial |
 
-There is no pricing/billing surface yet (`PricingTable`, Stripe, or plan
-entitlements). Chat is currently owner-allowlisted, not a general paid feature.
+Pricing (`/pricing`), billing settings, client/server Pro gates, Free browser
+history, and Pro-only prefs sync are shipped. Chat stays owner-allowlisted.
 
 ---
 
@@ -278,8 +278,8 @@ feature dumps (“Access Convex `practiceEvents`”).
 
 ## Codebase readiness — what already fits
 
-The Free-local / Pro-sync model is **mostly pre-plumbed**. Today
-`canPersist === isSignedIn`. Remapping that flag to Pro is the shortest path.
+The Free-local / Pro-sync model is shipped: `canPersist` maps to Pro/`sync`
+(or `AUTH_DISABLED`). Gaps below are historical — see implementation phases.
 
 ### Already aligned (reuse)
 
@@ -400,11 +400,11 @@ Today `!canPersist` = **session-only** (lost on refresh). For the Pro pitch
 - Upgrade path: one-shot “Upload local history to Pro” (extend patterns from
   `import-local-storage.tsx` / `bulkImportTracking`).
 
-### WP6 — Align settings sync with Free/Pro (optional polish)
+### WP6 — Align settings sync with Free/Pro
 
-Theme / atmosphere hooks currently sync on any `isSignedIn`
-(`useThemePreference`, `useAmbientEffects`, hero settings). Flip Convex sync
-to `canPersist` if Free prefs must stay device-local per the packaging table.
+Theme / atmosphere / hero hooks sync Convex only when `canPersist`.
+`settings.setSetting` uses `ensureUserIdWithSync`. Free prefs stay in
+localStorage.
 
 ### Explicitly defer
 
@@ -456,7 +456,7 @@ Skip unsigned drills and localStorage history until after that slice works.
 ### Phase 3 — Continuity + polish
 
 - [x] WP5 — Free localStorage practice history + Tracking/Technique readers + Pro upload import
-- [ ] WP6 settings sync alignment
+- [x] WP6 — theme/atmosphere/hero Convex sync requires Pro (`canPersist` + `setSetting` gate)
 - [ ] Reverse trial if chosen
 - [ ] Clerk appearance / FAQ polish
 

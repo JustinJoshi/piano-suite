@@ -8,10 +8,8 @@ import { ensureUserId } from "./auth";
  *
  * Reads Clerk Billing claims from the session JWT (`pla` / `fea`). Free
  * signed-in users can still call queries (soft empty); mutations that persist
- * practice history must use this helper.
- *
- * Does **not** gate `settings.setSetting` (theme/atmosphere still sync for any
- * signed-in user until WP6).
+ * practice history, technique sessions, or settings (theme/atmosphere/hero)
+ * must use this helper. Free prefs stay in localStorage (WP6).
  */
 export async function ensureUserIdWithSync(
   ctx: MutationCtx
@@ -25,7 +23,7 @@ export async function ensureUserIdWithSync(
   const claims = identity as unknown as Record<string, unknown>;
   if (!hasSyncFromClerkClaims(claims)) {
     throw new Error(
-      "Pro required to sync practice history. Upgrade at /pricing."
+      "Pro required to sync across devices. Upgrade at /pricing."
     );
   }
 

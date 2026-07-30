@@ -23,12 +23,13 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `hooks/useDrillTimer.ts` | Generic drill timer state machine |
 | `hooks/useAnkiSync.ts` | Poll Anki for current card and parse its chord |
 | `hooks/useThemeCssVars.ts` | Read theme CSS custom properties and watch for theme changes; useful for Canvas/WebGL visuals |
-| `hooks/useHeroAtmosphereKind.ts` | Welcome hero visual kind (`chladni` \| `quasiperiodic` \| `multigrid`); localStorage + Convex |
-| `hooks/useHeroMultigridSettings.ts` | Home Multigrid appearance (localStorage + Convex) |
+| `hooks/useThemePreference.ts` | Active theme; localStorage always; Convex sync when `canPersist` (Pro) |
+| `hooks/useHeroAtmosphereKind.ts` | Welcome hero visual kind (`chladni` \| `quasiperiodic` \| `multigrid`); localStorage + Convex when Pro |
+| `hooks/useHeroMultigridSettings.ts` | Home Multigrid appearance (localStorage + Convex when Pro) |
 | `lib/multigrid.ts` | De Bruijn multigrid → dual rhombus tiling math |
 | `lib/multigrid-hero-settings.ts` | Serializable home-hero Multigrid appearance |
 | `lib/ambient-effects.ts` | Per-route ambient backgrounds + float panel settings, soft viz defaults |
-| `hooks/useAmbientEffects.ts` | `AmbientEffectsProvider` + hook for ambient backgrounds / float (localStorage + Convex) |
+| `hooks/useAmbientEffects.ts` | `AmbientEffectsProvider` + hook; localStorage always; Convex when `canPersist` |
 | `components/ambient/*` | Root ambient host, renderer, background, float panel |
 | `hooks/useAuthAccess.ts` | Shared Clerk gate: `canAccess` / `canPersist` (Pro `sync` or `AUTH_DISABLED`) |
 | `hooks/useToolUserReady.ts` | Ensures Convex user row when signed in; ready immediately when auth is disabled |
@@ -37,7 +38,7 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `lib/clerk-authorized-parties.ts` | Parse `CLERK_AUTHORIZED_PARTIES` for `clerkMiddleware` `authorizedParties` (Phase A / production) |
 | `lib/billing.ts` | Clerk Billing plan/feature slugs (`pro`, `sync`) + `canPersistFromEntitlements` + JWT `pla`/`fea` helpers; apply Dashboard catalog via `docs/clerk-billing-setup.md` |
 | `lib/local-practice-history.ts` | Free-tier browser practice history (Reflex-compatible keys); drills write when `!canPersist` |
-| `convex/lib/entitlements.ts` | `ensureUserIdWithSync` — Pro/`sync` JWT gate for tracking/technique mutations |
+| `convex/lib/entitlements.ts` | `ensureUserIdWithSync` — Pro/`sync` JWT gate for tracking, technique, and settings writes |
 | `hooks/useLocalPracticeHistory.ts` | Version bump when local history changes (Tracking/Technique refresh) |
 | `components/pricing/*` | Public `/pricing` marketing page (Clerk `PricingTable`) |
 | `app/settings/billing/page.tsx` | Signed-in plan management (Clerk `PricingTable`) |
@@ -90,7 +91,7 @@ Before making styling changes, read `DESIGN-PRINCIPLES.md` for the visual conven
 
 ### Ambient effects
 
-`AmbientEffectsProvider` in `app/layout.tsx` owns a single shared store for page backgrounds and the float panel. Use `useAmbientEffects()` — do not instantiate a second ambient store. Background ownership for Welcome (`/`) lives in `AmbientEffectsHost`; Pattern Lab **Apply to home** still writes hero param blobs and also sets the ambient `/` kind. MIDI reactivity is only wired for `chladni-ripple`. Soft ambient defaults live in `lib/ambient-effects.ts` so tools stay readable.
+`AmbientEffectsProvider` in `app/layout.tsx` owns a single shared store for page backgrounds and the float panel. Use `useAmbientEffects()` — do not instantiate a second ambient store. Background ownership for Welcome (`/`) lives in `AmbientEffectsHost`; Pattern Lab **Apply to home** still writes hero param blobs and also sets the ambient `/` kind. MIDI reactivity is only wired for `chladni-ripple`. Soft ambient defaults live in `lib/ambient-effects.ts` so tools stay readable. Theme / ambient / hero Convex sync uses `canPersist` (Pro or `AUTH_DISABLED`), not merely signed-in — Free prefs stay device-local.
 
 ### Tokens you should use
 
