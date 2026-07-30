@@ -1,5 +1,6 @@
 import { clerkMiddleware } from "@clerk/nextjs/server";
 import { isAuthDisabled } from "@/lib/auth-disabled";
+import { getAuthorizedPartiesFromEnv } from "@/lib/clerk-authorized-parties";
 
 /**
  * Clerk proxy middleware for Next.js 16+.
@@ -15,28 +16,38 @@ import { isAuthDisabled } from "@/lib/auth-disabled";
  * `/sign-in` instead of collapsing into a bare Next.js 404 (Clerk-dev +
  * missing `dev-browser` handshake on `*.vercel.app` can otherwise do that).
  *
+ * When `CLERK_AUTHORIZED_PARTIES` is set (comma-separated origins), it is
+ * passed as `authorizedParties` so session tokens are only accepted from
+ * those origins — recommended for production custom domains.
+ *
  * @see https://clerk.com/docs/reference/nextjs/clerk-middleware
+ * @see docs/phase-a-auth-cutover-plan.md
  */
-export default clerkMiddleware(async (auth, request) => {
-  if (isAuthDisabled()) {
-    return;
-  }
+const authorizedParties = getAuthorizedPartiesFromEnv();
 
-  const pathname = request.nextUrl.pathname;
+export default clerkMiddleware(
+  async (auth, request) => {
+    if (isAuthDisabled()) {
+      return;
+    }
 
-  const isPublicRoute =
-    pathname === "/" ||
-    pathname === "/tools/chladni" ||
-    pathname.startsWith("/sign-in") ||
-    pathname.startsWith("/sign-up") ||
-    pathname.startsWith("/api") ||
-    pathname.startsWith("/__clerk");
+    const pathname = request.nextUrl.pathname;
 
-  if (!isPublicRoute) {
-    const signInUrl = new URL("/sign-in", request.url).href;
-    await auth.protect({ unauthenticatedUrl: signInUrl });
-  }
-});
+    const isPublicRoute =
+      pathname === "/" ||
+      pathname === "/tools/chladni" ||
+      pathname.startsWith("/sign-in") ||
+      pathname.startsWith("/sign-up") ||
+      pathname.startsWith("/api") ||
+      pathname.startsWith("/__clerk");
+
+    if (!isPublicRoute) {
+      const signInUrl = new URL("/sign-in", request.url).href;
+      await auth.protect({ unauthenticatedUrl: signInUrl });
+    }
+  },
+  authorizedParties ? { authorizedParties } : {}
+);
 
 export const config = {
   matcher: [

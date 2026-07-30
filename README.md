@@ -84,6 +84,7 @@ A shared **primitive layer** has been extracted from the original Reflex Drill E
 - `convex/settings.ts` — generic per-user settings persistence
 - `convex/lib/auth.ts` — `optionalUserId` / `ensureUserId` / `requireUserId` for Convex auth
 - `lib/auth-disabled.ts` — opt-in `isAuthDisabled()` bypass check
+- `lib/clerk-authorized-parties.ts` — parse `CLERK_AUTHORIZED_PARTIES` for middleware `authorizedParties`
 - `lib/chat-auth.ts` — `authorizeChatAccess` owner-allowlist decisions for `/api/chat`
 - `hooks/useAuthAccess.ts` — `canAccess` / `canPersist` gate for tool pages and drills
 - `hooks/useToolUserReady.ts` — waits for the Convex user row before a tool renders
@@ -191,6 +192,7 @@ Queries must never throw for a signed-in user whose row does not exist yet. `set
    | `NEXT_PUBLIC_ANKI_CONNECT_URL` | AnkiConnect endpoint; defaults to `http://127.0.0.1:8765` |
    | `NEXT_PUBLIC_AUTH_DISABLED` | `true` opens **every** route without signing in, including `/chat`. Convex saves still need a session. Restart `npm run dev` after changing it — see [the bypass notes](#the-next_public_auth_disabled-bypass) |
    | `NEXT_PUBLIC_CLERK_SIGN_IN_URL` / `_SIGN_UP_URL` / `_FALLBACK_REDIRECT_URL` | Clerk redirect overrides |
+   | `CLERK_AUTHORIZED_PARTIES` | Optional comma-separated origins for `clerkMiddleware` `authorizedParties` (recommended on Production after custom-domain cutover; see [`docs/phase-a-auth-cutover-plan.md`](docs/phase-a-auth-cutover-plan.md)) |
    | `E2E_CLERK_USER_EMAIL` / `E2E_CLERK_USER_PASSWORD` | Playwright test user (required to run E2E; password ≥ 8 chars) |
    | `E2E_ALLOW_AUTH_DISABLED` | skips the E2E guard that refuses to run with the bypass on |
 
@@ -290,13 +292,17 @@ Production hosting is **Vercel Hobby** + **Convex Free** + **Clerk development**
 
 ### Auth cutover checklist (remove bypass)
 
-When a custom domain + Clerk **production** keys are ready:
+Full step-by-step (Clerk + Convex production research): [`docs/phase-a-auth-cutover-plan.md`](docs/phase-a-auth-cutover-plan.md).
 
-1. Point the domain at Vercel; add it to Clerk allowed origins / redirect URLs.
-2. Set Vercel Production (and Preview) to `pk_live` / `sk_live` and the matching `CLERK_FRONTEND_API_URL`.
-3. On Convex production, set `CLERK_FRONTEND_API_URL` to that same Frontend API URL; keep the `convex` JWT template (`aud: "convex"`).
-4. **Unset** `NEXT_PUBLIC_AUTH_DISABLED` (or set `false`) on Production/Preview and **redeploy**.
-5. Verify with the auth suite below (local with bypass off) plus the production smoke checklist.
+When a custom domain + Clerk **production** instance are ready:
+
+1. Point the domain at Vercel; configure Clerk production Domains DNS + deploy certificates; re-activate the Convex JWT integration on the **production** instance (`aud: "convex"`).
+2. Set Vercel **Production** to `pk_live` / `sk_live`. Keep Vercel **Preview** on `pk_test` / `sk_test` (Clerk’s recommended split — do not put live keys on Preview).
+3. On Convex **production**, set `CLERK_FRONTEND_API_URL` to the production Frontend API URL (`https://clerk.<your-domain>.com`). Keep Convex **preview defaults** on the development Frontend API URL.
+4. **Unset** `NEXT_PUBLIC_AUTH_DISABLED` on Production and Preview and **redeploy** (Preview first, then Production).
+5. Create your production Clerk user and update Production `ALLOWED_CLERK_USER_ID` if chat should work.
+6. Optionally set Production `CLERK_AUTHORIZED_PARTIES` to your custom-domain origins (and localhost if needed), then redeploy.
+7. Verify with the auth suite below (local with bypass off) plus the production smoke checklist.
 
 ## Testing
 
@@ -416,6 +422,13 @@ npm run build
 - [x] Add article pages under `/articles/[slug]`
 - [x] Add token-driven theming system with `/settings/theme`
 - [x] Implement real LLM chat grounded on articles (Kimi Code API, owner-only access)
+
+### Post-v1 follow-ons
+
+The checklist above is the original product scope and is complete. Remaining work
+is planned in [`docs/missing-features-plan.md`](docs/missing-features-plan.md).
+Phase A (production auth cutover) detail:
+[`docs/phase-a-auth-cutover-plan.md`](docs/phase-a-auth-cutover-plan.md).
 
 ## License
 
