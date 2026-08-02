@@ -19,6 +19,17 @@ REPO="JustinJoshi/piano-suite"
 TOKEN_NAME="GH_TOKEN"
 TOKEN="${!TOKEN_NAME:-}"
 
+# Codespaces injects secrets into /workspaces/.codespaces/shared/.env, which is
+# loaded by interactive shells but not always by non-interactive ones. Source it
+# if the token is not already in the environment.
+if [ -z "$TOKEN" ] && [ -f /workspaces/.codespaces/shared/.env ]; then
+  # shellcheck source=/dev/null
+  set -a
+  . /workspaces/.codespaces/shared/.env
+  set +a
+  TOKEN="${!TOKEN_NAME:-}"
+fi
+
 if [ -z "$TOKEN" ]; then
   echo "Error: $TOKEN_NAME is not set." >&2
   echo "Add it as a Codespaces secret or run: export $TOKEN_NAME='ghp_...'" >&2
