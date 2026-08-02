@@ -5,6 +5,6 @@ test.describe("home page", () => {
     await page.goto("/");
 
     // The landing page should render without requiring authentication.
-    await expect(page.locator("body")).toContainText("Anki MIDI Chord Trainer");
+    await expect(page.locator("body")).toContainText("Piano Suite");
   });
 });
