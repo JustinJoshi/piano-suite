@@ -18,7 +18,14 @@ export function CtaSection() {
           Enter the drill
         </Link>
         <p className="mt-4 text-sm text-muted-foreground">
-          Needs Anki running with AnkiConnect, and a MIDI keyboard connected.
+          Needs{" "}
+          <Link
+            href="/articles/anki-ankiconnect-setup"
+            className="text-primary underline-offset-2 hover:underline"
+          >
+            Anki running with AnkiConnect
+          </Link>
+          , and a MIDI keyboard connected.
         </p>
         <p className="mt-3">
           <Link

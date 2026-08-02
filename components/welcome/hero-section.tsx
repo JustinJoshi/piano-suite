@@ -1,6 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Play } from "lucide-react";
 import { scrimStrengthCss } from "@/lib/chladni-hero-settings";
@@ -53,7 +54,14 @@ export function HeroSection({
               Enter the drill
             </Button>
             <p className="text-xs text-muted-foreground">
-              Needs Anki + AnkiConnect and a MIDI keyboard.
+              Needs{" "}
+              <Link
+                href="/articles/anki-ankiconnect-setup"
+                className="text-primary underline-offset-2 hover:underline"
+              >
+                Anki + AnkiConnect
+              </Link>{" "}
+              and a MIDI keyboard.
             </p>
           </div>
         </div>
