@@ -1,119 +1,17 @@
-import {
-  Home,
-  Music,
-  Zap,
-  RefreshCw,
-  BarChart3,
-  ArrowRightLeft,
-  Timer,
-  Search,
-  Bell,
-  Waves,
-  Sparkles,
-  Infinity,
-  Hexagon,
-  LayoutGrid,
-  Activity,
-} from "lucide-react";
+import { Home, Search, Bell } from "lucide-react";
 import { AppUserButton } from "@/components/app-user-button";
 import { DashboardMenuButton } from "@/components/tools/dashboard-nav";
 import { ToolCard } from "@/components/tools/tool-card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { tools } from "@/lib/tools";
 
-const tools = [
-  {
-    title: "Welcome",
-    description:
-      "Overview and getting-started hub for the practice suite.",
-    icon: Home,
-    href: "/",
-  },
-  {
-    title: "Chord Drill",
-    description:
-      "Blocked-practice chord drill with timer, stats, and AnkiConnect integration.",
-    icon: Music,
-    href: "/tools/chord-drill",
-  },
-  {
-    title: "Arpeggios",
-    description:
-      "Practice 7-note minor-11 arpeggio cells with two-phase root and sequence drilling.",
-    icon: Zap,
-    href: "/tools/arpeggios",
-  },
-  {
-    title: "Root Cycling",
-    description:
-      "Drill one fixed chord or arpeggio idea across random roots in all 12 keys.",
-    icon: RefreshCw,
-    href: "/tools/root-cycling",
-  },
-  {
-    title: "Tracking",
-    description:
-      "Review first-chord times, transition times, misses, and streaks over time.",
-    icon: BarChart3,
-    href: "/tools/tracking",
-  },
-  {
-    title: "Progression",
-    description:
-      "Loop ii-V-I and 12-bar blues progressions with per-chord transition timing.",
-    icon: ArrowRightLeft,
-    href: "/tools/progression",
-  },
-  {
-    title: "Technique",
-    description:
-      "Daily technique habit tracker with metronome, BPM log, and a 28-day grid.",
-    icon: Timer,
-    href: "/tools/technique",
-  },
-  {
-    title: "Chladni Lab",
-    description:
-      "Interactive square-plate waveform explorer for the hero background shader.",
-    icon: Waves,
-    href: "/tools/chladni",
-  },
-  {
-    title: "Chladni Ripple",
-    description:
-      "Drive Chladni nodal patterns from live MIDI notes — pitch, octave, and velocity.",
-    icon: Activity,
-    href: "/tools/chladni-ripple",
-  },
-  {
-    title: "Julia Lab",
-    description:
-      "Interactive escape-time Julia set explorer with morphing complex parameters.",
-    icon: Sparkles,
-    href: "/tools/julia",
-  },
-  {
-    title: "Lissajous Lab",
-    description:
-      "Interactive frequency-ratio curve explorer mapped to musical intervals.",
-    icon: Infinity,
-    href: "/tools/lissajous",
-  },
-  {
-    title: "Quasiperiodic Lab",
-    description:
-      "Interactive N-fold wave interference explorer with Apply-to-home atmosphere.",
-    icon: Hexagon,
-    href: "/tools/quasiperiodic",
-  },
-  {
-    title: "Multigrid Lab",
-    description:
-      "De Bruijn multigrid dual tiling explorer — crisp grids and colored rhombus tilings.",
-    icon: LayoutGrid,
-    href: "/tools/multigrid",
-  },
-];
+const welcomeTool = {
+  title: "Welcome",
+  description: "Overview and getting-started hub for the practice suite.",
+  icon: Home,
+  href: "/",
+};
 
 export default function ToolsPage() {
   return (
@@ -161,9 +59,15 @@ export default function ToolsPage() {
           <Separator className="mb-8 bg-border" />
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <ToolCard
+              title={welcomeTool.title}
+              description={welcomeTool.description}
+              icon={welcomeTool.icon}
+              href={welcomeTool.href}
+            />
             {tools.map((tool) => (
               <ToolCard
-                key={tool.title}
+                key={tool.href}
                 title={tool.title}
                 description={tool.description}
                 icon={tool.icon}

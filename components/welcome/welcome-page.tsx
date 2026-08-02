@@ -10,6 +10,7 @@ import { FeatureSection } from "./feature-section";
 import { FlowSection } from "./flow-section";
 import { DeckSection } from "./deck-section";
 import { CtaSection } from "./cta-section";
+import { ToolsGridSection } from "./tools-grid-section";
 
 /**
  * Welcome / marketing page.
@@ -161,6 +162,8 @@ export function WelcomePage() {
               always welcome.
             </p>
           </FeatureSection>
+
+          <ToolsGridSection />
 
           <CtaSection />
         </main>
