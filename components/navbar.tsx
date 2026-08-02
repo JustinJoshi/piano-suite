@@ -40,7 +40,7 @@ export function Navbar() {
         <Link href="/" className="flex items-center gap-2 text-foreground">
           <Music className="h-5 w-5 text-primary" />
           <span className="font-heading text-lg font-semibold tracking-tight">
-            Anki MIDI Chord Trainer
+            Piano Suite
           </span>
         </Link>
 

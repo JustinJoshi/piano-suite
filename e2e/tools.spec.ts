@@ -63,7 +63,7 @@ test.describe("/tools dashboard", () => {
 
     await page.locator("aside nav").getByRole("link", { name: "Welcome" }).click();
     await expect(page).toHaveURL("/");
-    await expect(page.locator("body")).toContainText("Anki MIDI Chord Trainer");
+    await expect(page.locator("body")).toContainText("Piano Suite");
   });
 
   test("dashboard cards link to their tool routes", async ({ page }) => {

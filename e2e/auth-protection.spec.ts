@@ -35,7 +35,7 @@ const PUBLIC_ROUTES = [
   {
     path: "/",
     assert: async (page: import("@playwright/test").Page) => {
-      await expect(page.locator("body")).toContainText("Anki MIDI Chord Trainer");
+      await expect(page.locator("body")).toContainText("Piano Suite");
     },
   },
   {
@@ -65,7 +65,7 @@ const SIGNED_IN_ROUTE_SMOKE: Array<{
   heading?: string | RegExp;
   bodyText?: string | RegExp;
 }> = [
-  { path: "/", bodyText: "Anki MIDI Chord Trainer" },
+  { path: "/", bodyText: "Piano Suite" },
   { path: "/pricing", heading: /Practice free\. Pro when you're ready\./i },
   { path: "/tools", heading: "Tools" },
   { path: "/tools/chord-drill", heading: /Chord Drill/i },
@@ -126,7 +126,7 @@ test.describe("auth protection (bypass off)", () => {
     await expect(page).toHaveURL("/");
     await expectNotBare404(page);
     await expectNoApplicationError(page);
-    await expect(page.locator("body")).toContainText("Anki MIDI Chord Trainer");
+    await expect(page.locator("body")).toContainText("Piano Suite");
   });
 
   test("deep link to tracking after sign-in reaches the tool", async ({

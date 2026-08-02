@@ -13,7 +13,7 @@ import {
 const faq = [
   {
     q: "What’s free forever?",
-    a: "Local drills and Pattern Lab, including exploring Chladni Ripple with MIDI. You can practice without paying. Pro unlocks Convex sync (personal bests, tracking history, preferences across devices) and the float panel that pops live resonance beside Chord Drill.",
+    a: "Local drills and Pattern Lab, including exploring Chladni Ripple with MIDI. You can practice without paying. Pro adds sync across devices — personal bests, tracking history, and preferences follow you — plus the float panel that pops live resonance beside Chord Drill.",
   },
   {
     q: "Can I see resonance while I practice chords?",
@@ -29,7 +29,7 @@ const faq = [
   },
   {
     q: "Is there a free trial of Pro?",
-    a: "Not for v1. Free forever covers local practice; subscribe when you want sync and the practice float panel.",
+    a: "Not right now. Free covers local practice for as long as you want, so you can take your time. Subscribe when you want sync and the practice float panel.",
   },
 ] as const;
 

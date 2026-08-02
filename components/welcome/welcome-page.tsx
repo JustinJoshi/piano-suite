@@ -10,6 +10,7 @@ import { FeatureSection } from "./feature-section";
 import { FlowSection } from "./flow-section";
 import { DeckSection } from "./deck-section";
 import { CtaSection } from "./cta-section";
+import { ToolsGridSection } from "./tools-grid-section";
 
 /**
  * Welcome / marketing page.
@@ -41,82 +42,70 @@ export function WelcomePage() {
 
           <FeatureSection
             number="01"
-            label="the memory science"
-            title="Why active recall and spacing work"
+            label="why it works"
+            title="Re-reading a chord chart feels like practice. It isn't."
           >
             <p>
-              Reading a chord chart again and again feels productive, but it barely
-              moves the needle. <strong className="text-foreground">Retrieving</strong>{" "}
-              an answer from memory — forcing yourself to produce it, not just
-              recognize it — is what actually strengthens the memory. Spacing those
-              retrievals out over days, instead of cramming them into one sitting, is
-              what makes the memory last.
+              Going over a chart again and again feels productive, but it barely
+              moves the needle. What actually builds the memory is retrieval:
+              forcing yourself to produce the answer instead of just recognizing
+              it. And what makes it last is spacing those retrievals over days
+              instead of cramming them into one sitting.
             </p>
             <p className="text-sm text-muted-foreground">
-              ↳ retrieval practice roughly doubled week-later retention over
-              re-reading (Roediger &amp; Karpicke, 2006)
+              Retrieval practice roughly doubled week-later retention over
+              re-reading (Roediger &amp; Karpicke, 2006).
+            </p>
+            <p>
+              That scheduling problem is exactly what Anki is for. It tracks,
+              chord by chord, when you&apos;re about to forget something, and puts
+              it back in front of you right before that happens. This drill
+              doesn&apos;t reinvent any of that. It listens to whatever Anki
+              already decided you need next.
             </p>
           </FeatureSection>
 
           <FeatureSection
             number="02"
-            label="the scheduler"
-            title="Why Anki is doing the driving"
+            label="the actual point"
+            title="Knowing a chord isn't the same as playing it"
           >
             <p>
-              Anki&apos;s job is to know, chord by chord, exactly when you&apos;re about to
-              forget it — and put it back in front of you right before that happens.
-              Its modern engine,{" "}
-              <strong className="text-foreground">FSRS</strong>, builds a model of
-              your personal memory from your review history, so the schedule adapts
-              to you instead of a fixed formula. This drill doesn&apos;t reinvent that —
-              it just listens to whatever Anki already decided you need next.
+              Flashcards are great at teaching you to name a chord. They can&apos;t
+              teach your hands to find it, under time pressure, without looking.
+              That&apos;s motor memory, and it needs a different kind of rep: hands
+              off the keys, chord announced, play it, get timed.
+            </p>
+            <p>
+              Anki keeps the recall side sharp. The drill keeps the physical side
+              honest.
             </p>
           </FeatureSection>
 
           <FeatureSection
             number="03"
-            label="the actual point"
-            title="Knowing a chord isn't the same as playing it"
-          >
-            <p>
-              Flashcards are excellent at teaching you to{" "}
-              <strong className="text-foreground">name</strong> a chord. They&apos;re not
-              built to teach your hands to <strong className="text-foreground">find</strong>{" "}
-              it, under time pressure, without looking. That&apos;s a different kind of
-              memory — motor memory — and it needs a different kind of rep: hands off
-              the keys, chord announced, play it, get timed.
-            </p>
-            <p>
-              This tool is that missing half. Anki keeps the recall side sharp; the
-              drill keeps the physical side honest.
-            </p>
-          </FeatureSection>
-
-          <FeatureSection
-            number="04"
             label="how it actually works"
             title="One loop, two directions"
           >
             <p>
               Turn on <strong className="text-foreground">Anki Sync</strong> and the
-              loop runs on its own — no manual chord picking, no separate app to
+              loop runs itself. No manual chord picking, no separate app to
               babysit.
             </p>
             <FlowSection />
           </FeatureSection>
 
           <FeatureSection
-            number="05"
+            number="04"
             label="not a new idea"
             title="This is how jazz pianists already practice"
           >
             <p>
               Drilling a voicing through every root, in time, until it stops
-              requiring thought, is the standard route from theory to fluency in jazz
-              piano — not a shortcut around it. This tool just puts a stopwatch and a
-              spaced-repetition schedule underneath a practice habit that already
-              exists.
+              requiring thought, is the standard route from theory to fluency in
+              jazz piano, not a shortcut around it. This tool just puts a
+              stopwatch and a spaced-repetition schedule underneath a practice
+              habit that already exists.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               {[
@@ -135,27 +124,54 @@ export function WelcomePage() {
           </FeatureSection>
 
           <FeatureSection
-            number="06"
+            number="05"
             label="the companion deck"
             title="The actual Anki deck behind this"
           >
             <p>
               Two ready-to-import decks: root-position 7ths and diminished 7ths
               across five keys (C-G-D-A-E), and the extended 9/11/13 voicings with
-              LH/RH fingering built in. Both are plain tab-separated Anki exports —
-              import via Anki&apos;s File → Import (Basic notetype), no add-on beyond
-              AnkiConnect needed to use them with this drill.
+              LH/RH fingering built in. Both are plain tab-separated Anki exports.
+              Import them via Anki&apos;s File → Import (Basic notetype) and they work
+              with this drill out of the box, no add-on needed beyond AnkiConnect.
             </p>
             <DeckSection />
           </FeatureSection>
+
+          <FeatureSection
+            number="06"
+            label="who made this"
+            title="Why this exists"
+          >
+            <p>
+              Lessons run $60 an hour and up, so a lot of us teach ourselves.
+              This suite is the toolkit I wanted for that path: drills, timers,
+              and pattern labs built to live inside a self-taught routine, with
+              Anki as the other half of it. Take whatever&apos;s useful.
+              Everything that runs locally on your machine stays free.
+            </p>
+            <p>
+              The project is{" "}
+              <a
+                href="https://github.com/JustinJoshi/piano-suite"
+                className="text-primary underline-offset-2 hover:underline"
+              >
+                open source
+              </a>
+              . If you&apos;re teaching yourself too, questions and ideas are
+              always welcome.
+            </p>
+          </FeatureSection>
+
+          <ToolsGridSection />
 
           <CtaSection />
         </main>
 
         <footer className="border-t border-border/50 bg-card/80 py-8 backdrop-blur-md">
           <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground sm:px-6 lg:px-8">
-            Anki MIDI Chord Trainer — a piano practice suite built for spaced
-            repetition and real keys.
+            Piano Suite — a practice toolkit for self-taught pianists. Built
+            for Anki, spaced repetition, and real keys.
           </div>
         </footer>
     </div>
