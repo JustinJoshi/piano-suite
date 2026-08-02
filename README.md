@@ -232,6 +232,16 @@ Queries must never throw for a signed-in user whose row does not exist yet. `set
 
 8. Open [http://localhost:3000](http://localhost:3000).
 
+### Git push in GitHub Codespaces
+
+Codespaces normally authenticate git pushes automatically with a short-lived `GITHUB_TOKEN`. If that token is not available (for example, `gh auth status` reports no login and `git push` fails), create a fine-grained personal access token with **Contents: read and write** access to this repo, add it as a Codespaces secret named `GH_TOKEN`, and run:
+
+```bash
+bash scripts/setup-codespaces-git-auth.sh
+```
+
+This configures the local git remote to use the token for pushes. The token is stored only in the local `.git/config` inside the Codespace and is never committed.
+
 ## Deploy (Vercel Hobby)
 
 Production hosting is **Vercel Hobby** + **Convex Free** + **Clerk development** keys (fine for personal `*.vercel.app` use). Live site: [https://piano-suite.vercel.app](https://piano-suite.vercel.app).
