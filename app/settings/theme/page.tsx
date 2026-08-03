@@ -5,6 +5,8 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { themes, type ThemeId } from "@/lib/themes";
 import { useThemePreference } from "@/hooks/useThemePreference";
+import { useOnboarding } from "@/hooks/useOnboarding";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -60,6 +62,26 @@ function ThemeCard({
   );
 }
 
+function OnboardingResetCard() {
+  const { reset } = useOnboarding();
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="font-heading text-base">Onboarding</CardTitle>
+        <CardDescription>
+          Replay the first-time introduction shown on the Tools dashboard.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Button variant="outline" onClick={reset}>
+          Replay onboarding
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function ThemeSettingsPage() {
   const { theme, setTheme, mounted } = useThemePreference();
 
@@ -96,6 +118,8 @@ export default function ThemeSettingsPage() {
             </div>
           </CardContent>
         </Card>
+
+        <OnboardingResetCard />
 
         <p className="text-sm text-muted-foreground">
           Customize the home Chladni pattern in{" "}
