@@ -346,6 +346,15 @@ Support the “learn music theory through articles” pillar beyond two beginner
 
 ---
 
+## Onboarding follow-ups
+
+Outstanding polish items for the first-time `/tools` onboarding flow shipped in PR #31:
+
+- [ ] **Styling pass** — refine the cinematic slide styling (typography, spacing, animation timing, reduced-motion behavior).
+- [ ] **Pillar body copy** — rewrite the main body text in all three onboarding pillars (active recall & spaced repetition, self-care, managing frustrations).
+
+---
+
 ## Suggested PR / branch sequence
 
 Cloud / local agents: one branch per phase (or per tool inside C/F), matching `cursor/<name>-8bc9` in cloud.
