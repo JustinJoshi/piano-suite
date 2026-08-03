@@ -28,7 +28,7 @@ export const ONBOARDING_INSTANT_PARAM = "onboarding=instant";
 export const ONBOARDING_RESET_PARAM = "onboarding=reset";
 
 export const introSlides = {
-  hi: "hi",
+  hi: "Hi",
   welcome: "welcome to piano suite",
   pillarsOverview: "These are the three most important pillars of learning on your piano journey.",
   closing: "Happy learning",
@@ -81,7 +81,7 @@ export const onboardingPillars: OnboardingPillar[] = [
         id: "isha-hand-stretches",
         title: "Isha Yoga hand stretches",
         description: "A short yoga routine for hand and wrist mobility.",
-        href: "https://www.ishafoundation.org/",
+        href: "https://www.youtube.com/watch?v=M9VSpOiwwDU&t=251s",
         imageSrc: "https://images.unsplash.com/photo-1544367563-12123d8965cd?w=600&auto=format&fit=crop&q=60",
       },
       {
@@ -120,7 +120,7 @@ export const onboardingPillars: OnboardingPillar[] = [
         id: "miracle-of-mind",
         title: "Miracle of Mind",
         description: "Short guided rests that help the brain shift into diffuse mode.",
-        href: "https://www.youtube.com/results?search_query=mircle+of+mind+meditation",
+        href: "https://isha.sadhguru.org/us/en/miracle-of-mind",
         imageSrc: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=600&auto=format&fit=crop&q=60",
       },
       {
