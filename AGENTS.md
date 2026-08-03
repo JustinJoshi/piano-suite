@@ -260,6 +260,34 @@ When you complete a task, follow this checklist before telling the user you are 
 
 If you are working in a git worktree, push from the worktree branch. If you are on `main` in the main worktree, push directly.
 
+### Creating PRs from cloud / headless / Codespaces environments
+
+`git push` may work while `gh pr create` fails with "You are not logged into any GitHub hosts." In these environments `gh` maintains its own auth state separately from git.
+
+1. **Check for an existing token.** In GitHub Codespaces, look in `/workspaces/.codespaces/shared/.env`:
+   ```bash
+   grep GH_TOKEN /workspaces/.codespaces/shared/.env
+   ```
+   If it exists, source it before running `gh`:
+   ```bash
+   set -a && . /workspaces/.codespaces/shared/.env && set +a
+   gh auth status
+   gh pr create --base main --title "..." --body "..."
+   ```
+
+2. **If no token is available, authenticate once.** Create a GitHub personal access token with at least `contents:read` + `pull_requests:write` (or `repo` scope for classic tokens), then:
+   ```bash
+   gh auth login --with-token
+   # paste the token, then press Enter
+   gh pr create --base main --title "..." --body "..."
+   ```
+
+3. **On Termux / mobile shells,** the `gh` auth you do in the local terminal does **not** automatically reach a remote Codespace agent. Either:
+   - Set `GH_TOKEN` as a Codespaces repository secret and reload the Codespace, or
+   - Paste the token once into the agent session with `export GH_TOKEN=...` before running `gh pr create`.
+
+After `gh pr create`, print the PR URL and the Vercel Preview URL once the PR checks finish.
+
 ### Cleaning up stale state
 
 If a git command fails with an `index.lock` error, no other git process is running, and the worktree is stale, remove the lock:
