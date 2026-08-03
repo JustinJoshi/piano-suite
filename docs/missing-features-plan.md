@@ -352,6 +352,7 @@ Outstanding polish items for the first-time `/tools` onboarding flow shipped in 
 
 - [ ] **Styling pass** — refine the cinematic slide styling (typography, spacing, animation timing, reduced-motion behavior).
 - [ ] **Pillar body copy** — rewrite the main body text in all three onboarding pillars (active recall & spaced repetition, self-care, managing frustrations).
+- [ ] **First pillar Next-button timing** — reduce the read-delay before the Next button appears on the first pillar (currently ~8–10 s) down to about 5 s.
 
 ---
 
