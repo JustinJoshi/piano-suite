@@ -15,17 +15,17 @@ export function CtaSection() {
           )}
         >
           <Play className="mr-2 h-5 w-5 fill-current" />
-          Enter the drill
+          Start learning
         </Link>
         <p className="mt-4 text-sm text-muted-foreground">
-          Needs{" "}
+          Open the tools dashboard and try the onboarding. MIDI drills need{" "}
           <Link
             href="/articles/anki-ankiconnect-setup"
             className="text-primary underline-offset-2 hover:underline"
           >
-            Anki running with AnkiConnect
-          </Link>
-          , and a MIDI keyboard connected.
+            Anki + AnkiConnect
+          </Link>{" "}
+          and a keyboard.
         </p>
         <p className="mt-3">
           <Link

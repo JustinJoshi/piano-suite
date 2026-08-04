@@ -141,14 +141,14 @@ export function WelcomePage() {
           <FeatureSection
             number="06"
             label="who made this"
-            title="Why this exists"
+            title="A community, not just a toolkit"
           >
             <p>
               Lessons run $60 an hour and up, so a lot of us teach ourselves.
-              This suite is the toolkit I wanted for that path: drills, timers,
-              and pattern labs built to live inside a self-taught routine, with
-              Anki as the other half of it. Take whatever&apos;s useful.
-              Everything that runs locally on your machine stays free.
+              Piano Suite started as the toolkit I wanted for that path, but it
+              is becoming something bigger: a free community where self-taught
+              pianists learn together, share what works, and build tools that
+              actually help beginners.
             </p>
             <p>
               The project is{" "}
@@ -170,8 +170,7 @@ export function WelcomePage() {
 
         <footer className="border-t border-border/50 bg-card/80 py-8 backdrop-blur-md">
           <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground sm:px-6 lg:px-8">
-            Piano Suite — a practice toolkit for self-taught pianists. Built
-            for Anki, spaced repetition, and real keys.
+            Piano Suite — a free practice community for self-taught pianists.
           </div>
         </footer>
     </div>

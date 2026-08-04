@@ -1,6 +1,6 @@
 ---
 title: "A Research-Informed Guide to Learning Piano: How Beginners Should Actually Practice"
-description: "A science-backed guide for beginning pianists that combines active recall, spaced repetition, motor-memory drilling, and jazz woodshedding traditions."
+description: "A science-backed guide for beginning pianists in the Piano Suite community. Covers active recall, spaced repetition, motor-memory drilling, and healthy practice habits."
 slug: "beginner-pianist-learning-journey"
 publishedAt: "2026-07-27"
 readingTime: "15 min"
@@ -12,7 +12,7 @@ readingTime: "15 min"
 
 Most beginning pianists start with the same mistake: they sit down, open a book or app, and try to "learn" piano the way they learned history in school — by reading, watching, and hoping it sticks. But playing piano depends on two very different memory systems. One system lets you *name* a Cmaj7 chord. The other system lets your hands *find* that chord in real time, without looking, while the metronome is running. If you only train the first system, you end up a music-theory hobbyist who cannot play. If you only train the second, you may play fluently but struggle to explain what you are doing or adapt to new harmonic situations.
 
-The welcome page of this piano suite argues that the solution is to combine two evidence-based techniques — active recall and spaced repetition — with the physical drill tradition used by jazz pianists. This article reviews the research behind each of those claims so that beginners can build a practice routine that is both efficient and honest about what the brain actually needs.
+The Piano Suite community is built around a simple idea: self-taught pianists learn best when they combine evidence-based study techniques with healthy, sustainable practice habits. This article reviews the research behind active recall, spaced repetition, motor-memory drilling, and focused/diffuse thinking so that beginners can build a routine that is efficient, honest about how the brain works, and kind to their hands.
 
 ## Active Recall: Why Retrieving Beats Re-Reading
 
@@ -99,6 +99,8 @@ Learning piano is not primarily a problem of information exposure. It is a probl
 The welcome page of this suite is therefore making a specific claim, not a generic productivity slogan. When it says that retrieval practice roughly doubled week-later retention over re-reading, it is pointing to a replicated experimental result. When it says Anki is doing the driving, it is referring to a scheduler that models your personal forgetting curve. When it says knowing a chord is not the same as playing it, it is acknowledging the declarative-procedural distinction that has been a cornerstone of memory neuroscience for decades. And when it says this is how jazz pianists already practice, it is drawing on a pedagogy that includes Barry Harris, Mark Levine, and generations of musicians who have treated all-twelve-key drill as the bridge from theory to performance.
 
 For a beginner, the practical takeaway is to stop treating practice as a single activity and start treating it as a loop. Let Anki handle the scheduling of symbolic knowledge. Use the drill to make that knowledge physical. Woodshed one idea through every key each week. Apply the material to real music, rest, and repeat. Beginners who build their routine around these four pillars will spend less time re-learning what they forgot and more time making music.
+
+Piano Suite exists to make that loop easier. The tools, articles, and onboarding are free, and the project is shaped by the self-taught pianists who use it. If you are learning on your own, you are not alone — you are exactly who this community is for.
 
 ---
 

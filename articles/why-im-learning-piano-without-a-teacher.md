@@ -1,6 +1,6 @@
 ---
 title: "Why I'm Learning Piano Without a Teacher"
-description: "Lessons are expensive. Community is free. The founding story behind Piano Suite and the self-taught practice routine that shaped it."
+description: "Lessons are expensive. Community is free. The founding story behind Piano Suite and why it is becoming a community for self-taught pianists."
 slug: "why-im-learning-piano-without-a-teacher"
 publishedAt: "2026-08-02"
 readingTime: "6 min"
@@ -21,6 +21,8 @@ I built the first version of that drill as a single HTML page. It was ugly, it h
 ## Why Piano Suite exists
 
 Piano Suite is the cleaned-up, shareable version of that messy set of pages. It is the toolkit I wanted when I started: drills, timers, pattern labs, and tracking built to live inside a self-taught routine, with Anki as the other half of it. Everything that runs locally on your machine stays free. The paid tier only covers things that cost real money to run — sync across devices and the live-resonance float panel.
+
+But a toolkit is only part of the answer. The harder part of teaching yourself is staying motivated, knowing what to do next, and avoiding the injuries and burnout that come from practicing wrong. That is why Piano Suite is becoming a community — a place where self-taught pianists learn together, share routines, and shape the tools we all use.
 
 I am not a professional pianist. I am a person building the tool I needed, in public, while I keep learning. The project is open source because the best way to make it useful is to let other self-taught pianists tell me what is broken, what is missing, and what they actually use.
 

@@ -10,10 +10,11 @@ export function ToolsGridSection() {
             the toolkit
           </span>
           <h2 className="mt-3 font-heading text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-            Twelve tools, one practice routine
+            Tools that grow with you
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground">
-            Drills for your hands, labs for your eyes, and tracking for your progress — all built to live inside an Anki routine.
+            From your first chord drill to advanced pattern labs, everything is
+            designed to keep your practice healthy, focused, and effective.
           </p>
         </div>
 
