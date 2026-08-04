@@ -41,7 +41,7 @@ export function HeroSection({
 
           <p className="max-w-lg text-lg leading-relaxed text-muted-foreground">
             Evidence-based drills, guided onboarding, and articles that teach you
-            how to practice — all free in your browser.
+            how to practice.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 pt-2 md:justify-start">
