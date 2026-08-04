@@ -1,7 +1,7 @@
 # Julia Set Lab — Integration Plan
 
 > **Status: shipped** in `4a3a89e` (`feat: add Julia Set Lab as Chladni sibling math explorer`).
-> Kept as a historical record of the original plan. For current behavior see `README.md`
+> Kept as a historical record of the original plan. For current behavior see `docs/PROJECT_HISTORY.md`
 > and the code under `app/tools/julia/` and `lib/julia.ts`. The "next steps" section below
 > is obsolete — the Lissajous Harmonic Lab has also shipped.
 

@@ -284,7 +284,7 @@ npx playwright test e2e/auth-protection.spec.ts e2e/chat-auth.spec.ts
 
 ### Step A8 — Docs cleanup (same PR as hardening, or follow-up)
 
-Update `README.md` Deploy section:
+Update `docs/PROJECT_HISTORY.md` Deploy section:
 
 - Replace “Temporary auth bypass” with past-tense / remove.
 - Fix cutover checklist: **Preview stays on `pk_test`**; only Production uses `pk_live`.

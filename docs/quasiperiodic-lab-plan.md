@@ -1,7 +1,7 @@
 # Quasiperiodic Pattern Lab — Integration Plan
 
 > **Status: shipped** in `faba4b3` (`feat: add Quasiperiodic Pattern Lab with Apply-to-home atmosphere`).
-> Kept as a historical record of the original plan. For current behavior see `README.md`
+> Kept as a historical record of the original plan. For current behavior see `docs/PROJECT_HISTORY.md`
 > and the code under `app/tools/quasiperiodic/` and `lib/quasiperiodic.ts`.
 
 ## Goal
@@ -61,7 +61,7 @@ Apply / Reset from Quasiperiodic Lab sets kind to `quasiperiodic`. Apply / Reset
 
 - `components/tools/sidebar.tsx` — Hexagon icon
 - `app/tools/page.tsx` — ToolCard
-- `README.md` — feature + primitive list
+- `docs/PROJECT_HISTORY.md` — feature + primitive list
 
 ## Out of scope (v1)
 

@@ -1,7 +1,7 @@
 # Missing Features — Implementation Plan
 
-> **Status: planning** — tracks work that remains after the v1 roadmap in `README.md`
-> (all checked off). Derived from `README.md` Purpose / Deploy notes, the parked
+> **Status: planning** — tracks work that remains after the v1 roadmap in `docs/PROJECT_HISTORY.md`
+> (all checked off). Derived from `docs/PROJECT_HISTORY.md` Purpose / Deploy notes, the parked
 > “out of scope” and backburner sections in `docs/*-plan.md`, and conventions in
 > `AGENTS.md` + `DESIGN-PRINCIPLES.md`.
 >

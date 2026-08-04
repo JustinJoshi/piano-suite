@@ -4,6 +4,10 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
+# Project Direction
+
+Piano Suite is repositioning as a **free learning community for self-taught pianists**. Docs, copy, and new features should reinforce welcome, inclusivity, and beginner success. The README and landing page speak to beginners first; deep technical history and architecture live in `docs/PROJECT_HISTORY.md`.
+
 # Primitive Layer Conventions
 
 This project extracts shared capabilities from the original Reflex Drill HTML apps into reusable primitives. When building or migrating practice tools, follow these rules.
@@ -236,7 +240,7 @@ If you need fully isolated database state, run Convex against a separate project
 
 When you complete a task, follow this checklist before telling the user you are done:
 
-1. **Update `README.md`.** If the change affects what the app does, how to run it, or what features exist, add or update the relevant section in the README.
+1. **Update `README.md` and `docs/PROJECT_HISTORY.md` as needed.** If the change affects what the app does, how to run it, or what features exist, add or update the relevant section in the README.
 2. **Update `AGENTS.md` if needed.** If you introduced new conventions, primitives, or workflow rules that future agents need to know, document them here.
 3. **Run the gate.** At minimum:
    ```bash

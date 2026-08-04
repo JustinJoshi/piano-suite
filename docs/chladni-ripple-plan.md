@@ -4,7 +4,7 @@
 > Kept as a historical record of the original plan. Two items below were later superseded:
 > the lab **does** expose an "Apply to home" style action (`applyAsAmbientBackground`,
 > added with the ambient-effects system in `fc4e1c5`), so the v1 "no Apply-to-home" scope
-> line no longer describes the shipped tool. For current behavior see `README.md` and the
+> line no longer describes the shipped tool. For current behavior see `docs/PROJECT_HISTORY.md` and the
 > code under `app/tools/chladni-ripple/`, `hooks/useChladniRipple.ts`, and `lib/chladni-ripple.ts`.
 
 ## Goal
@@ -49,7 +49,7 @@ Pure logic: `lib/chladni-ripple.ts`.
 - `components/tools/sidebar.tsx`
 - `app/tools/page.tsx`
 - `hooks/useMidi.ts` (velocity on note-on)
-- `README.md`
+- `docs/PROJECT_HISTORY.md`
 - `AGENTS.md` (new primitives)
 
 No `convex/schema.ts` / `package.json` / `globals.css` in v1.

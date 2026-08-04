@@ -2,6 +2,7 @@
   "name": "piano-suite",
   "version": "0.1.0",
   "private": true,
+  "description": "A free practice community for self-taught pianists.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

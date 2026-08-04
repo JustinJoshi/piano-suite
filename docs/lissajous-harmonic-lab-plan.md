@@ -1,7 +1,7 @@
 # Lissajous Harmonic Lab — Integration Plan
 
 > **Status: shipped** in `3f9105a` (`feat: add Lissajous Harmonic Lab as interval-ratio curve explorer`).
-> Kept as a historical record of the original plan. For current behavior see `README.md`
+> Kept as a historical record of the original plan. For current behavior see `docs/PROJECT_HISTORY.md`
 > and the code under `app/tools/lissajous/` and `lib/lissajous.ts`. Lissajous is now also
 > available as an ambient background via `/settings/atmosphere`, which the original
 > "out of scope" list did not anticipate.
@@ -72,7 +72,7 @@ components/drills/lissajous/__tests__/lissajous-lab.test.tsx
 
 - `components/tools/sidebar.tsx` — Lissajous Lab with Lucide `Infinity`
 - `app/tools/page.tsx` — ToolCard entry
-- `README.md` — document alongside Chladni/Julia
+- `docs/PROJECT_HISTORY.md` — document alongside Chladni/Julia
 
 ## Out of scope (v1)
 
