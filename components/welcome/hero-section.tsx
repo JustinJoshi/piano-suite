@@ -36,7 +36,7 @@ export function HeroSection({
           </span>
 
           <h1 className="font-heading text-4xl font-semibold leading-[1.1] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-            Learn piano with tools built for how self-taught pianists actually practice.
+            Learn piano with tools built for self-taught pianists.
           </h1>
 
           <p className="max-w-lg text-lg leading-relaxed text-muted-foreground">
