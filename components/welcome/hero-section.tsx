@@ -32,7 +32,7 @@ export function HeroSection({
       <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-center px-4 pb-16 pt-24 sm:px-6 lg:px-8">
         <div className="flex max-w-2xl flex-col items-center gap-6 text-center md:items-start md:text-left">
           <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium uppercase tracking-widest text-primary">
-            a free community for self-taught pianists
+            a free tool kit for self-taught pianists
           </span>
 
           <h1 className="font-heading text-4xl font-semibold leading-[1.1] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
