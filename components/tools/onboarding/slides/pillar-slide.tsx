@@ -43,11 +43,11 @@ export function PillarSlide({
   const showButton = phase >= 2 || isInstant;
 
   return (
-    <div className="flex min-h-[60vh] flex-col items-center py-8 sm:min-h-[80vh] sm:py-12">
+    <div className="flex min-h-[60vh] flex-col py-8 sm:min-h-[80vh] sm:py-12">
       {/* Top spacer collapses when content appears, pulling the title upward. */}
       <div
         className={cn(
-          "w-full transition-all duration-1000 ease-out",
+          "transition-[flex] duration-1000 ease-out",
           showContent ? "flex-[0]" : "flex-1"
         )}
       />
@@ -69,64 +69,62 @@ export function PillarSlide({
       {/* Bottom spacer collapses when content appears. */}
       <div
         className={cn(
-          "w-full transition-all duration-1000 ease-out",
+          "transition-[flex] duration-1000 ease-out",
           showContent ? "flex-[0]" : "flex-1"
         )}
       />
 
-      {/* Content is clipped in phase 0 so it does not push the title. */}
       <div
         className={cn(
-          "w-full overflow-hidden transition-all duration-1000 ease-out",
+          "mx-auto mt-6 max-w-2xl space-y-4 text-center sm:mt-8",
           showContent
-            ? "max-h-[2000px] opacity-100"
-            : "max-h-0 opacity-0"
+            ? "translate-y-0 opacity-100"
+            : "translate-y-6 opacity-0",
+          !isInstant && "transition-all duration-1000 ease-out"
         )}
       >
-        <div className="mx-auto mt-6 max-w-2xl space-y-4 text-center sm:mt-8">
-          {pillar.body.map((paragraph, index) => (
-            <p
-              key={index}
-              className="text-base leading-relaxed text-muted-foreground sm:text-lg"
-            >
-              {paragraph}
-            </p>
-          ))}
-        </div>
+        {pillar.body.map((paragraph, index) => (
+          <p
+            key={index}
+            className="text-base leading-relaxed text-muted-foreground sm:text-lg"
+          >
+            {paragraph}
+          </p>
+        ))}
+      </div>
 
+      <div
+        className={cn(
+          "mt-8 grid gap-3 sm:mt-10",
+          resourceCardVariant === "compact-list"
+            ? "grid-cols-1"
+            : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+        )}
+      >
+        {pillar.resources.map((resource, index) => (
+          <ResourceCard
+            key={resource.id}
+            resource={resource}
+            visible={showContent}
+            delayIndex={index}
+            isInstant={isInstant}
+            variant={resourceCardVariant}
+          />
+        ))}
+      </div>
+
+      <div className="mt-8 flex justify-center sm:mt-10">
         <div
           className={cn(
-            "mt-8 grid gap-3 sm:mt-10",
-            resourceCardVariant === "compact-list"
-              ? "grid-cols-1"
-              : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+            showButton
+              ? "translate-y-0 opacity-100"
+              : "translate-y-4 opacity-0",
+            !isInstant && "transition-all duration-700 ease-out"
           )}
         >
-          {pillar.resources.map((resource, index) => (
-            <ResourceCard
-              key={resource.id}
-              resource={resource}
-              visible={showContent}
-              delayIndex={index}
-              isInstant={isInstant}
-              variant={resourceCardVariant}
-            />
-          ))}
-        </div>
-
-        <div className="mt-8 flex justify-center sm:mt-10">
-          <div
-            className={cn(
-              showButton
-                ? "translate-y-0 opacity-100"
-                : "translate-y-4 opacity-0",
-              !isInstant && "transition-all duration-700 ease-out"
-            )}
-          >
-            <Button onClick={onNext} size="lg" className="rounded-full px-8">
-              Next
-            </Button>
-          </div>
+          <Button onClick={onNext} size="lg" className="rounded-full px-8">
+            Next
+          </Button>
         </div>
       </div>
     </div>
