@@ -18,11 +18,11 @@ export function DevToolsLink({ className }: DevToolsLinkProps) {
     <Link
       href="/dev/welcome-lab"
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary backdrop-blur-sm transition-colors hover:bg-primary/20",
+        "inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-medium text-primary shadow-lg shadow-primary/10 backdrop-blur-sm transition-colors hover:bg-primary/20",
         className
       )}
     >
-      <Wrench className="h-3.5 w-3.5" />
+      <Wrench className="h-4 w-4" />
       Dev lab
     </Link>
   );

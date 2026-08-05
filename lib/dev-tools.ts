@@ -6,7 +6,17 @@
  * - on Vercel preview deployments (`VERCEL_ENV === "preview"`).
  *
  * They are never available on a production deployment.
+ *
+ * A localStorage override (`piano-suite:dev-tools:visible`) is also supported
+ * on the client so preview links can be revealed even when env detection is
+ * unavailable (e.g. custom preview domains or cached builds).
  */
+
+const VISIBILITY_STORAGE_KEY = "piano-suite:dev-tools:visible";
+
+function isPreviewHostname(hostname: string): boolean {
+  return hostname.includes(".vercel.app") || hostname.includes("-git-");
+}
 
 /** Server-side check: is this request running in a dev-tools-enabled environment? */
 export function isDevToolsEnabled(): boolean {
@@ -18,9 +28,22 @@ export function isDevToolsEnabled(): boolean {
 
 /** Client-side check: should the dev-tools link be visible? */
 export function isDevToolsVisible(): boolean {
+  if (typeof window !== "undefined") {
+    try {
+      if (window.localStorage.getItem(VISIBILITY_STORAGE_KEY) === "true") {
+        return true;
+      }
+    } catch {
+      // Ignore storage errors.
+    }
+  }
+
   return (
     process.env.NODE_ENV === "development" ||
-    process.env.NEXT_PUBLIC_VERCEL_ENV === "preview"
+    process.env.NEXT_PUBLIC_VERCEL_ENV === "preview" ||
+    (typeof window !== "undefined" &&
+      isPreviewHostname(window.location.hostname)) ||
+    process.env.NEXT_PUBLIC_VERCEL_URL !== undefined
   );
 }
 
