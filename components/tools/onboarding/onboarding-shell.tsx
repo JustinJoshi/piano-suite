@@ -24,8 +24,8 @@ export const OnboardingShell = forwardRef<HTMLDivElement, OnboardingShellProps>(
       <div
         ref={ref}
         className={cn(
-          "z-50 flex items-start justify-center overflow-y-auto bg-background",
-          mode === "fixed" ? "fixed inset-0" : "absolute inset-0",
+          "z-50 flex items-center justify-center overflow-y-auto bg-background",
+          mode === "fixed" ? "fixed inset-0 min-h-dvh" : "absolute inset-0 min-h-full",
           visible ? "opacity-100" : "pointer-events-none opacity-0",
           !isInstant && "transition-opacity duration-1000 ease-out"
         )}
