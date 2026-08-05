@@ -9,7 +9,7 @@ The core experience is free and runs in your browser. Sign in to sync progress a
 ## What you get
 
 - **A friendly first-time onboarding** that introduces the pillars of healthy piano learning: active recall & spaced repetition, taking care of your hands, and managing practice frustration with focused/diffuse thinking.
-- **A modular welcome section** (`lib/welcome-config.ts`) that keeps landing-page copy, typography, and style tokens in one typed config. In local development and on Vercel previews, `/dev/welcome-lab` provides an interactive UI for iterating on those styles without touching component code.
+- **A modular welcome section** (`lib/welcome-config.ts`) that keeps landing-page copy, typography, and style tokens in one typed config. `/dev/welcome-lab` provides an interactive UI for iterating on those styles without touching component code.
 - **Practice tools** ported from real self-taught routines: Chord Drill, Arpeggios, Progressions, Root Cycling, Technique tracking, and Visualization Labs.
 - **Evidence-based articles** that explain *how* to practice, not just *what* to play.
 - **Progress tracking** so you can see improvement over time.

@@ -56,16 +56,16 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `lib/welcome-config.ts` | Typed copy + style-token config for the landing page and onboarding |
 | `hooks/useWelcomeConfig.ts` | React hook for reading and writing `welcome-config` |
 | `components/welcome/welcome-config-provider.tsx` | Context provider that persists welcome config to `localStorage` |
-| `app/dev/welcome-lab/page.tsx` | Interactive dev-only lab for tuning welcome copy and style tokens |
-| `lib/dev-tools.ts` | Environment helpers for gating `/dev/*` pages and links to dev/preview environments |
-| `components/dev-tools-link.tsx` | Floating link to the dev lab (rendered only when dev tools are enabled) |
+| `app/dev/welcome-lab/page.tsx` | Interactive lab for tuning welcome copy and style tokens |
+| `lib/dev-tools.ts` | Environment helpers for `/dev/*` pages and links (currently always enabled) |
+| `components/dev-tools-link.tsx` | Floating link to the dev lab |
 
 ## Welcome / onboarding conventions
 
 1. **Keep welcome copy and style tokens in `lib/welcome-config.ts`.** Landing-page and onboarding components should read from `useWelcomeConfig()` instead of hard-coding marketing copy or style values. This makes the section easy to iterate on from `/dev/welcome-lab`.
 2. **Mobile-first layout.** Hero feature cards, pillar slides, and tool grids must reflow for narrow viewports. Avoid fixed-height containers that clip content on small screens.
 3. **Wrap onboarding in `WelcomeConfigProvider`.** `DashboardShell` already wraps `<Onboarding />` with the provider; new onboarding entry points should do the same.
-4. **Dev lab is dev/preview only.** `/dev/welcome-lab` must `notFound()` in production. Use `lib/dev-tools.ts` helpers rather than inlining `NODE_ENV` checks.
+4. **Dev lab is always enabled.** `/dev/welcome-lab` is public and reachable from any deployment so styling can be iterated without environment gating. Use `lib/dev-tools.ts` helpers rather than inlining `NODE_ENV` checks.
 
 ## Rules for tool pages
 

@@ -1,4 +1,3 @@
-import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
 import {
   isDevToolsEnabled,
@@ -11,8 +10,7 @@ export default async function WelcomeLabPage() {
     notFound();
   }
 
-  const { userId } = await auth();
-  if (!isDevToolsUserAllowed(userId)) {
+  if (!isDevToolsUserAllowed()) {
     notFound();
   }
 

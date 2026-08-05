@@ -5,13 +5,15 @@ import { getAuthorizedPartiesFromEnv } from "@/lib/clerk-authorized-parties";
 /**
  * Clerk proxy middleware for Next.js 16+.
  *
- * Public routes: home, Pricing, Pattern Lab (homepage hero editor), sign-in/up,
- * API, and Clerk's frontend API. Other /tools/* routes require authentication,
- * unless `NEXT_PUBLIC_AUTH_DISABLED=true`.
+ * Public routes: home, Pricing, Pattern Lab (homepage hero editor), dev lab,
+ * sign-in/up, API, and Clerk's frontend API. Other /tools/* routes require
+ * authentication, unless `NEXT_PUBLIC_AUTH_DISABLED=true`.
  *
  * Pricing is public so visitors can evaluate Free vs Pro before signing up.
  * Pattern Lab is public so visitors can customize the welcome hero without
  * signing in (prefs still sync to Convex when authenticated).
+ * The dev lab is public so styling can be iterated from any deployment
+ * without requiring authentication.
  *
  * Always pass `unauthenticatedUrl` so document requests redirect to
  * `/sign-in` instead of collapsing into a bare Next.js 404 (Clerk-dev +
@@ -38,6 +40,7 @@ export default clerkMiddleware(
       pathname === "/" ||
       pathname === "/pricing" ||
       pathname === "/tools/chladni" ||
+      pathname.startsWith("/dev") ||
       pathname.startsWith("/sign-in") ||
       pathname.startsWith("/sign-up") ||
       pathname.startsWith("/api") ||
