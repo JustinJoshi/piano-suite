@@ -5,6 +5,8 @@ import {
   DashboardMobileTopBar,
   DashboardNavProvider,
 } from "@/components/tools/dashboard-nav";
+import { Onboarding } from "@/components/tools/onboarding";
+import { WelcomeConfigProvider } from "@/components/welcome/welcome-config-provider";
 
 export function DashboardShell({
   children,
@@ -16,6 +18,9 @@ export function DashboardShell({
   return (
     <DashboardNavProvider>
       <div className="relative z-10 min-h-screen bg-transparent">
+        <WelcomeConfigProvider>
+          <Onboarding />
+        </WelcomeConfigProvider>
         <Sidebar />
         <div className="dashboard-main flex min-h-screen flex-col">
           {showMobileTopBar ? <DashboardMobileTopBar /> : null}

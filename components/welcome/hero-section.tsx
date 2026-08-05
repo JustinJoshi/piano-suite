@@ -2,9 +2,11 @@
 
 import type { CSSProperties } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Play } from "lucide-react";
 import { scrimStrengthCss } from "@/lib/chladni-hero-settings";
+import { useWelcomeConfig } from "@/hooks/useWelcomeConfig";
+import { cn } from "@/lib/utils";
 
 function scrimStyleFromDarkness(scrimDarkness: number): CSSProperties {
   const strength = scrimStrengthCss(scrimDarkness);
@@ -15,44 +17,88 @@ function scrimStyleFromDarkness(scrimDarkness: number): CSSProperties {
   } as CSSProperties;
 }
 
+const backgroundEffectClasses = {
+  none: "",
+  "subtle-glow": "hero-glow opacity-30",
+  orb: "hero-orb opacity-20",
+  beam: "beam opacity-10",
+};
+
 export function HeroSection({
   settings,
 }: {
-  settings: { scrimDarkness: number };
+  settings?: { scrimDarkness: number };
 }) {
+  const { config } = useWelcomeConfig();
+  const { hero, styleTokens } = config;
+  const alignLeft = hero.align === "left";
+
   return (
     <section className="relative flex min-h-svh">
       {/* Quiet pocket for copy — pattern continues under later sections */}
       <div
         className="pointer-events-none absolute inset-0 z-[1] hero-scrim"
-        style={scrimStyleFromDarkness(settings.scrimDarkness)}
+        style={scrimStyleFromDarkness(settings?.scrimDarkness ?? 0.7)}
       />
-      <div className="pointer-events-none absolute inset-0 z-[1] hero-glow opacity-30" />
+      <div
+        className={cn(
+          "pointer-events-none absolute inset-0 z-[1]",
+          backgroundEffectClasses[styleTokens.backgroundEffect]
+        )}
+      />
 
       <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-center px-4 pb-16 pt-24 sm:px-6 lg:px-8">
-        <div className="flex max-w-2xl flex-col items-center gap-6 text-center md:items-start md:text-left">
-          <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium uppercase tracking-widest text-primary">
-            a free tool kit for self-taught pianists
-          </span>
+        <div
+          className={cn(
+            "flex max-w-2xl flex-col gap-6",
+            alignLeft
+              ? "items-center text-center md:items-start md:text-left"
+              : "items-center text-center"
+          )}
+        >
+          {hero.showEyebrow ? (
+            <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium uppercase tracking-widest text-primary">
+              {hero.eyebrow}
+            </span>
+          ) : null}
 
-          <h1 className="font-heading text-4xl font-semibold leading-[1.1] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-            Learn piano with tools built for self-taught pianists.
+          <h1
+            className={cn(
+              "font-heading text-4xl font-semibold leading-[1.1] tracking-tight text-foreground sm:text-5xl lg:text-6xl",
+              styleTokens.headingFont === "sans" && "font-sans",
+              styleTokens.headingFont === "mono" && "font-mono"
+            )}
+          >
+            {hero.headline}
           </h1>
 
-          <p className="max-w-lg text-lg leading-relaxed text-muted-foreground">
-            Evidence-based drills, guided onboarding, and articles that teach you
-            how to practice.
+          <p
+            className={cn(
+              "max-w-lg text-lg leading-relaxed text-muted-foreground",
+              styleTokens.bodyFont === "heading" && "font-heading",
+              styleTokens.bodyFont === "mono" && "font-mono"
+            )}
+          >
+            {hero.subheadline}
           </p>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 pt-2 md:justify-start">
-            <Button
-              size="lg"
-              className="rounded-full bg-primary px-6 text-primary-foreground hover:bg-primary/90"
+          <div
+            className={cn(
+              "flex w-full flex-col items-center gap-4 pt-2 sm:flex-row",
+              alignLeft ? "sm:justify-start" : "sm:justify-center"
+            )}
+          >
+            <Link
+              href={hero.ctaHref}
+              className={cn(
+                buttonVariants({ size: "lg" }),
+                "rounded-full bg-primary px-6 text-primary-foreground hover:bg-primary/90"
+              )}
             >
               <Play className="mr-2 h-4 w-4 fill-current" />
-              Start learning
-            </Button>
-            <p className="text-xs text-muted-foreground">
+              {hero.ctaText}
+            </Link>
+            <p className="max-w-[16rem] text-xs text-muted-foreground sm:max-w-none">
               No account needed to explore. MIDI drills require{" "}
               <Link
                 href="/articles/anki-ankiconnect-setup"

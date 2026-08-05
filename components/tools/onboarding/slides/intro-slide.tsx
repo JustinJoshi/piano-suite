@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { introSlides } from "@/lib/onboarding";
+import { useWelcomeConfig } from "@/hooks/useWelcomeConfig";
 
 interface IntroSlideProps {
   isInstant: boolean;
@@ -11,6 +11,8 @@ interface IntroSlideProps {
 }
 
 export function IntroSlide({ isInstant, onNext }: IntroSlideProps) {
+  const { config } = useWelcomeConfig();
+  const { intro } = config.onboarding;
   const [phase, setPhase] = useState<number>(() => (isInstant ? 2 : 0));
 
   useEffect(() => {
@@ -31,7 +33,7 @@ export function IntroSlide({ isInstant, onNext }: IntroSlideProps) {
             !isInstant && "transition-opacity duration-1000 ease-out"
           )}
         >
-          {introSlides.hi}
+          {intro.hi}
         </p>
         <h1
           className={cn(
@@ -40,7 +42,7 @@ export function IntroSlide({ isInstant, onNext }: IntroSlideProps) {
             !isInstant && "transition-opacity duration-1000 ease-out"
           )}
         >
-          {introSlides.welcome}
+          {intro.welcome}
         </h1>
       </div>
 

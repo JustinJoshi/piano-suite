@@ -7,6 +7,11 @@ interface OnboardingShellProps {
   visible: boolean;
   isInstant: boolean;
   onExited?: () => void;
+  /**
+   * `fixed` covers the whole viewport (production). `inline` is positioned
+   * absolutely inside its nearest positioned ancestor (dev lab preview).
+   */
+  mode?: "fixed" | "inline";
 }
 
 export function OnboardingShell({
@@ -14,11 +19,13 @@ export function OnboardingShell({
   visible,
   isInstant,
   onExited,
+  mode = "fixed",
 }: OnboardingShellProps) {
   return (
     <div
       className={cn(
-        "fixed inset-0 z-50 flex items-center justify-center bg-background",
+        "z-50 flex items-start justify-center overflow-y-auto bg-background",
+        mode === "fixed" ? "fixed inset-0" : "absolute inset-0",
         visible ? "opacity-100" : "pointer-events-none opacity-0",
         !isInstant && "transition-opacity duration-1000 ease-out"
       )}
@@ -28,7 +35,7 @@ export function OnboardingShell({
         }
       }}
     >
-      <div className="relative z-10 w-full max-w-3xl px-4 sm:px-6">
+      <div className="relative z-10 w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
         {children}
       </div>
     </div>

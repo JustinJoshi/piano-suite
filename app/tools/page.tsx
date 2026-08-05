@@ -1,9 +1,6 @@
-"use client";
-
 import { Home, Search, Bell } from "lucide-react";
 import { AppUserButton } from "@/components/app-user-button";
 import { DashboardMenuButton } from "@/components/tools/dashboard-nav";
-import { Onboarding } from "@/components/tools/onboarding";
 import { ToolCard } from "@/components/tools/tool-card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -19,7 +16,6 @@ const welcomeTool = {
 export default function ToolsPage() {
   return (
     <div className="flex min-h-full flex-col">
-      <Onboarding />
       {/* Top bar */}
       <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-border/50 bg-background/95 px-4 backdrop-blur sm:px-6">
         <div className="flex min-w-0 items-center gap-2 sm:gap-4">

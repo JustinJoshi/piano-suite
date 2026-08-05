@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { introSlides } from "@/lib/onboarding";
+import { useWelcomeConfig } from "@/hooks/useWelcomeConfig";
 
 interface ClosingSlideProps {
   isInstant: boolean;
@@ -11,6 +11,8 @@ interface ClosingSlideProps {
 }
 
 export function ClosingSlide({ isInstant, onComplete }: ClosingSlideProps) {
+  const { config } = useWelcomeConfig();
+  const { closing, cta } = config.onboarding;
   const [visible, setVisible] = useState<boolean>(() => isInstant);
 
   useEffect(() => {
@@ -28,7 +30,7 @@ export function ClosingSlide({ isInstant, onComplete }: ClosingSlideProps) {
           !isInstant && "transition-opacity duration-1000 ease-out"
         )}
       >
-        {introSlides.closing}
+        {closing}
       </h2>
 
       <div
@@ -45,7 +47,7 @@ export function ClosingSlide({ isInstant, onComplete }: ClosingSlideProps) {
           size="lg"
           className="rounded-full px-8"
         >
-          {introSlides.cta}
+          {cta}
         </Button>
       </div>
     </div>

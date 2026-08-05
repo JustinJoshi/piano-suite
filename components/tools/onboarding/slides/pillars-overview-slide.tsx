@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { introSlides } from "@/lib/onboarding";
+import { useWelcomeConfig } from "@/hooks/useWelcomeConfig";
 
 interface PillarsOverviewSlideProps {
   isInstant: boolean;
@@ -14,6 +14,8 @@ export function PillarsOverviewSlide({
   isInstant,
   onNext,
 }: PillarsOverviewSlideProps) {
+  const { config } = useWelcomeConfig();
+  const { pillarsOverview } = config.onboarding;
   const [visible, setVisible] = useState<boolean>(() => isInstant);
 
   useEffect(() => {
@@ -31,7 +33,7 @@ export function PillarsOverviewSlide({
           !isInstant && "transition-opacity duration-1000 ease-out"
         )}
       >
-        {introSlides.pillarsOverview}
+        {pillarsOverview}
       </h2>
 
       <div

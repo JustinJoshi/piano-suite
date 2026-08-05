@@ -4,25 +4,23 @@ import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useOnboarding } from "@/hooks/useOnboarding";
-import { onboardingPillars } from "@/lib/onboarding";
-import { OnboardingShell } from "@/components/tools/onboarding/onboarding-shell";
-import { IntroSlide } from "@/components/tools/onboarding/slides/intro-slide";
-import { PillarsOverviewSlide } from "@/components/tools/onboarding/slides/pillars-overview-slide";
-import { PillarSlide } from "@/components/tools/onboarding/slides/pillar-slide";
-import { ClosingSlide } from "@/components/tools/onboarding/slides/closing-slide";
-
-const TOTAL_SLIDES = 2 + onboardingPillars.length + 1; // intro + overview + pillars + closing
+import { useWelcomeConfig } from "@/hooks/useWelcomeConfig";
+import { OnboardingShell } from "./onboarding-shell";
+import { OnboardingContent } from "./onboarding-content";
 
 export function Onboarding() {
+  const { config } = useWelcomeConfig();
   const { isCompleted, markComplete, isInstant, mounted } = useOnboarding();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [exiting, setExiting] = useState(false);
 
+  const totalSlides = 2 + config.onboarding.pillars.length + 1;
+
   const goToNext = useCallback(() => {
-    if (currentSlide < TOTAL_SLIDES - 1) {
+    if (currentSlide < totalSlides - 1) {
       setCurrentSlide((prev) => prev + 1);
     }
-  }, [currentSlide]);
+  }, [currentSlide, totalSlides]);
 
   const handleComplete = useCallback(() => {
     setExiting(true);
@@ -48,7 +46,7 @@ export function Onboarding() {
     >
       <div className="relative">
         {/* Skip control */}
-        <div className="absolute -top-12 right-0 sm:-top-16">
+        <div className="absolute -top-8 right-0 sm:-top-12">
           <Button
             variant="ghost"
             size="sm"
@@ -59,23 +57,12 @@ export function Onboarding() {
           </Button>
         </div>
 
-        {/* Slides */}
-        <div className="relative">
-          {currentSlide === 0 && <IntroSlide isInstant={isInstant} onNext={goToNext} />}
-          {currentSlide === 1 && (
-            <PillarsOverviewSlide isInstant={isInstant} onNext={goToNext} />
-          )}
-          {currentSlide >= 2 && currentSlide < TOTAL_SLIDES - 1 && (
-            <PillarSlide
-              pillar={onboardingPillars[currentSlide - 2]}
-              isInstant={isInstant}
-              onNext={goToNext}
-            />
-          )}
-          {currentSlide === TOTAL_SLIDES - 1 && (
-            <ClosingSlide isInstant={isInstant} onComplete={handleComplete} />
-          )}
-        </div>
+        <OnboardingContent
+          currentSlide={currentSlide}
+          isInstant={isInstant}
+          onNext={goToNext}
+          onComplete={handleComplete}
+        />
 
         {/* Progress dots */}
         <div
@@ -84,7 +71,7 @@ export function Onboarding() {
             !isInstant && "transition-opacity duration-700 ease-out delay-500"
           )}
         >
-          {Array.from({ length: TOTAL_SLIDES }).map((_, index) => (
+          {Array.from({ length: totalSlides }).map((_, index) => (
             <button
               key={index}
               type="button"

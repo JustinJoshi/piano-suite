@@ -1,20 +1,23 @@
 import { ToolCard } from "@/components/tools/tool-card";
 import { tools } from "@/lib/tools";
+import { useWelcomeConfig } from "@/hooks/useWelcomeConfig";
 
 export function ToolsGridSection() {
+  const { config } = useWelcomeConfig();
+  const { eyebrow, title, subtitle } = config.toolsGrid;
+
   return (
     <section className="py-16 sm:py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-10 text-center">
           <span className="text-xs font-semibold uppercase tracking-widest text-primary">
-            the toolkit
+            {eyebrow}
           </span>
           <h2 className="mt-3 font-heading text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-            Tools that grow with you
+            {title}
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground">
-            From your first chord drill to advanced pattern labs, everything is
-            designed to keep your practice healthy, focused, and effective.
+            {subtitle}
           </p>
         </div>
 

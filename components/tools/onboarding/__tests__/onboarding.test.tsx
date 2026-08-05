@@ -1,11 +1,16 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import { Onboarding } from "@/components/tools/onboarding";
+import { WelcomeConfigProvider } from "@/components/welcome/welcome-config-provider";
 import { ONBOARDING_STORAGE_KEY } from "@/lib/onboarding";
 
 function renderWithInstantSearch() {
   window.history.replaceState({}, "", "?onboarding=instant");
-  return render(<Onboarding />);
+  return render(
+    <WelcomeConfigProvider>
+      <Onboarding />
+    </WelcomeConfigProvider>
+  );
 }
 
 describe("Onboarding", () => {
@@ -22,7 +27,7 @@ describe("Onboarding", () => {
 
   it("renders the intro slide on first visit", () => {
     renderWithInstantSearch();
-    expect(screen.getByText("hi")).toBeInTheDocument();
+    expect(screen.getByText("Hi")).toBeInTheDocument();
     expect(screen.getByText("welcome to piano suite")).toBeInTheDocument();
   });
 
