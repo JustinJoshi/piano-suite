@@ -1,6 +1,7 @@
 "use client";
 
 import { Navbar } from "@/components/navbar";
+import { DevToolsLink } from "@/components/dev-tools-link";
 import { useAmbientEffects } from "@/hooks/useAmbientEffects";
 import { useHeroChladniSettings } from "@/hooks/useHeroChladniSettings";
 import { useHeroQuasiperiodicSettings } from "@/hooks/useHeroQuasiperiodicSettings";
@@ -40,6 +41,9 @@ export function WelcomePage() {
           <HeroSection settings={heroScrimSettings} />
           <WelcomeContent />
         </main>
+        <div className="pointer-events-none fixed bottom-4 right-4 z-50">
+          <DevToolsLink className="pointer-events-auto" />
+        </div>
       </div>
     </WelcomeConfigProvider>
   );
