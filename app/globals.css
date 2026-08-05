@@ -304,3 +304,41 @@
     margin-left: var(--sidebar-width);
   }
 }
+
+/* ---------- Onboarding ambient effects ---------- */
+@keyframes onboarding-drift {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(3%, -2%) scale(1.05);
+  }
+  66% {
+    transform: translate(-2%, 2%) scale(0.98);
+  }
+}
+
+@keyframes onboarding-pulse {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(1.08);
+  }
+}
+
+.onboarding-ambient {
+  background:
+    radial-gradient(circle at 20% 30%, var(--hero-glow-1) 0%, transparent 45%),
+    radial-gradient(circle at 80% 70%, var(--hero-glow-2) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, var(--hero-glow-3) 0%, transparent 55%);
+  animation: onboarding-drift 20s ease-in-out infinite;
+}
+
+.onboarding-orb {
+  background: radial-gradient(circle at 35% 35%, var(--hero-orb-inner) 0%, var(--hero-orb-mid) 35%, var(--hero-orb-outer) 70%, transparent 100%);
+  animation: onboarding-pulse 8s ease-in-out infinite;
+  filter: blur(60px);
+}

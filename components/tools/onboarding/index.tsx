@@ -70,27 +70,25 @@ export function Onboarding() {
           onComplete={handleComplete}
         />
 
-        {/* Progress dots */}
+        {/* Progress line */}
         <div
           className={cn(
-            "mt-10 flex justify-center gap-2",
+            "mt-10",
             !isInstant && "transition-opacity duration-700 ease-out delay-500"
           )}
         >
-          {Array.from({ length: totalSlides }).map((_, index) => (
-            <button
-              key={index}
-              type="button"
-              aria-label={`Go to slide ${index + 1}`}
-              onClick={() => setCurrentSlide(index)}
+          <div className="relative h-1 w-full max-w-xs overflow-hidden rounded-full bg-muted-foreground/20 mx-auto">
+            <div
               className={cn(
-                "h-1.5 rounded-full transition-all duration-300",
-                index === currentSlide
-                  ? "w-6 bg-primary"
-                  : "w-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                "absolute left-0 top-0 h-full rounded-full bg-primary transition-all duration-500 ease-out",
+                !isInstant && "shadow-[0_0_8px_2px_var(--primary-glow)]"
               )}
+              style={{ width: `${((currentSlide + 1) / totalSlides) * 100}%` }}
             />
-          ))}
+          </div>
+          <div className="mt-2 text-center text-xs text-muted-foreground">
+            {currentSlide + 1} / {totalSlides}
+          </div>
         </div>
       </div>
     </OnboardingShell>

@@ -21,19 +21,16 @@ export function PillarSlide({
   const pillar = config.onboarding.pillars[pillarIndex];
   const resourceCardVariant = config.onboarding.resourceCardVariant;
 
-  const [titleVisible, setTitleVisible] = useState<boolean>(() => isInstant);
-  const [contentVisible, setContentVisible] = useState<boolean>(() => isInstant);
-  const [buttonVisible, setButtonVisible] = useState<boolean>(() => isInstant);
+  const [phase, setPhase] = useState<number>(() => (isInstant ? 2 : 0));
 
   useEffect(() => {
     if (isInstant) return;
     const timers: ReturnType<typeof setTimeout>[] = [];
-    timers.push(setTimeout(() => setTitleVisible(true), 100));
-    timers.push(setTimeout(() => setContentVisible(true), 900));
+    timers.push(setTimeout(() => setPhase(1), 100));
     timers.push(
       setTimeout(
-        () => setButtonVisible(true),
-        pillar.nextDelayMs > 0 ? 900 + pillar.nextDelayMs : 1200
+        () => setPhase(2),
+        pillar.nextDelayMs > 0 ? 1200 + pillar.nextDelayMs : 1800
       )
     );
 
@@ -42,13 +39,24 @@ export function PillarSlide({
 
   if (!pillar) return null;
 
+  const showContent = phase >= 1 || isInstant;
+  const showButton = phase >= 2 || isInstant;
+
   return (
-    <div className="flex min-h-[60vh] flex-col justify-center py-8 sm:min-h-[80vh] sm:py-12">
+    <div className="flex min-h-[60vh] flex-col py-8 sm:min-h-[80vh] sm:py-12">
+      {/* Top spacer collapses when content appears, pulling the title upward. */}
+      <div
+        className={cn(
+          "transition-[flex] duration-1000 ease-out",
+          showContent ? "flex-[0]" : "flex-1"
+        )}
+      />
+
       <div className="text-center">
         <h2
           className={cn(
             "inline-block font-heading text-2xl font-semibold tracking-tight text-foreground sm:text-3xl md:text-4xl",
-            titleVisible
+            phase >= 1
               ? "translate-y-0 opacity-100"
               : "translate-y-6 opacity-0",
             !isInstant && "transition-all duration-1000 ease-out"
@@ -58,10 +66,18 @@ export function PillarSlide({
         </h2>
       </div>
 
+      {/* Bottom spacer collapses when content appears. */}
+      <div
+        className={cn(
+          "transition-[flex] duration-1000 ease-out",
+          showContent ? "flex-[0]" : "flex-1"
+        )}
+      />
+
       <div
         className={cn(
           "mx-auto mt-6 max-w-2xl space-y-4 text-center sm:mt-8",
-          contentVisible
+          showContent
             ? "translate-y-0 opacity-100"
             : "translate-y-6 opacity-0",
           !isInstant && "transition-all duration-1000 ease-out"
@@ -89,7 +105,7 @@ export function PillarSlide({
           <ResourceCard
             key={resource.id}
             resource={resource}
-            visible={contentVisible}
+            visible={showContent}
             delayIndex={index}
             isInstant={isInstant}
             variant={resourceCardVariant}
@@ -100,7 +116,7 @@ export function PillarSlide({
       <div className="mt-8 flex justify-center sm:mt-10">
         <div
           className={cn(
-            buttonVisible
+            showButton
               ? "translate-y-0 opacity-100"
               : "translate-y-4 opacity-0",
             !isInstant && "transition-all duration-700 ease-out"
