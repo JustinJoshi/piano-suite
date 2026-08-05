@@ -373,10 +373,6 @@ function clampEnum<T extends string>(
   return allowed.includes(value as T) ? (value as T) : fallback;
 }
 
-function clampNumber(value: unknown, fallback: number): number {
-  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
-}
-
 function isValidResource(
   item: unknown
 ): item is WelcomeOnboardingResourceConfig {

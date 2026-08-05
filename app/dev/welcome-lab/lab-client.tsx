@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { Smartphone, Monitor, RotateCcw, Download, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -271,7 +271,7 @@ function StyleControls() {
 
 function FeatureControls() {
   const { config, updateConfig } = useWelcomeConfig();
-  const { features, styleTokens } = config;
+  const { features } = config;
   const [selectedIndex, setSelectedIndex] = useState(0);
   const section = features.sections[selectedIndex];
 

@@ -43,7 +43,7 @@ describe("welcome-config", () => {
     );
   });
 
-  it("discards invalid feature sections and falls back to defaults", () => {
+  it("discards invalid feature sections and keeps valid ones", () => {
     const partial = {
       features: {
         sections: [
@@ -53,11 +53,23 @@ describe("welcome-config", () => {
       },
     } as unknown as WelcomeConfig;
     const validated = validateWelcomeConfig(partial);
+    expect(validated.features.sections.length).toBe(1);
+    expect(validated.features.sections[0].id).toBe("valid");
+    expect(validated.features.sections[0].body).toEqual(["hello"]);
+  });
+
+  it("falls back to default sections when none are valid", () => {
+    const partial = {
+      features: {
+        sections: [
+          { id: "invalid", number: "02", label: "bad", title: "Bad" },
+        ],
+      },
+    } as unknown as WelcomeConfig;
+    const validated = validateWelcomeConfig(partial);
     expect(validated.features.sections.length).toBe(
       defaultWelcomeConfig.features.sections.length
     );
-    expect(validated.features.sections[0].id).toBe("valid");
-    expect(validated.features.sections[0].body).toEqual(["hello"]);
   });
 
   it("discards invalid onboarding pillars", () => {

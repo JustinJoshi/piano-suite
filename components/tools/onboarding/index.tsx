@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useOnboarding } from "@/hooks/useOnboarding";
@@ -13,6 +13,7 @@ export function Onboarding() {
   const { isCompleted, markComplete, isInstant, mounted } = useOnboarding();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [exiting, setExiting] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const totalSlides = 2 + config.onboarding.pillars.length + 1;
 
@@ -32,6 +33,10 @@ export function Onboarding() {
     markComplete();
   }, [markComplete]);
 
+  useEffect(() => {
+    scrollRef.current?.scrollTo?.({ top: 0, behavior: "smooth" });
+  }, [currentSlide]);
+
   if (!mounted || isCompleted) {
     return null;
   }
@@ -40,6 +45,7 @@ export function Onboarding() {
 
   return (
     <OnboardingShell
+      ref={scrollRef}
       visible={showShell}
       isInstant={isInstant}
       onExited={() => setCurrentSlide(0)}

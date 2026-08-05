@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   WelcomeConfigContext,
   type WelcomeConfigContextValue,
@@ -12,6 +12,19 @@ import {
 } from "@/lib/welcome-config";
 
 const STORAGE_KEY = "piano-suite:welcome-config";
+
+function readStoredConfig(): WelcomeConfig {
+  if (typeof window === "undefined") return defaultWelcomeConfig;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      return validateWelcomeConfig(JSON.parse(raw));
+    }
+  } catch {
+    // Ignore invalid or missing localStorage values.
+  }
+  return defaultWelcomeConfig;
+}
 
 interface WelcomeConfigProviderProps {
   children: React.ReactNode;
@@ -28,21 +41,8 @@ export function WelcomeConfigProvider({
 }: WelcomeConfigProviderProps) {
   const isControlled = value !== undefined;
   const [internalConfig, setInternalConfig] = useState<WelcomeConfig>(
-    defaultWelcomeConfig
+    isControlled ? defaultWelcomeConfig : readStoredConfig
   );
-
-  useEffect(() => {
-    if (isControlled) return;
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        setInternalConfig(validateWelcomeConfig(parsed));
-      }
-    } catch {
-      // Ignore invalid or missing localStorage values.
-    }
-  }, [isControlled]);
 
   const updateConfig: WelcomeConfigContextValue["updateConfig"] = useCallback(
     (patch) => {
