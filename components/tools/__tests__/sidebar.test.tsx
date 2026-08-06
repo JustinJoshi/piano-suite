@@ -19,6 +19,10 @@ vi.mock("@/components/tools/dashboard-nav", () => ({
   useDashboardNav: () => ({ open: false, setOpen: vi.fn() }),
 }));
 
+vi.mock("@/hooks/useExperimentalFeatures", () => ({
+  useExperimentalFeatures: () => ({ enabled: false, setEnabled: vi.fn() }),
+}));
+
 import { Sidebar } from "@/components/tools/sidebar";
 
 afterEach(() => {
