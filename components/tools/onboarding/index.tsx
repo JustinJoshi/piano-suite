@@ -56,7 +56,7 @@ export function Onboarding() {
       isInstant={isInstant}
       onExited={() => setCurrentSlide(0)}
     >
-      <div className="relative flex min-h-full flex-col">
+      <div className="relative flex min-h-screen flex-col">
         {/* Skip control */}
         <div className="absolute right-0 top-0 z-20">
           <Button

@@ -27,7 +27,7 @@ export function OnboardingContent({
   const totalSlides = 2 + pillars.length + 1; // intro + overview + pillars + closing
 
   return (
-    <div className="relative h-full w-full">
+    <div className="absolute inset-0">
       {currentSlide === 0 && <IntroSlide isInstant={isInstant} onNext={onNext} />}
       {currentSlide === 1 && (
         <PillarsOverviewSlide
