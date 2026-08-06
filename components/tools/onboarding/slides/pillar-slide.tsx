@@ -45,7 +45,7 @@ export function PillarSlide({
   const showButton = phase >= 2 || isInstant;
 
   return (
-    <div className="flex flex-1 flex-col py-4 sm:py-8">
+    <div className="flex h-full flex-col py-4 pb-16 sm:py-8 sm:pb-20">
       <div className="text-center">
         <h2
           className={cn(

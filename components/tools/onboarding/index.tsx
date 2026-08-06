@@ -69,18 +69,21 @@ export function Onboarding() {
           </Button>
         </div>
 
-        <OnboardingContent
-          currentSlide={currentSlide}
-          isInstant={isInstant}
-          onNext={goToNext}
-          onPrevious={goToPrevious}
-          onComplete={handleComplete}
-        />
+        {/* Slides fill the full viewport so text can be centered in it */}
+        <div className="relative flex-1">
+          <OnboardingContent
+            currentSlide={currentSlide}
+            isInstant={isInstant}
+            onNext={goToNext}
+            onPrevious={goToPrevious}
+            onComplete={handleComplete}
+          />
+        </div>
 
-        {/* Progress line */}
+        {/* Progress line anchored at the bottom */}
         <div
           className={cn(
-            "mt-auto pt-8 sm:pt-10",
+            "absolute bottom-0 left-0 right-0 z-20 p-4 sm:p-6",
             !isInstant && "transition-opacity duration-700 ease-out delay-500"
           )}
         >

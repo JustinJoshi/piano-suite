@@ -306,43 +306,61 @@
 }
 
 /* ---------- Onboarding ambient effects ---------- */
+/*
+  The ambient layer is intentionally larger than the viewport (inset: -10%)
+  and the drift range is tiny. This guarantees the breathing glow never
+  translates or scales far enough to expose the shell's dark background
+  at any edge, even when the user zooms.
+*/
 @keyframes onboarding-drift {
   0%, 100% {
     transform: translate(0, 0) scale(1);
   }
-  33% {
-    transform: translate(3%, -2%) scale(1.05);
-  }
-  66% {
-    transform: translate(-2%, 2%) scale(0.98);
+  50% {
+    transform: translate(1%, -1%) scale(1.015);
   }
 }
 
 @keyframes onboarding-pulse {
   0%, 100% {
-    opacity: 0.40;
-    transform: scale(1);
+    opacity: 0.25;
   }
   50% {
-    opacity: 0.50;
-    transform: scale(1.04);
+    opacity: 0.35;
   }
 }
 
 .onboarding-ambient {
-  background:
-    radial-gradient(circle at 20% 30%, var(--hero-glow-1) 0%, transparent 45%),
-    radial-gradient(circle at 80% 70%, var(--hero-glow-2) 0%, transparent 40%),
-    radial-gradient(circle at 50% 50%, var(--hero-glow-3) 0%, transparent 55%),
-    /* edge coverage so no viewport side falls back to solid background */
-    radial-gradient(circle at 50% 0%, var(--hero-glow-1) 0%, transparent 50%),
-    radial-gradient(circle at 100% 50%, var(--hero-glow-2) 0%, transparent 50%),
-    radial-gradient(circle at 0% 50%, var(--hero-glow-2) 0%, transparent 50%);
+  /* Oversize layer so drift can never reach the viewport edge. */
+  position: fixed;
+  inset: -10%;
+  /*
+    Base tint keeps the viewport from ever falling back to the raw dark
+    background. Theme gradients are layered on top for the breathing effect.
+  */
+  background-color: color-mix(in oklab, var(--hero-glow-2) 18%, var(--color-background));
+  background-image:
+    /* large corner blooms so every edge carries color */
+    radial-gradient(circle at 15% 15%, var(--hero-glow-1) 0%, transparent 55%),
+    radial-gradient(circle at 85% 85%, var(--hero-glow-2) 0%, transparent 55%),
+    radial-gradient(circle at 85% 15%, var(--hero-glow-2) 0%, transparent 55%),
+    radial-gradient(circle at 15% 85%, var(--hero-glow-1) 0%, transparent 55%),
+    /* central field blooms */
+    radial-gradient(circle at 20% 30%, var(--hero-glow-1) 0%, transparent 60%),
+    radial-gradient(circle at 80% 70%, var(--hero-glow-2) 0%, transparent 55%),
+    radial-gradient(circle at 50% 50%, var(--hero-glow-3) 0%, transparent 70%),
+    /* side, top, and bottom edge coverage */
+    radial-gradient(circle at 50% 0%, var(--hero-glow-1) 0%, transparent 55%),
+    radial-gradient(circle at 100% 50%, var(--hero-glow-2) 0%, transparent 55%),
+    radial-gradient(circle at 0% 50%, var(--hero-glow-2) 0%, transparent 55%),
+    radial-gradient(circle at 50% 100%, var(--hero-glow-1) 0%, transparent 55%),
+    /* base wash */
+    radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--hero-glow-2) 16%, transparent) 0%, transparent 75%);
   animation: onboarding-drift 20s ease-in-out infinite;
 }
 
 .onboarding-orb {
   background: radial-gradient(circle at 35% 35%, var(--hero-orb-inner) 0%, var(--hero-orb-mid) 35%, var(--hero-orb-outer) 70%, transparent 100%);
   animation: onboarding-pulse 8s ease-in-out infinite;
-  filter: blur(60px);
+  filter: blur(80px);
 }

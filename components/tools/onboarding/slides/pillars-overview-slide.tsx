@@ -27,8 +27,9 @@ export function PillarsOverviewSlide({
   }, [isInstant]);
 
   return (
-    <div className="flex flex-1 flex-col">
-      <div className="flex flex-1 flex-col items-center justify-center text-center">
+    <div className="grid h-full w-full place-items-center">
+      {/* Headline pinned to the vertical center of the viewport */}
+      <div className="col-start-1 row-start-1 px-4 text-center">
         <h2
           className={cn(
             "max-w-2xl font-heading text-3xl font-semibold tracking-tight text-foreground sm:text-4xl",
@@ -40,26 +41,28 @@ export function PillarsOverviewSlide({
         </h2>
       </div>
 
+      {/* Button row sits a fixed distance below the centered headline */}
       <div
         className={cn(
-          "flex items-center justify-center gap-4 pb-8 sm:pb-10",
+          "col-start-1 row-start-1 transition-all duration-700 ease-out delay-700",
           visible
-            ? "translate-y-0 opacity-100"
-            : "translate-y-4 opacity-0",
-          !isInstant && "transition-all duration-700 ease-out delay-700"
+            ? "translate-y-[7rem] opacity-100 sm:translate-y-[8.5rem]"
+            : "translate-y-[8rem] opacity-0 sm:translate-y-[9.5rem]"
         )}
       >
-        <Button
-          variant="outline"
-          onClick={onPrevious}
-          size="lg"
-          className="rounded-full px-8"
-        >
-          Back
-        </Button>
-        <Button onClick={onNext} size="lg" className="rounded-full px-8">
-          Next
-        </Button>
+        <div className="flex items-center justify-center gap-4">
+          <Button
+            variant="outline"
+            onClick={onPrevious}
+            size="lg"
+            className="rounded-full px-8"
+          >
+            Back
+          </Button>
+          <Button onClick={onNext} size="lg" className="rounded-full px-8">
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   );
