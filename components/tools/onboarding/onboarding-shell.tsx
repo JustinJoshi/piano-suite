@@ -52,6 +52,11 @@ export const OnboardingShell = forwardRef<HTMLDivElement, OnboardingShellProps>(
           style={{ animationDelay: "4s" }}
           aria-hidden="true"
         />
+        <div
+          className="onboarding-orb pointer-events-none fixed -right-32 top-1/3 h-72 w-72 rounded-full opacity-30"
+          style={{ animationDelay: "2s" }}
+          aria-hidden="true"
+        />
 
         {/* Scrollable content area */}
         <div

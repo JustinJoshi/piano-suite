@@ -27,20 +27,22 @@ export function ClosingSlide({
   }, [isInstant]);
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center text-center">
-      <h2
-        className={cn(
-          "font-heading text-4xl font-semibold tracking-tight text-foreground sm:text-5xl",
-          visible ? "opacity-100" : "opacity-0",
-          !isInstant && "transition-opacity duration-1000 ease-out"
-        )}
-      >
-        {closing}
-      </h2>
+    <div className="flex flex-1 flex-col">
+      <div className="flex flex-1 flex-col items-center justify-center text-center">
+        <h2
+          className={cn(
+            "font-heading text-4xl font-semibold tracking-tight text-foreground sm:text-5xl",
+            visible ? "opacity-100" : "opacity-0",
+            !isInstant && "transition-opacity duration-1000 ease-out"
+          )}
+        >
+          {closing}
+        </h2>
+      </div>
 
       <div
         className={cn(
-          "mt-10 flex items-center justify-center gap-4",
+          "flex items-center justify-center gap-4 pb-8 sm:pb-10",
           visible
             ? "translate-y-0 opacity-100"
             : "translate-y-4 opacity-0",

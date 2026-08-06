@@ -24,31 +24,33 @@ export function IntroSlide({ isInstant, onNext }: IntroSlideProps) {
   }, [isInstant]);
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center text-center">
-      <div className="space-y-2">
-        <p
-          className={cn(
-            "font-heading text-4xl font-semibold tracking-tight text-foreground sm:text-5xl",
-            phase >= 0 ? "opacity-100" : "opacity-0",
-            !isInstant && "transition-opacity duration-1000 ease-out"
-          )}
-        >
-          {intro.hi}
-        </p>
-        <h1
-          className={cn(
-            "font-heading text-3xl font-semibold tracking-tight text-foreground sm:text-4xl",
-            phase >= 1 ? "opacity-100" : "opacity-0",
-            !isInstant && "transition-opacity duration-1000 ease-out"
-          )}
-        >
-          {intro.welcome}
-        </h1>
+    <div className="flex flex-1 flex-col">
+      <div className="flex flex-1 flex-col items-center justify-center text-center">
+        <div className="space-y-2">
+          <p
+            className={cn(
+              "font-heading text-4xl font-semibold tracking-tight text-foreground sm:text-5xl",
+              phase >= 0 ? "opacity-100" : "opacity-0",
+              !isInstant && "transition-opacity duration-1000 ease-out"
+            )}
+          >
+            {intro.hi}
+          </p>
+          <h1
+            className={cn(
+              "font-heading text-3xl font-semibold tracking-tight text-foreground sm:text-4xl",
+              phase >= 1 ? "opacity-100" : "opacity-0",
+              !isInstant && "transition-opacity duration-1000 ease-out"
+            )}
+          >
+            {intro.welcome}
+          </h1>
+        </div>
       </div>
 
       <div
         className={cn(
-          "mt-10",
+          "flex items-center justify-center gap-4 pb-8 sm:pb-10",
           phase >= 2
             ? "translate-y-0 opacity-100"
             : "translate-y-4 opacity-0",

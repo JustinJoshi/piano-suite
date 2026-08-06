@@ -46,14 +46,6 @@ export function PillarSlide({
 
   return (
     <div className="flex flex-1 flex-col py-4 sm:py-8">
-      {/* Top spacer collapses when content appears, pulling the title upward. */}
-      <div
-        className={cn(
-          "transition-[flex] duration-1000 ease-out",
-          showContent ? "flex-[0]" : "flex-1"
-        )}
-      />
-
       <div className="text-center">
         <h2
           className={cn(
@@ -67,14 +59,6 @@ export function PillarSlide({
           {pillar.headline}
         </h2>
       </div>
-
-      {/* Bottom spacer collapses when content appears. */}
-      <div
-        className={cn(
-          "transition-[flex] duration-1000 ease-out",
-          showContent ? "flex-[0]" : "flex-1"
-        )}
-      />
 
       <div
         className={cn(
@@ -115,36 +99,26 @@ export function PillarSlide({
         ))}
       </div>
 
-      <div className="mt-6 flex items-center justify-center gap-4 sm:mt-8">
-        <div
-          className={cn(
-            showButton
-              ? "translate-y-0 opacity-100"
-              : "translate-y-4 opacity-0",
-            !isInstant && "transition-all duration-700 ease-out"
-          )}
+      <div
+        className={cn(
+          "mt-auto flex items-center justify-center gap-4 pb-4 pt-6 sm:pb-8 sm:pt-8",
+          showButton
+            ? "translate-y-0 opacity-100"
+            : "translate-y-4 opacity-0",
+          !isInstant && "transition-all duration-700 ease-out"
+        )}
+      >
+        <Button
+          variant="outline"
+          onClick={onPrevious}
+          size="lg"
+          className="rounded-full px-8"
         >
-          <Button
-            variant="outline"
-            onClick={onPrevious}
-            size="lg"
-            className="rounded-full px-8"
-          >
-            Back
-          </Button>
-        </div>
-        <div
-          className={cn(
-            showButton
-              ? "translate-y-0 opacity-100"
-              : "translate-y-4 opacity-0",
-            !isInstant && "transition-all duration-700 ease-out"
-          )}
-        >
-          <Button onClick={onNext} size="lg" className="rounded-full px-8">
-            Next
-          </Button>
-        </div>
+          Back
+        </Button>
+        <Button onClick={onNext} size="lg" className="rounded-full px-8">
+          Next
+        </Button>
       </div>
     </div>
   );
