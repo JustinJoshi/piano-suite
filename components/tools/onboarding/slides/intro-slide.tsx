@@ -24,7 +24,7 @@ export function IntroSlide({ isInstant, onNext }: IntroSlideProps) {
   }, [isInstant]);
 
   return (
-    <div className="flex min-h-[40vh] flex-col items-center justify-center text-center">
+    <div className="flex flex-1 flex-col items-center justify-center text-center">
       <div className="space-y-2">
         <p
           className={cn(

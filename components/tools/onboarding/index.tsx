@@ -23,6 +23,12 @@ export function Onboarding() {
     }
   }, [currentSlide, totalSlides]);
 
+  const goToPrevious = useCallback(() => {
+    if (currentSlide > 0) {
+      setCurrentSlide((prev) => prev - 1);
+    }
+  }, [currentSlide]);
+
   const handleComplete = useCallback(() => {
     setExiting(true);
     markComplete();
@@ -50,9 +56,9 @@ export function Onboarding() {
       isInstant={isInstant}
       onExited={() => setCurrentSlide(0)}
     >
-      <div className="relative">
+      <div className="relative flex min-h-full flex-col">
         {/* Skip control */}
-        <div className="absolute -top-8 right-0 sm:-top-12">
+        <div className="absolute right-0 top-0 z-20">
           <Button
             variant="ghost"
             size="sm"
@@ -67,13 +73,14 @@ export function Onboarding() {
           currentSlide={currentSlide}
           isInstant={isInstant}
           onNext={goToNext}
+          onPrevious={goToPrevious}
           onComplete={handleComplete}
         />
 
         {/* Progress line */}
         <div
           className={cn(
-            "mt-10",
+            "mt-auto pt-8 sm:pt-10",
             !isInstant && "transition-opacity duration-700 ease-out delay-500"
           )}
         >

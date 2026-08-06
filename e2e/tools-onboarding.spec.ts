@@ -26,7 +26,7 @@ test.describe("/tools onboarding", () => {
     await expect(
       page.getByText("Active recall & spaced repetition")
     ).toBeVisible();
-    await expect(page.getByText("Anki")).toBeVisible();
+    await expect(page.getByRole("link", { name: /Anki/i }).first()).toBeVisible();
 
     await page.getByRole("button", { name: /next/i }).first().click();
     await expect(page.getByText("Take care of yourself")).toBeVisible();
@@ -85,6 +85,18 @@ test.describe("/tools onboarding", () => {
     // Revisiting the same tool should not show onboarding again.
     await page.goto("/tools/chord-drill");
     await expect(page.getByText("Hi")).not.toBeVisible();
+  });
+
+  test("goes back to the previous slide", async ({ page }) => {
+    await signInAsTestUser(page);
+    await page.goto(ONBOARDING_RESET_URL);
+
+    await page.getByRole("button", { name: /next/i }).first().click();
+    await expect(page.getByText(/three most important pillars/i)).toBeVisible();
+
+    await page.getByRole("button", { name: /back/i }).first().click();
+    await expect(page.getByText("Hi")).toBeVisible();
+    await expect(page.getByText("welcome to piano suite")).toBeVisible();
   });
 
   test("fits within a mobile viewport and advances through pillars", async ({

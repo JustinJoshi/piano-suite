@@ -613,6 +613,7 @@ function OnboardingPreview() {
           currentSlide={slide}
           isInstant
           onNext={() => setSlide((s) => Math.min(s + 1, totalSlides - 1))}
+          onPrevious={() => setSlide((s) => Math.max(s - 1, 0))}
           onComplete={() => setSlide(0)}
         />
         <div className="mt-6 flex justify-center gap-2">

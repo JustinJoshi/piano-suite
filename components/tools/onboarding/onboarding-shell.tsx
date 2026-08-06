@@ -22,9 +22,8 @@ export const OnboardingShell = forwardRef<HTMLDivElement, OnboardingShellProps>(
   ) {
     return (
       <div
-        ref={ref}
         className={cn(
-          "z-50 flex items-start justify-center overflow-y-auto bg-background",
+          "z-50 overflow-hidden bg-background",
           mode === "fixed" ? "fixed inset-0" : "absolute inset-0",
           visible ? "opacity-100" : "pointer-events-none opacity-0",
           !isInstant && "transition-opacity duration-1000 ease-out"
@@ -35,27 +34,33 @@ export const OnboardingShell = forwardRef<HTMLDivElement, OnboardingShellProps>(
           }
         }}
       >
-        {/* Ambient background layer */}
+        {/* Ambient background layer — fixed so it always covers the viewport */}
         <div
           className={cn(
-            "pointer-events-none absolute inset-0 opacity-60 onboarding-ambient",
+            "pointer-events-none fixed inset-0 onboarding-ambient",
             !isInstant && "transition-opacity duration-1000 ease-out",
             visible ? "opacity-60" : "opacity-0"
           )}
           aria-hidden="true"
         />
         <div
-          className="onboarding-orb pointer-events-none absolute -left-32 top-1/4 h-64 w-64 rounded-full opacity-40"
+          className="onboarding-orb pointer-events-none fixed -left-32 top-1/4 h-64 w-64 rounded-full opacity-40"
           aria-hidden="true"
         />
         <div
-          className="onboarding-orb pointer-events-none absolute -right-32 bottom-1/4 h-80 w-80 rounded-full opacity-30"
+          className="onboarding-orb pointer-events-none fixed -right-32 bottom-1/4 h-80 w-80 rounded-full opacity-30"
           style={{ animationDelay: "4s" }}
           aria-hidden="true"
         />
 
-        <div className="relative z-10 w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
-          {children}
+        {/* Scrollable content area */}
+        <div
+          ref={ref}
+          className="absolute inset-0 z-10 overflow-y-auto overflow-x-hidden"
+        >
+          <div className="mx-auto flex min-h-full w-full max-w-3xl flex-col px-4 py-6 sm:px-6 sm:py-10">
+            {children}
+          </div>
         </div>
       </div>
     );

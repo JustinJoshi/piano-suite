@@ -10,12 +10,14 @@ interface PillarSlideProps {
   pillarIndex: number;
   isInstant: boolean;
   onNext: () => void;
+  onPrevious: () => void;
 }
 
 export function PillarSlide({
   pillarIndex,
   isInstant,
   onNext,
+  onPrevious,
 }: PillarSlideProps) {
   const { config } = useWelcomeConfig();
   const pillar = config.onboarding.pillars[pillarIndex];
@@ -43,7 +45,7 @@ export function PillarSlide({
   const showButton = phase >= 2 || isInstant;
 
   return (
-    <div className="flex min-h-[60vh] flex-col py-8 sm:min-h-[80vh] sm:py-12">
+    <div className="flex flex-1 flex-col py-4 sm:py-8">
       {/* Top spacer collapses when content appears, pulling the title upward. */}
       <div
         className={cn(
@@ -76,7 +78,7 @@ export function PillarSlide({
 
       <div
         className={cn(
-          "mx-auto mt-6 max-w-2xl space-y-4 text-center sm:mt-8",
+          "mx-auto mt-4 max-w-2xl space-y-3 text-center sm:mt-6",
           showContent
             ? "translate-y-0 opacity-100"
             : "translate-y-6 opacity-0",
@@ -95,7 +97,7 @@ export function PillarSlide({
 
       <div
         className={cn(
-          "mt-8 grid gap-3 sm:mt-10",
+          "mt-6 grid gap-3 sm:mt-8",
           resourceCardVariant === "compact-list"
             ? "grid-cols-1"
             : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
@@ -113,7 +115,24 @@ export function PillarSlide({
         ))}
       </div>
 
-      <div className="mt-8 flex justify-center sm:mt-10">
+      <div className="mt-6 flex items-center justify-center gap-4 sm:mt-8">
+        <div
+          className={cn(
+            showButton
+              ? "translate-y-0 opacity-100"
+              : "translate-y-4 opacity-0",
+            !isInstant && "transition-all duration-700 ease-out"
+          )}
+        >
+          <Button
+            variant="outline"
+            onClick={onPrevious}
+            size="lg"
+            className="rounded-full px-8"
+          >
+            Back
+          </Button>
+        </div>
         <div
           className={cn(
             showButton

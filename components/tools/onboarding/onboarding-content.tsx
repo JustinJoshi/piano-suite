@@ -10,6 +10,7 @@ interface OnboardingContentProps {
   currentSlide: number;
   isInstant: boolean;
   onNext: () => void;
+  onPrevious: () => void;
   onComplete: () => void;
 }
 
@@ -17,6 +18,7 @@ export function OnboardingContent({
   currentSlide,
   isInstant,
   onNext,
+  onPrevious,
   onComplete,
 }: OnboardingContentProps) {
   const { config } = useWelcomeConfig();
@@ -25,20 +27,29 @@ export function OnboardingContent({
   const totalSlides = 2 + pillars.length + 1; // intro + overview + pillars + closing
 
   return (
-    <div className="relative">
+    <div className="relative flex min-h-0 flex-1 flex-col">
       {currentSlide === 0 && <IntroSlide isInstant={isInstant} onNext={onNext} />}
       {currentSlide === 1 && (
-        <PillarsOverviewSlide isInstant={isInstant} onNext={onNext} />
+        <PillarsOverviewSlide
+          isInstant={isInstant}
+          onNext={onNext}
+          onPrevious={onPrevious}
+        />
       )}
       {currentSlide >= 2 && currentSlide < totalSlides - 1 && (
         <PillarSlide
           pillarIndex={currentSlide - 2}
           isInstant={isInstant}
           onNext={onNext}
+          onPrevious={onPrevious}
         />
       )}
       {currentSlide === totalSlides - 1 && (
-        <ClosingSlide isInstant={isInstant} onComplete={onComplete} />
+        <ClosingSlide
+          isInstant={isInstant}
+          onComplete={onComplete}
+          onPrevious={onPrevious}
+        />
       )}
     </div>
   );

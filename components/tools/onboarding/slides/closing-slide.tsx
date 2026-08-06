@@ -8,9 +8,14 @@ import { useWelcomeConfig } from "@/hooks/useWelcomeConfig";
 interface ClosingSlideProps {
   isInstant: boolean;
   onComplete: () => void;
+  onPrevious: () => void;
 }
 
-export function ClosingSlide({ isInstant, onComplete }: ClosingSlideProps) {
+export function ClosingSlide({
+  isInstant,
+  onComplete,
+  onPrevious,
+}: ClosingSlideProps) {
   const { config } = useWelcomeConfig();
   const { closing, cta } = config.onboarding;
   const [visible, setVisible] = useState<boolean>(() => isInstant);
@@ -22,7 +27,7 @@ export function ClosingSlide({ isInstant, onComplete }: ClosingSlideProps) {
   }, [isInstant]);
 
   return (
-    <div className="flex min-h-[40vh] flex-col items-center justify-center text-center">
+    <div className="flex flex-1 flex-col items-center justify-center text-center">
       <h2
         className={cn(
           "font-heading text-4xl font-semibold tracking-tight text-foreground sm:text-5xl",
@@ -35,7 +40,7 @@ export function ClosingSlide({ isInstant, onComplete }: ClosingSlideProps) {
 
       <div
         className={cn(
-          "mt-10",
+          "mt-10 flex items-center justify-center gap-4",
           visible
             ? "translate-y-0 opacity-100"
             : "translate-y-4 opacity-0",
@@ -43,10 +48,14 @@ export function ClosingSlide({ isInstant, onComplete }: ClosingSlideProps) {
         )}
       >
         <Button
-          onClick={onComplete}
+          variant="outline"
+          onClick={onPrevious}
           size="lg"
           className="rounded-full px-8"
         >
+          Back
+        </Button>
+        <Button onClick={onComplete} size="lg" className="rounded-full px-8">
           {cta}
         </Button>
       </div>

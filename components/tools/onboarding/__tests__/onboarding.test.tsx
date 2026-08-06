@@ -85,12 +85,27 @@ describe("Onboarding", () => {
     fireEvent.click(screen.getAllByRole("button", { name: /next/i })[0]);
     fireEvent.click(screen.getAllByRole("button", { name: /next/i })[0]);
 
-    expect(screen.getByText("Anki")).toBeInTheDocument();
-    expect(screen.getByText("Dr. Barbara Oakley")).toBeInTheDocument();
-    expect(screen.getByText("Active recall research")).toBeInTheDocument();
+    expect(screen.getAllByText("Anki")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("Dr. Barbara Oakley")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("Active recall research")[0]).toBeInTheDocument();
 
-    const ankiLink = screen.getByText("Anki").closest("a");
+    const ankiLink = screen.getAllByText("Anki")[0].closest("a");
     expect(ankiLink).toHaveAttribute("href", "https://apps.ankiweb.net/");
     expect(ankiLink).toHaveAttribute("target", "_blank");
+  });
+
+  it("goes back to the previous slide when Back is clicked", () => {
+    renderWithInstantSearch();
+
+    // Intro -> overview
+    fireEvent.click(screen.getAllByRole("button", { name: /next/i })[0]);
+    expect(
+      screen.getByText(/three most important pillars/i)
+    ).toBeInTheDocument();
+
+    // Overview -> intro
+    fireEvent.click(screen.getByRole("button", { name: /back/i }));
+    expect(screen.getByText("Hi")).toBeInTheDocument();
+    expect(screen.getByText("welcome to piano suite")).toBeInTheDocument();
   });
 });

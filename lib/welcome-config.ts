@@ -223,7 +223,7 @@ export const defaultWelcomeConfig: WelcomeConfig = {
           "The fastest way to waste practice time is to re-read something you already saw. What actually builds memory is retrieval: producing the answer from scratch, then spacing those retrievals over days.",
           "Anki handles the scheduling. It tracks what you are about to forget and shows it to you right before that happens. Use it for chord names, progressions, and anything else you need to remember.",
         ],
-        nextDelayMs: 8000,
+        nextDelayMs: 1800,
         resources: [
           {
             id: "anki",
