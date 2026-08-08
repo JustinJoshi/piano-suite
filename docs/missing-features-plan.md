@@ -357,6 +357,97 @@ Outstanding polish items for the first-time `/tools` onboarding flow shipped in 
 
 ---
 
+## User-requested backlog (new)
+
+These items were requested after the v1 roadmap was written. They are tracked here until they are promoted to phased implementation plans.
+
+### Audio / piano sound option (`kimi/piano-sound`)
+
+Add an optional piano sound that plays when the user presses a key on a connected MIDI keyboard.
+
+- **Status:** Milestone 1 (global playback + quick toggle + `/settings/audio`) shipped in branch `kimi/piano-sound`. Milestone 2 (custom `.sf2`/sample-map upload, caching, preset expansion) is next.
+- **Research:** `docs/piano-sound-engine-research.md` — compare Tone.js Sampler, `smplr`, raw Web Audio, and SF2-based engines.
+- **Implementation plan:** `docs/piano-sound-implementation-plan.md`.
+- **Settings surface:** `/settings/audio` page with:
+  - Piano sound on/off
+  - Volume
+  - Preset selector (built-in smplr pianos; custom upload in Milestone 2)
+- **Per-tool access:** a **“Use MIDI sounds”** switch + gear icon on the MIDI connection bar when connected.
+- **Custom soundfonts:** support user-uploaded sample packs and popular open-source soundfonts (Salamander, FluidR3_GM, MusyngKite, GeneralUser GS, smplr’s SplendidGrandPiano).
+- **Files likely touched:**
+  - `package.json` / `package-lock.json` (new dependency)
+  - `hooks/useAudio.ts` or new `hooks/useToneAudio.ts`
+  - `hooks/useMidi.ts` (dispatch note-ons to audio)
+  - `app/settings/theme/page.tsx` or new `app/settings/audio/page.tsx`
+  - `lib/audio-settings.ts`
+  - `components/drills/midi-connection-bar.tsx`
+
+### Tracking verification
+
+The tracking pipeline needs a health check before declaring it fully reliable.
+
+- **Goal:** verify end-to-end event flow for Chord Drill, Arpeggios, Progression, Root Cycling, and Technique.
+- **Checklist:**
+  - Events write to Convex when `canPersist` is true.
+  - Free-tier local history (`lib/local-practice-history.ts`) is read back correctly.
+  - Tracking dashboard displays the right data and does not double-count imports.
+  - Reflex Drill EXT JSON import still works.
+  - E2E specs still pass.
+- **Files likely touched:**
+  - `convex/tracking.ts`
+  - `components/tracking/*`
+  - `lib/local-practice-history.ts`
+  - `e2e/tracking.*.spec.ts`
+
+### Arpeggio root-chord miss filter
+
+In `/tools/arpeggios`, re-articulating a left-hand root-chord note during the right-hand sequence should not count as a miss.
+
+- **Fix:** when the drill arms, record the exact MIDI note numbers that satisfied the left-hand hold. During the sequence phase, ignore note-on events for those specific note numbers.
+- **Why this works:** a higher-octave copy of the same pitch class is a different MIDI note number, so it is still evaluated as an arpeggio note.
+- **Files likely touched:**
+  - `hooks/useArpeggios.ts`
+  - `lib/sequence-drill.ts` (helpers if needed)
+  - `lib/__tests__/arpeggios.test.ts` / `hooks/__tests__/useArpeggios.test.ts`
+
+### Music ripple integration (audio file / microphone)
+
+Let the existing ripple/ambient visualizations react to an uploaded audio file or live microphone input, not just live MIDI.
+
+- **Use case:** user uploads a song and watches the Chladni / Julia / Lissajous / Quasiperiodic field pulse with the music.
+- **Approach:** use Web Audio `AnalyserNode` to extract frequency/energy data and feed it into the visualization impulse layer. This should reuse the shared MIDI → viz foundation planned in Phase B rather than adding a second ambient store.
+- **Files likely touched:**
+  - `lib/audio-impulse.ts` (new)
+  - `hooks/useAudioRipple.ts` (new)
+  - `components/ambient/ambient-effect-renderer.tsx`
+  - `app/tools/chladni-ripple/page.tsx` or new `/tools/music-ripple`
+
+### Chladni Ripple polish suite
+
+A cluster of related improvements for the Chladni Ripple Lab and ambient backgrounds:
+
+1. **Viewport-independent pattern geometry**
+   - Fix the shader so the square-plate pattern looks the same regardless of container aspect ratio.
+   - File: `components/welcome/chladni-visualization.tsx`.
+2. **Persist ripple params to welcome / ambient presets**
+   - Currently “Use on Welcome” only sets the ambient kind to `chladni-ripple`; the custom lab controls are lost.
+   - Add a persisted ripple settings blob and make the ambient/welcome renderer read it.
+   - Files: `lib/chladni-ripple-settings.ts`, `hooks/useChladniRippleSettings.ts`, `components/ambient/ambient-effect-renderer.tsx`, `components/drills/chladni-ripple/chladni-ripple-lab.tsx`.
+3. **Float panel dynamic resolution**
+   - Use `ResizeObserver` so the canvas rerenders at full resolution when the float panel is resized.
+   - Files: `components/welcome/chladni-visualization.tsx`, `components/ambient/ambient-float-panel.tsx`.
+4. **Full customization like Chladni Lab**
+   - Add zoom, secondary wave controls, breathe, time scale, pattern color, and presets to the Ripple Lab.
+   - Optionally share a `components/drills/lab-controls/*` extraction with Chladni Lab.
+   - Files: `components/drills/chladni-ripple/chladni-ripple-lab.tsx`, `lib/chladni-ripple.ts`, `hooks/useChladniRipple.ts`.
+5. **Unified “turn off” + one customization place**
+   - Add a global atmosphere on/off toggle in `/settings/atmosphere`.
+   - Make the page the single place to pick the active visual concept, customize it, and decide where it appears.
+   - Keep the Labs as deep editors, but route the “Apply to home / everywhere” actions through the same settings store.
+   - Files: `app/settings/atmosphere/page.tsx`, `lib/ambient-effects.ts`, `hooks/useAmbientEffects.tsx`.
+
+---
+
 ## Suggested PR / branch sequence
 
 Cloud / local agents: one branch per phase (or per tool inside C/F), matching `cursor/<name>-8bc9` in cloud.
@@ -369,6 +460,10 @@ Cloud / local agents: one branch per phase (or per tool inside C/F), matching `c
 | 4 | D ambient MIDI kinds | `lib/ambient-effects.ts`, ambient components, atmosphere settings, `AGENTS.md` |
 | 5 | E chat access | `lib/chat-auth.ts`, `app/api/chat`, e2e, maybe Convex |
 | 6… | F / G as needed | F may hit lab components; G mostly `articles/` |
+| Audio | Piano sound option | `package.json`, `hooks/useAudio.ts`, settings, `components/drills/midi-connection-bar.tsx` |
+| Arp-fix | Arpeggio root-chord miss filter | `hooks/useArpeggios.ts`, tests |
+| Ripple-polish | Chladni Ripple fixes + customization + unified UI | ambient components, Ripple Lab, Chladni visualization |
+| Music-ripple | Audio file / mic reactivity | new audio-impulse layer, ambient renderer |
 
 Do not combine E (auth/chat) with D (ambient MIDI) in one PR — different risk profiles.
 

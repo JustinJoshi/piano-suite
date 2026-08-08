@@ -6,6 +6,8 @@ import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AmbientEffectsHost } from "@/components/ambient/ambient-effects-host";
 import { AmbientEffectsProvider } from "@/hooks/useAmbientEffects";
+import { AudioEngineHost } from "@/components/audio/audio-engine-host";
+import { AudioSettingsProvider } from "@/hooks/useAudioSettings";
 import { ExperimentalFeaturesProvider } from "@/hooks/useExperimentalFeatures";
 import { defaultTheme, themeIds } from "@/lib/themes";
 import "./globals.css";
@@ -54,10 +56,13 @@ export default function RootLayout({
           <ClerkProvider appearance={{ theme: shadcn }}>
             <ConvexClientProvider>
               <ExperimentalFeaturesProvider>
-                <AmbientEffectsProvider>
-                  <AmbientEffectsHost />
-                  {children}
-                </AmbientEffectsProvider>
+                <AudioSettingsProvider>
+                  <AmbientEffectsProvider>
+                    <AmbientEffectsHost />
+                    <AudioEngineHost />
+                    {children}
+                  </AmbientEffectsProvider>
+                </AudioSettingsProvider>
               </ExperimentalFeaturesProvider>
             </ConvexClientProvider>
           </ClerkProvider>

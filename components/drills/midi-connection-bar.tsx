@@ -1,6 +1,9 @@
 "use client";
 
+import Link from "next/link";
+import { Loader2, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAudioSettings } from "@/hooks/useAudioSettings";
 
 export type MidiConnectionBarProps = {
   supported: boolean;
@@ -27,6 +30,8 @@ export function MidiConnectionBar({
   onSelectInput,
   onConnect,
 }: MidiConnectionBarProps) {
+  const { settings, setEnabled, setSustain, engineState } = useAudioSettings();
+
   if (!supported) {
     return (
       <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
@@ -73,6 +78,47 @@ export function MidiConnectionBar({
           ))}
         </select>
       )}
+
+      <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-background px-2.5 py-1.5 text-foreground">
+        <input
+          type="checkbox"
+          checked={settings.enabled}
+          onChange={(e) => setEnabled(e.target.checked)}
+          className="accent-primary"
+          data-testid="midi-sound-toggle"
+        />
+        <span className="text-xs">Use MIDI sounds</span>
+      </label>
+
+      <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-background px-2.5 py-1.5 text-foreground">
+        <input
+          type="checkbox"
+          checked={settings.sustain}
+          onChange={(e) => setSustain(e.target.checked)}
+          className="accent-primary"
+          data-testid="midi-sustain-toggle"
+        />
+        <span className="text-xs">Sustain</span>
+      </label>
+
+      {engineState === "loading" && (
+        <span
+          className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"
+          data-testid="midi-audio-loading"
+        >
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          Loading
+        </span>
+      )}
+
+      <Link
+        href="/settings/audio"
+        aria-label="Audio settings"
+        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
+        data-testid="midi-audio-settings-link"
+      >
+        <Settings className="h-4 w-4" />
+      </Link>
     </div>
   );
 }

@@ -19,6 +19,7 @@ import {
   Activity,
   Aperture,
   CreditCard,
+  Volume2,
   X,
 } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
@@ -191,6 +192,28 @@ export function Sidebar() {
                   )}
                 />
                 Atmosphere
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/settings/audio"
+                onClick={() => setOpen(false)}
+                className={cn(
+                  "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  pathname === "/settings/audio"
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                )}
+              >
+                <Volume2
+                  className={cn(
+                    "h-4 w-4 transition-colors",
+                    pathname === "/settings/audio"
+                      ? "text-primary"
+                      : "text-muted-foreground group-hover:text-foreground"
+                  )}
+                />
+                Audio
               </Link>
             </li>
             <li>
