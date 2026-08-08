@@ -66,6 +66,22 @@ vi.mock("@/hooks/useAuthAccess", () => ({
   useAuthAccess: () => useAuthAccessMock(),
 }));
 
+vi.mock("@/hooks/useAudioSettings", () => ({
+  useAudioSettings: () => ({
+    settings: {
+      enabled: true,
+      volume: 0.7,
+      preset: "splendid-grand-piano",
+      customKit: null,
+    },
+    setEnabled: vi.fn(),
+    setVolume: vi.fn(),
+    setPreset: vi.fn(),
+    setCustomKit: vi.fn(),
+    loaded: true,
+  }),
+}));
+
 describe("ChladniRippleLab", () => {
   beforeEach(() => {
     setRouteBackground.mockClear();

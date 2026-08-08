@@ -361,16 +361,18 @@ Outstanding polish items for the first-time `/tools` onboarding flow shipped in 
 
 These items were requested after the v1 roadmap was written. They are tracked here until they are promoted to phased implementation plans.
 
-### Audio / piano sound option
+### Audio / piano sound option (`kimi/piano-sound`)
 
 Add an optional piano sound that plays when the user presses a key on a connected MIDI keyboard.
 
+- **Status:** Milestone 1 (global playback + quick toggle + `/settings/audio`) shipped in branch `kimi/piano-sound`. Milestone 2 (custom `.sf2`/sample-map upload, caching, preset expansion) is next.
 - **Research:** `docs/piano-sound-engine-research.md` — compare Tone.js Sampler, `smplr`, raw Web Audio, and SF2-based engines.
-- **Settings surface:** add an **Audio** section to `/settings/theme` (or a new `/settings/audio` page) with:
+- **Implementation plan:** `docs/piano-sound-implementation-plan.md`.
+- **Settings surface:** `/settings/audio` page with:
   - Piano sound on/off
   - Volume
-  - Sound source selector (built-in synth, bundled sample set, custom upload)
-- **Per-tool access:** add a small gear icon next to every MIDI connect button that opens the audio settings inline.
+  - Preset selector (built-in smplr pianos; custom upload in Milestone 2)
+- **Per-tool access:** a **“Use MIDI sounds”** switch + gear icon on the MIDI connection bar when connected.
 - **Custom soundfonts:** support user-uploaded sample packs and popular open-source soundfonts (Salamander, FluidR3_GM, MusyngKite, GeneralUser GS, smplr’s SplendidGrandPiano).
 - **Files likely touched:**
   - `package.json` / `package-lock.json` (new dependency)
