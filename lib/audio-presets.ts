@@ -69,6 +69,7 @@ export type BuiltInPreset = (typeof BUILT_IN_PRESETS)[number];
  */
 export type AudioPreset =
   | BuiltInPreset
+  | "custom"
   | `sf:${SoundFontKit}:${string}`
   | `ep:${string}`
   | `mallet:${string}`;
@@ -123,7 +124,14 @@ function formatPresetName(name: string): string {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-export function getPresetLabel(preset: AudioPreset): string {
+export function getPresetLabel(
+  preset: AudioPreset,
+  customName?: string
+): string {
+  if (preset === "custom") {
+    return customName ? `${customName} (custom)` : "Custom kit";
+  }
+
   if (preset in PRESET_CATEGORIES) {
     const builtIn = preset as BuiltInPreset;
     // Derive a readable label from the ID.
@@ -167,6 +175,8 @@ export function getPresetLabel(preset: AudioPreset): string {
 }
 
 export function getPresetCategory(preset: AudioPreset): string {
+  if (preset === "custom") return "Custom";
+
   if (preset in PRESET_CATEGORIES) {
     return PRESET_CATEGORIES[preset as BuiltInPreset];
   }
@@ -184,6 +194,8 @@ export function getPresetCategory(preset: AudioPreset): string {
 
 export function isAudioPreset(value: unknown): value is AudioPreset {
   if (typeof value !== "string") return false;
+
+  if (value === "custom") return true;
 
   if (BUILT_IN_PRESETS.includes(value as BuiltInPreset)) return true;
 

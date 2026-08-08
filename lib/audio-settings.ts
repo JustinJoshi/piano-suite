@@ -17,9 +17,10 @@ export const AUDIO_SETTINGS_LOCAL_STORAGE_KEY = "piano-suite-audio-v1";
 export type { AudioPreset };
 
 export type CustomKit =
-  | { kind: "sf2"; name: string; url: string; preset: string }
+  | { kind: "sf2"; id: string; name: string; preset: string }
   | {
       kind: "samples";
+      id: string;
       name: string;
       map: Record<string, string>;
     };
@@ -67,14 +68,14 @@ function normalizeCustomKit(value: unknown): CustomKit | null {
   if (!value || typeof value !== "object") return null;
   const src = value as Record<string, unknown>;
   const kind = src.kind;
+  const id = typeof src.id === "string" ? src.id.trim() : "";
   const name = typeof src.name === "string" ? src.name.trim() : "";
-  if (!name) return null;
+  if (!id || !name) return null;
 
   if (kind === "sf2") {
-    const url = typeof src.url === "string" ? src.url.trim() : "";
     const preset = typeof src.preset === "string" ? src.preset.trim() : "";
-    if (!url || !preset) return null;
-    return { kind: "sf2", name, url, preset };
+    if (!preset) return null;
+    return { kind: "sf2", id, name, preset };
   }
 
   if (kind === "samples") {
@@ -87,7 +88,7 @@ function normalizeCustomKit(value: unknown): CustomKit | null {
       }
     }
     if (Object.keys(map).length === 0) return null;
-    return { kind: "samples", name, map };
+    return { kind: "samples", id, name, map };
   }
 
   return null;

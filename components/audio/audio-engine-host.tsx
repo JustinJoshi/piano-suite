@@ -29,12 +29,17 @@ export function AudioEngineHost() {
     connectedRef.current = connected;
   }, [connected]);
 
-  // Create a new engine whenever the instrument preset changes.
+  // Create a new engine whenever the instrument preset or custom kit changes.
   // Volume is applied separately so we don't reload samples on every slide.
   useEffect(() => {
-    const engine = createAudioEngine(settings.preset, settings.volume, {
-      onStateChange: setEngineState,
-    });
+    const engine = createAudioEngine(
+      settings.preset,
+      settings.volume,
+      settings.customKit,
+      {
+        onStateChange: setEngineState,
+      }
+    );
     const sustainedNotes = sustainedNotesRef.current;
     engineRef.current = engine;
     sustainedNotes.clear();
@@ -50,7 +55,7 @@ export function AudioEngineHost() {
       sustainedNotes.clear();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settings.preset]);
+  }, [settings.preset, settings.customKit]);
 
   // Update volume without recreating the engine.
   useEffect(() => {

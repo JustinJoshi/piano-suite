@@ -47,6 +47,26 @@ describe("normalizeAudioSettings", () => {
     );
   });
 
+  it("preserves the custom preset", () => {
+    expect(normalizeAudioSettings({ preset: "custom" }).preset).toBe("custom");
+  });
+
+  it("preserves sample custom kits", () => {
+    const settings: AudioSettings = {
+      enabled: true,
+      volume: 0.5,
+      preset: "custom",
+      sustain: false,
+      customKit: {
+        kind: "samples",
+        id: "kit-2",
+        name: "My Samples",
+        map: { "60": "sample-1", "62": "sample-2" },
+      },
+    };
+    expect(normalizeAudioSettings(settings)).toEqual(settings);
+  });
+
   it("preserves valid custom values", () => {
     const settings: AudioSettings = {
       enabled: false,
@@ -55,8 +75,8 @@ describe("normalizeAudioSettings", () => {
       sustain: true,
       customKit: {
         kind: "sf2",
+        id: "kit-1",
         name: "My Piano",
-        url: "blob:abc",
         preset: "Grand Piano",
       },
     };

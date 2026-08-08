@@ -181,64 +181,50 @@ npm run build
 
 ---
 
-## Milestone 2 — Custom soundfonts, sample maps, and caching
+## Milestone 2 — Custom soundfonts, sample maps, and caching ✅ Shipped
 
 ### 1. Custom `.sf2` upload
 
-Use `smplr`'s `Soundfont2` instrument:
+Uses `soundfont2` to parse the file and `smplr.Soundfont2` to play it:
 
 ```ts
-import { Soundfont2 } from "smplr";
 const sampler = Soundfont2(context, {
   url: objectUrlFromUserFile,
   createSoundfont: (data) => new SoundFont2(data),
 });
 await sampler.ready;
-sampler.loadInstrument("Grand Piano");
+await sampler.loadInstrument("Grand Piano");
 ```
 
-UI flow in `/settings/audio`:
+UI flow in `/settings/audio` (see `components/audio/sf2-uploader.tsx`):
 - File input accepts `.sf2`.
-- After parsing, list available presets; user picks one.
-- Store the user's choice in `settings.customKit` and `localStorage`.
-- For persistence across sessions, we can keep the file in `IndexedDB` or ask the user to re-upload ( simpler v1 ).
+- After parsing, list available presets; user picks one and names the kit.
+- Blob is stored in IndexedDB via `lib/audio-storage.ts`.
+- Metadata (`kind: "sf2"`, id, name, preset) is stored in `settings.customKit`.
 
 ### 2. Custom sample-map upload
 
-Allow the user to upload a `.zip` or multiple `.wav`/`.mp3` files.
+Allows the user to upload individual audio files or a `.zip` archive.
 
-- Parse filenames like `C4.wav`, `F#3.mp3`, etc.
-- Build a `Record<string, AudioBuffer>` and use `smplr`'s `Sampler`.
-- Provide a simple mapping editor if filenames are ambiguous.
+- Filenames like `C4.wav`, `F#3.mp3`, or `60.wav` are mapped to MIDI notes (`lib/sample-map-kit.ts`).
+- Samples are decoded with `context.decodeAudioData` and loaded into `smplr.Sampler`.
+- Sample blobs are stored in IndexedDB; `settings.customKit.map` holds `note → sampleId`.
 
 ### 3. Preset soundfont hosting
 
-For the built-in presets that are not in `smplr` out of the box (FluidR3, MusyngKite, GeneralUser GS), either:
-
-- Use `smplr`'s `Soundfont` instrument with the gleitz.github.io MIDI.js soundfont URLs.
-- Or mirror a small subset in `public/soundfonts/` if external fetches are unreliable.
+Built-in presets and the full GM browser use `smplr`'s `Soundfont` instrument with the gleitz.github.io MIDI.js soundfont URLs. No local mirroring is required.
 
 ### 4. Sample caching
 
-Use `smplr`'s `CacheStorage`:
-
-```ts
-import { CacheStorage } from "smplr";
-const storage = CacheStorage();
-const piano = SplendidGrandPiano(context, { storage });
-```
-
-- Works over HTTPS.
-- For local dev, document that users may need `next-dev-https` if they want caching; otherwise samples are fetched each session.
-- Cache invalidation: user can clear from `/settings/audio`.
+Fetched network samples are cached via `smplr`'s `CacheStorage("piano-suite")`. Uploaded kits are kept separately in IndexedDB. Users can clear the network cache from `/settings/audio`.
 
 ### 5. Convex sync for settings
 
-Already wired in Milestone 1 via `useAudioSettings`. In Milestone 2 we also sync:
-- Selected preset / custom kit metadata (not the uploaded binary; that stays local).
-- Volume and enabled state.
+`useAudioSettings` syncs metadata only:
+- Selected preset / custom kit name and ids.
+- Enabled, volume, and sustain state.
 
-This lets a Pro user keep the same piano sound across devices.
+Uploaded audio binaries stay device-local in IndexedDB.
 
 ---
 

@@ -108,32 +108,40 @@ Run E2E if the settings page or preset switching changes materially.
 
 ---
 
-### Phase 2 — Custom `.sf2` / sample upload (Milestone 2)
+### Phase 2 — Custom `.sf2` / sample upload (Milestone 2) ✅ Shipped
 
 **1. Custom `.sf2` upload**
 
-- File: `app/settings/audio/page.tsx`
-- Add a file input that accepts `.sf2`.
-- Use `smplr`’s `Soundfont2` / `Soundfont2Sampler` to parse the file in the browser.
-- List available presets inside the SF2 and let the user pick one.
-- Store the selected preset metadata in `settings.customKit`.
+- File: `components/audio/sf2-uploader.tsx`
+- File input accepts `.sf2`.
+- Uses `soundfont2` + `smplr.Soundfont2` to parse and list instrument presets.
+- Selected preset metadata stored in `settings.customKit`; blob stored in IndexedDB.
 
-**2. Persist uploaded files locally**
+**2. Sample-map upload**
 
-- Store the `.sf2` blob in `IndexedDB` (not `localStorage`; samples are too large).
-- On app start, read the blob from IndexedDB and create an object URL for `Soundfont2`.
-- Provide a "Manage custom soundfonts" UI to delete stored files.
+- File: `components/audio/sample-map-uploader.tsx`
+- Accepts individual audio files or a `.zip` archive.
+- Filenames like `C4.wav`, `F#3.mp3`, or `60.wav` are mapped to MIDI notes.
+- Sample blobs stored in IndexedDB; note → blob-key map stored in `settings.customKit`.
 
-**3. Settings sync**
+**3. Persist uploaded files locally**
 
-- Convex syncs only the metadata (`customKit` name, preset index, enabled, volume).
-- The actual `.sf2` binary stays device-local in IndexedDB.
+- File: `lib/audio-storage.ts`
+- IndexedDB object store `customKits` holds blobs keyed by kit/sample ID.
+- Object URLs are created on demand and revoked when the engine disposes.
+- "Delete kit" removes blobs from IndexedDB and clears `customKit`.
 
-**4. Tests**
+**4. Settings sync**
 
-- Unit tests for SF2 parsing helpers.
-- Component tests for the upload flow.
-- E2E smoke that the upload UI appears and rejects non-`.sf2` files gracefully.
+- Convex syncs only metadata (`customKit` name, preset/index map, enabled, volume).
+- Audio binaries stay device-local in IndexedDB.
+
+**5. Tests**
+
+- `lib/__tests__/audio-storage.test.ts`
+- `lib/__tests__/sf2-kit.test.ts`
+- `lib/__tests__/sample-map-kit.test.ts`
+- `lib/__tests__/audio-engine.test.ts` covers custom SF2 loading.
 
 ---
 

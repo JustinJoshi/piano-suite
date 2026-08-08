@@ -13,10 +13,15 @@ import {
   SplendidGrandPiano,
   type ElectricPiano as ElectricPianoType,
   type Mallet as MalletType,
+  type Sampler as SamplerType,
   type Soundfont as SoundfontType,
+  type Soundfont2 as Soundfont2Type,
   type SplendidGrandPiano as SplendidGrandPianoType,
 } from "smplr";
-import type { AudioPreset } from "@/lib/audio-settings";
+import type { AudioPreset, CustomKit } from "@/lib/audio-settings";
+import { loadCustomKitBlob } from "@/lib/audio-storage";
+import { createSf2Sampler } from "@/lib/sf2-kit";
+import { createSampleMapSampler } from "@/lib/sample-map-kit";
 
 export type AudioEngineState =
   | "idle"
@@ -38,7 +43,9 @@ type SamplerInstance =
   | SplendidGrandPianoType
   | SoundfontType
   | ElectricPianoType
-  | MalletType;
+  | MalletType
+  | Soundfont2Type
+  | SamplerType;
 
 function getAudioContext(): AudioContext | null {
   if (typeof window === "undefined") return null;
@@ -87,9 +94,7 @@ function createSampler(
       const instrument = formatInstrumentName(preset.slice(prefix.length));
       return Soundfont(
         context,
-        storage
-          ? { instrument, kit, storage }
-          : { instrument, kit }
+        storage ? { instrument, kit, storage } : { instrument, kit }
       );
     }
   }
@@ -113,9 +118,7 @@ function createSampler(
     const instrument = preset.slice(3);
     return ElectricPiano(
       context,
-      storage
-        ? { instrument, storage }
-        : { instrument }
+      storage ? { instrument, storage } : { instrument }
     );
   }
 
@@ -124,13 +127,45 @@ function createSampler(
     const instrument = preset.slice(7);
     return Mallet(
       context,
-      storage
-        ? { instrument, storage }
-        : { instrument }
+      storage ? { instrument, storage } : { instrument }
     );
   }
 
   throw new Error(`Unsupported audio preset: ${preset}`);
+}
+
+async function loadCustomSampler(
+  context: AudioContext,
+  customKit: CustomKit
+): Promise<{ sampler: SamplerInstance; objectUrls: string[] }> {
+  if (customKit.kind === "sf2") {
+    const blob = await loadCustomKitBlob(customKit.id);
+    if (!blob) {
+      throw new Error(`Custom SF2 kit not found: ${customKit.id}`);
+    }
+    const url = URL.createObjectURL(blob);
+    try {
+      const sampler = await createSf2Sampler(context, url, customKit.preset);
+      return { sampler, objectUrls: [url] };
+    } catch (err) {
+      URL.revokeObjectURL(url);
+      throw err;
+    }
+  }
+
+  // Sample map kit: load each sample blob by sub-key and build a Sampler.
+  const entries = await Promise.all(
+    Object.entries(customKit.map).map(async ([note, sampleId]) => {
+      const blob = await loadCustomKitBlob(sampleId);
+      if (!blob) {
+        throw new Error(`Sample not found: ${sampleId}`);
+      }
+      return { note: Number(note), blob, name: sampleId };
+    })
+  );
+
+  const sampler = await createSampleMapSampler(context, entries);
+  return { sampler, objectUrls: [] };
 }
 
 export type CreateAudioEngineOptions = {
@@ -141,6 +176,7 @@ export type CreateAudioEngineOptions = {
 export function createAudioEngine(
   preset: AudioPreset,
   volume: number,
+  customKit: CustomKit | null,
   options: CreateAudioEngineOptions = {}
 ): AudioEngine {
   const { onStateChange } = options;
@@ -148,6 +184,7 @@ export function createAudioEngine(
   let state: AudioEngineState = context ? "idle" : "error";
   let sampler: SamplerInstance | null = null;
   let loadPromise: Promise<void> | null = null;
+  let objectUrls: string[] = [];
 
   function setState(next: AudioEngineState) {
     state = next;
@@ -184,7 +221,13 @@ export function createAudioEngine(
     setState("loading");
     loadPromise = (async () => {
       try {
-        sampler = createSampler(context, preset);
+        if (preset === "custom" && customKit) {
+          const result = await loadCustomSampler(context, customKit);
+          sampler = result.sampler;
+          objectUrls = result.objectUrls;
+        } else {
+          sampler = createSampler(context, preset);
+        }
         await sampler.ready;
         applyVolume();
         setState("ready");
@@ -252,6 +295,8 @@ export function createAudioEngine(
         sampler.dispose();
       }
       sampler = null;
+      objectUrls.forEach((url) => URL.revokeObjectURL(url));
+      objectUrls = [];
       setState("idle");
       loadPromise = null;
     },

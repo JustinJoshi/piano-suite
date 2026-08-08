@@ -5,6 +5,9 @@ import { useAudioSettings } from "@/hooks/useAudioSettings";
 import { PresetPicker } from "@/components/audio/preset-picker";
 import { SoundfontBrowser } from "@/components/audio/soundfont-browser";
 import { ExternalSoundfontsCard } from "@/components/audio/external-soundfonts-card";
+import { CustomKitCard } from "@/components/audio/custom-kit-card";
+import { Sf2Uploader } from "@/components/audio/sf2-uploader";
+import { SampleMapUploader } from "@/components/audio/sample-map-uploader";
 import { clearAudioCache } from "@/lib/audio-engine";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +25,7 @@ export default function AudioSettingsPage() {
     setVolume,
     setPreset,
     setSustain,
+    setCustomKit,
     engineState,
   } = useAudioSettings();
 
@@ -203,21 +207,69 @@ export default function AudioSettingsPage() {
           </CardContent>
         </Card>
 
+        {settings.customKit && (
+          <Card data-testid="active-custom-kit-card">
+            <CardHeader>
+              <CardTitle className="font-heading text-base">
+                Active custom kit
+              </CardTitle>
+              <CardDescription>
+                Your uploaded kit is stored in this browser. The audio data does
+                not sync to your account.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CustomKitCard
+                kit={settings.customKit}
+                isActive={settings.preset === "custom"}
+                onUse={() => setPreset("custom")}
+                onDelete={() => {
+                  setCustomKit(null);
+                  if (settings.preset === "custom") {
+                    setPreset("splendid-grand-piano");
+                  }
+                }}
+              />
+            </CardContent>
+          </Card>
+        )}
+
         <Card>
           <CardHeader>
             <CardTitle className="font-heading text-base">
-              Custom soundfonts
+              Upload .sf2 soundfont
             </CardTitle>
             <CardDescription>
-              Upload your own .sf2 files or sample packs to use as the MIDI
-              sound.
+              Load a SoundFont 2 file and pick one of its instruments.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Custom instrument support is on the way. For now, pick one of the
-              built-in presets or browse the full soundfont catalog above.
-            </p>
+            <Sf2Uploader
+              onSaved={(kit) => {
+                setCustomKit(kit);
+                setPreset("custom");
+              }}
+            />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-heading text-base">
+              Upload sample map
+            </CardTitle>
+            <CardDescription>
+              Load individual audio files or a .zip of files named by note (e.g.
+              C4.wav, F#3.mp3, 60.wav).
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SampleMapUploader
+              onSaved={(kit) => {
+                setCustomKit(kit);
+                setPreset("custom");
+              }}
+            />
           </CardContent>
         </Card>
       </div>

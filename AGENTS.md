@@ -27,10 +27,17 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `lib/audio-presets.ts` | Curated preset categories, GM catalog metadata, and preset ID validation |
 | `lib/audio-settings.ts` | Typed MIDI-sound prefs + localStorage normalization |
 | `lib/audio-engine.ts` | smplr-based sampler engine (load, play, stop, volume, CacheStorage) |
+| `lib/audio-storage.ts` | IndexedDB blob storage for uploaded custom kits |
+| `lib/sf2-kit.ts` | Parse `.sf2` files and build a `smplr.Soundfont2` sampler |
+| `lib/sample-map-kit.ts` | Map audio filenames/zip entries to MIDI notes and build a `smplr.Sampler` |
+| `lib/audio-upload.ts` | Coordinate saving custom kit blobs + metadata to IndexedDB |
 | `hooks/useAudioSettings.tsx` | `AudioSettingsProvider` + hook; shared MIDI-sound prefs (localStorage + Convex) |
 | `components/audio/audio-engine-host.tsx` | Global MIDI note-on → audio playback host |
 | `components/audio/preset-picker.tsx` | Categorized built-in preset picker |
 | `components/audio/soundfont-browser.tsx` | Full smplr GM / electric piano / mallet browser |
+| `components/audio/sf2-uploader.tsx` | `.sf2` upload + instrument preset selector |
+| `components/audio/sample-map-uploader.tsx` | Per-note sample / zip upload |
+| `components/audio/custom-kit-card.tsx` | Active custom kit with use/delete actions |
 | `hooks/useDrillTimer.ts` | Generic drill timer state machine |
 | `hooks/useAnkiSync.ts` | Poll Anki for current card and parse its chord |
 | `hooks/useThemeCssVars.ts` | Read theme CSS custom properties and watch for theme changes; useful for Canvas/WebGL visuals |
