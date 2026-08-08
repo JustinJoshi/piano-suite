@@ -32,37 +32,37 @@ export default function AudioSettingsPage() {
   return (
     <div className="p-4 sm:p-6 lg:p-10">
       <div className="mx-auto max-w-3xl space-y-8">
-        <div>
-          <h1 className="font-heading text-2xl font-semibold tracking-tight text-foreground">
+        <div className="space-y-2">
+          <h1 className="font-heading text-3xl font-semibold tracking-tight text-foreground">
             Audio
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-base leading-relaxed text-muted-foreground">
             Configure the sound that plays when you press keys on your MIDI
             keyboard. Preferences save in this browser and sync when signed in.
           </p>
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="font-heading text-base">
+          <CardHeader className="gap-2">
+            <CardTitle className="font-heading text-lg">
               MIDI sounds
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-sm leading-relaxed">
               Play a sample when MIDI notes are pressed anywhere on the site.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <label className="flex cursor-pointer items-start gap-3 text-sm text-foreground">
+          <CardContent className="space-y-5">
+            <label className="flex cursor-pointer items-start gap-3 text-base text-foreground">
               <input
                 type="checkbox"
                 checked={settings.enabled}
                 onChange={(e) => setEnabled(e.target.checked)}
-                className="mt-0.5 accent-primary"
+                className="mt-1 accent-primary"
                 data-testid="audio-master-toggle"
               />
-              <span>
-                <span className="font-medium">Enable MIDI sounds</span>
-                <span className="mt-1 block text-muted-foreground">
+              <span className="space-y-1.5">
+                <span className="block font-medium">Enable MIDI sounds</span>
+                <span className="block text-sm leading-relaxed text-muted-foreground">
                   You can also toggle this quickly from the MIDI connection bar
                   on any drill page.
                 </span>
@@ -72,24 +72,24 @@ export default function AudioSettingsPage() {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="font-heading text-base">Sustain</CardTitle>
-            <CardDescription>
+          <CardHeader className="gap-2">
+            <CardTitle className="font-heading text-lg">Sustain</CardTitle>
+            <CardDescription className="text-sm leading-relaxed">
               Hold notes after you release the keys, like a piano sustain pedal.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <label className="flex cursor-pointer items-start gap-3 text-sm text-foreground">
+          <CardContent className="space-y-5">
+            <label className="flex cursor-pointer items-start gap-3 text-base text-foreground">
               <input
                 type="checkbox"
                 checked={settings.sustain}
                 onChange={(e) => setSustain(e.target.checked)}
-                className="mt-0.5 accent-primary"
+                className="mt-1 accent-primary"
                 data-testid="audio-sustain-toggle"
               />
-              <span>
-                <span className="font-medium">Enable sustain</span>
-                <span className="mt-1 block text-muted-foreground">
+              <span className="space-y-1.5">
+                <span className="block font-medium">Enable sustain</span>
+                <span className="block text-sm leading-relaxed text-muted-foreground">
                   You can also toggle this quickly from the MIDI connection bar
                   on any drill page.
                 </span>
@@ -99,15 +99,15 @@ export default function AudioSettingsPage() {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="font-heading text-base">Volume</CardTitle>
-            <CardDescription>
+          <CardHeader className="gap-2">
+            <CardTitle className="font-heading text-lg">Volume</CardTitle>
+            <CardDescription className="text-sm leading-relaxed">
               Master volume for the MIDI sound.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <label className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between text-xs">
+          <CardContent className="space-y-5">
+            <label className="flex flex-col gap-2.5">
+              <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Output level</span>
                 <span className="font-mono text-foreground">
                   {Math.round(settings.volume * 100)}%
@@ -129,16 +129,16 @@ export default function AudioSettingsPage() {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="font-heading text-base">Preset</CardTitle>
-            <CardDescription>
+          <CardHeader className="gap-2">
+            <CardTitle className="font-heading text-lg">Preset</CardTitle>
+            <CardDescription className="text-sm leading-relaxed">
               Choose a curated instrument. Changes apply immediately.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-5">
             {engineState === "loading" && (
               <div
-                className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-xs text-muted-foreground"
+                className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm text-muted-foreground"
                 data-testid="audio-preset-loading"
               >
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -153,16 +153,16 @@ export default function AudioSettingsPage() {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="font-heading text-base">
+          <CardHeader className="gap-2">
+            <CardTitle className="font-heading text-lg">
               Browse all soundfonts
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-sm leading-relaxed">
               Explore every General MIDI instrument from smplr&apos;s built-in
               kits, plus electric pianos and mallets.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-5">
             <SoundfontBrowser
               activePreset={settings.preset}
               onSelect={setPreset}
@@ -171,31 +171,31 @@ export default function AudioSettingsPage() {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="font-heading text-base">
+          <CardHeader className="gap-2">
+            <CardTitle className="font-heading text-lg">
               Find more soundfonts
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-sm leading-relaxed">
               Download .sf2 files or sample packs from these external libraries
-              to use with the custom kit uploader coming soon.
+              to use with the custom kit uploader.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-5">
             <ExternalSoundfontsCard />
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="font-heading text-base">
+          <CardHeader className="gap-2">
+            <CardTitle className="font-heading text-lg">
               Audio cache
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-sm leading-relaxed">
               Clear downloaded samples from this browser. They will be
               re-downloaded the next time you play.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-5">
             <Button
               variant="outline"
               onClick={() => void clearAudioCache()}
@@ -209,16 +209,16 @@ export default function AudioSettingsPage() {
 
         {settings.customKit && (
           <Card data-testid="active-custom-kit-card">
-            <CardHeader>
-              <CardTitle className="font-heading text-base">
+            <CardHeader className="gap-2">
+              <CardTitle className="font-heading text-lg">
                 Active custom kit
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-sm leading-relaxed">
                 Your uploaded kit is stored in this browser. The audio data does
                 not sync to your account.
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-5">
               <CustomKitCard
                 kit={settings.customKit}
                 isActive={settings.preset === "custom"}
@@ -235,15 +235,15 @@ export default function AudioSettingsPage() {
         )}
 
         <Card>
-          <CardHeader>
-            <CardTitle className="font-heading text-base">
+          <CardHeader className="gap-2">
+            <CardTitle className="font-heading text-lg">
               Upload .sf2 soundfont
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-sm leading-relaxed">
               Load a SoundFont 2 file and pick one of its instruments.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-5">
             <Sf2Uploader
               onSaved={(kit) => {
                 setCustomKit(kit);
@@ -254,16 +254,16 @@ export default function AudioSettingsPage() {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="font-heading text-base">
+          <CardHeader className="gap-2">
+            <CardTitle className="font-heading text-lg">
               Upload sample map
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-sm leading-relaxed">
               Load individual audio files or a .zip of files named by note (e.g.
               C4.wav, F#3.mp3, 60.wav).
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-5">
             <SampleMapUploader
               onSaved={(kit) => {
                 setCustomKit(kit);
