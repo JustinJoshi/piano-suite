@@ -57,6 +57,12 @@ describe("createAudioEngine", () => {
     expect(engine.state).toBe("ready");
   });
 
+  it("loads the FatBoy grand piano preset", async () => {
+    const engine = createAudioEngine("fatboy-piano", 0.7);
+    await engine.load();
+    expect(engine.state).toBe("ready");
+  });
+
   it("notifies state changes through onStateChange", async () => {
     const onStateChange = vi.fn();
     const engine = createAudioEngine("splendid-grand-piano", 0.7, {

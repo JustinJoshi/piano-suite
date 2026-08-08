@@ -12,7 +12,8 @@ export const AUDIO_SETTINGS_LOCAL_STORAGE_KEY = "piano-suite-audio-v1";
 export type AudioPreset =
   | "splendid-grand-piano"
   | "fluidr3-piano"
-  | "musyngkite-piano";
+  | "musyngkite-piano"
+  | "fatboy-piano";
 
 export type CustomKit =
   | { kind: "sf2"; name: string; url: string; preset: string }
@@ -47,6 +48,7 @@ export const AUDIO_PRESET_LABELS: Record<AudioPreset, string> = {
   "splendid-grand-piano": "Splendid Grand Piano",
   "fluidr3-piano": "FluidR3 Grand Piano",
   "musyngkite-piano": "MusyngKite Grand Piano",
+  "fatboy-piano": "FatBoy Grand Piano",
 };
 
 function isAudioPreset(value: unknown): value is AudioPreset {

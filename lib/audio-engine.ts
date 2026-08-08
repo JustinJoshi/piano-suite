@@ -65,6 +65,11 @@ function createSampler(
         instrument: "acoustic_grand_piano",
         kit: "MusyngKite",
       });
+    case "fatboy-piano":
+      return Soundfont(context, {
+        instrument: "acoustic_grand_piano",
+        kit: "FatBoy",
+      });
     case "splendid-grand-piano":
     default:
       return SplendidGrandPiano(context);
