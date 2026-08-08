@@ -19,6 +19,7 @@ export function AudioEngineHost() {
   const engineRef = useRef<AudioEngine | null>(null);
   const settingsRef = useRef(settings);
   const connectedRef = useRef(connected);
+  const sustainedNotesRef = useRef<Set<number>>(new Set());
 
   useEffect(() => {
     settingsRef.current = settings;
@@ -32,7 +33,9 @@ export function AudioEngineHost() {
   // Volume is applied separately so we don't reload samples on every slide.
   useEffect(() => {
     const engine = createAudioEngine(settings.preset, settings.volume);
+    const sustainedNotes = sustainedNotesRef.current;
     engineRef.current = engine;
+    sustainedNotes.clear();
 
     // Start loading samples eagerly so the first note plays quickly.
     engine.load().catch(() => {
@@ -42,6 +45,7 @@ export function AudioEngineHost() {
     return () => {
       engine.dispose();
       engineRef.current = null;
+      sustainedNotes.clear();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings.preset]);
@@ -55,8 +59,19 @@ export function AudioEngineHost() {
   useEffect(() => {
     if (!settings.enabled) {
       engineRef.current?.stopAll();
+      sustainedNotesRef.current.clear();
     }
   }, [settings.enabled]);
+
+  // Release sustained notes when sustain is turned off.
+  useEffect(() => {
+    if (!settings.sustain) {
+      sustainedNotesRef.current.forEach((note) => {
+        engineRef.current?.stop(note);
+      });
+      sustainedNotesRef.current.clear();
+    }
+  }, [settings.sustain]);
 
   // Subscribe to global MIDI note events.
   useEffect(() => {
@@ -64,6 +79,7 @@ export function AudioEngineHost() {
       if (!settingsRef.current.enabled || !connectedRef.current) return;
       const detail = (event as CustomEvent<MidiNoteEventDetail>).detail;
       if (!detail) return;
+      sustainedNotesRef.current.delete(detail.note);
       engineRef.current?.play(detail.note, detail.velocity);
     };
 
@@ -71,6 +87,12 @@ export function AudioEngineHost() {
       if (!settingsRef.current.enabled || !connectedRef.current) return;
       const detail = (event as CustomEvent<MidiNoteEventDetail>).detail;
       if (!detail) return;
+
+      if (settingsRef.current.sustain) {
+        sustainedNotesRef.current.add(detail.note);
+        return;
+      }
+
       engineRef.current?.stop(detail.note);
     };
 

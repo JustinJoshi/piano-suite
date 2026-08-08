@@ -4,17 +4,21 @@ import { MidiConnectionBar } from "../midi-connection-bar";
 
 const setEnabled = vi.fn();
 
+const setSustain = vi.fn();
+
 vi.mock("@/hooks/useAudioSettings", () => ({
   useAudioSettings: () => ({
     settings: {
       enabled: true,
       volume: 0.7,
       preset: "splendid-grand-piano",
+      sustain: false,
       customKit: null,
     },
     setEnabled,
     setVolume: vi.fn(),
     setPreset: vi.fn(),
+    setSustain,
     setCustomKit: vi.fn(),
     loaded: true,
   }),
@@ -75,5 +79,25 @@ describe("MidiConnectionBar", () => {
 
     fireEvent.click(screen.getByTestId("midi-sound-toggle"));
     expect(setEnabled).toHaveBeenCalledWith(false);
+  });
+
+  it("shows and toggles the sustain switch when connected", () => {
+    setSustain.mockClear();
+
+    render(
+      <MidiConnectionBar
+        supported
+        connected
+        error={null}
+        inputs={[{ id: "input-1", name: "Piano Keyboard" }]}
+        selectedInputId="input-1"
+        onSelectInput={vi.fn()}
+        onConnect={vi.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("midi-sustain-toggle")).not.toBeChecked();
+    fireEvent.click(screen.getByTestId("midi-sustain-toggle"));
+    expect(setSustain).toHaveBeenCalledWith(true);
   });
 });

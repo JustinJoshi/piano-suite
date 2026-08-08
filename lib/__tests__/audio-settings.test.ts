@@ -30,6 +30,7 @@ describe("normalizeAudioSettings", () => {
       enabled: false,
       volume: 0.5,
       preset: "fluidr3-piano",
+      sustain: true,
       customKit: {
         kind: "sf2",
         name: "My Piano",
@@ -38,6 +39,12 @@ describe("normalizeAudioSettings", () => {
       },
     };
     expect(normalizeAudioSettings(settings)).toEqual(settings);
+  });
+
+  it("falls back to default sustain for non-booleans", () => {
+    expect(
+      normalizeAudioSettings({ sustain: "yes" as never }).sustain
+    ).toBe(DEFAULT_AUDIO_SETTINGS.sustain);
   });
 
   it("rejects malformed custom kits", () => {
@@ -67,6 +74,7 @@ describe("localStorage helpers", () => {
       enabled: false,
       volume: 0.25,
       preset: "musyngkite-piano",
+      sustain: true,
       customKit: null,
     };
     writeAudioSettingsToLocalStorage(settings);

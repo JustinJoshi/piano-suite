@@ -11,7 +11,8 @@ import {
 } from "@/components/ui/card";
 
 export default function AudioSettingsPage() {
-  const { settings, setEnabled, setVolume, setPreset } = useAudioSettings();
+  const { settings, setEnabled, setVolume, setPreset, setSustain } =
+    useAudioSettings();
 
   return (
     <div className="p-4 sm:p-6 lg:p-10">
@@ -47,6 +48,33 @@ export default function AudioSettingsPage() {
               />
               <span>
                 <span className="font-medium">Enable MIDI sounds</span>
+                <span className="mt-1 block text-muted-foreground">
+                  You can also toggle this quickly from the MIDI connection bar
+                  on any drill page.
+                </span>
+              </span>
+            </label>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-heading text-base">Sustain</CardTitle>
+            <CardDescription>
+              Hold notes after you release the keys, like a piano sustain pedal.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <label className="flex cursor-pointer items-start gap-3 text-sm text-foreground">
+              <input
+                type="checkbox"
+                checked={settings.sustain}
+                onChange={(e) => setSustain(e.target.checked)}
+                className="mt-0.5 accent-primary"
+                data-testid="audio-sustain-toggle"
+              />
+              <span>
+                <span className="font-medium">Enable sustain</span>
                 <span className="mt-1 block text-muted-foreground">
                   You can also toggle this quickly from the MIDI connection bar
                   on any drill page.

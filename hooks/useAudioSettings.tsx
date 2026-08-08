@@ -27,6 +27,7 @@ type AudioSettingsContextValue = {
   setEnabled: (enabled: boolean) => void;
   setVolume: (volume: number) => void;
   setPreset: (preset: AudioSettings["preset"]) => void;
+  setSustain: (sustain: boolean) => void;
   setCustomKit: (customKit: AudioSettings["customKit"]) => void;
   loaded: boolean;
 };
@@ -127,6 +128,10 @@ export function AudioSettingsProvider({ children }: { children: ReactNode }) {
     (preset: AudioSettings["preset"]) => updateSettings({ preset }),
     [updateSettings]
   );
+  const setSustain = useCallback(
+    (sustain: boolean) => updateSettings({ sustain }),
+    [updateSettings]
+  );
   const setCustomKit = useCallback(
     (customKit: AudioSettings["customKit"]) => updateSettings({ customKit }),
     [updateSettings]
@@ -138,10 +143,20 @@ export function AudioSettingsProvider({ children }: { children: ReactNode }) {
       setEnabled,
       setVolume,
       setPreset,
+      setSustain,
       setCustomKit,
       loaded: localSettings !== null || remoteSettings !== null,
     }),
-    [settings, setEnabled, setVolume, setPreset, setCustomKit, localSettings, remoteSettings]
+    [
+      settings,
+      setEnabled,
+      setVolume,
+      setPreset,
+      setSustain,
+      setCustomKit,
+      localSettings,
+      remoteSettings,
+    ]
   );
 
   return (

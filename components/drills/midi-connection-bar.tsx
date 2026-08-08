@@ -30,7 +30,7 @@ export function MidiConnectionBar({
   onSelectInput,
   onConnect,
 }: MidiConnectionBarProps) {
-  const { settings, setEnabled } = useAudioSettings();
+  const { settings, setEnabled, setSustain } = useAudioSettings();
 
   if (!supported) {
     return (
@@ -88,6 +88,17 @@ export function MidiConnectionBar({
           data-testid="midi-sound-toggle"
         />
         <span className="text-xs">Use MIDI sounds</span>
+      </label>
+
+      <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-background px-2.5 py-1.5 text-foreground">
+        <input
+          type="checkbox"
+          checked={settings.sustain}
+          onChange={(e) => setSustain(e.target.checked)}
+          className="accent-primary"
+          data-testid="midi-sustain-toggle"
+        />
+        <span className="text-xs">Sustain</span>
       </label>
 
       <Link

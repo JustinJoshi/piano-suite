@@ -27,12 +27,13 @@ function Reader({ label }: { label: string }) {
   const { settings } = useAudioSettings();
   return (
     <div data-testid={label}>
-      {settings.preset}-{settings.enabled ? "on" : "off"}
+      {settings.preset}-{settings.enabled ? "on" : "off"}-
+      {settings.sustain ? "sus" : "nosus"}
     </div>
   );
 }
 
-function Setter() {
+function PresetSetter() {
   const { setPreset } = useAudioSettings();
   return (
     <button
@@ -40,6 +41,15 @@ function Setter() {
       onClick={() => setPreset("fluidr3-piano")}
     >
       Change preset
+    </button>
+  );
+}
+
+function SustainSetter() {
+  const { setSustain } = useAudioSettings();
+  return (
+    <button data-testid="set-sustain" onClick={() => setSustain(true)}>
+      Enable sustain
     </button>
   );
 }
@@ -54,27 +64,46 @@ describe("AudioSettingsProvider", () => {
       <AudioSettingsProvider>
         <Reader label="reader-a" />
         <Reader label="reader-b" />
-        <Setter />
+        <PresetSetter />
       </AudioSettingsProvider>
     );
 
     expect(screen.getByTestId("reader-a")).toHaveTextContent(
-      "splendid-grand-piano-on"
+      "splendid-grand-piano-on-nosus"
     );
     expect(screen.getByTestId("reader-b")).toHaveTextContent(
-      "splendid-grand-piano-on"
+      "splendid-grand-piano-on-nosus"
     );
 
     fireEvent.click(screen.getByTestId("set-preset"));
 
     expect(screen.getByTestId("reader-a")).toHaveTextContent(
-      "fluidr3-piano-on"
+      "fluidr3-piano-on-nosus"
     );
     expect(screen.getByTestId("reader-b")).toHaveTextContent(
-      "fluidr3-piano-on"
+      "fluidr3-piano-on-nosus"
     );
     expect(localStorage.getItem(AUDIO_SETTINGS_LOCAL_STORAGE_KEY)).toContain(
       "fluidr3-piano"
+    );
+  });
+
+  it("shares sustain changes immediately across consumers", () => {
+    render(
+      <AudioSettingsProvider>
+        <Reader label="reader-a" />
+        <Reader label="reader-b" />
+        <SustainSetter />
+      </AudioSettingsProvider>
+    );
+
+    fireEvent.click(screen.getByTestId("set-sustain"));
+
+    expect(screen.getByTestId("reader-a")).toHaveTextContent(
+      "splendid-grand-piano-on-sus"
+    );
+    expect(screen.getByTestId("reader-b")).toHaveTextContent(
+      "splendid-grand-piano-on-sus"
     );
   });
 });

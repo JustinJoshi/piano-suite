@@ -29,6 +29,8 @@ export type AudioSettings = {
   volume: number;
   /** Built-in instrument preset. */
   preset: AudioPreset;
+  /** Hold notes after note-off until sustain is released. */
+  sustain: boolean;
   /** User-uploaded custom kit, if any. */
   customKit: CustomKit | null;
 };
@@ -37,6 +39,7 @@ export const DEFAULT_AUDIO_SETTINGS: AudioSettings = {
   enabled: true,
   volume: 0.7,
   preset: "splendid-grand-piano",
+  sustain: false,
   customKit: null,
 };
 
@@ -115,6 +118,8 @@ export function normalizeAudioSettings(
       typeof src.enabled === "boolean" ? src.enabled : d.enabled,
     volume: asNumber(src.volume, d.volume, 0, 1),
     preset: isAudioPreset(src.preset) ? src.preset : d.preset,
+    sustain:
+      typeof src.sustain === "boolean" ? src.sustain : d.sustain,
     customKit: normalizeCustomKit(src.customKit),
   };
 }
