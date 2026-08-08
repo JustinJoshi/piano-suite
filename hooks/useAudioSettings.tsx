@@ -1,6 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useAuthAccess } from "@/hooks/useAuthAccess";
@@ -13,14 +22,30 @@ import {
   type AudioSettings,
 } from "@/lib/audio-settings";
 
+type AudioSettingsContextValue = {
+  settings: AudioSettings;
+  setEnabled: (enabled: boolean) => void;
+  setVolume: (volume: number) => void;
+  setPreset: (preset: AudioSettings["preset"]) => void;
+  setCustomKit: (customKit: AudioSettings["customKit"]) => void;
+  loaded: boolean;
+};
+
+const AudioSettingsContext = createContext<AudioSettingsContextValue | null>(
+  null
+);
+
 /**
- * Audio preferences React hook.
+ * Shared audio preferences store.
  *
  * - localStorage for everyone (instant, works signed-out)
  * - Convex `settings` key when Pro sync (`canPersist`) is available
  * - Remote hydrates only when there is no local value yet
+ *
+ * Mounted once in the root layout so `AudioEngineHost` and every settings page
+ * see the same state and preset changes take effect immediately.
  */
-export function useAudioSettings() {
+export function AudioSettingsProvider({ children }: { children: ReactNode }) {
   const { canPersist } = useAuthAccess();
   const remote = useQuery(
     api.settings.getSetting,
@@ -37,8 +62,7 @@ export function useAudioSettings() {
     return normalizeAudioSettings(remote as Partial<AudioSettings>);
   }, [remote]);
 
-  const settings =
-    localSettings ?? remoteSettings ?? DEFAULT_AUDIO_SETTINGS;
+  const settings = localSettings ?? remoteSettings ?? DEFAULT_AUDIO_SETTINGS;
 
   const wroteRemoteToLocal = useRef(false);
 
@@ -104,17 +128,40 @@ export function useAudioSettings() {
     [updateSettings]
   );
   const setCustomKit = useCallback(
-    (customKit: AudioSettings["customKit"]) =>
-      updateSettings({ customKit }),
+    (customKit: AudioSettings["customKit"]) => updateSettings({ customKit }),
     [updateSettings]
   );
 
-  return {
-    settings,
-    setEnabled,
-    setVolume,
-    setPreset,
-    setCustomKit,
-    loaded: localSettings !== null || remoteSettings !== null,
-  };
+  const value = useMemo(
+    () => ({
+      settings,
+      setEnabled,
+      setVolume,
+      setPreset,
+      setCustomKit,
+      loaded: localSettings !== null || remoteSettings !== null,
+    }),
+    [settings, setEnabled, setVolume, setPreset, setCustomKit, localSettings, remoteSettings]
+  );
+
+  return (
+    <AudioSettingsContext.Provider value={value}>
+      {children}
+    </AudioSettingsContext.Provider>
+  );
+}
+
+/**
+ * Audio preferences React hook.
+ *
+ * Must be used inside `AudioSettingsProvider` (mounted in the root layout).
+ */
+export function useAudioSettings() {
+  const ctx = useContext(AudioSettingsContext);
+  if (!ctx) {
+    throw new Error(
+      "useAudioSettings must be used within AudioSettingsProvider"
+    );
+  }
+  return ctx;
 }

@@ -28,6 +28,7 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `hooks/useAudioSettings.ts` | Audio prefs React hook: localStorage + Convex sync |
 | `lib/audio-engine.ts` | smplr-based piano sampler engine (load, play, stop, volume) |
 | `components/audio/audio-engine-host.tsx` | Global MIDI note-on → audio playback host |
+| `hooks/useAudioSettings.tsx` | `AudioSettingsProvider` + hook; shared MIDI-sound prefs (localStorage + Convex) |
 | `hooks/useDrillTimer.ts` | Generic drill timer state machine |
 | `hooks/useAnkiSync.ts` | Poll Anki for current card and parse its chord |
 | `hooks/useThemeCssVars.ts` | Read theme CSS custom properties and watch for theme changes; useful for Canvas/WebGL visuals |
