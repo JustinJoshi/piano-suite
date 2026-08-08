@@ -25,11 +25,33 @@ describe("normalizeAudioSettings", () => {
     ).toBe(DEFAULT_AUDIO_SETTINGS.preset);
   });
 
+  it("preserves valid built-in presets", () => {
+    expect(
+      normalizeAudioSettings({ preset: "fluidr3-acoustic-grand-piano" }).preset
+    ).toBe("fluidr3-acoustic-grand-piano");
+  });
+
+  it("preserves dynamic sf presets", () => {
+    expect(
+      normalizeAudioSettings({ preset: "sf:FluidR3_GM:acoustic_grand_piano" })
+        .preset
+    ).toBe("sf:FluidR3_GM:acoustic_grand_piano");
+  });
+
+  it("preserves electric piano and mallet presets", () => {
+    expect(normalizeAudioSettings({ preset: "ep:CP80" }).preset).toBe(
+      "ep:CP80"
+    );
+    expect(normalizeAudioSettings({ preset: "mallet:Marimba" }).preset).toBe(
+      "mallet:Marimba"
+    );
+  });
+
   it("preserves valid custom values", () => {
     const settings: AudioSettings = {
       enabled: false,
       volume: 0.5,
-      preset: "fluidr3-piano",
+      preset: "musyngkite-acoustic-grand-piano",
       sustain: true,
       customKit: {
         kind: "sf2",
@@ -73,7 +95,7 @@ describe("localStorage helpers", () => {
     const settings: AudioSettings = {
       enabled: false,
       volume: 0.25,
-      preset: "musyngkite-piano",
+      preset: "musyngkite-acoustic-grand-piano",
       sustain: true,
       customKit: null,
     };

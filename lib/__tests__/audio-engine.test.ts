@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { createAudioEngine } from "@/lib/audio-engine";
+import { createAudioEngine, clearAudioCache } from "@/lib/audio-engine";
 
 const startMock = vi.fn();
 const stopMock = vi.fn();
@@ -17,6 +17,9 @@ const mockSampler = {
 vi.mock("smplr", () => ({
   SplendidGrandPiano: vi.fn(() => mockSampler),
   Soundfont: vi.fn(() => mockSampler),
+  ElectricPiano: vi.fn(() => mockSampler),
+  Mallet: vi.fn(() => mockSampler),
+  CacheStorage: vi.fn(() => ({})),
 }));
 
 describe("createAudioEngine", () => {
@@ -57,8 +60,29 @@ describe("createAudioEngine", () => {
     expect(engine.state).toBe("ready");
   });
 
-  it("loads the FatBoy grand piano preset", async () => {
-    const engine = createAudioEngine("fatboy-piano", 0.7);
+  it("loads built-in soundfont presets", async () => {
+    const engine = createAudioEngine(
+      "fluidr3-acoustic-grand-piano",
+      0.7
+    );
+    await engine.load();
+    expect(engine.state).toBe("ready");
+  });
+
+  it("loads dynamic sf presets", async () => {
+    const engine = createAudioEngine("sf:FluidR3_GM:acoustic_grand_piano", 0.7);
+    await engine.load();
+    expect(engine.state).toBe("ready");
+  });
+
+  it("loads electric piano presets", async () => {
+    const engine = createAudioEngine("ep:CP80", 0.7);
+    await engine.load();
+    expect(engine.state).toBe("ready");
+  });
+
+  it("loads mallet presets", async () => {
+    const engine = createAudioEngine("mallet:Marimba", 0.7);
     await engine.load();
     expect(engine.state).toBe("ready");
   });
@@ -108,5 +132,22 @@ describe("createAudioEngine", () => {
     engine.dispose();
     expect(disposeMock).toHaveBeenCalled();
     expect(engine.state).toBe("idle");
+  });
+});
+
+describe("clearAudioCache", () => {
+  it("deletes the piano-suite cache", async () => {
+    const deleteMock = vi.fn().mockResolvedValue(true);
+    vi.stubGlobal("caches", { delete: deleteMock });
+
+    await clearAudioCache();
+    expect(deleteMock).toHaveBeenCalledWith("piano-suite");
+    vi.unstubAllGlobals();
+  });
+
+  it("does nothing when caches is unavailable", async () => {
+    vi.stubGlobal("caches", undefined);
+    await expect(clearAudioCache()).resolves.toBeUndefined();
+    vi.unstubAllGlobals();
   });
 });

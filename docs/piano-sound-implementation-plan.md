@@ -2,7 +2,7 @@
 
 > Branch: `kimi/piano-sound`  
 > Worktree: `.worktrees/kimi-piano-sound`  
-> Target: play piano sound on every MIDI note-on across the site, with a quick toggle next to the MIDI connect bar and a full settings page.
+> Target: play piano sound on every MIDI note-on across the site, with a quick toggle next to the MIDI connect bar, categorized presets, a full soundfont browser, and a full settings page.
 
 ## Why `smplr` instead of Tone.js `Sampler`
 
@@ -258,21 +258,26 @@ This lets a Pro user keep the same piano sound across devices.
 ## Files touched summary
 
 ### New files
+- `lib/audio-presets.ts`
 - `lib/audio-settings.ts`
-- `hooks/useAudioSettings.ts`
+- `hooks/useAudioSettings.tsx`
 - `lib/audio-engine.ts`
 - `components/audio/audio-engine-host.tsx`
+- `components/audio/preset-picker.tsx`
+- `components/audio/soundfont-browser.tsx`
+- `components/audio/external-soundfonts-card.tsx`
 - `app/settings/audio/page.tsx`
 - `lib/__tests__/audio-settings.test.ts`
 - `lib/__tests__/audio-engine.test.ts`
+- `e2e/audio-loading.authenticated.spec.ts`
 
 ### Modified files
 - `package.json` / `package-lock.json` — add `smplr`
 - `app/layout.tsx` — mount `AudioEngineHost`
-- `components/drills/midi-connection-bar.tsx` — switch + gear icon
+- `components/drills/midi-connection-bar.tsx` — switch + sustain + gear icon
 - `components/tools/sidebar.tsx` — Audio link
-- `docs/AGENTS.md` — add audio engine to primitive layer table
-- `docs/missing-features-plan.md` — mark piano sound as in-progress
+- `AGENTS.md` — add audio presets and browser components to primitive layer table
+- `docs/piano-sound-categorization-plan.md` — Phase 1 plan for categories and browser
 
 ---
 

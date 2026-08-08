@@ -1,19 +1,20 @@
 /**
  * Audio / MIDI sound settings for Piano Suite.
  *
- * Defines the user-facing sound preferences: master on/off, volume, and the
- * selected instrument preset. Custom kits (user-uploaded .sf2 or sample maps)
- * are declared here but implemented in Milestone 2.
+ * Defines the user-facing sound preferences: master on/off, volume, sustain, and
+ * the selected instrument preset. Custom kits (user-uploaded .sf2 or sample
+ * maps) are declared here but implemented in Phase 2 / Milestone 2.
  */
+
+import {
+  isAudioPreset,
+  type AudioPreset,
+} from "@/lib/audio-presets";
 
 export const AUDIO_SETTINGS_KEY = "audio";
 export const AUDIO_SETTINGS_LOCAL_STORAGE_KEY = "piano-suite-audio-v1";
 
-export type AudioPreset =
-  | "splendid-grand-piano"
-  | "fluidr3-piano"
-  | "musyngkite-piano"
-  | "fatboy-piano";
+export type { AudioPreset };
 
 export type CustomKit =
   | { kind: "sf2"; name: string; url: string; preset: string }
@@ -28,7 +29,7 @@ export type AudioSettings = {
   enabled: boolean;
   /** Output volume, 0..1. */
   volume: number;
-  /** Built-in instrument preset. */
+  /** Built-in or dynamic instrument preset. */
   preset: AudioPreset;
   /** Hold notes after note-off until sustain is released. */
   sustain: boolean;
@@ -43,20 +44,6 @@ export const DEFAULT_AUDIO_SETTINGS: AudioSettings = {
   sustain: false,
   customKit: null,
 };
-
-export const AUDIO_PRESET_LABELS: Record<AudioPreset, string> = {
-  "splendid-grand-piano": "Splendid Grand Piano",
-  "fluidr3-piano": "FluidR3 Grand Piano",
-  "musyngkite-piano": "MusyngKite Grand Piano",
-  "fatboy-piano": "FatBoy Grand Piano",
-};
-
-function isAudioPreset(value: unknown): value is AudioPreset {
-  return (
-    typeof value === "string" &&
-    Object.keys(AUDIO_PRESET_LABELS).includes(value)
-  );
-}
 
 function isFiniteNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);

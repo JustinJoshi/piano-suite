@@ -27,11 +27,11 @@ test.describe("/settings/audio", () => {
     await page.goto("/settings/audio");
     await expect(page.getByRole("heading", { name: "Audio" })).toBeVisible();
 
-    const presetSelect = page.getByTestId("audio-preset");
-    await expect(presetSelect).toHaveValue("splendid-grand-piano");
+    const presetBtn = page.getByTestId("audio-preset-fluidr3-acoustic-grand-piano");
+    await expect(presetBtn).toBeVisible();
 
-    // Switch to FluidR3 to trigger a fresh soundfont fetch.
-    await presetSelect.selectOption("fluidr3-piano");
+    // Switch to a built-in FluidR3 piano to trigger a fresh soundfont fetch.
+    await presetBtn.click();
 
     const loading = page.getByTestId("audio-preset-loading");
     await expect(loading).toBeVisible();
@@ -39,6 +39,5 @@ test.describe("/settings/audio", () => {
 
     // The indicator disappears once samples are ready.
     await expect(loading).toBeHidden({ timeout: 15000 });
-    await expect(presetSelect).toHaveValue("fluidr3-piano");
   });
 });

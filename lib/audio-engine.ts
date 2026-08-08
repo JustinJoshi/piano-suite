@@ -6,8 +6,13 @@
  */
 
 import {
+  CacheStorage,
+  ElectricPiano,
+  Mallet,
   Soundfont,
   SplendidGrandPiano,
+  type ElectricPiano as ElectricPianoType,
+  type Mallet as MalletType,
   type Soundfont as SoundfontType,
   type SplendidGrandPiano as SplendidGrandPianoType,
 } from "smplr";
@@ -29,7 +34,11 @@ export type AudioEngine = {
   dispose(): void;
 };
 
-type SamplerInstance = SplendidGrandPianoType | SoundfontType;
+type SamplerInstance =
+  | SplendidGrandPianoType
+  | SoundfontType
+  | ElectricPianoType
+  | MalletType;
 
 function getAudioContext(): AudioContext | null {
   if (typeof window === "undefined") return null;
@@ -49,31 +58,79 @@ function getAudioContext(): AudioContext | null {
   return g[globalKey] ?? null;
 }
 
+function getStorage() {
+  if (typeof window === "undefined") return undefined;
+  return CacheStorage("piano-suite");
+}
+
+function formatInstrumentName(name: string): string {
+  return name.replace(/-/g, "_");
+}
+
 function createSampler(
   context: AudioContext,
   preset: AudioPreset
 ): SamplerInstance {
-  // Milestone 2: accept a CustomKit here to build a Soundfont2 or Sampler instance.
-  switch (preset) {
-    case "fluidr3-piano":
-      return Soundfont(context, {
-        instrument: "acoustic_grand_piano",
-        kit: "FluidR3_GM",
-      });
-    case "musyngkite-piano":
-      return Soundfont(context, {
-        instrument: "acoustic_grand_piano",
-        kit: "MusyngKite",
-      });
-    case "fatboy-piano":
-      return Soundfont(context, {
-        instrument: "acoustic_grand_piano",
-        kit: "FatBoy",
-      });
-    case "splendid-grand-piano":
-    default:
-      return SplendidGrandPiano(context);
+  const storage = getStorage();
+
+  if (preset === "splendid-grand-piano") {
+    return SplendidGrandPiano(context, storage ? { storage } : undefined);
   }
+
+  // Built-in soundfont presets like "fluidr3-acoustic-grand-piano".
+  for (const { prefix, kit } of [
+    { prefix: "fluidr3-", kit: "FluidR3_GM" },
+    { prefix: "musyngkite-", kit: "MusyngKite" },
+    { prefix: "fatboy-", kit: "FatBoy" },
+  ] as const) {
+    if (preset.startsWith(prefix)) {
+      const instrument = formatInstrumentName(preset.slice(prefix.length));
+      return Soundfont(
+        context,
+        storage
+          ? { instrument, kit, storage }
+          : { instrument, kit }
+      );
+    }
+  }
+
+  // Dynamic soundfont preset: "sf:<kit>:<instrument>".
+  if (preset.startsWith("sf:")) {
+    const [, kit, instrument] = preset.split(":");
+    if (!kit || !instrument) {
+      throw new Error(`Invalid soundfont preset: ${preset}`);
+    }
+    return Soundfont(
+      context,
+      storage
+        ? { instrument: formatInstrumentName(instrument), kit, storage }
+        : { instrument: formatInstrumentName(instrument), kit }
+    );
+  }
+
+  // Electric piano preset: "ep:<instrument>".
+  if (preset.startsWith("ep:")) {
+    const instrument = preset.slice(3);
+    return ElectricPiano(
+      context,
+      storage
+        ? { instrument, storage }
+        : { instrument }
+    );
+  }
+
+  // Mallet preset: "mallet:<instrument>".
+  if (preset.startsWith("mallet:")) {
+    const instrument = preset.slice(7);
+    return Mallet(
+      context,
+      storage
+        ? { instrument, storage }
+        : { instrument }
+    );
+  }
+
+  throw new Error(`Unsupported audio preset: ${preset}`);
 }
 
 export type CreateAudioEngineOptions = {
@@ -187,7 +244,11 @@ export function createAudioEngine(
     },
 
     dispose() {
-      if (sampler && "dispose" in sampler && typeof sampler.dispose === "function") {
+      if (
+        sampler &&
+        "dispose" in sampler &&
+        typeof sampler.dispose === "function"
+      ) {
         sampler.dispose();
       }
       sampler = null;
@@ -195,4 +256,14 @@ export function createAudioEngine(
       loadPromise = null;
     },
   };
+}
+
+/** Clear the browser's audio sample cache. */
+export async function clearAudioCache(): Promise<void> {
+  if (typeof window === "undefined" || !("caches" in window)) return;
+  try {
+    await window.caches.delete("piano-suite");
+  } catch {
+    // Ignore errors in private mode or unsupported environments.
+  }
 }

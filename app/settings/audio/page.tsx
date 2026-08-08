@@ -1,7 +1,12 @@
 "use client";
 
-import { AUDIO_PRESET_LABELS, type AudioPreset } from "@/lib/audio-settings";
+import { Loader2, Trash2 } from "lucide-react";
 import { useAudioSettings } from "@/hooks/useAudioSettings";
+import { PresetPicker } from "@/components/audio/preset-picker";
+import { SoundfontBrowser } from "@/components/audio/soundfont-browser";
+import { ExternalSoundfontsCard } from "@/components/audio/external-soundfonts-card";
+import { clearAudioCache } from "@/lib/audio-engine";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -9,7 +14,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
 
 export default function AudioSettingsPage() {
   const {
@@ -29,7 +33,7 @@ export default function AudioSettingsPage() {
             Audio
           </h1>
           <p className="text-sm text-muted-foreground">
-            Configure the piano sound that plays when you press keys on your MIDI
+            Configure the sound that plays when you press keys on your MIDI
             keyboard. Preferences save in this browser and sync when signed in.
           </p>
         </div>
@@ -40,8 +44,7 @@ export default function AudioSettingsPage() {
               MIDI sounds
             </CardTitle>
             <CardDescription>
-              Play a piano sample when MIDI notes are pressed anywhere on the
-              site.
+              Play a sample when MIDI notes are pressed anywhere on the site.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -95,7 +98,7 @@ export default function AudioSettingsPage() {
           <CardHeader>
             <CardTitle className="font-heading text-base">Volume</CardTitle>
             <CardDescription>
-              Master volume for the piano sound.
+              Master volume for the MIDI sound.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -125,8 +128,7 @@ export default function AudioSettingsPage() {
           <CardHeader>
             <CardTitle className="font-heading text-base">Preset</CardTitle>
             <CardDescription>
-              Choose the built-in piano sound. More options and custom
-              soundfonts are coming soon.
+              Choose a curated instrument. Changes apply immediately.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -139,20 +141,65 @@ export default function AudioSettingsPage() {
                 Loading samples…
               </div>
             )}
-            <select
-              value={settings.preset}
-              onChange={(e) => setPreset(e.target.value as AudioPreset)}
-              className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground"
-              data-testid="audio-preset"
+            <PresetPicker
+              activePreset={settings.preset}
+              onSelect={setPreset}
+            />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-heading text-base">
+              Browse all soundfonts
+            </CardTitle>
+            <CardDescription>
+              Explore every General MIDI instrument from smplr&apos;s built-in
+              kits, plus electric pianos and mallets.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SoundfontBrowser
+              activePreset={settings.preset}
+              onSelect={setPreset}
+            />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-heading text-base">
+              Find more soundfonts
+            </CardTitle>
+            <CardDescription>
+              Download .sf2 files or sample packs from these external libraries
+              to use with the custom kit uploader coming soon.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ExternalSoundfontsCard />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-heading text-base">
+              Audio cache
+            </CardTitle>
+            <CardDescription>
+              Clear downloaded samples from this browser. They will be
+              re-downloaded the next time you play.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              variant="outline"
+              onClick={() => void clearAudioCache()}
+              data-testid="audio-clear-cache"
             >
-              {(Object.keys(AUDIO_PRESET_LABELS) as AudioPreset[]).map(
-                (preset) => (
-                  <option key={preset} value={preset}>
-                    {AUDIO_PRESET_LABELS[preset]}
-                  </option>
-                )
-              )}
-            </select>
+              <Trash2 className="mr-2 h-4 w-4" />
+              Clear audio cache
+            </Button>
           </CardContent>
         </Card>
 
@@ -162,14 +209,14 @@ export default function AudioSettingsPage() {
               Custom soundfonts
             </CardTitle>
             <CardDescription>
-              Upload your own .sf2 files or sample packs to use as the piano
+              Upload your own .sf2 files or sample packs to use as the MIDI
               sound.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
               Custom instrument support is on the way. For now, pick one of the
-              built-in presets above.
+              built-in presets or browse the full soundfont catalog above.
             </p>
           </CardContent>
         </Card>

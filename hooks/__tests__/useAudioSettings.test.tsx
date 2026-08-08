@@ -46,7 +46,7 @@ function PresetSetter() {
   return (
     <button
       data-testid="set-preset"
-      onClick={() => setPreset("fluidr3-piano")}
+      onClick={() => setPreset("fluidr3-acoustic-grand-piano")}
     >
       Change preset
     </button>
@@ -100,13 +100,13 @@ describe("AudioSettingsProvider", () => {
     fireEvent.click(screen.getByTestId("set-preset"));
 
     expect(screen.getByTestId("reader-a")).toHaveTextContent(
-      "fluidr3-piano-on-nosus"
+      "fluidr3-acoustic-grand-piano-on-nosus"
     );
     expect(screen.getByTestId("reader-b")).toHaveTextContent(
-      "fluidr3-piano-on-nosus"
+      "fluidr3-acoustic-grand-piano-on-nosus"
     );
     expect(localStorage.getItem(AUDIO_SETTINGS_LOCAL_STORAGE_KEY)).toContain(
-      "fluidr3-piano"
+      "fluidr3-acoustic-grand-piano"
     );
   });
 
