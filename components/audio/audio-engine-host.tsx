@@ -13,7 +13,7 @@ import { createAudioEngine, type AudioEngine } from "@/lib/audio-engine";
  * feature enabled and a MIDI device is connected.
  */
 export function AudioEngineHost() {
-  const { settings } = useAudioSettings();
+  const { settings, setEngineState } = useAudioSettings();
   const { connected } = useMidi();
 
   const engineRef = useRef<AudioEngine | null>(null);
@@ -32,14 +32,16 @@ export function AudioEngineHost() {
   // Create a new engine whenever the instrument preset changes.
   // Volume is applied separately so we don't reload samples on every slide.
   useEffect(() => {
-    const engine = createAudioEngine(settings.preset, settings.volume);
+    const engine = createAudioEngine(settings.preset, settings.volume, {
+      onStateChange: setEngineState,
+    });
     const sustainedNotes = sustainedNotesRef.current;
     engineRef.current = engine;
     sustainedNotes.clear();
 
     // Start loading samples eagerly so the first note plays quickly.
     engine.load().catch(() => {
-      // Loading errors are surfaced through engine.state if we ever expose it.
+      // Loading errors are surfaced through onStateChange.
     });
 
     return () => {

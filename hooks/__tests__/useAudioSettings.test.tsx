@@ -23,6 +23,14 @@ vi.mock("convex/react", () => ({
   useMutation: () => vi.fn(),
 }));
 
+vi.mock("@/lib/audio-engine", () => ({
+  createAudioEngine: () => ({
+    load: () => Promise.resolve(),
+    dispose: () => {},
+    state: "ready",
+  }),
+}));
+
 function Reader({ label }: { label: string }) {
   const { settings } = useAudioSettings();
   return (
@@ -50,6 +58,20 @@ function SustainSetter() {
   return (
     <button data-testid="set-sustain" onClick={() => setSustain(true)}>
       Enable sustain
+    </button>
+  );
+}
+
+function EngineStateReader({ label }: { label: string }) {
+  const { engineState } = useAudioSettings();
+  return <div data-testid={label}>{engineState}</div>;
+}
+
+function EngineStateSetter() {
+  const { setEngineState } = useAudioSettings();
+  return (
+    <button data-testid="set-loading" onClick={() => setEngineState("loading")}>
+      Set loading
     </button>
   );
 }
@@ -105,5 +127,23 @@ describe("AudioSettingsProvider", () => {
     expect(screen.getByTestId("reader-b")).toHaveTextContent(
       "splendid-grand-piano-on-sus"
     );
+  });
+
+  it("shares engine state changes across consumers", () => {
+    render(
+      <AudioSettingsProvider>
+        <EngineStateReader label="engine-a" />
+        <EngineStateReader label="engine-b" />
+        <EngineStateSetter />
+      </AudioSettingsProvider>
+    );
+
+    expect(screen.getByTestId("engine-a")).toHaveTextContent("idle");
+    expect(screen.getByTestId("engine-b")).toHaveTextContent("idle");
+
+    fireEvent.click(screen.getByTestId("set-loading"));
+
+    expect(screen.getByTestId("engine-a")).toHaveTextContent("loading");
+    expect(screen.getByTestId("engine-b")).toHaveTextContent("loading");
   });
 });

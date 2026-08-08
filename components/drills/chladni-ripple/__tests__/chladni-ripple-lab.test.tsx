@@ -81,6 +81,8 @@ vi.mock("@/hooks/useAudioSettings", () => ({
     setSustain: vi.fn(),
     setCustomKit: vi.fn(),
     loaded: true,
+    engineState: "ready",
+    setEngineState: vi.fn(),
   }),
 }));
 

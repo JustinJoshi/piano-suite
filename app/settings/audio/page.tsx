@@ -9,10 +9,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 
 export default function AudioSettingsPage() {
-  const { settings, setEnabled, setVolume, setPreset, setSustain } =
-    useAudioSettings();
+  const {
+    settings,
+    setEnabled,
+    setVolume,
+    setPreset,
+    setSustain,
+    engineState,
+  } = useAudioSettings();
 
   return (
     <div className="p-4 sm:p-6 lg:p-10">
@@ -122,7 +129,16 @@ export default function AudioSettingsPage() {
               soundfonts are coming soon.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-3">
+            {engineState === "loading" && (
+              <div
+                className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-xs text-muted-foreground"
+                data-testid="audio-preset-loading"
+              >
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                Loading samples…
+              </div>
+            )}
             <select
               value={settings.preset}
               onChange={(e) => setPreset(e.target.value as AudioPreset)}

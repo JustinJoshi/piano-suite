@@ -57,6 +57,16 @@ describe("createAudioEngine", () => {
     expect(engine.state).toBe("ready");
   });
 
+  it("notifies state changes through onStateChange", async () => {
+    const onStateChange = vi.fn();
+    const engine = createAudioEngine("splendid-grand-piano", 0.7, {
+      onStateChange,
+    });
+    await engine.load();
+    expect(onStateChange).toHaveBeenCalledWith("loading");
+    expect(onStateChange).toHaveBeenCalledWith("ready");
+  });
+
   it("plays a note with clamped velocity", async () => {
     const engine = createAudioEngine("splendid-grand-piano", 0.7);
     await engine.load();

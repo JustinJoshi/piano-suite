@@ -1,30 +1,40 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { MidiConnectionBar } from "../midi-connection-bar";
 
 const setEnabled = vi.fn();
-
 const setSustain = vi.fn();
 
+const mockAudioSettings = {
+  settings: {
+    enabled: true,
+    volume: 0.7,
+    preset: "splendid-grand-piano" as const,
+    sustain: false,
+    customKit: null,
+  },
+  setEnabled,
+  setVolume: vi.fn(),
+  setPreset: vi.fn(),
+  setSustain,
+  setCustomKit: vi.fn(),
+  loaded: true,
+  engineState: "ready" as const,
+  setEngineState: vi.fn(),
+};
+
 vi.mock("@/hooks/useAudioSettings", () => ({
-  useAudioSettings: () => ({
-    settings: {
-      enabled: true,
-      volume: 0.7,
-      preset: "splendid-grand-piano",
-      sustain: false,
-      customKit: null,
-    },
-    setEnabled,
-    setVolume: vi.fn(),
-    setPreset: vi.fn(),
-    setSustain,
-    setCustomKit: vi.fn(),
-    loaded: true,
-  }),
+  useAudioSettings: () => mockAudioSettings,
 }));
 
 describe("MidiConnectionBar", () => {
+  beforeEach(() => {
+    setEnabled.mockClear();
+    setSustain.mockClear();
+    mockAudioSettings.engineState = "ready";
+    mockAudioSettings.settings.sustain = false;
+  });
+
   it("shows a connect button when disconnected", () => {
     render(
       <MidiConnectionBar
@@ -63,8 +73,6 @@ describe("MidiConnectionBar", () => {
   });
 
   it("toggles MIDI sounds through the settings hook", () => {
-    setEnabled.mockClear();
-
     render(
       <MidiConnectionBar
         supported
@@ -82,8 +90,6 @@ describe("MidiConnectionBar", () => {
   });
 
   it("shows and toggles the sustain switch when connected", () => {
-    setSustain.mockClear();
-
     render(
       <MidiConnectionBar
         supported
@@ -99,5 +105,25 @@ describe("MidiConnectionBar", () => {
     expect(screen.getByTestId("midi-sustain-toggle")).not.toBeChecked();
     fireEvent.click(screen.getByTestId("midi-sustain-toggle"));
     expect(setSustain).toHaveBeenCalledWith(true);
+  });
+
+  it("shows a loading indicator while the engine is loading", () => {
+    mockAudioSettings.engineState = "loading";
+
+    render(
+      <MidiConnectionBar
+        supported
+        connected
+        error={null}
+        inputs={[{ id: "input-1", name: "Piano Keyboard" }]}
+        selectedInputId="input-1"
+        onSelectInput={vi.fn()}
+        onConnect={vi.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("midi-audio-loading")).toHaveTextContent(
+      /Loading/i
+    );
   });
 });

@@ -71,14 +71,26 @@ function createSampler(
   }
 }
 
+export type CreateAudioEngineOptions = {
+  /** Called whenever the engine state changes (loading -> ready/error). */
+  onStateChange?: (state: AudioEngineState) => void;
+};
+
 export function createAudioEngine(
   preset: AudioPreset,
-  volume: number
+  volume: number,
+  options: CreateAudioEngineOptions = {}
 ): AudioEngine {
+  const { onStateChange } = options;
   const context = getAudioContext();
   let state: AudioEngineState = context ? "idle" : "error";
   let sampler: SamplerInstance | null = null;
   let loadPromise: Promise<void> | null = null;
+
+  function setState(next: AudioEngineState) {
+    state = next;
+    onStateChange?.(next);
+  }
 
   function applyVolume() {
     if (sampler) {
@@ -99,7 +111,7 @@ export function createAudioEngine(
 
   const load = async (): Promise<void> => {
     if (!context) {
-      state = "error";
+      setState("error");
       return;
     }
     if (loadPromise) {
@@ -107,16 +119,16 @@ export function createAudioEngine(
       return;
     }
 
-    state = "loading";
+    setState("loading");
     loadPromise = (async () => {
       try {
         sampler = createSampler(context, preset);
         await sampler.ready;
         applyVolume();
-        state = "ready";
+        setState("ready");
       } catch (err) {
         console.error("Failed to load audio instrument", err);
-        state = "error";
+        setState("error");
       }
     })();
 
@@ -174,7 +186,7 @@ export function createAudioEngine(
         sampler.dispose();
       }
       sampler = null;
-      state = "idle";
+      setState("idle");
       loadPromise = null;
     },
   };

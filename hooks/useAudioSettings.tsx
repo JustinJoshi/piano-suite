@@ -21,6 +21,7 @@ import {
   writeAudioSettingsToLocalStorage,
   type AudioSettings,
 } from "@/lib/audio-settings";
+import type { AudioEngineState } from "@/lib/audio-engine";
 
 type AudioSettingsContextValue = {
   settings: AudioSettings;
@@ -30,6 +31,8 @@ type AudioSettingsContextValue = {
   setSustain: (sustain: boolean) => void;
   setCustomKit: (customKit: AudioSettings["customKit"]) => void;
   loaded: boolean;
+  engineState: AudioEngineState;
+  setEngineState: (state: AudioEngineState) => void;
 };
 
 const AudioSettingsContext = createContext<AudioSettingsContextValue | null>(
@@ -57,6 +60,7 @@ export function AudioSettingsProvider({ children }: { children: ReactNode }) {
   const [localSettings, setLocalSettings] = useState<AudioSettings | null>(
     () => readAudioSettingsFromLocalStorage()
   );
+  const [engineState, setEngineState] = useState<AudioEngineState>("idle");
 
   const remoteSettings = useMemo(() => {
     if (remote == null || remote === undefined) return null;
@@ -146,6 +150,8 @@ export function AudioSettingsProvider({ children }: { children: ReactNode }) {
       setSustain,
       setCustomKit,
       loaded: localSettings !== null || remoteSettings !== null,
+      engineState,
+      setEngineState,
     }),
     [
       settings,
@@ -156,6 +162,8 @@ export function AudioSettingsProvider({ children }: { children: ReactNode }) {
       setCustomKit,
       localSettings,
       remoteSettings,
+      engineState,
+      setEngineState,
     ]
   );
 

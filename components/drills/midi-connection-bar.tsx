@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Settings } from "lucide-react";
+import { Loader2, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAudioSettings } from "@/hooks/useAudioSettings";
 
@@ -30,7 +30,7 @@ export function MidiConnectionBar({
   onSelectInput,
   onConnect,
 }: MidiConnectionBarProps) {
-  const { settings, setEnabled, setSustain } = useAudioSettings();
+  const { settings, setEnabled, setSustain, engineState } = useAudioSettings();
 
   if (!supported) {
     return (
@@ -100,6 +100,16 @@ export function MidiConnectionBar({
         />
         <span className="text-xs">Sustain</span>
       </label>
+
+      {engineState === "loading" && (
+        <span
+          className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"
+          data-testid="midi-audio-loading"
+        >
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          Loading
+        </span>
+      )}
 
       <Link
         href="/settings/audio"
