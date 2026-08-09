@@ -4,14 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import {
   AMBIENT_JULIA,
   AMBIENT_LISSAJOUS,
-  AMBIENT_RIPPLE_CONTROLS,
-  AMBIENT_RIPPLE_VIZ,
   type AmbientEffectKind,
 } from "@/lib/ambient-effects";
 import { randomC, type Complex } from "@/lib/julia";
 import { randomRatio, type LissajousParams } from "@/lib/lissajous";
 import { useMidi } from "@/hooks/useMidi";
 import { useChladniRipple } from "@/hooks/useChladniRipple";
+import { useAmbientEffects } from "@/hooks/useAmbientEffects";
 import { useExperimentalFeatures } from "@/hooks/useExperimentalFeatures";
 import { useHeroChladniSettings } from "@/hooks/useHeroChladniSettings";
 import { useHeroQuasiperiodicSettings } from "@/hooks/useHeroQuasiperiodicSettings";
@@ -24,11 +23,21 @@ import { ChladniVisualization } from "@/components/welcome/chladni-visualization
 import { JuliaVisualization } from "@/components/drills/julia/julia-visualization";
 import { LissajousVisualization } from "@/components/drills/lissajous/lissajous-visualization";
 
-function AmbientRippleEffect({ className }: { className?: string }) {
+function AmbientRippleEffect({
+  className,
+  resolutionScale,
+}: {
+  className?: string;
+  resolutionScale?: number;
+}) {
   const midi = useMidi();
+  const { settings } = useAmbientEffects();
   const { viz } = useChladniRipple({
     heldNotes: midi.heldNotes,
-    ...AMBIENT_RIPPLE_CONTROLS,
+    decayMs: settings.ripple.decayMs,
+    octaveComplexity: settings.ripple.octaveComplexity,
+    baseLineThickness: settings.ripple.baseLineThickness,
+    baseIntensity: settings.ripple.baseIntensity,
   });
 
   return (
@@ -37,14 +46,17 @@ function AmbientRippleEffect({ className }: { className?: string }) {
       nextMode={viz.nextMode}
       morph={viz.morph}
       lineThickness={viz.lineThickness}
-      zoom={AMBIENT_RIPPLE_VIZ.zoom}
-      secondaryOffset={AMBIENT_RIPPLE_VIZ.secondaryOffset}
+      zoom={settings.ripple.zoom}
+      secondaryOffset={settings.ripple.secondaryOffset}
       secondaryBlend={viz.secondaryBlend}
-      secondarySpeed={AMBIENT_RIPPLE_VIZ.secondarySpeed}
-      secondaryMotion={AMBIENT_RIPPLE_VIZ.secondaryMotion}
+      secondarySpeed={settings.ripple.secondarySpeed}
+      secondaryMotion={settings.ripple.secondaryMotion}
       breathe={viz.breathe}
       lineIntensity={viz.lineIntensity}
-      colorSoftness={AMBIENT_RIPPLE_VIZ.colorSoftness}
+      colorSoftness={settings.ripple.colorSoftness}
+      timeScale={settings.ripple.timeScale}
+      normalizeViewport
+      resolutionScale={resolutionScale}
       className={className}
     />
   );
@@ -190,6 +202,7 @@ function AmbientLissajousEffect({ className }: { className?: string }) {
 export type AmbientEffectRendererProps = {
   kind: AmbientEffectKind;
   className?: string;
+  resolutionScale?: number;
 };
 
 /**
@@ -199,6 +212,7 @@ export type AmbientEffectRendererProps = {
 export function AmbientEffectRenderer({
   kind,
   className = "h-full w-full",
+  resolutionScale,
 }: AmbientEffectRendererProps) {
   const { enabled: experimentalEnabled } = useExperimentalFeatures();
   const effectiveKind =
@@ -214,7 +228,12 @@ export function AmbientEffectRenderer({
     case "multigrid":
       return <AmbientMultigridEffect />;
     case "chladni-ripple":
-      return <AmbientRippleEffect className={className} />;
+      return (
+        <AmbientRippleEffect
+          className={className}
+          resolutionScale={resolutionScale}
+        />
+      );
     case "julia":
       return <AmbientJuliaEffect className={className} />;
     case "lissajous":

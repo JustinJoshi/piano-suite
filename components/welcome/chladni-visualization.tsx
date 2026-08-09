@@ -65,6 +65,16 @@ export type ChladniVisualizationProps = {
    * colors come from theme tokens (`--hero-orb-inner`, `--color-primary`, etc.).
    */
   patternColor?: string | null;
+  /**
+   * Multiply the internal rendering resolution beyond device pixel ratio.
+   * Useful for small pop-out panels that would otherwise look pixelated.
+   */
+  resolutionScale?: number;
+  /**
+   * When true, the shader crops to a centered square plate so the pattern
+   * looks the same regardless of viewport aspect ratio.
+   */
+  normalizeViewport?: boolean;
   className?: string;
 };
 
@@ -95,6 +105,7 @@ const fragmentShader = /* glsl */ `
   uniform float uBreathe;
   uniform float uTimeScale;
   uniform float uLineIntensity;
+  uniform bool uNormalizeViewport;
 
   varying vec2 vUv;
 
@@ -108,9 +119,14 @@ const fragmentShader = /* glsl */ `
 
   void main() {
     vec2 uv = vUv * 2.0 - 1.0;
-    uv.x *= uResolution.x / uResolution.y;
+    float aspect = uResolution.x / uResolution.y;
+    uv.x *= aspect;
 
     vec2 p = uv * uZoom;
+    if (uNormalizeViewport) {
+      vec2 scale = vec2(max(aspect, 1.0), max(1.0 / aspect, 1.0));
+      p /= scale;
+    }
 
     vec2 mode = mix(uMode, uNextMode, uMorph);
 
@@ -155,6 +171,8 @@ export function ChladniVisualization({
   lineIntensity = 1,
   colorSoftness = 0,
   patternColor = null,
+  resolutionScale = 1,
+  normalizeViewport = false,
   className,
 }: ChladniVisualizationProps) {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -182,8 +200,12 @@ export function ChladniVisualization({
       return;
     }
 
+    const dpr = Math.min(
+      (window.devicePixelRatio || 1) * Math.max(0.5, resolutionScale),
+      3
+    );
+    renderer.setPixelRatio(dpr);
     renderer.setSize(width, height, false);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     const canvas = renderer.domElement;
     canvas.style.display = "block";
     canvas.style.width = "100%";
@@ -213,6 +235,7 @@ export function ChladniVisualization({
         uBreathe: { value: breathe },
         uTimeScale: { value: timeScale },
         uLineIntensity: { value: lineIntensity },
+        uNormalizeViewport: { value: normalizeViewport },
       },
     });
     materialRef.current = material;
@@ -238,6 +261,13 @@ export function ChladniVisualization({
       const h = Math.max(mount.clientHeight, 1);
       renderer.setSize(w, h, false);
       material.uniforms.uResolution.value.set(w, h);
+      const nextDpr = Math.min(
+        (window.devicePixelRatio || 1) * Math.max(0.5, resolutionScale),
+        3
+      );
+      if (renderer.getPixelRatio() !== nextDpr) {
+        renderer.setPixelRatio(nextDpr);
+      }
     }
 
     window.addEventListener("resize", handleResize);
@@ -279,6 +309,7 @@ export function ChladniVisualization({
     material.uniforms.uBreathe.value = breathe;
     material.uniforms.uTimeScale.value = timeScale;
     material.uniforms.uLineIntensity.value = lineIntensity;
+    material.uniforms.uNormalizeViewport.value = normalizeViewport;
   }, [
     mode,
     nextMode,
@@ -292,6 +323,7 @@ export function ChladniVisualization({
     breathe,
     timeScale,
     lineIntensity,
+    normalizeViewport,
   ]);
 
   // Sync theme (or override) colors whenever CSS props / patternColor change.

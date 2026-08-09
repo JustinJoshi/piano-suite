@@ -215,7 +215,11 @@ export function AmbientFloatPanel({
       </div>
 
       <div className="relative min-h-0 flex-1 bg-background">
-        <AmbientEffectRenderer kind={kind} className="h-full w-full" />
+        <AmbientEffectRenderer
+          kind={kind}
+          className="h-full w-full"
+          resolutionScale={2}
+        />
       </div>
 
       <div

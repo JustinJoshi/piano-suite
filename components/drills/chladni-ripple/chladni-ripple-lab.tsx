@@ -13,6 +13,13 @@ import { useAuthAccess } from "@/hooks/useAuthAccess";
 import { floatPanelUpgradeCopy } from "@/lib/billing";
 import { noteName } from "@/lib/music-theory";
 import { PC_MODE_TABLE } from "@/lib/chladni-ripple";
+import {
+  DEFAULT_RIPPLE_PARAMS,
+  AMBIENT_RIPPLE_PARAMS,
+  type ChladniRippleParams,
+  type ModePair,
+} from "@/lib/chladni-ripple-settings";
+import { cn } from "@/lib/utils";
 
 // ============================================================
 // CHLADNI RIPPLE LAB
@@ -20,6 +27,31 @@ import { PC_MODE_TABLE } from "@/lib/chladni-ripple";
 // Maps live MIDI notes onto square-plate Chladni modes: pitch
 // class → pattern identity, octave → density, velocity → pulse.
 // ============================================================
+
+const PRESETS: { label: string; params: ChladniRippleParams }[] = [
+  { label: "Lab", params: { ...DEFAULT_RIPPLE_PARAMS } },
+  { label: "Ambient", params: { ...AMBIENT_RIPPLE_PARAMS } },
+  {
+    label: "Bright",
+    params: {
+      ...DEFAULT_RIPPLE_PARAMS,
+      baseIntensity: 0.75,
+      baseLineThickness: 22,
+      colorSoftness: 0,
+      secondaryBlend: 0.25,
+    },
+  },
+  {
+    label: "Dense",
+    params: {
+      ...DEFAULT_RIPPLE_PARAMS,
+      octaveComplexity: 0.6,
+      zoom: 2.8,
+      secondaryMotion: 2.5,
+      secondarySpeed: 1.4,
+    },
+  },
+];
 
 function RangeControl({
   label,
@@ -60,23 +92,80 @@ function RangeControl({
   );
 }
 
+function NumberControl({
+  label,
+  value,
+  onChange,
+  min,
+  max,
+  step = 1,
+}: {
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+  min: number;
+  max: number;
+  step?: number;
+}) {
+  return (
+    <label className="flex flex-col gap-1.5">
+      <span className="text-xs text-muted-foreground">{label}</span>
+      <input
+        type="number"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring"
+      />
+    </label>
+  );
+}
+
+function ControlGroup({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-2">
+      <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        {label}
+      </span>
+      <div className="flex gap-3">{children}</div>
+    </div>
+  );
+}
+
 export function ChladniRippleLab() {
   const midi = useMidi();
   const { canUseFloatPanel } = useAuthAccess();
-  const { applyAsAmbientBackground, openFloat, setRouteBackground } =
-    useAmbientEffects();
-  const [decayMs, setDecayMs] = useState(1200);
-  const [octaveComplexity, setOctaveComplexity] = useState(0.35);
-  const [baseLineThickness, setBaseLineThickness] = useState(28);
-  const [baseIntensity, setBaseIntensity] = useState(0.45);
+  const {
+    settings,
+    updateSettings,
+    applyAsAmbientBackground,
+    openFloat,
+    setRouteBackground,
+    setDefaultBackground,
+    setApplyEverywhere,
+  } = useAmbientEffects();
+
+  // Local lab state starts from the persisted ambient ripple settings so the
+  // preview matches whatever is currently applied as the background.
+  const [params, setParams] = useState<ChladniRippleParams>(() => ({
+    ...settings.ripple,
+  }));
   const [ambientMessage, setAmbientMessage] = useState<string | null>(null);
 
   const { viz } = useChladniRipple({
     heldNotes: midi.heldNotes,
-    decayMs,
-    octaveComplexity,
-    baseLineThickness,
-    baseIntensity,
+    decayMs: params.decayMs,
+    octaveComplexity: params.octaveComplexity,
+    baseLineThickness: params.baseLineThickness,
+    baseIntensity: params.baseIntensity,
   });
 
   const heldLabel =
@@ -91,15 +180,44 @@ export function ChladniRippleLab() {
       ? "Idle"
       : `${noteName(viz.activePc)} → (${viz.activeMode[0]}, ${viz.activeMode[1]})`;
 
+  function patch(next: Partial<ChladniRippleParams>) {
+    setParams((prev) => ({ ...prev, ...next }));
+  }
+
+  function updateSecondaryOffset(index: 0 | 1, value: number) {
+    const next: ModePair = [...params.secondaryOffset] as ModePair;
+    next[index] = value;
+    patch({ secondaryOffset: next });
+  }
+
+  function applyPreset(preset: (typeof PRESETS)[number]) {
+    setParams({ ...preset.params });
+  }
+
+  function handleReset() {
+    setParams({ ...DEFAULT_RIPPLE_PARAMS });
+  }
+
+  function persistAndMessage(
+    message: string,
+    apply: () => void
+  ) {
+    updateSettings({ ripple: params });
+    apply();
+    setAmbientMessage(message);
+  }
+
   function handleUseOnHome() {
-    setRouteBackground("/", "chladni-ripple");
-    setAmbientMessage("Chladni Ripple set as the Welcome background.");
+    persistAndMessage(
+      "Chladni Ripple set as the Welcome background.",
+      () => setRouteBackground("/", "chladni-ripple")
+    );
   }
 
   function handleUseEverywhere() {
-    applyAsAmbientBackground("chladni-ripple");
-    setAmbientMessage(
-      "Chladni Ripple applied as the default ambient background."
+    persistAndMessage(
+      "Chladni Ripple applied as the default ambient background.",
+      () => applyAsAmbientBackground("chladni-ripple")
     );
   }
 
@@ -112,8 +230,19 @@ export function ChladniRippleLab() {
     setAmbientMessage("Float panel opened with Chladni Ripple.");
   }
 
+  function handleDisableBackground() {
+    setRouteBackground("/", "none");
+    setDefaultBackground("chladni");
+    setApplyEverywhere(false);
+    setAmbientMessage("Chladni Ripple background turned off.");
+  }
+
+  const isBackgroundOn =
+    settings.routeBackgrounds["/"] === "chladni-ripple" ||
+    (settings.applyEverywhere && settings.defaultBackground === "chladni-ripple");
+
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+    <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
       <Card className="overflow-hidden ring-1 ring-foreground/10">
         <CardContent className="p-0">
           <div className="relative aspect-square w-full bg-background sm:aspect-[4/3] lg:aspect-auto lg:min-h-[480px]">
@@ -122,15 +251,16 @@ export function ChladniRippleLab() {
               nextMode={viz.nextMode}
               morph={viz.morph}
               lineThickness={viz.lineThickness}
-              zoom={2.2}
-              secondaryOffset={[1, 2]}
+              zoom={params.zoom}
+              secondaryOffset={params.secondaryOffset}
               secondaryBlend={viz.secondaryBlend}
-              secondarySpeed={1}
-              secondaryMotion={1.5}
+              secondarySpeed={params.secondarySpeed}
+              secondaryMotion={params.secondaryMotion}
               breathe={viz.breathe}
-              timeScale={1}
+              timeScale={params.timeScale}
               lineIntensity={viz.lineIntensity}
-              colorSoftness={0.15}
+              colorSoftness={params.colorSoftness}
+              normalizeViewport
               className="absolute inset-0 h-full w-full"
             />
           </div>
@@ -180,6 +310,20 @@ export function ChladniRippleLab() {
             <CardTitle className="font-heading text-base">Ambient</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">
+                Background ripple
+              </span>
+              <span
+                className={cn(
+                  "text-xs font-medium",
+                  isBackgroundOn ? "text-success" : "text-muted-foreground"
+                )}
+                data-testid="ripple-background-status"
+              >
+                {isBackgroundOn ? "On" : "Off"}
+              </span>
+            </div>
             <p className="text-xs text-muted-foreground">
               Use this MIDI-reactive pattern as a page background. Pro can pop
               out a live resonance panel beside Chord Drill and other tools.
@@ -222,6 +366,15 @@ export function ChladniRippleLab() {
                   ? "Pop out while practicing"
                   : "Pop out while practicing (Pro)"}
               </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleDisableBackground}
+                data-testid="ripple-disable-background"
+              >
+                Turn off background ripple
+              </Button>
             </div>
             {ambientMessage ? (
               <p className="text-xs text-primary" role="status">
@@ -246,42 +399,139 @@ export function ChladniRippleLab() {
 
         <Card className="ring-1 ring-foreground/10">
           <CardHeader className="pb-3">
+            <CardTitle className="font-heading text-base">Presets</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {PRESETS.map((preset) => (
+                <Button
+                  key={preset.label}
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => applyPreset(preset)}
+                  data-testid={`ripple-preset-${preset.label.toLowerCase()}`}
+                >
+                  {preset.label}
+                </Button>
+              ))}
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleReset}
+                data-testid="ripple-reset-params"
+              >
+                Reset
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="ring-1 ring-foreground/10">
+          <CardHeader className="pb-3">
             <CardTitle className="font-heading text-base">Ripple</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <RangeControl
               label="Decay"
-              value={decayMs}
+              value={params.decayMs}
               min={400}
               max={3000}
               step={50}
-              onChange={setDecayMs}
-              display={`${(decayMs / 1000).toFixed(2)}s`}
+              onChange={(v) => patch({ decayMs: v })}
+              display={`${(params.decayMs / 1000).toFixed(2)}s`}
             />
             <RangeControl
               label="Octave complexity"
-              value={octaveComplexity}
+              value={params.octaveComplexity}
               min={0}
-              max={0.7}
+              max={1}
               step={0.05}
-              onChange={setOctaveComplexity}
+              onChange={(v) => patch({ octaveComplexity: v })}
             />
             <RangeControl
               label="Line thickness"
-              value={baseLineThickness}
-              min={10}
-              max={60}
+              value={params.baseLineThickness}
+              min={5}
+              max={120}
               step={1}
-              onChange={setBaseLineThickness}
-              display={String(baseLineThickness)}
+              onChange={(v) => patch({ baseLineThickness: v })}
+              display={String(params.baseLineThickness)}
             />
             <RangeControl
               label="Base intensity"
-              value={baseIntensity}
-              min={0.2}
-              max={0.9}
+              value={params.baseIntensity}
+              min={0.1}
+              max={2}
               step={0.05}
-              onChange={setBaseIntensity}
+              onChange={(v) => patch({ baseIntensity: v })}
+            />
+            <RangeControl
+              label="Zoom"
+              value={params.zoom}
+              min={0.5}
+              max={8}
+              step={0.01}
+              onChange={(v) => patch({ zoom: v })}
+            />
+            <RangeControl
+              label="Secondary blend"
+              value={params.secondaryBlend}
+              min={0}
+              max={0.8}
+              step={0.01}
+              onChange={(v) => patch({ secondaryBlend: v })}
+            />
+            <ControlGroup label="Secondary offset">
+              <NumberControl
+                label="m"
+                value={params.secondaryOffset[0]}
+                onChange={(v) => updateSecondaryOffset(0, v)}
+                min={-10}
+                max={10}
+                step={0.1}
+              />
+              <NumberControl
+                label="n"
+                value={params.secondaryOffset[1]}
+                onChange={(v) => updateSecondaryOffset(1, v)}
+                min={-10}
+                max={10}
+                step={0.1}
+              />
+            </ControlGroup>
+            <RangeControl
+              label="Secondary speed"
+              value={params.secondarySpeed}
+              min={0}
+              max={5}
+              step={0.1}
+              onChange={(v) => patch({ secondarySpeed: v })}
+            />
+            <RangeControl
+              label="Secondary motion"
+              value={params.secondaryMotion}
+              min={0}
+              max={6}
+              step={0.1}
+              onChange={(v) => patch({ secondaryMotion: v })}
+            />
+            <RangeControl
+              label="Color softness"
+              value={params.colorSoftness}
+              min={0}
+              max={1}
+              step={0.01}
+              onChange={(v) => patch({ colorSoftness: v })}
+            />
+            <RangeControl
+              label="Time scale"
+              value={params.timeScale}
+              min={0}
+              max={3}
+              step={0.1}
+              onChange={(v) => patch({ timeScale: v })}
             />
           </CardContent>
         </Card>

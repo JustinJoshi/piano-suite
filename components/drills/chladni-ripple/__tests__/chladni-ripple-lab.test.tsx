@@ -46,6 +46,9 @@ vi.mock("@/hooks/useChladniRipple", () => ({
 const setRouteBackground = vi.fn();
 const applyAsAmbientBackground = vi.fn();
 const openFloat = vi.fn();
+const setDefaultBackground = vi.fn();
+const setApplyEverywhere = vi.fn();
+const updateSettings = vi.fn();
 const useAuthAccessMock = vi.fn(() => ({
   authDisabled: false,
   isSignedIn: true,
@@ -54,11 +57,41 @@ const useAuthAccessMock = vi.fn(() => ({
   canUseFloatPanel: true,
 }));
 
+const defaultRippleSettings = {
+  defaultBackground: "chladni" as const,
+  applyEverywhere: false,
+  routeBackgrounds: { "/": "chladni" as const },
+  float: {
+    enabled: false,
+    kind: "chladni-ripple" as const,
+    routes: [],
+    rect: { x: 0.62, y: 0.55, w: 0.32, h: 0.32 },
+  },
+  scrimDarkness: 0.55,
+  ripple: {
+    decayMs: 1200,
+    octaveComplexity: 0.35,
+    baseLineThickness: 28,
+    baseIntensity: 0.45,
+    zoom: 2.2,
+    secondaryOffset: [1, 2] as [number, number],
+    secondaryBlend: 0.15,
+    secondarySpeed: 1,
+    secondaryMotion: 1.5,
+    colorSoftness: 0.15,
+    timeScale: 1,
+  },
+};
+
 vi.mock("@/hooks/useAmbientEffects", () => ({
   useAmbientEffects: () => ({
+    settings: defaultRippleSettings,
+    updateSettings,
     setRouteBackground,
     applyAsAmbientBackground,
     openFloat,
+    setDefaultBackground,
+    setApplyEverywhere,
   }),
 }));
 
@@ -91,6 +124,9 @@ describe("ChladniRippleLab", () => {
     setRouteBackground.mockClear();
     applyAsAmbientBackground.mockClear();
     openFloat.mockClear();
+    setDefaultBackground.mockClear();
+    setApplyEverywhere.mockClear();
+    updateSettings.mockClear();
     useAuthAccessMock.mockReturnValue({
       authDisabled: false,
       isSignedIn: true,
@@ -144,5 +180,45 @@ describe("ChladniRippleLab", () => {
       "href",
       "/pricing"
     );
+  });
+
+  it("persists ripple params when applying to ambient", () => {
+    render(<ChladniRippleLab />);
+
+    fireEvent.click(screen.getByTestId("ripple-use-on-home"));
+    expect(updateSettings).toHaveBeenCalledWith({
+      ripple: defaultRippleSettings.ripple,
+    });
+    expect(setRouteBackground).toHaveBeenCalledWith("/", "chladni-ripple");
+
+    fireEvent.click(screen.getByTestId("ripple-use-everywhere"));
+    expect(updateSettings).toHaveBeenCalledWith({
+      ripple: defaultRippleSettings.ripple,
+    });
+    expect(applyAsAmbientBackground).toHaveBeenCalledWith("chladni-ripple");
+  });
+
+  it("turns off the ripple background", () => {
+    render(<ChladniRippleLab />);
+
+    fireEvent.click(screen.getByTestId("ripple-disable-background"));
+    expect(setRouteBackground).toHaveBeenCalledWith("/", "none");
+    expect(setDefaultBackground).toHaveBeenCalledWith("chladni");
+    expect(setApplyEverywhere).toHaveBeenCalledWith(false);
+  });
+
+  it("applies presets and shows background status", () => {
+    render(<ChladniRippleLab />);
+
+    expect(screen.getByTestId("ripple-background-status")).toHaveTextContent(
+      /Off/i
+    );
+    expect(screen.getByLabelText("Decay")).toHaveValue("1200");
+
+    fireEvent.click(screen.getByTestId("ripple-preset-ambient"));
+    expect(screen.getByLabelText("Decay")).toHaveValue("1400");
+
+    fireEvent.click(screen.getByTestId("ripple-reset-params"));
+    expect(screen.getByLabelText("Decay")).toHaveValue("1200");
   });
 });

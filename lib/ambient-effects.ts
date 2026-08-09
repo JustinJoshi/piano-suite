@@ -13,6 +13,11 @@ import {
   HERO_ATMOSPHERE_LOCAL_STORAGE_KEY,
   type HeroAtmosphereKind,
 } from "@/lib/hero-atmosphere";
+import {
+  AMBIENT_RIPPLE_PARAMS,
+  normalizeChladniRippleParams,
+  type ChladniRippleParams,
+} from "@/lib/chladni-ripple-settings";
 
 export const AMBIENT_EFFECTS_SETTINGS_KEY = "ambient-effects-v1";
 export const AMBIENT_EFFECTS_LOCAL_STORAGE_KEY =
@@ -49,6 +54,8 @@ export type AmbientEffectsSettings = {
   float: AmbientFloatSettings;
   /** 0..1 strength of the ambient scrim overlay. */
   scrimDarkness: number;
+  /** Parameters for the "chladni-ripple" ambient background. */
+  ripple: ChladniRippleParams;
 };
 
 /** Routes shown in the Atmosphere settings UI. */
@@ -94,23 +101,8 @@ export const DEFAULT_AMBIENT_EFFECTS: AmbientEffectsSettings = {
     rect: { ...DEFAULT_FLOAT_RECT },
   },
   scrimDarkness: 0.55,
+  ripple: { ...AMBIENT_RIPPLE_PARAMS },
 };
-
-/** Soft MIDI ripple defaults for ambient use (quieter than the lab). */
-export const AMBIENT_RIPPLE_CONTROLS = {
-  decayMs: 1400,
-  octaveComplexity: 0.35,
-  baseLineThickness: 36,
-  baseIntensity: 0.35,
-} as const;
-
-export const AMBIENT_RIPPLE_VIZ = {
-  zoom: 1.8,
-  colorSoftness: 0.55,
-  secondaryOffset: [1, 2] as [number, number],
-  secondarySpeed: 0.7,
-  secondaryMotion: 1,
-} as const;
 
 /** Soft Julia ambient defaults. */
 export const AMBIENT_JULIA = {
@@ -240,6 +232,7 @@ export function normalizeAmbientEffects(
       0,
       1
     ),
+    ripple: normalizeChladniRippleParams(src.ripple ?? DEFAULT_AMBIENT_EFFECTS.ripple),
   };
 }
 
