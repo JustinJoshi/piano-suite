@@ -89,6 +89,9 @@ export type ArpeggioEngine = {
   toggleChordIncluded: (id: string) => void;
   moveChord: (id: string, direction: "up" | "down") => void;
   resetOrder: () => void;
+  ignoredPcs: number[];
+  toggleIgnoredPc: (pc: number) => void;
+  setIgnoredPcs: (pcs: number[]) => void;
 
   // Anki
   ankiFollow: boolean;
@@ -189,6 +192,7 @@ export function useArpeggios(enabled: boolean): ArpeggioEngine {
   const liveRafRef = useRef<number | null>(null);
   const ankiDefaultsAppliedRef = useRef(false);
   const pendingCardRef = useRef<{ rootPc: number; rootName: string } | null>(null);
+  const ignoredPcsRef = useRef<number[]>(settings.ignoredPcs);
 
   useEffect(() => {
     settingsRef.current = settings;
@@ -199,6 +203,7 @@ export function useArpeggios(enabled: boolean): ArpeggioEngine {
     autoGradeRef.current = autoGrade;
     breakTickSoundRef.current = settings.breakTickSound;
     lapChimeRef.current = settings.lapChime;
+    ignoredPcsRef.current = settings.ignoredPcs;
   });
 
   // -------------------------------------------------------------------------
@@ -462,7 +467,7 @@ export function useArpeggios(enabled: boolean): ArpeggioEngine {
           if (nextIdx === 0) {
             finishLap();
           }
-        } else {
+        } else if (!ignoredPcsRef.current.includes(normalizePc(pc))) {
           setMissCountState((prev) => {
             missCountRef.current = prev + 1;
             return prev + 1;
@@ -787,6 +792,28 @@ export function useArpeggios(enabled: boolean): ArpeggioEngine {
     [updateSettings]
   );
 
+  const setIgnoredPcs = useCallback(
+    (pcs: number[]) => {
+      const valid = pcs
+        .map((n) => normalizePc(n))
+        .filter((n, i, arr) => arr.indexOf(n) === i);
+      updateSettings({ ignoredPcs: valid });
+    },
+    [updateSettings]
+  );
+
+  const toggleIgnoredPc = useCallback(
+    (pc: number) => {
+      const normalized = normalizePc(pc);
+      setIgnoredPcs(
+        settingsRef.current.ignoredPcs.includes(normalized)
+          ? settingsRef.current.ignoredPcs.filter((n) => n !== normalized)
+          : [...settingsRef.current.ignoredPcs, normalized]
+      );
+    },
+    [setIgnoredPcs]
+  );
+
   // -------------------------------------------------------------------------
   // Return
   // -------------------------------------------------------------------------
@@ -827,6 +854,9 @@ export function useArpeggios(enabled: boolean): ArpeggioEngine {
     toggleChordIncluded,
     moveChord,
     resetOrder,
+    ignoredPcs: settings.ignoredPcs,
+    toggleIgnoredPc,
+    setIgnoredPcs,
 
     ankiFollow,
     setAnkiFollow,

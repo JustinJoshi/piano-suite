@@ -22,6 +22,8 @@ export type ArpeggioSettings = {
   breakSeconds: number;
   breakTickSound: boolean;
   missThresholds: MissThresholds;
+  /** Pitch classes (0–11) that never count as misses during the sequence. */
+  ignoredPcs: number[];
 };
 
 export const ARPEGGIO_CHORDS: SequenceDrill[] = [
@@ -239,6 +241,7 @@ export const DEFAULT_ARPEGGIO_SETTINGS: ArpeggioSettings = {
   breakSeconds: 0,
   breakTickSound: true,
   missThresholds: { ...DEFAULT_THRESHOLDS },
+  ignoredPcs: [],
 };
 
 /**
@@ -282,6 +285,15 @@ export function normalizeArpeggioSettings(
     Math.max(good, DEFAULT_THRESHOLDS.hard)
   );
 
+  const ignoredPcs = Array.isArray(raw.ignoredPcs)
+    ? raw.ignoredPcs
+        .filter(
+          (n): n is number =>
+            typeof n === "number" && Number.isInteger(n) && n >= 0 && n <= 11
+        )
+        .filter((n, i, arr) => arr.indexOf(n) === i)
+    : DEFAULT_ARPEGGIO_SETTINGS.ignoredPcs;
+
   return {
     flashOnMiss:
       typeof raw.flashOnMiss === "boolean"
@@ -313,5 +325,6 @@ export function normalizeArpeggioSettings(
         ? raw.breakTickSound
         : DEFAULT_ARPEGGIO_SETTINGS.breakTickSound,
     missThresholds: { good, hard },
+    ignoredPcs,
   };
 }

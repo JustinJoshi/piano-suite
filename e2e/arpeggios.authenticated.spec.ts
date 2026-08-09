@@ -44,4 +44,31 @@ test.describe("Arpeggios (authenticated)", () => {
     const chips = page.getByTestId("arpeggio-cell-strip").locator("span");
     await expect(chips).toHaveCount(7);
   });
+
+  test("miss filter can be toggled and preset to the root chord", async ({ page }) => {
+    await expect(page.getByText("Miss filter")).toBeVisible();
+
+    const cButton = page.getByTestId("miss-filter-pc-0");
+    await expect(cButton).toHaveAttribute("aria-pressed", "false");
+    await cButton.click();
+    await expect(cButton).toHaveAttribute("aria-pressed", "true");
+
+    await page.getByRole("button", { name: "Use root chord" }).click();
+
+    const rootPcs = [10, 5, 8]; // Bb, F, Ab for Bbm11
+    for (const pc of rootPcs) {
+      await expect(page.getByTestId(`miss-filter-pc-${pc}`)).toHaveAttribute(
+        "aria-pressed",
+        "true"
+      );
+    }
+
+    await page.getByRole("button", { name: "Clear" }).click();
+    for (let pc = 0; pc < 12; pc++) {
+      await expect(page.getByTestId(`miss-filter-pc-${pc}`)).toHaveAttribute(
+        "aria-pressed",
+        "false"
+      );
+    }
+  });
 });

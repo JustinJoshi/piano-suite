@@ -13,6 +13,7 @@ import { MidiConnectionBar } from "@/components/drills/midi-connection-bar";
 import { useArpeggios } from "@/hooks/useArpeggios";
 import { useAuthAccess } from "@/hooks/useAuthAccess";
 import { cn } from "@/lib/utils";
+import { SHARP_NAMES } from "@/lib/music-theory";
 import { ChevronUp, ChevronDown, RotateCcw } from "lucide-react";
 
 const GRADE_COLORS = {
@@ -113,6 +114,9 @@ export function Arpeggios() {
     toggleChordIncluded,
     moveChord,
     resetOrder,
+    ignoredPcs,
+    toggleIgnoredPc,
+    setIgnoredPcs,
 
     ankiFollow,
     setAnkiFollow,
@@ -420,6 +424,60 @@ export function Arpeggios() {
               ]}
             />
           </SettingRow>
+
+          <div className="space-y-3 rounded-lg border border-border p-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <div className="text-sm font-medium">Miss filter</div>
+                <div className="text-xs text-muted-foreground">
+                  Selected notes never count as misses during the sequence.
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setIgnoredPcs(chord?.lh.map((n) => n.pc) ?? [])
+                  }
+                  disabled={!chord}
+                >
+                  Use root chord
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIgnoredPcs([])}
+                >
+                  Clear
+                </Button>
+              </div>
+            </div>
+            <div className="grid grid-cols-6 gap-2 sm:grid-cols-12">
+              {SHARP_NAMES.map((name, pc) => {
+                const active = ignoredPcs.includes(pc);
+                return (
+                  <button
+                    key={name}
+                    type="button"
+                    onClick={() => toggleIgnoredPc(pc)}
+                    className={cn(
+                      "rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
+                      active
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                    )}
+                    aria-pressed={active}
+                    data-testid={`miss-filter-pc-${pc}`}
+                  >
+                    {name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
           <div
             className={cn(

@@ -128,6 +128,7 @@ describe("normalizeArpeggioSettings", () => {
     expect(settings.breakSeconds).toBe(0);
     expect(settings.breakTickSound).toBe(true);
     expect(settings.missThresholds).toEqual({ good: 0, hard: 2 });
+    expect(settings.ignoredPcs).toEqual([]);
   });
 
   it("preserves valid overrides", () => {
@@ -157,6 +158,20 @@ describe("normalizeArpeggioSettings", () => {
       config: { order: DEFAULT_ORDER.slice(), excluded: ["Bbm11", "Xyz"] },
     });
     expect(settings.config.excluded).toEqual(["Bbm11"]);
+  });
+
+  it("preserves valid ignored pitch classes", () => {
+    const settings = normalizeArpeggioSettings({
+      ignoredPcs: [0, 3, 7, 7, 11],
+    });
+    expect(settings.ignoredPcs).toEqual([0, 3, 7, 11]);
+  });
+
+  it("filters invalid ignored pitch classes", () => {
+    const settings = normalizeArpeggioSettings({
+      ignoredPcs: [-1, 0, 5, 12, 3.5, "x", null] as unknown as number[],
+    });
+    expect(settings.ignoredPcs).toEqual([0, 5]);
   });
 
   it("resets order to default if it does not contain all ids", () => {
