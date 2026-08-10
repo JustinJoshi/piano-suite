@@ -58,6 +58,12 @@ next-env.d.ts
 
 # per-agent git worktrees
 .worktrees/
+
+# aider session artifacts (config files .aider.conf.yml / .aider.model.settings.yml stay committed)
+.aider.chat.history.md
+.aider.input.history
+.aider.tags.cache.*
+.aider.llm.history
 clerk/billing.pulled.json
 .agents/
 skills-lock.json

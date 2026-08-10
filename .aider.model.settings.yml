@@ -1,0 +1,7 @@
+# Per-model overrides for local Ollama models.
+# Ollama serves models with a small default context window; once the
+# conversation overflows it, the model forgets the tool-call format and
+# degrades into "helpful assistant" text instead of acting. 32k fixes that.
+- name: ollama_chat/qwen2.5-coder:14b
+  extra_params:
+    num_ctx: 32768

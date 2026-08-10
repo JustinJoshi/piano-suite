@@ -1,0 +1,30 @@
+# Aider + Ollama local-model setup for Piano Suite (RTX 5080 / 16GB VRAM).
+# Based on the local-model trade-offs research: use the ollama_chat/ endpoint
+# (NOT ollama/) so tool calling works, and pair it with
+# .aider.model.settings.yml to raise num_ctx — the default tiny context window
+# is the "silent quality killer" that breaks tool calling on longer tasks.
+#
+# Prereqs (one-time, machine-wide):
+#   curl -fsSL https://ollama.com/install.sh | sh
+#   ollama pull qwen2.5-coder:14b   # ~9GB VRAM at Q4, comfortable on 16GB
+#   python -m pip install aider-install && aider-install
+#
+# Usage: run `aider` from the repo root. Works fully offline, $0/token.
+
+model: ollama_chat/qwen2.5-coder:14b
+
+# Whole-file edits are more reliable with local models than diff formats.
+edit-format: whole
+
+# Commit aider's edits automatically (one commit per accepted change).
+auto-commits: true
+
+# Surface model warnings while evaluating local-model behavior.
+show-model-warnings: true
+
+# We ignore aider session artifacts explicitly in .gitignore; without this,
+# aider insists on adding a blanket `.aider*` pattern that would also ignore
+# the committed config files above.
+gitignore: false
+
+dark-mode: true
