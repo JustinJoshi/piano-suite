@@ -5,11 +5,12 @@ import { getAuthorizedPartiesFromEnv } from "@/lib/clerk-authorized-parties";
 /**
  * Clerk proxy middleware for Next.js 16+.
  *
- * Public routes: home, Pricing, Pattern Lab (homepage hero editor), dev lab,
- * sign-in/up, API, and Clerk's frontend API. Other /tools/* routes require
- * authentication, unless `NEXT_PUBLIC_AUTH_DISABLED=true`. The bypass is
- * never honored on Vercel Production (see `isAuthBypassEffective`), so a
- * stray env assignment there cannot open the site.
+ * Public routes: home, Pricing, Articles, Pattern Lab (homepage hero
+ * editor), dev lab, sign-in/up, API, and Clerk's frontend API. Other
+ * /tools/* routes require authentication, unless
+ * `NEXT_PUBLIC_AUTH_DISABLED=true`. The bypass is never honored on Vercel
+ * Production (see `isAuthBypassEffective`), so a stray env assignment there
+ * cannot open the site.
  *
  * Every `app/api/**` route handler must authorize itself via `auth()` —
  * `/api` is public here by design (handlers are the enforcement point,
@@ -51,8 +52,10 @@ export default clerkMiddleware(
       pathname === "/" ||
       pathname === "/pricing" ||
       pathname === "/tools/chladni" ||
-      ["/dev", "/sign-in", "/sign-up", "/api", "/__clerk"].some((base) =>
-        isExactOrUnder(pathname, base)
+      // Articles are public: the library is marketing/SEO content for the
+      // free learning community, and the landing hero links to it.
+      ["/articles", "/dev", "/sign-in", "/sign-up", "/api", "/__clerk"].some(
+        (base) => isExactOrUnder(pathname, base)
       );
 
     if (!isPublicRoute) {

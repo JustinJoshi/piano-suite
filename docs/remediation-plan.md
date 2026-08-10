@@ -142,12 +142,11 @@ silent empty bubble), no stop/retry/abort.
 
 ## Phase 11 — Metadata/SEO + articles decision (P2)
 
-Decision needed first: articles are SEO-instrumented but `/articles` is
-Clerk-gated and the landing hero links to a gated article — contradicts the
-"free learning community" repositioning. Recommended: make `/articles`
-public. Then: `title.template` in root metadata; per-route metadata (push
-`"use client"` down into a gate child on the ~12 tool pages → server
-components); `app/not-found.tsx`; `robots.ts` + `sitemap.ts`.
+Articles are now **public** (done on branch `kimi/articles-public`):
+`proxy.ts` allowlist + e2e updated. Remaining: `title.template` in root
+metadata; per-route metadata (push `"use client"` down into a gate child on
+the ~12 tool pages → server components); `app/not-found.tsx`; `robots.ts` +
+`sitemap.ts`.
 
 ## Phase 12 — Theming + E2E cleanup (P3)
 

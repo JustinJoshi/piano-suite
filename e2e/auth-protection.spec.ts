@@ -22,8 +22,6 @@ const PROTECTED_ROUTES = [
   "/tools/quasiperiodic",
   "/tools/multigrid",
   "/tools/midi-test",
-  "/articles",
-  "/articles/beginner-pianist-learning-journey",
   "/chat",
   "/settings/theme",
   "/settings/atmosphere",
@@ -47,11 +45,29 @@ const PUBLIC_ROUTES = [
     },
   },
   {
+    path: "/articles",
+    assert: async (page: import("@playwright/test").Page) => {
+      await expect(
+        page.getByRole("heading", { name: "Articles", exact: true })
+      ).toBeVisible();
+    },
+  },
+  {
+    path: "/articles/beginner-pianist-learning-journey",
+    assert: async (page: import("@playwright/test").Page) => {
+      await expect(
+        page.getByRole("heading", {
+          name: /Research-Informed Guide to Learning Piano/i,
+        })
+      ).toBeVisible();
+    },
+  },
+  {
     path: "/pricing",
     assert: async (page: import("@playwright/test").Page) => {
       await expect(
         page.getByRole("heading", {
-          name: /Practice free\. Sync when you're ready\./i,
+          name: /Practice free\. Pro when you're ready\./i,
         })
       ).toBeVisible();
       await expect(page.getByRole("link", { name: "Pricing" })).toBeVisible();
