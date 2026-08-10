@@ -20,6 +20,10 @@ Piano Suite’s original product pillars are live:
 | Account-backed tracking + settings | Shipped (Convex + Clerk) |
 | Cross-device sync | Shipped when signed in |
 | Math labs + atmosphere | Shipped (Chladni, Ripple, Julia, Lissajous, Quasiperiodic + ambient backgrounds / float) |
+| Global MIDI piano sound | Shipped (smplr-based, on/off toggle, volume, preset picker, sustain, loading indicator) |
+| Custom soundfonts | Shipped (`.sf2` upload, sample-map / zip upload, IndexedDB persistence, GM browser + cache) |
+| Arpeggio miss filter | Shipped (configurable filter with root-chord preset) |
+| Music player | Shipped (upload / playback, drives ripple + piano sound, independent audio toggle) |
 
 Remaining work falls into four buckets:
 
@@ -361,26 +365,20 @@ Outstanding polish items for the first-time `/tools` onboarding flow shipped in 
 
 These items were requested after the v1 roadmap was written. They are tracked here until they are promoted to phased implementation plans.
 
-### Audio / piano sound option (`kimi/piano-sound`)
+### Audio / piano sound option (`kimi/piano-sound`) ✅ Shipped
 
 Add an optional piano sound that plays when the user presses a key on a connected MIDI keyboard.
 
-- **Status:** Milestone 1 (global playback + quick toggle + `/settings/audio`) shipped in branch `kimi/piano-sound`. Milestone 2 (custom `.sf2`/sample-map upload, caching, preset expansion) is next.
-- **Research:** `docs/piano-sound-engine-research.md` — compare Tone.js Sampler, `smplr`, raw Web Audio, and SF2-based engines.
-- **Implementation plan:** `docs/piano-sound-implementation-plan.md`.
-- **Settings surface:** `/settings/audio` page with:
-  - Piano sound on/off
-  - Volume
-  - Preset selector (built-in smplr pianos; custom upload in Milestone 2)
-- **Per-tool access:** a **“Use MIDI sounds”** switch + gear icon on the MIDI connection bar when connected.
-- **Custom soundfonts:** support user-uploaded sample packs and popular open-source soundfonts (Salamander, FluidR3_GM, MusyngKite, GeneralUser GS, smplr’s SplendidGrandPiano).
-- **Files likely touched:**
-  - `package.json` / `package-lock.json` (new dependency)
-  - `hooks/useAudio.ts` or new `hooks/useToneAudio.ts`
-  - `hooks/useMidi.ts` (dispatch note-ons to audio)
-  - `app/settings/theme/page.tsx` or new `app/settings/audio/page.tsx`
-  - `lib/audio-settings.ts`
-  - `components/drills/midi-connection-bar.tsx`
+- **Status:** Shipped. Milestone 1 (global playback + quick toggle + `/settings/audio`) and Milestone 2 (custom `.sf2`/sample-map upload, caching, GM browser, preset categories) are both live.
+- **Shipped capabilities:**
+  - `/settings/audio` page with piano sound on/off, volume, preset selector, sustain toggle.
+  - Built-in smplr pianos + General MIDI browser + categorized presets.
+  - Custom `.sf2` and per-note/zip sample-map upload with IndexedDB persistence.
+  - Sample cache via CacheStorage for repeat visits.
+  - “Use MIDI sounds” switch + gear icon on the MIDI connection bar when connected.
+  - Loading indicator while soundfont samples load.
+- **Research:** `docs/piano-sound-engine-research.md`
+- **Implementation plan:** `docs/piano-sound-implementation-plan.md`
 
 ### Tracking verification
 
@@ -399,15 +397,14 @@ The tracking pipeline needs a health check before declaring it fully reliable.
   - `lib/local-practice-history.ts`
   - `e2e/tracking.*.spec.ts`
 
-### Arpeggio root-chord miss filter
+### Arpeggio root-chord miss filter ✅ Shipped
 
 In `/tools/arpeggios`, re-articulating a left-hand root-chord note during the right-hand sequence should not count as a miss.
 
-- **Fix:** when the drill arms, record the exact MIDI note numbers that satisfied the left-hand hold. During the sequence phase, ignore note-on events for those specific note numbers.
-- **Why this works:** a higher-octave copy of the same pitch class is a different MIDI note number, so it is still evaluated as an arpeggio note.
-- **Files likely touched:**
+- **Status:** Shipped. The drill now has a configurable miss filter with a root-chord preset; the exact MIDI note numbers that satisfied the left-hand hold are ignored during the sequence phase, while higher-octave copies of the same pitch class are still evaluated.
+- **Files touched:**
   - `hooks/useArpeggios.ts`
-  - `lib/sequence-drill.ts` (helpers if needed)
+  - `lib/arpeggios.ts`
   - `lib/__tests__/arpeggios.test.ts` / `hooks/__tests__/useArpeggios.test.ts`
 
 ### Music ripple integration (audio file / microphone)
@@ -422,28 +419,26 @@ Let the existing ripple/ambient visualizations react to an uploaded audio file o
   - `components/ambient/ambient-effect-renderer.tsx`
   - `app/tools/chladni-ripple/page.tsx` or new `/tools/music-ripple`
 
-### Chladni Ripple polish suite
+### Chladni Ripple polish suite 🟡 Partially shipped
 
 A cluster of related improvements for the Chladni Ripple Lab and ambient backgrounds:
 
-1. **Viewport-independent pattern geometry**
-   - Fix the shader so the square-plate pattern looks the same regardless of container aspect ratio.
-   - File: `components/welcome/chladni-visualization.tsx`.
-2. **Persist ripple params to welcome / ambient presets**
-   - Currently “Use on Welcome” only sets the ambient kind to `chladni-ripple`; the custom lab controls are lost.
-   - Add a persisted ripple settings blob and make the ambient/welcome renderer read it.
-   - Files: `lib/chladni-ripple-settings.ts`, `hooks/useChladniRippleSettings.ts`, `components/ambient/ambient-effect-renderer.tsx`, `components/drills/chladni-ripple/chladni-ripple-lab.tsx`.
-3. **Float panel dynamic resolution**
-   - Use `ResizeObserver` so the canvas rerenders at full resolution when the float panel is resized.
+1. **Viewport / aspect-ratio behavior** ✅ Shipped
+   - The Welcome page background fills the viewport; the Ripple Lab preview card uses `aspect-[4/3] lg:aspect-[16/9]` and matches the Welcome page fill behavior.
+   - Files: `components/welcome/chladni-visualization.tsx`, `components/drills/chladni-ripple/chladni-ripple-lab.tsx`, `components/ambient/ambient-effect-renderer.tsx`.
+2. **Persist ripple params to welcome / ambient presets** ✅ Shipped
+   - Ripple params are persisted to localStorage + Convex and read by the ambient renderer. The Lab can “Use on Welcome” / “Use as ambient default”.
+   - Files: `lib/chladni-ripple-settings.ts`, `hooks/useAmbientEffects.tsx`, `components/ambient/ambient-effect-renderer.tsx`, `components/drills/chladni-ripple/chladni-ripple-lab.tsx`.
+3. **Float panel resolution** ✅ Shipped
+   - The float panel passes `resolutionScale={2}`; `ChladniVisualization` already uses `ResizeObserver` to resize the canvas and refresh DPR on container changes.
    - Files: `components/welcome/chladni-visualization.tsx`, `components/ambient/ambient-float-panel.tsx`.
-4. **Full customization like Chladni Lab**
-   - Add zoom, secondary wave controls, breathe, time scale, pattern color, and presets to the Ripple Lab.
-   - Optionally share a `components/drills/lab-controls/*` extraction with Chladni Lab.
+4. **Full customization like Chladni Lab** 🟡 Partially shipped
+   - Ripple Lab already has zoom, decay, octave complexity, line thickness, base intensity, secondary blend/offset/speed/motion, color softness, and time scale. Presets and reset are live.
+   - Still missing: pattern color picker and a richer preset gallery (currently Lab / Ambient / Bright / Dense).
    - Files: `components/drills/chladni-ripple/chladni-ripple-lab.tsx`, `lib/chladni-ripple.ts`, `hooks/useChladniRipple.ts`.
-5. **Unified “turn off” + one customization place**
-   - Add a global atmosphere on/off toggle in `/settings/atmosphere`.
-   - Make the page the single place to pick the active visual concept, customize it, and decide where it appears.
-   - Keep the Labs as deep editors, but route the “Apply to home / everywhere” actions through the same settings store.
+5. **Unified “turn off” + one customization place** 🟡 Partially shipped
+   - The Ripple Lab has a “Turn off background ripple” button; `/settings/atmosphere` can pick the route background and set the default.
+   - Still possible: a single global on/off toggle at the top of `/settings/atmosphere` and clearer routing of “Apply to home / everywhere” through one settings store.
    - Files: `app/settings/atmosphere/page.tsx`, `lib/ambient-effects.ts`, `hooks/useAmbientEffects.tsx`.
 
 ---
