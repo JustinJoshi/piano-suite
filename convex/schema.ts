@@ -8,6 +8,13 @@ export default defineSchema({
     name: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
     createdAt: v.number(),
+    // Pro/sync entitlement mirrored from Clerk Billing webhooks. Mutations
+    // gate on JWT `pla`/`fea` claims OR this column (see
+    // convex/lib/entitlements.ts); the webhook is the robust path because
+    // claims delivery depends on Clerk session-token configuration.
+    syncEntitled: v.optional(v.boolean()),
+    // Who last set `syncEntitled` (e.g. "webhook").
+    entitlementSource: v.optional(v.string()),
   })
     .index("by_clerkId", ["clerkId"])
     .index("by_email", ["email"]),
