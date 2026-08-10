@@ -1,5 +1,5 @@
 import { clerkMiddleware } from "@clerk/nextjs/server";
-import { isAuthDisabled } from "@/lib/auth-disabled";
+import { isAuthBypassEffective } from "@/lib/auth-disabled";
 import { getAuthorizedPartiesFromEnv } from "@/lib/clerk-authorized-parties";
 
 /**
@@ -7,7 +7,13 @@ import { getAuthorizedPartiesFromEnv } from "@/lib/clerk-authorized-parties";
  *
  * Public routes: home, Pricing, Pattern Lab (homepage hero editor), dev lab,
  * sign-in/up, API, and Clerk's frontend API. Other /tools/* routes require
- * authentication, unless `NEXT_PUBLIC_AUTH_DISABLED=true`.
+ * authentication, unless `NEXT_PUBLIC_AUTH_DISABLED=true`. The bypass is
+ * never honored on Vercel Production (see `isAuthBypassEffective`), so a
+ * stray env assignment there cannot open the site.
+ *
+ * Every `app/api/**` route handler must authorize itself via `auth()` —
+ * `/api` is public here by design (handlers are the enforcement point,
+ * e.g. `/api/chat` checks the session + allowlist).
  *
  * Pricing is public so visitors can evaluate Free vs Pro before signing up.
  * Pattern Lab is public so visitors can customize the welcome hero without
@@ -28,9 +34,14 @@ import { getAuthorizedPartiesFromEnv } from "@/lib/clerk-authorized-parties";
  */
 const authorizedParties = getAuthorizedPartiesFromEnv();
 
+/** Exact match or descendant — `startsWith("/dev")` alone would also open
+ * `/devtools`, `startsWith("/sign-in")` would open `/sign-in-anything`. */
+const isExactOrUnder = (pathname: string, base: string): boolean =>
+  pathname === base || pathname.startsWith(base + "/");
+
 export default clerkMiddleware(
   async (auth, request) => {
-    if (isAuthDisabled()) {
+    if (isAuthBypassEffective()) {
       return;
     }
 
@@ -40,11 +51,9 @@ export default clerkMiddleware(
       pathname === "/" ||
       pathname === "/pricing" ||
       pathname === "/tools/chladni" ||
-      pathname.startsWith("/dev") ||
-      pathname.startsWith("/sign-in") ||
-      pathname.startsWith("/sign-up") ||
-      pathname.startsWith("/api") ||
-      pathname.startsWith("/__clerk");
+      ["/dev", "/sign-in", "/sign-up", "/api", "/__clerk"].some((base) =>
+        isExactOrUnder(pathname, base)
+      );
 
     if (!isPublicRoute) {
       const signInUrl = new URL("/sign-in", request.url).href;
