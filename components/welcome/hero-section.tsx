@@ -31,7 +31,6 @@ export function HeroSection({
 }) {
   const { config } = useWelcomeConfig();
   const { hero, styleTokens } = config;
-  const alignLeft = hero.align === "left";
 
   return (
     <section className="relative flex min-h-svh">
@@ -47,15 +46,8 @@ export function HeroSection({
         )}
       />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-center px-4 pb-16 pt-24 sm:px-6 lg:px-8">
-        <div
-          className={cn(
-            "flex max-w-2xl flex-col gap-6",
-            alignLeft
-              ? "items-center text-center md:items-start md:text-left"
-              : "items-center text-center"
-          )}
-        >
+      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-center justify-center px-4 pb-16 pt-24 sm:px-6 lg:px-8">
+        <div className="flex max-w-2xl flex-col items-center gap-6 text-center">
           {hero.showEyebrow ? (
             <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium uppercase tracking-widest text-primary">
               {hero.eyebrow}
@@ -83,10 +75,7 @@ export function HeroSection({
           </p>
 
           <div
-            className={cn(
-              "flex w-full flex-col items-center gap-4 pt-2 sm:flex-row",
-              alignLeft ? "sm:justify-start" : "sm:justify-center"
-            )}
+            className="flex w-full flex-col items-center justify-center gap-4 pt-2 sm:flex-row"
           >
             <Link
               href={hero.ctaHref}
