@@ -1,5 +1,11 @@
 import { auth } from "@clerk/nextjs/server";
-import { streamText } from "ai";
+import {
+  streamText,
+  createUIMessageStreamResponse,
+  toUIMessageStream,
+  convertToModelMessages,
+  type ModelMessage,
+} from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { getAllArticles } from "@/lib/articles";
 import { authorizeChatAccess } from "@/lib/chat-auth";
@@ -48,6 +54,18 @@ function getSystemPrompt(): string {
   return cachedSystemPrompt;
 }
 
+function getModelMessageTextLength(message: ModelMessage): number {
+  if (typeof message.content === "string") {
+    return message.content.length;
+  }
+  return message.content.reduce((sum, part) => {
+    if (part.type === "text") {
+      return sum + part.text.length;
+    }
+    return sum;
+  }, 0);
+}
+
 export async function POST(req: Request) {
   // Chat always requires a verified session + allowlist. The
   // NEXT_PUBLIC_AUTH_DISABLED route-gate bypass never opens this paid LLM
@@ -77,24 +95,21 @@ export async function POST(req: Request) {
   }
 
   const body = (await req.json()) as {
-    messages?: { role: string; content: string }[];
+    messages?: Parameters<typeof convertToModelMessages>[0];
   };
 
-  // Strip client-supplied system/other roles so a crafted request cannot
-  // append its own system prompt alongside the article-grounded one.
-  const messages = (body.messages ?? []).filter(
-    (m): m is { role: "user" | "assistant"; content: string } =>
-      (m.role === "user" || m.role === "assistant") &&
-      typeof m.content === "string",
-  );
+  // Convert client UI messages to model messages. This strips client-
+  // supplied system roles and non-text parts by design, replacing Phase 1's
+  // manual role filter.
+  const modelMessages = await convertToModelMessages(body.messages ?? []);
 
-  if (messages.length === 0) {
+  if (modelMessages.length === 0) {
     return new Response("No messages provided", { status: 400 });
   }
-  if (messages.length > MAX_MESSAGES) {
+  if (modelMessages.length > MAX_MESSAGES) {
     return new Response("Too many messages", { status: 400 });
   }
-  if (messages.some((m) => m.content.length > MAX_MESSAGE_CHARS)) {
+  if (modelMessages.some((m) => getModelMessageTextLength(m) > MAX_MESSAGE_CHARS)) {
     return new Response("Message too long", { status: 400 });
   }
 
@@ -104,10 +119,15 @@ export async function POST(req: Request) {
       // Responses API that @ai-sdk/openai uses by default for kimikode().
       model: kimikode.chat(modelId),
       system: getSystemPrompt(),
-      messages,
+      messages: modelMessages,
     });
 
-    return result.toTextStreamResponse();
+    return createUIMessageStreamResponse({
+      stream: toUIMessageStream({
+        stream: result.stream,
+        onError: () => "Chat stream failed",
+      }),
+    });
   } catch (error) {
     console.error("Chat streaming error:", error);
     return new Response("Failed to start chat stream", { status: 500 });
