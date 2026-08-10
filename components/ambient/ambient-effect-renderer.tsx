@@ -55,7 +55,6 @@ function AmbientRippleEffect({
       lineIntensity={viz.lineIntensity}
       colorSoftness={settings.ripple.colorSoftness}
       timeScale={settings.ripple.timeScale}
-      normalizeViewport
       resolutionScale={resolutionScale}
       className={className}
     />

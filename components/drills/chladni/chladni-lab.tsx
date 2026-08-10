@@ -290,7 +290,6 @@ export function ChladniLab() {
           breathe={breathe}
           timeScale={timeScale}
           patternColor={settings.patternColor}
-          normalizeViewport
           className="absolute inset-0"
         />
         <div className="pointer-events-none absolute inset-0 hero-glow opacity-30" />

@@ -232,7 +232,7 @@ export function ChladniRippleLab() {
     <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
       <Card className="overflow-hidden ring-1 ring-foreground/10">
         <CardContent className="p-0">
-          <div className="relative aspect-square w-full bg-background sm:aspect-[4/3] lg:aspect-auto lg:min-h-[480px]">
+          <div className="relative aspect-[4/3] w-full bg-background lg:aspect-[16/9]">
             <ChladniVisualization
               mode={viz.mode}
               nextMode={viz.nextMode}
@@ -247,7 +247,6 @@ export function ChladniRippleLab() {
               timeScale={params.timeScale}
               lineIntensity={viz.lineIntensity}
               colorSoftness={params.colorSoftness}
-              normalizeViewport
               className="absolute inset-0 h-full w-full"
             />
           </div>
