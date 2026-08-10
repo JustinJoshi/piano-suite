@@ -33,9 +33,8 @@ const DEFAULT_PARAMS: LissajousParams = {
 
 export function LissajousLab() {
   const [params, setParams] = useState<LissajousParams>(DEFAULT_PARAMS);
-  const [nextParams, setNextParams] = useState<LissajousParams>(() =>
-    randomRatio()
-  );
+  // Use deterministic defaults for SSR hydration, then randomize on the client.
+  const [nextParams, setNextParams] = useState<LissajousParams>(DEFAULT_PARAMS);
   const [morph, setMorph] = useState(0);
   const [autoMorph, setAutoMorph] = useState(true);
   const [morphSpeed, setMorphSpeed] = useState(10);
@@ -50,6 +49,7 @@ export function LissajousLab() {
   const paramsRef = useRef(params);
   const nextParamsRef = useRef(nextParams);
   const morphRef = useRef(morph);
+  const seededNextParamsRef = useRef(false);
 
   useEffect(() => {
     autoMorphRef.current = autoMorph;
@@ -78,6 +78,13 @@ export function LissajousLab() {
     function animate(now: number) {
       const delta = now - lastTime;
       lastTime = now;
+
+      if (!seededNextParamsRef.current) {
+        seededNextParamsRef.current = true;
+        const fresh = randomRatio();
+        nextParamsRef.current = fresh;
+        setNextParams(fresh);
+      }
 
       if (autoMorphRef.current && morphSpeedRef.current > 0) {
         const step = delta / (morphSpeedRef.current * 1000);

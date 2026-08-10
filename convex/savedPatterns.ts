@@ -1,23 +1,9 @@
-import { query, mutation, type QueryCtx, type MutationCtx } from "./_generated/server";
+import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { optionalUserId, ensureUserId } from "./lib/auth";
 
 const MAX_PATTERNS_PER_TOOL = 50;
 const MAX_NAME_LENGTH = 80;
-
-async function currentUserId(ctx: QueryCtx | MutationCtx) {
-  const identity = await ctx.auth.getUserIdentity();
-  if (!identity) {
-    throw new Error("Not authenticated");
-  }
-  const user = await ctx.db
-    .query("users")
-    .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-    .unique();
-  if (!user) {
-    throw new Error("User not found");
-  }
-  return user._id;
-}
 
 function normalizeName(name: string): string {
   const trimmed = name.trim().slice(0, MAX_NAME_LENGTH);
@@ -37,8 +23,21 @@ function normalizeTool(tool: string): string {
 
 export const listSavedPatterns = query({
   args: { tool: v.string() },
+  returns: v.array(
+    v.object({
+      _id: v.id("savedPatterns"),
+      name: v.string(),
+      params: v.any(),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    })
+  ),
   handler: async (ctx, args) => {
-    const userId = await currentUserId(ctx);
+    const userId = await optionalUserId(ctx);
+    if (!userId) {
+      return [];
+    }
+
     const tool = normalizeTool(args.tool);
     const patterns = await ctx.db
       .query("savedPatterns")
@@ -63,8 +62,9 @@ export const savePattern = mutation({
     name: v.string(),
     params: v.any(),
   },
+  returns: v.id("savedPatterns"),
   handler: async (ctx, args) => {
-    const userId = await currentUserId(ctx);
+    const userId = await ensureUserId(ctx);
     const tool = normalizeTool(args.tool);
     const name = normalizeName(args.name);
     const now = Date.now();
@@ -96,8 +96,9 @@ export const renamePattern = mutation({
     patternId: v.id("savedPatterns"),
     name: v.string(),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
-    const userId = await currentUserId(ctx);
+    const userId = await ensureUserId(ctx);
     const name = normalizeName(args.name);
     const pattern = await ctx.db.get(args.patternId);
     if (!pattern) {
@@ -117,8 +118,9 @@ export const deletePattern = mutation({
   args: {
     patternId: v.id("savedPatterns"),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
-    const userId = await currentUserId(ctx);
+    const userId = await ensureUserId(ctx);
     const pattern = await ctx.db.get(args.patternId);
     if (!pattern) {
       throw new Error("Pattern not found");

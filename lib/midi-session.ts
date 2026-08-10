@@ -286,15 +286,17 @@ export function getMidiSessionSnapshot(): MidiSessionSnapshot {
   return snapshot;
 }
 
+const SERVER_MIDI_SESSION_SNAPSHOT: MidiSessionSnapshot = {
+  supported: false,
+  connected: false,
+  error: null,
+  inputs: [],
+  selectedInputId: null,
+  heldNotes: [],
+};
+
 export function getServerMidiSessionSnapshot(): MidiSessionSnapshot {
-  return {
-    supported: false,
-    connected: false,
-    error: null,
-    inputs: [],
-    selectedInputId: null,
-    heldNotes: [],
-  };
+  return SERVER_MIDI_SESSION_SNAPSHOT;
 }
 
 export function subscribeMidiSession(listener: Listener): () => void {
