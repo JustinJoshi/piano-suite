@@ -28,6 +28,8 @@ export type CustomKit =
 export type AudioSettings = {
   /** Master on/off switch for MIDI-driven piano sound. */
   enabled: boolean;
+  /** Master on/off switch for music-player audio output. */
+  musicEnabled: boolean;
   /** Output volume, 0..1. */
   volume: number;
   /** Built-in or dynamic instrument preset. */
@@ -40,6 +42,7 @@ export type AudioSettings = {
 
 export const DEFAULT_AUDIO_SETTINGS: AudioSettings = {
   enabled: true,
+  musicEnabled: true,
   volume: 0.7,
   preset: "splendid-grand-piano",
   sustain: false,
@@ -106,6 +109,8 @@ export function normalizeAudioSettings(
   return {
     enabled:
       typeof src.enabled === "boolean" ? src.enabled : d.enabled,
+    musicEnabled:
+      typeof src.musicEnabled === "boolean" ? src.musicEnabled : d.musicEnabled,
     volume: asNumber(src.volume, d.volume, 0, 1),
     preset: isAudioPreset(src.preset) ? src.preset : d.preset,
     sustain:

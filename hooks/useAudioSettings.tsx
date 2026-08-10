@@ -26,6 +26,7 @@ import type { AudioEngineState } from "@/lib/audio-engine";
 type AudioSettingsContextValue = {
   settings: AudioSettings;
   setEnabled: (enabled: boolean) => void;
+  setMusicEnabled: (enabled: boolean) => void;
   setVolume: (volume: number) => void;
   setPreset: (preset: AudioSettings["preset"]) => void;
   setSustain: (sustain: boolean) => void;
@@ -124,6 +125,10 @@ export function AudioSettingsProvider({ children }: { children: ReactNode }) {
     (enabled: boolean) => updateSettings({ enabled }),
     [updateSettings]
   );
+  const setMusicEnabled = useCallback(
+    (enabled: boolean) => updateSettings({ musicEnabled: enabled }),
+    [updateSettings]
+  );
   const setVolume = useCallback(
     (volume: number) => updateSettings({ volume }),
     [updateSettings]
@@ -145,6 +150,7 @@ export function AudioSettingsProvider({ children }: { children: ReactNode }) {
     () => ({
       settings,
       setEnabled,
+      setMusicEnabled,
       setVolume,
       setPreset,
       setSustain,
@@ -156,6 +162,7 @@ export function AudioSettingsProvider({ children }: { children: ReactNode }) {
     [
       settings,
       setEnabled,
+      setMusicEnabled,
       setVolume,
       setPreset,
       setSustain,

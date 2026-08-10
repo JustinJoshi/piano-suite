@@ -22,6 +22,7 @@ export default function AudioSettingsPage() {
   const {
     settings,
     setEnabled,
+    setMusicEnabled,
     setVolume,
     setPreset,
     setSustain,
@@ -65,6 +66,32 @@ export default function AudioSettingsPage() {
                 <span className="block text-sm leading-relaxed text-muted-foreground">
                   You can also toggle this quickly from the MIDI connection bar
                   on any drill page.
+                </span>
+              </span>
+            </label>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="gap-2">
+            <CardTitle className="font-heading text-lg">Music sounds</CardTitle>
+            <CardDescription className="text-sm leading-relaxed">
+              Play uploaded MIDI or audio files through the piano sound engine.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <label className="flex cursor-pointer items-start gap-3 text-base text-foreground">
+              <input
+                type="checkbox"
+                checked={settings.musicEnabled}
+                onChange={(e) => setMusicEnabled(e.target.checked)}
+                className="mt-1 accent-primary"
+                data-testid="audio-music-toggle"
+              />
+              <span className="space-y-1.5">
+                <span className="block font-medium">Enable music audio</span>
+                <span className="block text-sm leading-relaxed text-muted-foreground">
+                  This is separate from the MIDI-keyboard sound toggle.
                 </span>
               </span>
             </label>

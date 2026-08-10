@@ -20,6 +20,7 @@ export function AudioEngineHost() {
   const settingsRef = useRef(settings);
   const connectedRef = useRef(connected);
   const sustainedNotesRef = useRef<Set<number>>(new Set());
+  const musicActiveNotesRef = useRef<Set<number>>(new Set());
 
   useEffect(() => {
     settingsRef.current = settings;
@@ -70,6 +71,16 @@ export function AudioEngineHost() {
     }
   }, [settings.enabled]);
 
+  // Stop music-player notes when music audio is turned off.
+  useEffect(() => {
+    if (!settings.musicEnabled) {
+      musicActiveNotesRef.current.forEach((note) => {
+        engineRef.current?.stop(note);
+      });
+      musicActiveNotesRef.current.clear();
+    }
+  }, [settings.musicEnabled]);
+
   // Release sustained notes when sustain is turned off.
   useEffect(() => {
     if (!settings.sustain) {
@@ -104,16 +115,18 @@ export function AudioEngineHost() {
     };
 
     const onMusicNoteOn = (event: Event) => {
-      if (!settingsRef.current.enabled) return;
+      if (!settingsRef.current.musicEnabled) return;
       const detail = (event as CustomEvent<MidiNoteEventDetail>).detail;
       if (!detail) return;
+      musicActiveNotesRef.current.add(detail.note);
       engineRef.current?.play(detail.note, detail.velocity);
     };
 
     const onMusicNoteOff = (event: Event) => {
-      if (!settingsRef.current.enabled) return;
+      if (!settingsRef.current.musicEnabled) return;
       const detail = (event as CustomEvent<MidiNoteEventDetail>).detail;
       if (!detail) return;
+      musicActiveNotesRef.current.delete(detail.note);
       engineRef.current?.stop(detail.note);
     };
 

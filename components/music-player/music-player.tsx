@@ -10,8 +10,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useMusicPlayer } from "@/hooks/useMusicPlayer";
+import { useAudioSettings } from "@/hooks/useAudioSettings";
 import { cn } from "@/lib/utils";
-import { Play, Pause, Square, Upload, Volume2, Music2 } from "lucide-react";
+import { Play, Pause, Square, Upload, Volume2, Music2, Piano } from "lucide-react";
 
 function formatTime(seconds: number): string {
   const s = Math.max(0, Math.floor(seconds));
@@ -35,6 +36,7 @@ export function MusicPlayer({ className }: { className?: string }) {
     stop,
     setVolume,
   } = useMusicPlayer();
+  const { settings, setMusicEnabled } = useAudioSettings();
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -157,8 +159,21 @@ export function MusicPlayer({ className }: { className?: string }) {
                 aria-label="Music volume"
               />
             </label>
+
           </div>
         )}
+
+        <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
+          <Piano className="h-4 w-4 text-muted-foreground" />
+          <input
+            type="checkbox"
+            checked={settings.musicEnabled}
+            onChange={(e) => setMusicEnabled(e.target.checked)}
+            className="accent-primary"
+            data-testid="music-audio-toggle"
+          />
+          <span>Play through piano sound</span>
+        </label>
 
         {error ? (
           <p className="text-xs text-destructive" role="alert" data-testid="music-error">

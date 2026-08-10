@@ -54,6 +54,7 @@ describe("normalizeAudioSettings", () => {
   it("preserves sample custom kits", () => {
     const settings: AudioSettings = {
       enabled: true,
+      musicEnabled: true,
       volume: 0.5,
       preset: "custom",
       sustain: false,
@@ -70,6 +71,7 @@ describe("normalizeAudioSettings", () => {
   it("preserves valid custom values", () => {
     const settings: AudioSettings = {
       enabled: false,
+      musicEnabled: false,
       volume: 0.5,
       preset: "musyngkite-acoustic-grand-piano",
       sustain: true,
@@ -81,6 +83,12 @@ describe("normalizeAudioSettings", () => {
       },
     };
     expect(normalizeAudioSettings(settings)).toEqual(settings);
+  });
+
+  it("falls back to default musicEnabled for non-booleans", () => {
+    expect(
+      normalizeAudioSettings({ musicEnabled: "yes" as never }).musicEnabled
+    ).toBe(DEFAULT_AUDIO_SETTINGS.musicEnabled);
   });
 
   it("falls back to default sustain for non-booleans", () => {
@@ -114,6 +122,7 @@ describe("localStorage helpers", () => {
   it("round-trips settings", () => {
     const settings: AudioSettings = {
       enabled: false,
+      musicEnabled: true,
       volume: 0.25,
       preset: "musyngkite-acoustic-grand-piano",
       sustain: true,
