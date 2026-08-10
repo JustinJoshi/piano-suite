@@ -1,5 +1,8 @@
 # Remediation Plan — Deep Research Findings
 
+> Full findings with evidence and sources:
+> [`docs/deep-research-report.md`](deep-research-report.md).
+>
 > Source: full-repo audit (2026-08) against current docs/best practices for
 > Next.js 16, React 19, Convex, Clerk + Billing, Tailwind v4, smplr/Web
 > Audio/Web MIDI, Vercel AI SDK v7, three.js, Vitest/RTL/Playwright.
