@@ -119,6 +119,10 @@ vi.mock("@/hooks/useAudioSettings", () => ({
   }),
 }));
 
+vi.mock("@/components/music-player/music-player", () => ({
+  MusicPlayer: () => null,
+}));
+
 describe("ChladniRippleLab", () => {
   beforeEach(() => {
     setRouteBackground.mockClear();

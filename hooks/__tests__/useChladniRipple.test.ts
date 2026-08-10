@@ -59,4 +59,21 @@ describe("useChladniRipple", () => {
     expect(result.current.viz.mode).toEqual(modeForNote(60));
     expect(result.current.viz.lineIntensity).toBeGreaterThan(0.45);
   });
+
+  it("reacts to music-note-on impulses", () => {
+    const { result } = renderHook(() => useChladniRipple({ heldNotes: [] }));
+
+    act(() => {
+      window.dispatchEvent(
+        new CustomEvent<MidiNoteEventDetail>("music-note-on", {
+          detail: { note: 64, pc: 4, velocity: 100 },
+        })
+      );
+    });
+
+    runFrame(50);
+
+    expect(result.current.viz.activePc).toBe(4);
+    expect(result.current.viz.mode).toEqual(modeForNote(64));
+  });
 });

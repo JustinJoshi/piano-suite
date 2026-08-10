@@ -20,6 +20,7 @@ import {
   type ModePair,
 } from "@/lib/chladni-ripple-settings";
 import { cn } from "@/lib/utils";
+import { MusicPlayer } from "@/components/music-player/music-player";
 
 // ============================================================
 // CHLADNI RIPPLE LAB
@@ -268,6 +269,8 @@ export function ChladniRippleLab() {
       </Card>
 
       <div className="flex flex-col gap-4">
+        <MusicPlayer />
+
         <Card className="ring-1 ring-foreground/10">
           <CardHeader className="pb-3">
             <CardTitle className="font-heading text-base">MIDI</CardTitle>

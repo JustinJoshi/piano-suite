@@ -23,6 +23,9 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `hooks/useMidi.ts` | React subscription to `midi-session`; note-on events include velocity |
 | `hooks/useChladniRipple.ts` | MIDI impulses + held notes → Chladni viz props (Ripple Lab) |
 | `lib/chladni-ripple.ts` | Pitch-class → mode table, octave density, velocity decay mapping |
+| `lib/music-player.ts` | MIDI/audio parsing, scheduling, and global `music-note-on/off` events |
+| `hooks/useMusicPlayer.tsx` | Global music player provider; playback survives route changes |
+| `components/music-player/*` | Upload/playback UI for driving ripple and piano sound from a song |
 | `lib/chladni-ripple-settings.ts` | Serializable Chladni Ripple params (lab + ambient background defaults) |
 | `hooks/useAudio.ts` | Web Audio chimes, ticks, metronome |
 | `lib/audio-presets.ts` | Curated preset categories, GM catalog metadata, and preset ID validation |

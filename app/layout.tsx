@@ -9,6 +9,7 @@ import { AmbientEffectsProvider } from "@/hooks/useAmbientEffects";
 import { AudioEngineHost } from "@/components/audio/audio-engine-host";
 import { AudioSettingsProvider } from "@/hooks/useAudioSettings";
 import { ExperimentalFeaturesProvider } from "@/hooks/useExperimentalFeatures";
+import { MusicPlayerProvider } from "@/hooks/useMusicPlayer";
 import { defaultTheme, themeIds } from "@/lib/themes";
 import "./globals.css";
 
@@ -58,9 +59,11 @@ export default function RootLayout({
               <ExperimentalFeaturesProvider>
                 <AudioSettingsProvider>
                   <AmbientEffectsProvider>
-                    <AmbientEffectsHost />
-                    <AudioEngineHost />
-                    {children}
+                    <MusicPlayerProvider>
+                      <AmbientEffectsHost />
+                      <AudioEngineHost />
+                      {children}
+                    </MusicPlayerProvider>
                   </AmbientEffectsProvider>
                 </AudioSettingsProvider>
               </ExperimentalFeaturesProvider>

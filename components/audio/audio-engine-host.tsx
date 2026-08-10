@@ -103,12 +103,30 @@ export function AudioEngineHost() {
       engineRef.current?.stop(detail.note);
     };
 
+    const onMusicNoteOn = (event: Event) => {
+      if (!settingsRef.current.enabled) return;
+      const detail = (event as CustomEvent<MidiNoteEventDetail>).detail;
+      if (!detail) return;
+      engineRef.current?.play(detail.note, detail.velocity);
+    };
+
+    const onMusicNoteOff = (event: Event) => {
+      if (!settingsRef.current.enabled) return;
+      const detail = (event as CustomEvent<MidiNoteEventDetail>).detail;
+      if (!detail) return;
+      engineRef.current?.stop(detail.note);
+    };
+
     window.addEventListener("midi-note-on", onNoteOn);
     window.addEventListener("midi-note-off", onNoteOff);
+    window.addEventListener("music-note-on", onMusicNoteOn);
+    window.addEventListener("music-note-off", onMusicNoteOff);
 
     return () => {
       window.removeEventListener("midi-note-on", onNoteOn);
       window.removeEventListener("midi-note-off", onNoteOff);
+      window.removeEventListener("music-note-on", onMusicNoteOn);
+      window.removeEventListener("music-note-off", onMusicNoteOff);
     };
   }, []);
 

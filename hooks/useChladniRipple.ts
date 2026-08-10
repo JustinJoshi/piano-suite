@@ -91,7 +91,11 @@ export function useChladniRipple({
     };
 
     window.addEventListener("midi-note-on", onNoteOn);
-    return () => window.removeEventListener("midi-note-on", onNoteOn);
+    window.addEventListener("music-note-on", onNoteOn);
+    return () => {
+      window.removeEventListener("midi-note-on", onNoteOn);
+      window.removeEventListener("music-note-on", onNoteOn);
+    };
   }, []);
 
   useEffect(() => {
