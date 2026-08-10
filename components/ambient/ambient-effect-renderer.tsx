@@ -8,7 +8,6 @@ import {
 } from "@/lib/ambient-effects";
 import { randomC, type Complex } from "@/lib/julia";
 import { randomRatio, type LissajousParams } from "@/lib/lissajous";
-import { useMidi } from "@/hooks/useMidi";
 import { useChladniRipple } from "@/hooks/useChladniRipple";
 import { useAmbientEffects } from "@/hooks/useAmbientEffects";
 import { useExperimentalFeatures } from "@/hooks/useExperimentalFeatures";
@@ -57,10 +56,8 @@ function AmbientRippleEffect({
   className?: string;
   resolutionScale?: number;
 }) {
-  const midi = useMidi();
   const { settings } = useAmbientEffects();
   const { viz } = useChladniRipple({
-    heldNotes: midi.heldNotes,
     decayMs: settings.ripple.decayMs,
     octaveComplexity: settings.ripple.octaveComplexity,
     baseLineThickness: settings.ripple.baseLineThickness,

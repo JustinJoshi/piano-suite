@@ -7,6 +7,12 @@
  */
 
 import { clamp } from "@/lib/chladni";
+import {
+  impulseAmplitude,
+  type MidiImpulse,
+} from "@/lib/midi-impulse";
+
+export type { MidiImpulse } from "@/lib/midi-impulse";
 
 export type ModePair = [number, number];
 
@@ -31,14 +37,6 @@ export const PC_MODE_TABLE: readonly ModePair[] = [
 
 /** Soft idle pattern when nothing is held and impulses have decayed. */
 export const IDLE_MODE: ModePair = [5, 7];
-
-export type MidiImpulse = {
-  note: number;
-  pc: number;
-  /** Normalized 0..1 */
-  velocity: number;
-  bornAt: number;
-};
 
 export type ChladniRippleControls = {
   /** Impulse half-life-ish window in ms (envelope reaches ~5% near the end). */
@@ -70,12 +68,6 @@ export function pitchClass(note: number): number {
 /** MIDI note number → scientific octave (C4 = MIDI 60 → 4). */
 export function midiOctave(note: number): number {
   return Math.floor(note / 12) - 1;
-}
-
-/** Normalize MIDI velocity 1..127 to 0..1 (0 stays 0). */
-export function normalizeVelocity(velocity: number): number {
-  if (velocity <= 0) return 0;
-  return clamp(velocity / 127, 0, 1);
 }
 
 /**
@@ -112,29 +104,6 @@ export function modeForNote(
   const pc = pitchClass(note);
   const base = PC_MODE_TABLE[pc] ?? IDLE_MODE;
   return scaleModeForOctave(base, midiOctave(note), octaveComplexity);
-}
-
-/**
- * Exponential decay envelope. At age ≈ decayMs amplitude is ~5% of peak.
- */
-export function impulseAmplitude(
-  impulse: MidiImpulse,
-  now: number,
-  decayMs: number
-): number {
-  const window = Math.max(1, decayMs);
-  const age = now - impulse.bornAt;
-  if (age < 0) return impulse.velocity;
-  if (age >= window) return 0;
-  return impulse.velocity * Math.exp((-3 * age) / window);
-}
-
-export function pruneImpulses(
-  impulses: readonly MidiImpulse[],
-  now: number,
-  decayMs: number
-): MidiImpulse[] {
-  return impulses.filter((imp) => impulseAmplitude(imp, now, decayMs) > 0.02);
 }
 
 const DEFAULT_CONTROLS: ChladniRippleControls = {

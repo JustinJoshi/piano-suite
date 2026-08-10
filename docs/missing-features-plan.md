@@ -169,9 +169,17 @@ Do **not** force extraction if the first MIDI ripple only needs hooks + libs.
 
 ### Done when
 
-- Shared impulse helpers exist and Chladni Ripple either uses them or coexists without duplication of decay math.
-- `AGENTS.md` primitive table lists the new libs/hooks.
-- Gate green.
+- [x] Shared impulse helpers exist and Chladni Ripple uses them without duplication of decay math.
+- [x] `AGENTS.md` primitive table lists the new libs/hooks.
+- [x] Gate green.
+
+### Status
+
+Shipped in `kimi/midi-viz-foundation`.
+- `lib/midi-impulse.ts` — velocity normalization, exponential decay, pruning, snapshot helpers.
+- `hooks/useMidiImpulses.ts` — single hook that tracks held notes + decaying impulses from both MIDI and music-player events.
+- `hooks/useChladniRipple.ts` refactored to consume the shared layer; behavior preserved.
+- Unit tests for `midi-impulse`, `useMidiImpulses`, and updated `useChladniRipple` tests.
 
 ### Hotspots
 

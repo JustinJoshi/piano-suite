@@ -21,8 +21,10 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `lib/anki.ts` | Typed AnkiConnect HTTP client and helpers |
 | `lib/midi-session.ts` | Tab-scoped Web MIDI session store (access, devices, held notes); survives tool-page navigation |
 | `hooks/useMidi.ts` | React subscription to `midi-session`; note-on events include velocity |
+| `lib/midi-impulse.ts` | Generic MIDI/music note impulse math (velocity, decay, pruning) |
+| `hooks/useMidiImpulses.ts` | Shared MIDI + music reactive impulse layer; held notes + decaying impulses |
 | `hooks/useChladniRipple.ts` | MIDI impulses + held notes → Chladni viz props (Ripple Lab) |
-| `lib/chladni-ripple.ts` | Pitch-class → mode table, octave density, velocity decay mapping |
+| `lib/chladni-ripple.ts` | Pitch-class → mode table, octave density, velocity-to-intensity mapping |
 | `lib/music-player.ts` | MIDI/audio parsing, scheduling, and global `music-note-on/off` events |
 | `hooks/useMusicPlayer.tsx` | Global music player provider; playback survives route changes |
 | `components/music-player/*` | Upload/playback UI for driving ripple and piano sound from a song |

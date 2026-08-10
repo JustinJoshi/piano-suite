@@ -2,17 +2,19 @@ import { describe, expect, it } from "vitest";
 import {
   IDLE_MODE,
   PC_MODE_TABLE,
-  impulseAmplitude,
   mapMidiToChladni,
   midiOctave,
   modeEnergy,
   modeForNote,
-  normalizeVelocity,
   pitchClass,
-  pruneImpulses,
   scaleModeForOctave,
-  type MidiImpulse,
 } from "@/lib/chladni-ripple";
+import {
+  impulseAmplitude,
+  normalizeVelocity,
+  pruneImpulses,
+  type MidiImpulse,
+} from "@/lib/midi-impulse";
 
 describe("chladni-ripple mapping", () => {
   it("has twelve unique pitch-class mode identities", () => {
