@@ -242,20 +242,22 @@ export function TechniqueTracker() {
         </CardContent>
       </Card>
 
-      <Card className="flex flex-row items-center gap-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-2xl">
-          <Flame
-            className={cn(
-              "h-6 w-6 transition-opacity",
-              streak > 0 ? "text-primary opacity-100" : "text-muted-foreground opacity-30"
-            )}
-          />
-        </div>
-        <div>
-          <div data-testid="streak-number" className="font-heading text-3xl font-semibold">
-            {streak}
+      <Card className="flex items-center justify-center px-6 py-4">
+        <div className="flex flex-row items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-2xl">
+            <Flame
+              className={cn(
+                "h-6 w-6 transition-opacity",
+                streak > 0 ? "text-primary opacity-100" : "text-muted-foreground opacity-30"
+              )}
+            />
           </div>
-          <div className="text-sm text-muted-foreground">day streak</div>
+          <div className="text-center">
+            <div data-testid="streak-number" className="font-heading text-3xl font-semibold">
+              {streak}
+            </div>
+            <div className="text-sm text-muted-foreground">day streak</div>
+          </div>
         </div>
       </Card>
 
