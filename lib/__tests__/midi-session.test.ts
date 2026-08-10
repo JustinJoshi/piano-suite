@@ -17,12 +17,10 @@ function createMockMidiInput(id: string, name: string) {
 }
 
 function createMockMidiAccess(inputs: ReturnType<typeof createMockMidiInput>[]) {
-  const inputMap = new Map(inputs.map((input) => [input.id, input]));
-
   return {
     inputs: {
       forEach: (cb: (input: (typeof inputs)[0]) => void) => inputs.forEach(cb),
-      get: (id: string) => inputMap.get(id),
+      get: (id: string) => inputs.find((input) => input.id === id),
     },
     onstatechange: null as ((event: Event) => void) | null,
   };
@@ -161,5 +159,71 @@ describe("midi-session", () => {
 
     unsubscribe();
     expect(inputs[0].onmidimessage).not.toBeNull();
+  });
+
+  it("clears held notes when the selected input disconnects", async () => {
+    const inputs = [createMockMidiInput("input-1", "Roland Digital Piano")];
+    const access = createMockMidiAccess(inputs);
+    vi.mocked(navigator.requestMIDIAccess).mockResolvedValueOnce(
+      access as unknown as MIDIAccess
+    );
+
+    await connectMidiSession();
+
+    inputs[0].onmidimessage?.(createMockMidiMessage([0x90, 60, 100]));
+    expect(getMidiSessionSnapshot().heldNotes).toEqual([60]);
+
+    // Simulate unplug: the input disappears and access fires statechange.
+    inputs.pop();
+    access.onstatechange?.(new Event("statechange"));
+
+    expect(getMidiSessionSnapshot().heldNotes).toEqual([]);
+    expect(getMidiSessionSnapshot().selectedInputId).toBeNull();
+  });
+
+  it("keeps held notes when an unrelated input connects", async () => {
+    const inputs = [createMockMidiInput("input-1", "Roland Digital Piano")];
+    const access = createMockMidiAccess(inputs);
+    vi.mocked(navigator.requestMIDIAccess).mockResolvedValueOnce(
+      access as unknown as MIDIAccess
+    );
+
+    await connectMidiSession();
+
+    inputs[0].onmidimessage?.(createMockMidiMessage([0x90, 60, 100]));
+    expect(getMidiSessionSnapshot().heldNotes).toEqual([60]);
+
+    inputs.push(createMockMidiInput("input-2", "Virtual MIDI"));
+    access.onstatechange?.(new Event("statechange"));
+
+    expect(getMidiSessionSnapshot().heldNotes).toEqual([60]);
+    expect(getMidiSessionSnapshot().selectedInputId).toBe("input-1");
+  });
+
+  it("reports permission denial as supported with a retry message", async () => {
+    vi.mocked(navigator.requestMIDIAccess).mockRejectedValueOnce(
+      new Error("NotAllowedError")
+    );
+
+    await connectMidiSession();
+
+    const snap = getMidiSessionSnapshot();
+    expect(snap.supported).toBe(true);
+    expect(snap.connected).toBe(false);
+    expect(snap.error).toBe(
+      "MIDI access was denied — allow it in the browser site settings and retry."
+    );
+  });
+
+  it("reports unsupported when requestMIDIAccess is missing", async () => {
+    vi.stubGlobal("navigator", {});
+    __resetMidiSessionForTests();
+
+    await connectMidiSession();
+
+    const snap = getMidiSessionSnapshot();
+    expect(snap.supported).toBe(false);
+    expect(snap.connected).toBe(false);
+    expect(snap.error).toBe("Web MIDI is not supported in this browser.");
   });
 });

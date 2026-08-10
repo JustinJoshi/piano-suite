@@ -60,7 +60,10 @@ function getAudioContext(): AudioContext | null {
 
 async function ensureAudioContextResumed(): Promise<void> {
   const ctx = getAudioContext();
-  if (ctx && ctx.state === "suspended") {
+  if (!ctx) return;
+  // Safari reports "interrupted" instead of "suspended".
+  const state = ctx.state as string;
+  if (state === "suspended" || state === "interrupted") {
     try {
       await ctx.resume();
     } catch {

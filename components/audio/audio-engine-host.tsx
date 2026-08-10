@@ -32,7 +32,13 @@ export function AudioEngineHost() {
 
   // Create a new engine whenever the instrument preset or custom kit changes.
   // Volume is applied separately so we don't reload samples on every slide.
+  // No engine (and no sample downloads) while both sound toggles are off;
+  // the same engine also plays music-player notes (musicEnabled).
   useEffect(() => {
+    if (!settings.enabled && !settings.musicEnabled) {
+      return;
+    }
+
     const engine = createAudioEngine(
       settings.preset,
       settings.volume,
@@ -56,12 +62,27 @@ export function AudioEngineHost() {
       sustainedNotes.clear();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settings.preset, settings.customKit]);
+  }, [settings.preset, settings.customKit, settings.enabled, settings.musicEnabled]);
 
   // Update volume without recreating the engine.
   useEffect(() => {
     engineRef.current?.setVolume(settings.volume);
   }, [settings.volume]);
+
+  // Autoplay policy: Web Audio only resumes from a real user gesture, and
+  // MIDI events don't count. Resume the shared context on the first
+  // pointerdown/keydown so notes played before any click are not lost.
+  useEffect(() => {
+    const resume = () => {
+      engineRef.current?.resumeFromUserGesture();
+    };
+    window.addEventListener("pointerdown", resume, { once: true });
+    window.addEventListener("keydown", resume, { once: true });
+    return () => {
+      window.removeEventListener("pointerdown", resume);
+      window.removeEventListener("keydown", resume);
+    };
+  }, []);
 
   // Stop all notes when the user disables the feature.
   useEffect(() => {

@@ -36,6 +36,8 @@ export type AudioEngine = {
   play(note: number, velocity: number): void;
   stop(note: number): void;
   stopAll(): void;
+  /** Resume the shared AudioContext from a real user gesture. */
+  resumeFromUserGesture(): void;
   dispose(): void;
 };
 
@@ -185,6 +187,7 @@ export function createAudioEngine(
   let sampler: SamplerInstance | null = null;
   let loadPromise: Promise<void> | null = null;
   let objectUrls: string[] = [];
+  let disposed = false;
 
   function setState(next: AudioEngineState) {
     state = next;
@@ -199,7 +202,10 @@ export function createAudioEngine(
   }
 
   async function ensureResumed() {
-    if (context && context.state === "suspended") {
+    if (!context) return;
+    // Safari reports "interrupted" instead of "suspended".
+    const contextState = context.state as string;
+    if (contextState === "suspended" || contextState === "interrupted") {
       try {
         await context.resume();
       } catch {
@@ -223,15 +229,21 @@ export function createAudioEngine(
       try {
         if (preset === "custom" && customKit) {
           const result = await loadCustomSampler(context, customKit);
+          if (disposed) {
+            result.objectUrls.forEach((url) => URL.revokeObjectURL(url));
+            return;
+          }
           sampler = result.sampler;
           objectUrls = result.objectUrls;
         } else {
           sampler = createSampler(context, preset);
         }
         await sampler.ready;
+        if (disposed) return;
         applyVolume();
         setState("ready");
       } catch (err) {
+        if (disposed) return;
         console.error("Failed to load audio instrument", err);
         setState("error");
       }
@@ -253,9 +265,15 @@ export function createAudioEngine(
     },
 
     play(note, velocity) {
-      if (!context || state === "error") return;
+      if (!context || state === "error" || disposed) return;
 
-      void ensureResumed();
+      // Autoplay policy: scheduling into a suspended context queues notes at
+      // a frozen currentTime, so they'd all fire at once on resume. Wait for
+      // a real user gesture (resumeFromUserGesture) instead.
+      if (context.state !== "running") {
+        void ensureResumed();
+        return;
+      }
 
       if (state === "ready" && sampler) {
         sampler.start({
@@ -267,12 +285,11 @@ export function createAudioEngine(
 
       // If not loaded yet, load now and play once ready.
       void load().then(() => {
-        if (sampler) {
-          sampler.start({
-            note,
-            velocity: Math.max(0, Math.min(127, Math.round(velocity))),
-          });
-        }
+        if (disposed || !sampler || context.state !== "running") return;
+        sampler.start({
+          note,
+          velocity: Math.max(0, Math.min(127, Math.round(velocity))),
+        });
       });
     },
 
@@ -286,7 +303,12 @@ export function createAudioEngine(
       sampler.stop();
     },
 
+    resumeFromUserGesture() {
+      void ensureResumed();
+    },
+
     dispose() {
+      disposed = true;
       if (
         sampler &&
         "dispose" in sampler &&
