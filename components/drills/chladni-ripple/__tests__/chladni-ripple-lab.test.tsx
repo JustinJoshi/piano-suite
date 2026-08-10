@@ -43,12 +43,11 @@ vi.mock("@/hooks/useChladniRipple", () => ({
   }),
 }));
 
+const applyRippleBackground = vi.fn();
 const setRouteBackground = vi.fn();
-const applyAsAmbientBackground = vi.fn();
 const openFloat = vi.fn();
 const setDefaultBackground = vi.fn();
 const setApplyEverywhere = vi.fn();
-const updateSettings = vi.fn();
 const useAuthAccessMock = vi.fn(() => ({
   authDisabled: false,
   isSignedIn: true,
@@ -86,9 +85,8 @@ const defaultRippleSettings = {
 vi.mock("@/hooks/useAmbientEffects", () => ({
   useAmbientEffects: () => ({
     settings: defaultRippleSettings,
-    updateSettings,
+    applyRippleBackground,
     setRouteBackground,
-    applyAsAmbientBackground,
     openFloat,
     setDefaultBackground,
     setApplyEverywhere,
@@ -125,12 +123,11 @@ vi.mock("@/components/music-player/music-player", () => ({
 
 describe("ChladniRippleLab", () => {
   beforeEach(() => {
+    applyRippleBackground.mockClear();
     setRouteBackground.mockClear();
-    applyAsAmbientBackground.mockClear();
     openFloat.mockClear();
     setDefaultBackground.mockClear();
     setApplyEverywhere.mockClear();
-    updateSettings.mockClear();
     useAuthAccessMock.mockReturnValue({
       authDisabled: false,
       isSignedIn: true,
@@ -155,10 +152,16 @@ describe("ChladniRippleLab", () => {
     render(<ChladniRippleLab />);
 
     fireEvent.click(screen.getByTestId("ripple-use-on-home"));
-    expect(setRouteBackground).toHaveBeenCalledWith("/", "chladni-ripple");
+    expect(applyRippleBackground).toHaveBeenCalledWith(
+      defaultRippleSettings.ripple,
+      "home"
+    );
 
     fireEvent.click(screen.getByTestId("ripple-use-everywhere"));
-    expect(applyAsAmbientBackground).toHaveBeenCalledWith("chladni-ripple");
+    expect(applyRippleBackground).toHaveBeenCalledWith(
+      defaultRippleSettings.ripple,
+      "everywhere"
+    );
 
     fireEvent.click(screen.getByTestId("ripple-open-float"));
     expect(openFloat).toHaveBeenCalledWith("chladni-ripple");
@@ -190,16 +193,16 @@ describe("ChladniRippleLab", () => {
     render(<ChladniRippleLab />);
 
     fireEvent.click(screen.getByTestId("ripple-use-on-home"));
-    expect(updateSettings).toHaveBeenCalledWith({
-      ripple: defaultRippleSettings.ripple,
-    });
-    expect(setRouteBackground).toHaveBeenCalledWith("/", "chladni-ripple");
+    expect(applyRippleBackground).toHaveBeenCalledWith(
+      defaultRippleSettings.ripple,
+      "home"
+    );
 
     fireEvent.click(screen.getByTestId("ripple-use-everywhere"));
-    expect(updateSettings).toHaveBeenCalledWith({
-      ripple: defaultRippleSettings.ripple,
-    });
-    expect(applyAsAmbientBackground).toHaveBeenCalledWith("chladni-ripple");
+    expect(applyRippleBackground).toHaveBeenCalledWith(
+      defaultRippleSettings.ripple,
+      "everywhere"
+    );
   });
 
   it("turns off the ripple background", () => {

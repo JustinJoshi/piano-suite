@@ -27,6 +27,7 @@ import {
   seedAmbientFromHeroAtmosphere,
   writeAmbientEffectsToLocalStorage,
 } from "@/lib/ambient-effects";
+import { type ChladniRippleParams } from "@/lib/chladni-ripple-settings";
 
 type AmbientEffectsContextValue = {
   settings: AmbientEffectsSettings;
@@ -46,6 +47,10 @@ type AmbientEffectsContextValue = {
   applyAsAmbientBackground: (
     kind: AmbientEffectKind,
     pathname?: string
+  ) => void;
+  applyRippleBackground: (
+    params: ChladniRippleParams,
+    target?: "home" | "everywhere"
   ) => void;
   backgroundFor: (pathname: string) => AmbientEffectKind;
   floatVisibleFor: (pathname: string) => boolean;
@@ -232,6 +237,33 @@ export function AmbientEffectsProvider({ children }: { children: ReactNode }) {
     [setRouteBackground, updateSettings]
   );
 
+  const applyRippleBackground = useCallback(
+    (params: ChladniRippleParams, target: "home" | "everywhere" = "home") => {
+      if (target === "home") {
+        const next = normalizeAmbientEffects({
+          ...settings,
+          ripple: params,
+          routeBackgrounds: {
+            ...settings.routeBackgrounds,
+            "/": "chladni-ripple",
+          },
+        });
+        setLocalSettings(next);
+        persist(next);
+      } else {
+        const next = normalizeAmbientEffects({
+          ...settings,
+          ripple: params,
+          defaultBackground: "chladni-ripple",
+          applyEverywhere: true,
+        });
+        setLocalSettings(next);
+        persist(next);
+      }
+    },
+    [settings, persist]
+  );
+
   const backgroundFor = useCallback(
     (pathname: string) => resolveBackgroundKind(pathname, settings),
     [settings]
@@ -256,6 +288,7 @@ export function AmbientEffectsProvider({ children }: { children: ReactNode }) {
       setFloatRect,
       openFloat,
       applyAsAmbientBackground,
+      applyRippleBackground,
       backgroundFor,
       floatVisibleFor,
       defaults: DEFAULT_AMBIENT_EFFECTS,
@@ -273,6 +306,7 @@ export function AmbientEffectsProvider({ children }: { children: ReactNode }) {
       setFloatRect,
       openFloat,
       applyAsAmbientBackground,
+      applyRippleBackground,
       backgroundFor,
       floatVisibleFor,
     ]

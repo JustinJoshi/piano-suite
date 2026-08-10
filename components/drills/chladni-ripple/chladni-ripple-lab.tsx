@@ -146,8 +146,7 @@ export function ChladniRippleLab() {
   const { canUseFloatPanel } = useAuthAccess();
   const {
     settings,
-    updateSettings,
-    applyAsAmbientBackground,
+    applyRippleBackground,
     openFloat,
     setRouteBackground,
     setDefaultBackground,
@@ -199,27 +198,14 @@ export function ChladniRippleLab() {
     setParams({ ...DEFAULT_RIPPLE_PARAMS });
   }
 
-  function persistAndMessage(
-    message: string,
-    apply: () => void
-  ) {
-    updateSettings({ ripple: params });
-    apply();
-    setAmbientMessage(message);
-  }
-
   function handleUseOnHome() {
-    persistAndMessage(
-      "Chladni Ripple set as the Welcome background.",
-      () => setRouteBackground("/", "chladni-ripple")
-    );
+    applyRippleBackground(params, "home");
+    setAmbientMessage("Chladni Ripple set as the Welcome background.");
   }
 
   function handleUseEverywhere() {
-    persistAndMessage(
-      "Chladni Ripple applied as the default ambient background.",
-      () => applyAsAmbientBackground("chladni-ripple")
-    );
+    applyRippleBackground(params, "everywhere");
+    setAmbientMessage("Chladni Ripple applied as the default ambient background.");
   }
 
   function handleOpenFloat() {

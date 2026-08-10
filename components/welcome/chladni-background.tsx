@@ -104,6 +104,7 @@ function ChladniBackgroundInner({
       lineIntensity={settings.lineIntensity}
       colorSoftness={settings.colorSoftness}
       patternColor={settings.patternColor}
+      normalizeViewport
       className="h-full w-full"
     />
   );

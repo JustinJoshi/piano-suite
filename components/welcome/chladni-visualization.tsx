@@ -122,11 +122,12 @@ const fragmentShader = /* glsl */ `
     float aspect = uResolution.x / uResolution.y;
     uv.x *= aspect;
 
-    vec2 p = uv * uZoom;
+    vec2 p = uv;
     if (uNormalizeViewport) {
       vec2 scale = vec2(max(aspect, 1.0), max(1.0 / aspect, 1.0));
       p /= scale;
     }
+    p *= uZoom;
 
     vec2 mode = mix(uMode, uNextMode, uMorph);
 
@@ -271,12 +272,20 @@ export function ChladniVisualization({
     }
 
     window.addEventListener("resize", handleResize);
+
+    const resizeObserver =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(handleResize)
+        : null;
+    resizeObserver?.observe(mount);
+
     // Catch late layout after fonts/nav settle.
     handleResize();
 
     return () => {
       cancelAnimationFrame(rafId);
       window.removeEventListener("resize", handleResize);
+      resizeObserver?.disconnect();
       geometry.dispose();
       material.dispose();
       renderer.dispose();
