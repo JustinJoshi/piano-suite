@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { QuasiperiodicLab } from "../quasiperiodic-lab";
 import { DEFAULT_HERO_QUASIPERIODIC_SETTINGS } from "@/lib/quasiperiodic-hero-settings";
 
@@ -48,13 +48,15 @@ describe("QuasiperiodicLab", () => {
     setRouteBackground.mockClear();
   });
 
-  it("renders the parameter controls and presets", () => {
+  it("renders the parameter controls and presets", async () => {
     render(<QuasiperiodicLab />);
 
     expect(screen.getByText("Parameters")).toBeInTheDocument();
-    expect(
-      screen.getByTestId("quasiperiodic-visualization")
-    ).toBeInTheDocument();
+    await waitFor(() =>
+      expect(
+        screen.getByTestId("quasiperiodic-visualization")
+      ).toBeInTheDocument()
+    );
 
     for (const label of [
       "Lattice",

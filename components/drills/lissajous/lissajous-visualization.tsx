@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { cssColorToRgb, mixRgb } from "@/lib/chladni";
 import { lerpParams, pointAt, type LissajousParams } from "@/lib/lissajous";
 import { useThemeCssVars } from "@/hooks/useThemeCssVars";
+import { useVisibilityPause } from "@/hooks/useVisibilityPause";
 
 // ============================================================
 // LISSAJOUS VISUALIZATION — Canvas 2D trail/glow component
@@ -69,8 +70,13 @@ export function LissajousVisualization({
   colorSoftness = 0,
   className,
 }: LissajousVisualizationProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [canvasRef, visible] = useVisibilityPause<HTMLCanvasElement>();
+  const visibleRef = useRef(visible);
   const themeColors = useThemeCssVars(VAR_NAMES);
+
+  useEffect(() => {
+    visibleRef.current = visible;
+  }, [visible]);
 
   const paramsRef = useRef(params);
   const nextParamsRef = useRef(nextParams ?? params);
@@ -117,6 +123,9 @@ export function LissajousVisualization({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    const parent = canvas.parentElement;
+    if (!parent) return;
+
     let rafId = 0;
     let t = 0;
     let lastX = 0;
@@ -125,19 +134,27 @@ export function LissajousVisualization({
     let lastTime = performance.now();
     let dpr = 1;
 
+    const sizeRef = { width: 0, height: 0 };
+    function updateSizeFromRect(rect: { width: number; height: number }) {
+      sizeRef.width = rect.width;
+      sizeRef.height = rect.height;
+    }
+
     function resize() {
       if (!canvas) return;
-      const parent = canvas.parentElement;
-      if (!parent) return;
-      const rect = parent.getBoundingClientRect();
+      if (sizeRef.width === 0 || sizeRef.height === 0) {
+        // Fallback for browsers without ResizeObserver or before it fires.
+        const rect = parent!.getBoundingClientRect();
+        updateSizeFromRect(rect);
+      }
       dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const w = Math.max(1, Math.floor(rect.width * dpr));
-      const h = Math.max(1, Math.floor(rect.height * dpr));
+      const w = Math.max(1, Math.floor(sizeRef.width * dpr));
+      const h = Math.max(1, Math.floor(sizeRef.height * dpr));
       if (canvas.width !== w || canvas.height !== h) {
         canvas.width = w;
         canvas.height = h;
-        canvas.style.width = `${rect.width}px`;
-        canvas.style.height = `${rect.height}px`;
+        canvas.style.width = `${sizeRef.width}px`;
+        canvas.style.height = `${sizeRef.height}px`;
         hasLast = false;
       }
     }
@@ -159,6 +176,11 @@ export function LissajousVisualization({
 
     function paint(now: number) {
       if (!canvas || !ctx) return;
+      if (!visibleRef.current) {
+        lastTime = now;
+        rafId = requestAnimationFrame(paint);
+        return;
+      }
       resize();
 
       const deltaMs = now - lastTime;
@@ -234,18 +256,25 @@ export function LissajousVisualization({
     ctx.fillStyle = rgbCss(bg, 1);
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const onResize = () => {
-      hasLast = false;
-      resize();
-    };
-    window.addEventListener("resize", onResize);
+    const resizeObserver =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver((entries) => {
+            const entry = entries[0];
+            if (!entry) return;
+            updateSizeFromRect(entry.contentRect);
+            hasLast = false;
+            resize();
+          })
+        : null;
+    resizeObserver?.observe(parent);
+
     rafId = requestAnimationFrame(paint);
 
     return () => {
       cancelAnimationFrame(rafId);
-      window.removeEventListener("resize", onResize);
+      resizeObserver?.disconnect();
     };
-  }, []);
+  }, [canvasRef]);
 
   return (
     <canvas

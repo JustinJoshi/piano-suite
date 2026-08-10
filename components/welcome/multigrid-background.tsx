@@ -1,9 +1,18 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { randomRecipe } from "@/lib/multigrid";
 import type { HeroMultigridSettings } from "@/lib/multigrid-hero-settings";
-import { MultigridVisualization } from "@/components/drills/multigrid/multigrid-visualization";
+import type { MultigridVisualizationProps } from "@/components/drills/multigrid/multigrid-visualization";
+
+const MultigridVisualization = dynamic<MultigridVisualizationProps>(
+  () =>
+    import("@/components/drills/multigrid/multigrid-visualization").then(
+      (m) => m.MultigridVisualization
+    ),
+  { ssr: false }
+);
 
 export function MultigridBackground({
   settings,

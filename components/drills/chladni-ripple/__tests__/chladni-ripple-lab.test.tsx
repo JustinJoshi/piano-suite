@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { ChladniRippleLab } from "../chladni-ripple-lab";
 import { floatPanelUpgradeCopy } from "@/lib/billing";
 
@@ -137,10 +137,12 @@ describe("ChladniRippleLab", () => {
     });
   });
 
-  it("renders MIDI bar, viz, and ripple controls", () => {
+  it("renders MIDI bar, viz, and ripple controls", async () => {
     render(<ChladniRippleLab />);
 
-    expect(screen.getByTestId("chladni-visualization")).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByTestId("chladni-visualization")).toBeInTheDocument()
+    );
     expect(screen.getByTestId("connect-midi-btn")).toBeInTheDocument();
     expect(screen.getByLabelText("Decay")).toBeInTheDocument();
     expect(screen.getByLabelText("Octave complexity")).toBeInTheDocument();

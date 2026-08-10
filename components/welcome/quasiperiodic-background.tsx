@@ -1,9 +1,18 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { randomRecipe } from "@/lib/quasiperiodic";
 import type { HeroQuasiperiodicSettings } from "@/lib/quasiperiodic-hero-settings";
-import { QuasiperiodicVisualization } from "@/components/drills/quasiperiodic/quasiperiodic-visualization";
+import type { QuasiperiodicVisualizationProps } from "@/components/drills/quasiperiodic/quasiperiodic-visualization";
+
+const QuasiperiodicVisualization = dynamic<QuasiperiodicVisualizationProps>(
+  () =>
+    import("@/components/drills/quasiperiodic/quasiperiodic-visualization").then(
+      (m) => m.QuasiperiodicVisualization
+    ),
+  { ssr: false }
+);
 
 // ============================================================
 // QUASIPERIODIC ANIMATED BACKGROUND — welcome-page atmosphere
