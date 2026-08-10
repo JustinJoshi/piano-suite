@@ -134,8 +134,39 @@ Practice mutations read Billing entitlements from the session JWT via
 “Pro required…”. Used by tracking, technique, and `settings.setSetting`
 (theme/atmosphere/hero — WP6). Free prefs stay in localStorage.
 
-Confirm a real Pro checkout JWT includes `pla`/`fea` in the Convex dashboard
-identity payload (or by temporarily logging claim keys in a mutation).
+The gate accepts **either** JWT claims **or** the webhook-mirrored
+`users.syncEntitled` column (below) — the webhook is the robust path because
+whether `pla`/`fea` reach `ctx.auth.getUserIdentity()` depends on Clerk
+session-token configuration and fails silently. JWT claims remain as a
+fallback. If you rely on claims, confirm a real Pro checkout JWT includes
+`pla`/`fea` in the Convex dashboard identity payload (or by temporarily
+logging claim keys in a mutation).
+
+### Webhook entitlement mirror (robust path)
+
+`app/api/webhooks/clerk/route.ts` receives svix-signed Clerk webhooks and
+mirrors Pro/`sync` entitlement into `users.syncEntitled`
+(`users.applyWebhookEntitlement`) plus profile fields on `user.updated`
+(`users.applyWebhookProfile`). The route recomputes entitlement from every
+`subscription.*` / `subscriptionItem.*` event payload (plan slug `pro` or a
+`sync` feature; `active` / `canceled` / `past_due` statuses keep access —
+see [Clerk Billing webhooks](https://clerk.com/docs/nextjs/guides/development/webhooks/billing)).
+The mutations' only auth is `CLERK_WEBHOOK_SHARED_SECRET`, shared
+server-to-server; never call them from a client.
+
+Dashboard setup (per environment):
+
+1. Clerk Dashboard → **Webhooks** → **Add Endpoint**, URL
+   `https://<your-domain>/api/webhooks/clerk` (ngrok URL for local dev).
+2. Subscribe to the Billing events (`subscription.*`, `subscriptionItem.*`)
+   and `user.updated`.
+3. Copy the endpoint's **Signing Secret** into
+   `CLERK_WEBHOOK_SIGNING_SECRET` (Vercel / `.env.local`).
+4. Generate a random `CLERK_WEBHOOK_SHARED_SECRET`; set it in Vercel /
+   `.env.local` **and** on each Convex deployment:
+   `npx convex env set CLERK_WEBHOOK_SHARED_SECRET <value>`.
+5. Use the Dashboard **Testing** tab (`subscriptionItem.active` example) and
+   confirm the user row's `syncEntitled` flips in the Convex dashboard.
 
 Test cards: [Stripe testing](https://docs.stripe.com/testing)
 
@@ -147,7 +178,10 @@ Test cards: [Stripe testing](https://docs.stripe.com/testing)
 |------|------|
 | `lib/billing.ts` | Slugs, display prices, client + JWT claim helpers |
 | `lib/local-practice-history.ts` | Free-tier browser history (import-compatible keys) |
-| `convex/lib/entitlements.ts` | `ensureUserIdWithSync` for practice mutations |
+| `convex/lib/entitlements.ts` | `ensureUserIdWithSync` for practice mutations (JWT claims OR DB) |
+| `app/api/webhooks/clerk/route.ts` | Svix-verified Clerk webhook receiver (entitlement + profile mirror) |
+| `lib/clerk-webhook.ts` | Pure webhook event → entitlement/profile mapping helpers |
+| `convex/users.ts` | `applyWebhookEntitlement` / `applyWebhookProfile` (shared-secret auth) |
 | `clerk/billing.desired.json` | Desired PLAPI billing patch |
 | `scripts/apply-clerk-billing.sh` | Enable + patch helper |
 | `docs/subscription-page-plan.md` | Full freemium plan |
