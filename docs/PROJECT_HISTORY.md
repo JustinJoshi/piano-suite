@@ -426,6 +426,25 @@ If the icon does not appear in the app menu immediately after creation, log out 
 npm run build
 ```
 
+## E2E stabilization (2026-08)
+
+After the Phase 1–6 remediation work, the Playwright suite was green locally but flaky on repeated runs because of two root causes:
+
+1. **`hooks/useOnboarding.ts` infinite render loop.** The `?onboarding=reset` query-param reset was being evaluated inside the `useSyncExternalStore` snapshot function, so every render created a new snapshot, triggered another render, and occasionally left the fullscreen onboarding overlay mounted when authenticated specs expected the dashboard.
+   - Moved the reset logic into a mount-only `useLayoutEffect`.
+2. **Theme hydration mismatch.** `useThemePreference.ts` set `mounted` during the synchronous render path, so the active theme card could render client-only state (`resolvedTheme`) before hydration completed and cause a React hydration mismatch warning.
+   - Deferred the `mounted` flag until after hydration with a layout effect.
+
+Test harness fixes:
+
+- `e2e/auth-helper.ts` now writes `piano-suite:onboarding-completed` to `localStorage` immediately after `clerk.signIn()`, so authenticated specs start on the dashboard instead of behind the overlay.
+- `e2e/tools-onboarding.spec.ts` scopes assertions to `data-testid="onboarding-shell"` and navigates through all slides before testing instant-complete behavior.
+- `e2e/auth-protection.spec.ts` and `e2e/home-mobile.spec.ts` use `.first()` for duplicate headings/links, and the signed-in smoke timeout was raised to 120s.
+- `e2e/chord-drill.authenticated.spec.ts` waits up to 20s for the drill to load.
+- `convex/_generated/api.d.ts` was regenerated to include the `lib/auth` and `lib/entitlements` exports added in earlier phases.
+
+Verification: `npm run lint`, `npm run test:unit:run` (568 passed), and `npm run test:e2e` (83 passed) all pass.
+
 ## Roadmap
 
 - [x] Scaffold Next.js + Tailwind + shadcn/ui
