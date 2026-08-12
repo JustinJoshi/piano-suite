@@ -58,7 +58,7 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `hooks/useAuthAccess.ts` | Shared Clerk gate: `canAccess` / `canPersist` (Pro `sync` or `AUTH_DISABLED`) |
 | `hooks/useToolUserReady.ts` | Ensures Convex user row when signed in; ready immediately when auth is disabled |
 | `components/ensure-signed-in-user.tsx` | Bootstraps Convex `users` row on Clerk sign-in (homepage settings before tools) |
-| `lib/auth-disabled.ts` | Opt-in `isAuthDisabled()` (`=== "true"` only); Hobby Vercel may set temporarily (see README Deploy) |
+| `lib/auth-disabled.ts` | Opt-in bypass: `isAuthDisabled()` (`=== "true"` only) for client UI; `isAuthBypassEffective()` for server gates — never true when `VERCEL_ENV === "production"`. Hobby Vercel may set temporarily (see README Deploy) |
 | `lib/clerk-authorized-parties.ts` | Parse `CLERK_AUTHORIZED_PARTIES` for `clerkMiddleware` `authorizedParties` (Phase A / production) |
 | `lib/billing.ts` | Clerk Billing plan/feature slugs (`pro`, `sync`) + `canPersistFromEntitlements` / `canUseFloatPanelFromEntitlements` + JWT `pla`/`fea` helpers; apply Dashboard catalog via `docs/clerk-billing-setup.md` |
 | `lib/local-practice-history.ts` | Free-tier browser practice history (Reflex-compatible keys); drills write when `!canPersist` |
@@ -66,9 +66,9 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `hooks/useLocalPracticeHistory.ts` | Version bump when local history changes (Tracking/Technique refresh) |
 | `components/pricing/*` | Public `/pricing` marketing page (Clerk `PricingTable`) |
 | `app/settings/billing/page.tsx` | Signed-in plan management (Clerk `PricingTable`) |
-| `lib/chat-auth.ts` | Chat API allowlist decisions (`authorizeChatAccess`) |
+| `lib/chat-auth.ts` | Chat API allowlist decisions (`authorizeChatAccess`); always session + `ALLOWED_CLERK_USER_ID` — the `AUTH_DISABLED` bypass never opens the paid endpoint |
 | `convex/lib/auth.ts` | `optionalUserId` (queries), `ensureUserId` (mutations, upserts the row), `requireUserId` (throws) |
-| `proxy.ts` | Clerk route gate (Next 16 proxy convention); public-route list + `unauthenticatedUrl` redirect |
+| `proxy.ts` | Clerk route gate (Next 16 proxy convention); public-route list + `unauthenticatedUrl` redirect. `/api` is public by design — **every `app/api/**/route.ts` handler must authorize itself via `auth()`** (e.g. `/api/chat`) |
 | `app/error.tsx`, `app/global-error.tsx` | Error boundaries so a thrown query cannot blank the app |
 | `components/drills/drill-shell.tsx` | Shared layout wrapper for every tool page |
 | `components/tools/dashboard-nav.tsx` | Dashboard drawer open state + mobile Menu button |

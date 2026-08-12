@@ -2,10 +2,15 @@ import { auth } from "@clerk/nextjs/server";
 import { streamText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { getAllArticles } from "@/lib/articles";
-import { isAuthDisabled } from "@/lib/auth-disabled";
 import { authorizeChatAccess } from "@/lib/chat-auth";
 
 export const runtime = "nodejs";
+// Long tutor answers stream for a while; without this Vercel kills the
+// function mid-stream at the default timeout.
+export const maxDuration = 30;
+
+const MAX_MESSAGES = 50;
+const MAX_MESSAGE_CHARS = 4000;
 
 const kimikode = createOpenAI({
   baseURL: process.env.KIMI_CODE_BASE_URL ?? "https://api.kimi.com/coding/v1",
@@ -29,12 +34,27 @@ Articles:
 ${articleContext}`;
 }
 
+let cachedSystemPrompt: string | null = null;
+
+/**
+ * Article content only changes at deploy, so read it from disk once per
+ * server instance instead of on every POST. Lazy (not module-load) so the
+ * fs reads never run if this module is evaluated during build.
+ */
+function getSystemPrompt(): string {
+  if (cachedSystemPrompt === null) {
+    cachedSystemPrompt = buildSystemPrompt();
+  }
+  return cachedSystemPrompt;
+}
+
 export async function POST(req: Request) {
-  const authDisabled = isAuthDisabled();
-  const userId = authDisabled ? null : (await auth()).userId;
+  // Chat always requires a verified session + allowlist. The
+  // NEXT_PUBLIC_AUTH_DISABLED route-gate bypass never opens this paid LLM
+  // endpoint (and deployments using the bypass have no KIMI_CODE_* keys
+  // anyway).
   const decision = authorizeChatAccess({
-    authDisabled,
-    userId,
+    userId: (await auth()).userId,
     allowedUserId: process.env.ALLOWED_CLERK_USER_ID,
   });
 
@@ -56,12 +76,26 @@ export async function POST(req: Request) {
     return new Response("Kimi Code model is not configured", { status: 500 });
   }
 
-  const { messages } = (await req.json()) as {
-    messages?: { role: "user" | "assistant" | "system"; content: string }[];
+  const body = (await req.json()) as {
+    messages?: { role: string; content: string }[];
   };
 
-  if (!messages || messages.length === 0) {
+  // Strip client-supplied system/other roles so a crafted request cannot
+  // append its own system prompt alongside the article-grounded one.
+  const messages = (body.messages ?? []).filter(
+    (m): m is { role: "user" | "assistant"; content: string } =>
+      (m.role === "user" || m.role === "assistant") &&
+      typeof m.content === "string",
+  );
+
+  if (messages.length === 0) {
     return new Response("No messages provided", { status: 400 });
+  }
+  if (messages.length > MAX_MESSAGES) {
+    return new Response("Too many messages", { status: 400 });
+  }
+  if (messages.some((m) => m.content.length > MAX_MESSAGE_CHARS)) {
+    return new Response("Message too long", { status: 400 });
   }
 
   try {
@@ -69,7 +103,7 @@ export async function POST(req: Request) {
       // Kimi Code exposes OpenAI-compatible chat completions, not the
       // Responses API that @ai-sdk/openai uses by default for kimikode().
       model: kimikode.chat(modelId),
-      system: buildSystemPrompt(),
+      system: getSystemPrompt(),
       messages,
     });
 

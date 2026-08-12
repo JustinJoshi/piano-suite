@@ -148,10 +148,11 @@ Clerk owns identity, Convex owns per-user data, and the two are joined by a Cler
 
 ### The `NEXT_PUBLIC_AUTH_DISABLED` bypass
 
-Setting `NEXT_PUBLIC_AUTH_DISABLED=true` makes the proxy skip protection for **every** route, and makes `/api/chat` skip both the sign-in check and the `ALLOWED_CLERK_USER_ID` allowlist. Treat it as a temporary escape hatch, not a supported mode.
+Setting `NEXT_PUBLIC_AUTH_DISABLED=true` makes the proxy skip protection for **every** route — except on Vercel Production, where `isAuthBypassEffective()` never honors it. It does **not** affect `/api/chat`, which always requires a verified session plus the `ALLOWED_CLERK_USER_ID` allowlist. Treat it as a temporary escape hatch, not a supported mode.
 
 - It is **opt-in only**: `isAuthDisabled()` is true only for the exact string `"true"`. Unset, `"false"`, and `"1"` all leave auth enabled.
 - It is a `NEXT_PUBLIC_*` variable, so the value is **baked in at build time** — restart `npm run dev` locally, or redeploy on Vercel.
+- Server-side gates (`proxy.ts`, route handlers) use `isAuthBypassEffective()`, which returns false when `VERCEL_ENV === "production"` — a stray Production env assignment cannot open the site. Client UI (`useAuthAccess`) keeps using `isAuthDisabled()`, since `VERCEL_ENV` is not inlined into the client bundle.
 - Convex persistence always requires a real Clerk session, so unsigned use stays local-only even with the bypass on.
 
 ### Client gates
@@ -202,7 +203,7 @@ Queries must never throw for a signed-in user whose row does not exist yet. `set
    | Variable | Purpose |
    |----------|---------|
    | `NEXT_PUBLIC_ANKI_CONNECT_URL` | AnkiConnect endpoint; defaults to `http://127.0.0.1:8765` |
-   | `NEXT_PUBLIC_AUTH_DISABLED` | `true` opens **every** route without signing in, including `/chat`. Convex saves still need a session. Restart `npm run dev` after changing it — see [the bypass notes](#the-next_public_auth_disabled-bypass) |
+   | `NEXT_PUBLIC_AUTH_DISABLED` | `true` opens **every** route without signing in — except on Vercel Production (never honored) and `/api/chat` (always allowlist-gated). Convex saves still need a session. Restart `npm run dev` after changing it — see [the bypass notes](#the-next_public_auth_disabled-bypass) |
    | `NEXT_PUBLIC_CLERK_SIGN_IN_URL` / `_SIGN_UP_URL` / `_FALLBACK_REDIRECT_URL` | Clerk redirect overrides |
    | `CLERK_AUTHORIZED_PARTIES` | Optional comma-separated origins for `clerkMiddleware` `authorizedParties` (recommended on Production after custom-domain cutover; see [`docs/phase-a-auth-cutover-plan.md`](docs/phase-a-auth-cutover-plan.md)) |
    | `E2E_CLERK_USER_EMAIL` / `E2E_CLERK_USER_PASSWORD` | Playwright test user (required to run E2E; password ≥ 8 chars) |
