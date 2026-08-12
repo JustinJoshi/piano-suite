@@ -33,7 +33,7 @@ export function HeroSection({
   const { hero, styleTokens } = config;
 
   return (
-    <section className="relative flex min-h-svh">
+    <section className="relative flex min-h-[calc(100svh-4rem)]">
       {/* Quiet pocket for copy — pattern continues under later sections */}
       <div
         className="pointer-events-none absolute inset-0 z-[1] hero-scrim"
@@ -46,7 +46,7 @@ export function HeroSection({
         )}
       />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-center justify-center px-4 pb-16 pt-24 sm:px-6 lg:px-8">
+      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-center justify-center px-4 py-16 sm:px-6 lg:px-8">
         <div className="flex max-w-2xl flex-col items-center gap-6 text-center">
           {hero.showEyebrow ? (
             <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium uppercase tracking-widest text-primary">
