@@ -4,6 +4,11 @@
 > these findings into 12 executable phases. This document preserves the full
 > audit: method, per-tool findings with file:line evidence and best-practice
 > sources, and the consolidated priority list.
+>
+> **Status:** Phases 1–5 plus the articles-public change are **shipped** and
+> merged to `main` (PRs #39–#44). The consolidated priority list below has
+> been updated to show which items are fixed; unresolved findings remain for
+> Phases 6–12.
 
 ## Method
 
@@ -39,14 +44,10 @@ genuinely static (`generateStaticParams`); `AmbientEffectsHost` uses
 
 ### High impact
 
-- **three.js (~600KB) statically bundled into lab routes.**
-  `components/welcome/chladni-visualization.tsx:4`,
-  `components/drills/julia/julia-visualization.tsx:4`,
-  `components/drills/quasiperiodic/quasiperiodic-visualization.tsx:4` all use
-  `import * as THREE from "three"` and are statically imported by the lab
-  components. The **public** `/tools/chladni` page ships three.js in its
-  route bundle. Fix: `next/dynamic(..., { ssr: false })` per visualization.
-  Effort: low.
+- **three.js (~600KB) statically bundled into lab routes — FIXED in Phase 5
+  (PR #44).** The lab components now dynamically import their visualization
+  with `next/dynamic({ ssr: false })` so three.js is not in the initial
+  `/tools/chladni` route bundle.
 - **`MusicPlayerProvider` re-renders every context consumer at 60fps during
   playback.** `hooks/useMusicPlayer.tsx:310-324` sets progress state every
   animation frame; the context value (`:407-420`) is a fresh object every
@@ -60,7 +61,8 @@ genuinely static (`generateStaticParams`); `AmbientEffectsHost` uses
   behind Clerk while the landing hero links to a gated article
   (`components/welcome/hero-section.tsx:93`) — contradicts the "free
   learning community" repositioning. No `robots.ts`/`sitemap.ts`. Effort:
-  low–medium.
+  low–medium. **Articles are now public (PR #41); metadata/SEO skeleton
+  remains for Phase 11.**
 
 ### Medium impact
 
@@ -193,17 +195,17 @@ a fail-fast bypass-off guard.
   Medium-term: Clerk's `frontendApiProxy` + production keys, then delete
   the bypass.
 - **Convex Pro gate reads `pla`/`fea` claims that may never reach
-  `getUserIdentity()` — unverified, fails closed.**
+  `getUserIdentity()` — mitigated by webhook mirror (FIXED in Phase 3, PR
+  #42).**
   `convex/lib/entitlements.ts:22-28` → `hasSyncFromClerkClaims`
   (`lib/billing.ts:152-169`). Clerk docs state `pla`/`fea` cannot be
   included in custom JWT templates; they only arrive via the raw session
   token when the Clerk↔Convex **integration** (not the JWT-template path)
   is active. `docs/phase-a-auth-cutover-plan.md:167` blesses either setup,
-  so this is a dashboard fact. If the template branch is live, every paid
-  Pro user fails every sync mutation. Fix: (a) verify by logging identity
-  keys after a real test checkout; (b) robustly, mirror subscription state
-  into `users` via a svix-verified Billing webhook and gate on the DB
-  column. Effort: low to verify, medium for the webhook. **(Phase 3.)**
+  so this was a dashboard fact. The fix mirrors subscription state into
+  `users.syncEntitled` via a svix-verified Billing webhook and gates on the
+  DB column as a fallback. The manual Dashboard setup for the webhook is
+  documented in `docs/clerk-billing-setup.md`.
 
 ### Medium
 
@@ -359,8 +361,9 @@ Multigrid; renderer construction wrapped in try/catch.
 ### High
 
 - **No off-screen pausing; ambient + lab visuals render simultaneously at
-  60fps.** Root-mounted ambient background + lab visualization = 2 WebGL
-  contexts + 2+ RAF loops; nothing uses IntersectionObserver. (Phase 5.)
+  60fps — FIXED in Phase 5 (PR #44).** `hooks/useVisibilityPause.ts` pauses
+  RAF loops when the visual leaves the viewport; applied to the four lab
+  visualizations and the ambient host.
 - **60fps React state churn driving the multigrid ambient background.**
   `MultigridBackgroundInner` calls `setMorph` every frame
   (`multigrid-background.tsx:49-80`) → full `blendRecipes` +
@@ -370,12 +373,11 @@ Multigrid; renderer construction wrapped in try/catch.
 
 ### Medium
 
-- **No `renderer.forceContextLoss()` on unmount** (3 files). Browsers cap
-  ~16 GL contexts; the Pro float panel mounts a second live context of the
-  same effect. One line × 3 files. (Phase 5.)
+- **No `renderer.forceContextLoss()` on unmount — FIXED in Phase 5
+  (PR #44).** Added to the three WebGL visualization components.
 - **Julia and Quasiperiodic only listen to `window` resize**; Lissajous
   re-reads `getBoundingClientRect()` every frame. Port the Chladni
-  ResizeObserver pattern. (Phase 5.)
+  ResizeObserver pattern. — **FIXED in Phase 5 (PR #44).**
 
 ### Low
 
@@ -392,8 +394,8 @@ Multigrid; renderer construction wrapped in try/catch.
 
 Sources: [ai-sdk.dev chatbot guide](https://ai-sdk.dev/docs/ai-sdk-ui/chatbot),
 [useChat reference](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-chat).
-Verified against installed `ai@7.0.37` / `@ai-sdk/openai@4.0.20`
-(`@ai-sdk/react` not yet installed).
+Verified against installed `ai@7.0.37` / `@ai-sdk/openai@4.0.20`. After
+Phase 4 (PR #43), `@ai-sdk/react` is installed and `useChat` drives the UI.
 
 **Sound (verified):** no key leakage (server-only env, zero
 `NEXT_PUBLIC_*KIMI*`); auth gating correct and e2e-tested; markdown
@@ -401,23 +403,21 @@ rendering XSS-safe (no `rehype-raw`/`dangerouslySetInnerHTML` anywhere).
 
 ### Findings
 
-1. **Hand-rolled fetch stream; error/abort fundamentally broken — HIGH.**
-   `app/chat/page.tsx:48-105` + `toTextStreamResponse()` has no error
-   channel: a mid-stream provider failure presents as a silent empty
-   bubble. No Stop, no retry, no AbortController. Fix: `useChat` +
-   `DefaultChatTransport` (or `TextStreamChatTransport` minimal step) +
-   `createUIMessageStreamResponse` with `onError`. (Phase 4.)
+1. **Hand-rolled fetch stream; error/abort fundamentally broken — FIXED in
+   Phase 4 (PR #43).** `app/chat/page.tsx` now uses `useChat` with
+   `DefaultChatTransport`; the API returns
+   `createUIMessageStreamResponse` with `onError` masking. Stop, retry, and
+   error display are wired in the UI.
 2. **No `maxDuration` — HIGH on Vercel (FIXED in Phase 1).**
 3. **Client could inject `system`-role messages; no input validation —
-   MED (FIXED in Phase 1).** `convertToModelMessages` in Phase 4 makes it
-   structural.
+   MED (FIXED in Phase 1 / structural in Phase 4).** `convertToModelMessages`
+   strips client-supplied system roles and non-text parts.
 4. **No rate limiting — MED** (owner-only allowlist limits blast radius;
    tracked in `docs/missing-features-plan.md:297`).
-5. **Citations invisible — LOW.** System prompt tells the model to cite
-   sources (`route.ts:26`) but the UI renders raw text; use the existing
-   react-markdown for assistant bubbles. (Phase 4.)
-6. **No token-usage visibility — LOW** (falls out of the Phase 4 stream
-   migration via `messageMetadata`).
+5. **Citations invisible — FIXED in Phase 4 (PR #43).** Assistant messages
+   are rendered with `react-markdown` so citation links are visible.
+6. **No token-usage visibility — LOW** (available via `messageMetadata` in
+   the `useChat` migration if product wants it later).
 
 ---
 
@@ -467,35 +467,42 @@ runtime-swappable tokens; ThemeProvider wiring matches the AGENTS.md rule
 
 1. ~~`AUTH_DISABLED` bypass opens production + paid chat endpoint~~ —
    **FIXED (Phase 1, PR #39).**
-2. Pro gating may be silently dead in production (`pla`/`fea` verification +
-   webhook mirror) — Phase 3.
+2. ~~Pro gating may be silently dead in production (`pla`/`fea` verification +
+   webhook mirror)~~ — **FIXED (Phase 3, PR #42).**
 3. ~~Audio autoplay: MIDI is not user activation~~ — **FIXED (Phase 2).**
 4. ~~Async kit-load race mutates disposed engine~~ — **FIXED (Phase 2).**
-5. Chat silent-empty-bubble on mid-stream failure; `useChat` migration —
-   Phase 4 (`maxDuration` + input caps already fixed in Phase 1).
+5. ~~Chat silent-empty-bubble on mid-stream failure; `useChat` migration~~ —
+   **FIXED (Phase 4, PR #43).** (`maxDuration` + input caps already fixed in
+   Phase 1.)
 
 ### P1 — High-impact performance
 
-6. three.js statically bundled into public routes — Phase 5.
+6. ~~three.js statically bundled into public routes~~ — **FIXED (Phase 5,
+   PR #44).**
 7. Unbounded `.collect()` on event tables — Phase 6.
 8. 60fps React state churn (multigrid morph, ripple `setViz`, music-player
    progress context) — Phase 7.
-9. No off-screen pausing (dual WebGL contexts at all times) — Phase 5.
+9. ~~No off-screen pausing (dual WebGL contexts at all times)~~ — **FIXED
+   (Phase 5, PR #44).**
 10. Per-note `setTimeout` song scheduling + drifting metronome — Phase 8.
 
 ### P2 — Medium
 
 11. No CI — Phase 9.
-12. Metadata/SEO + articles-public decision — Phase 11.
-13. MIDI hygiene (stuck notes FIXED; CC64 sustain pedal open) — Phase 2/12.
+12. Metadata/SEO + articles-public decision — Phase 11 (articles public
+    **FIXED** in PR #41; metadata/SEO remains).
+13. MIDI hygiene (stuck notes FIXED in Phase 2; CC64 sustain pedal open) —
+    Phase 12.
 14. Convex `returns` validators, unused indexes, table-name args, eslint
     plugin — Phase 6.
 15. Test coverage gaps (`useChordDrill`, `audio-presets`, persistence
     hooks, edge-runtime split, coverage tooling) — Phases 9–10.
-16. Eager sample loading (FIXED) + IndexedDB hygiene — Phase 2/12.
-17. `/api` blanket-public + prefix matching — FIXED (Phase 1, rule
-    documented).
-18. `forceContextLoss` + ResizeObserver ports — Phase 5.
+16. ~~Eager sample loading~~ — **FIXED (Phase 2).** IndexedDB hygiene remains
+    Phase 12.
+17. ~~`/api` blanket-public + prefix matching~~ — **FIXED (Phase 1, rule
+    documented).**
+18. ~~`forceContextLoss` + ResizeObserver ports~~ — **FIXED (Phase 5,
+    PR #44).**
 
 ### P3 — Low / cleanup
 

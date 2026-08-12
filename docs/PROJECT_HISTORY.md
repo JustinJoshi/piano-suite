@@ -44,7 +44,7 @@ This repository now contains:
   - Recharts visualizations with grade colors, redo indicators, and good/hard threshold lines
   - A one-time client-side migration from Reflex Drill EXT via exported JSON file (localStorage is not shared across origins)
 - **Clerk authentication** with route protection via `proxy.ts` and shadcn-themed sign-in/sign-up pages. See [Authentication & routes](#authentication--routes) for the public-route list and the `NEXT_PUBLIC_AUTH_DISABLED` bypass.
-- **Convex data persistence** for users and tracking events, with Clerk JWT integration.
+- **Convex data persistence** for users and tracking events, with Clerk JWT integration. Pro/`sync` entitlements are enforced server-side; a svix-verified Clerk Billing webhook (`/api/webhooks/clerk`) additionally mirrors subscription state into `users.syncEntitled` as a robust fallback when JWT `pla`/`fea` claims are not present.
 - An **AI chat assistant** (`/chat`) powered by the Kimi Code API, grounded in the site's articles, and restricted to a single owner Clerk user (the allowlist is skipped when the auth bypass is on).
 - **Playwright end-to-end tests**, including auth-protection and chat-gate specs plus authenticated flows for every drill, the Tools hub, and the Tracking dashboard.
 - The original Anki deck exports (`chord-symbols-CGDAE.txt` and `chord-symbols-CGDAEno11.txt`) preserved for download.
@@ -448,6 +448,7 @@ npm run build
 - [x] Clerk Billing freemium (Free local / Pro sync) — WP0–WP2 + WP4–WP6; owner cutover still open (`docs/subscription-page-plan.md`)
 - [x] Public `/pricing` + `canPersist` remap to Pro/`sync` (practice + prefs)
 - [x] WP6 — theme/atmosphere/hero Convex sync requires Pro
+- [x] Clerk Billing webhook entitlement mirror (`/api/webhooks/clerk`) — server-side Pro enforcement now accepts JWT claims or DB-mirrored `users.syncEntitled`; manual Dashboard setup remains (`docs/clerk-billing-setup.md`)
 
 ### Post-v1 follow-ons
 

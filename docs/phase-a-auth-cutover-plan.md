@@ -1,10 +1,10 @@
 # Phase A — Production Auth Cutover Plan
 
 > **Parent:** [`docs/missing-features-plan.md`](./missing-features-plan.md)  
-> **Status: A0 in progress / A1–A8 blocked on operator credentials** — A0 code
-> (`authorizedParties` helper + `proxy.ts` wiring) ships in-repo. Custom domain,
-> Clerk production instance, Convex/Vercel env flips require dashboard access
-> outside this agent.  
+> **Status: A0 shipped / A1–A8 blocked on operator credentials** — A0 code
+> (`lib/clerk-authorized-parties.ts` + `proxy.ts` wiring) is in `main`.
+> Custom domain, Clerk production instance, and Convex/Vercel env flips still
+> require dashboard access outside this agent.  
 > **Researched against (2026):**
 >
 > - [Clerk — Deploy to production](https://clerk.com/docs/guides/development/deployment/production)
@@ -107,9 +107,9 @@ This app uses **email + password only** (README). That means production cutover 
 
 ## 5. Implementation steps
 
-### Step A0 — Preflight (local / repo)
+### Step A0 — Preflight (local / repo) ✅ Shipped
 
-No production traffic yet.
+No production traffic yet. The preflight code is already in `main`:
 
 1. Confirm bypass is **off** locally and auth e2e pass:
    ```bash
@@ -119,8 +119,9 @@ No production traffic yet.
    npx playwright test e2e/auth-protection.spec.ts e2e/chat-auth.spec.ts
    ```
 2. Confirm `proxy.ts` still uses `unauthenticatedUrl` (do not remove).
-3. Optional hardening PR (can ship before or with cutover docs):
-   - Pass `authorizedParties` into `clerkMiddleware` for production origins (Clerk production guide recommends this to limit subdomain session abuse):
+3. Hardening already shipped:
+   - `proxy.ts` passes `authorizedParties` into `clerkMiddleware` when
+     `CLERK_AUTHORIZED_PARTIES` is set, for production-origin limits.
      ```ts
      export default clerkMiddleware(
        async (auth, request) => { /* existing protect logic */ },

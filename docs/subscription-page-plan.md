@@ -452,7 +452,8 @@ Skip unsigned drills and localStorage history until after that slice works.
 ### Phase 2 — Enforce + harden
 
 - [x] WP2 — `ensureUserIdWithSync` on tracking/technique mutations; JWT `pla`/`fea` via `hasSyncFromClerkClaims`
-- [ ] e2e Pro/Free checkout smoke; optional WP3 public articles
+- [x] WP3 public articles — `/articles` and `/articles/*` are public (PR #41)
+- [ ] e2e Pro/Free checkout smoke
 - [ ] Remove reliance on `AUTH_DISABLED` for “Free”
 
 ### Phase 3 — Continuity + polish
@@ -527,7 +528,7 @@ for some EU renewals).
 ## Open questions for the owner
 
 1. ~~Prices / reverse trial~~ → locked: **$8/mo · $72/yr · freemium-only v1** (change in `lib/billing.ts` + Clerk if you disagree)
-2. Should Articles become public marketing, or stay auth-gated?
+2. ~~Should Articles become public marketing, or stay auth-gated?~~ → **Answered:** Articles are now public (PR #41); `/articles` and `/articles/*` are in `proxy.ts` public routes.
 3. Confirm Chat stays owner-only (recommended for v1).
 4. Clerk Billing appearance: stock `PricingTable` first, or custom cards from day one?
 5. v1 Free = signed-in local only, or also unsigned public drills?

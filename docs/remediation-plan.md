@@ -7,6 +7,9 @@
 > Next.js 16, React 19, Convex, Clerk + Billing, Tailwind v4, smplr/Web
 > Audio/Web MIDI, Vercel AI SDK v7, three.js, Vitest/RTL/Playwright.
 >
+> **Status:** Phases 1–5 plus the articles-public change are **shipped** and
+> merged to `main` (PRs #39–#44). Phases 6–12 remain available to pick up.
+>
 > **How phases work:** one phase = one turn of work. Each phase is
 > independently mergeable, gets its own worktree/branch
 > (`kimi/phase-N-<name>`), and closes with the gate (`lint`, `test:unit:run`,
@@ -14,7 +17,9 @@
 > `package.json`/lockfile are hotspot files — only Phases 4, 6, and 9 touch
 > them; never run two such phases in parallel.
 
-## Phase 1 — Auth bypass guard + chat cost hardening (P0 security)
+## Phase 1 — Auth bypass guard + chat cost hardening (P0 security) ✅ Shipped
+
+**PR:** #39 · **Branch:** `kimi/phase-1-auth-guard`
 
 The `AUTH_DISABLED` escape hatch can never open production; the paid chat
 endpoint never bypasses authorization; chat cost surface hardened.
@@ -36,7 +41,9 @@ Explicitly out of scope: `frontendApiProxy` migration / bypass deletion
 (custom-domain cutover, `docs/phase-a-auth-cutover-plan.md`); `useChat`
 rewrite (Phase 4).
 
-## Phase 2 — Audio core-value fixes (P0)
+## Phase 2 — Audio core-value fixes (P0) ✅ Shipped
+
+**PR:** #40 · **Branch:** `kimi/phase-2-audio-fixes`
 
 MIDI input is not user activation (autoplay policy): playing without
 clicking the page gives silence-then-burst. Preset switching mid-load
@@ -54,20 +61,31 @@ corrupts engine state via a stale async continuation.
   (~:239-243); split permission-denied from unsupported (~:245-257)
 - Tests: audio-engine race/disposed cases; midi-session cases
 
-## Phase 3 — Pro entitlement verification + webhook mirror (P0)
+## Phase 3 — Pro entitlement verification + webhook mirror (P0) ✅ Shipped
 
-Verify first (dev mutation logging `Object.keys(getUserIdentity())` after a
-real test Pro checkout) whether `pla`/`fea` reach Convex — depends on the
-Clerk↔Convex integration vs JWT-template dashboard setup. If absent: add a
-svix-verified Clerk Billing webhook (`app/api/webhooks/clerk/route.ts`),
-mirror subscription state onto `users` in `convex/schema.ts`, gate
-`convex/lib/entitlements.ts:22-28` on the DB column; fold `user.updated`
-profile sync into the same endpoint. Tests in `convex/__tests__/`.
+**PR:** #42 · **Branch:** `kimi/phase-3-clerk-billing-webhook`
 
-## Phase 4 — Chat UX migration to AI SDK v7 `useChat` (P0)
+A svix-verified Clerk Billing webhook (`app/api/webhooks/clerk/route.ts`)
+mirrors Pro/`sync` entitlement onto `users.syncEntitled`, and `user.updated`
+profile sync is folded into the same endpoint. `convex/lib/entitlements.ts`
+now accepts either JWT `pla`/`fea` claims **or** the webhook-mirrored DB
+column.
+
+**Post-merge manual step:** In the Clerk Dashboard, point the webhook
+endpoint to `/api/webhooks/clerk`, subscribe to Billing
+(`subscription.*`, `subscriptionItem.*`) and `user.updated` events, and set
+`CLERK_WEBHOOK_SIGNING_SECRET` (Vercel) plus `CLERK_WEBHOOK_SHARED_SECRET`
+(Vercel **and** Convex `npx convex env set`). See `docs/clerk-billing-setup.md`
+for the full matrix.
+
+## Phase 4 — Chat UX migration to AI SDK v7 `useChat` (P0) ✅ Shipped
+
+**PR:** #43 · **Branch:** `kimi/phase-4-usechat-v7`
 
 Hand-rolled stream read has no error channel (mid-stream provider failure =
-silent empty bubble), no stop/retry/abort.
+silent empty bubble), no stop/retry/abort. The chat UI now uses `useChat`
+with `DefaultChatTransport`; the API returns
+`createUIMessageStreamResponse` with `onError` masking.
 
 - `package.json` — add `@ai-sdk/react` (own lockfile this batch)
 - `app/api/chat/route.ts` — `createUIMessageStreamResponse` with `onError`
@@ -78,7 +96,9 @@ silent empty bubble), no stop/retry/abort.
   (already a dep; no `rehype-raw`) so source citations render
 - E2E: extend `e2e/chat-auth.spec.ts` if the response shape changes
 
-## Phase 5 — Bundle & render-loop perf quick wins (P1)
+## Phase 5 — Bundle & render-loop perf quick wins (P1) ✅ Shipped
+
+**PR:** #44 · **Branch:** `kimi/phase-5-viz-perf`
 
 - `components/drills/{chladni,julia,quasiperiodic,chladni-ripple}/*-lab.tsx`
   — `next/dynamic({ ssr: false })` around the three.js visualization imports
@@ -90,6 +110,8 @@ silent empty bubble), no stop/retry/abort.
 - Port ResizeObserver to Julia/Quasiperiodic; replace Lissajous per-frame
   `getBoundingClientRect()`
 - Check e2e for animation assertions before landing
+
+E2E passed (48 specs).
 
 ## Phase 6 — Convex scaling + validation (P1)
 
@@ -140,13 +162,14 @@ silent empty bubble), no stop/retry/abort.
 - `convex/__tests__/` — `savedPatterns` (untested), tracking/technique list
   queries, cross-user access on pattern/grade mutations
 
-## Phase 11 — Metadata/SEO + articles decision (P2)
+## Phase 11 — Metadata/SEO + articles decision (P2) 🟡 Partially shipped
 
-Articles are now **public** (done on branch `kimi/articles-public`):
-`proxy.ts` allowlist + e2e updated. Remaining: `title.template` in root
-metadata; per-route metadata (push `"use client"` down into a gate child on
-the ~12 tool pages → server components); `app/not-found.tsx`; `robots.ts` +
-`sitemap.ts`.
+**Articles public:** PR #41 · **Branch:** `kimi/articles-public`
+
+Articles are now **public**: `proxy.ts` allowlist + e2e updated. Remaining:
+`title.template` in root metadata; per-route metadata (push `"use client"`
+down into a gate child on the ~12 tool pages → server components);
+`app/not-found.tsx`; `robots.ts` + `sitemap.ts`.
 
 ## Phase 12 — Theming + E2E cleanup (P3)
 

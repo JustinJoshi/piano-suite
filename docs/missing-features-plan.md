@@ -71,8 +71,9 @@ Recommended order: **A → B → C → D**, with **E** and **G** parallel to B�
 > **Detailed plan:** [`docs/phase-a-auth-cutover-plan.md`](./phase-a-auth-cutover-plan.md)
 > (Clerk + Convex production docs researched; step-by-step ops + optional code).
 >
-> **Progress:** A0 code shipped (`lib/clerk-authorized-parties.ts` + `proxy.ts`).
-> A1–A8 require operator access to the custom domain, Clerk Dashboard, Convex, and Vercel.
+> **Progress:** A0 code shipped (`lib/clerk-authorized-parties.ts` + `proxy.ts`
+> wiring is in `main`). A1–A8 still require operator access to the custom
+> domain, Clerk Dashboard, Convex, and Vercel.
 
 ### Goal
 
