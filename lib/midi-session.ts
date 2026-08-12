@@ -238,16 +238,28 @@ async function doConnect(): Promise<void> {
     refreshInputs(midiAccess);
     midiAccess.onstatechange = () => {
       if (access) {
+        // A disconnected input never sends its pending note-offs; drop held
+        // notes so drills don't see them stuck forever.
+        if (
+          snapshot.selectedInputId !== null &&
+          !access.inputs.get(snapshot.selectedInputId)
+        ) {
+          heldSet.clear();
+        }
         refreshInputs(access);
       }
     };
     persistSession();
   } catch {
     access = null;
+    // Reaching here means requestMIDIAccess exists, so the browser supports
+    // Web MIDI — the user (or browser policy) denied permission. Keep
+    // `supported: true` so the UI can offer a retry instead of dead-ending.
     setSnapshot({
-      supported: false,
+      supported: true,
       connected: false,
-      error: "Could not access MIDI devices.",
+      error:
+        "MIDI access was denied — allow it in the browser site settings and retry.",
       inputs: [],
       selectedInputId: null,
       heldNotes: [],

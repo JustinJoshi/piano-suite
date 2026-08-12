@@ -52,6 +52,7 @@ describe("createAudioEngine", () => {
     disposeMock.mockClear();
     loadInstrumentMock.mockClear();
     loadCustomKitBlobMock.mockReset();
+    mockSampler.ready = readyPromise;
 
     audioContextMock = {
       state: "running",
@@ -185,6 +186,93 @@ describe("createAudioEngine", () => {
     });
     await engine.load();
     expect(engine.state).toBe("error");
+  });
+
+  it("ignores load completion after dispose", async () => {
+    let resolveReady: () => void = () => {};
+    mockSampler.ready = new Promise<void>((resolve) => {
+      resolveReady = resolve;
+    });
+
+    const onStateChange = vi.fn();
+    const engine = createAudioEngine("splendid-grand-piano", 0.7, null, {
+      onStateChange,
+    });
+    const loadPromise = engine.load();
+    expect(engine.state).toBe("loading");
+
+    engine.dispose();
+    resolveReady();
+    await loadPromise;
+
+    // The stale continuation must not clobber the disposed engine's state.
+    expect(engine.state).toBe("idle");
+    expect(onStateChange).not.toHaveBeenCalledWith("ready");
+  });
+
+  it("ignores load failure after dispose", async () => {
+    let rejectReady: (err: unknown) => void = () => {};
+    mockSampler.ready = new Promise<void>((_, reject) => {
+      rejectReady = reject;
+    });
+
+    const onStateChange = vi.fn();
+    const engine = createAudioEngine("splendid-grand-piano", 0.7, null, {
+      onStateChange,
+    });
+    const loadPromise = engine.load();
+
+    engine.dispose();
+    rejectReady(new Error("boom"));
+    await loadPromise;
+
+    expect(engine.state).toBe("idle");
+    expect(onStateChange).not.toHaveBeenCalledWith("error");
+  });
+
+  it("does not start a deferred note after dispose", async () => {
+    let resolveReady: () => void = () => {};
+    mockSampler.ready = new Promise<void>((resolve) => {
+      resolveReady = resolve;
+    });
+
+    const engine = createAudioEngine("splendid-grand-piano", 0.7, null);
+    engine.play(60, 100);
+    engine.dispose();
+    resolveReady();
+    // Flush the load().then(...) continuation.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(startMock).not.toHaveBeenCalled();
+  });
+
+  it("does not schedule notes while the context is suspended", async () => {
+    audioContextMock.state = "suspended";
+
+    const engine = createAudioEngine("splendid-grand-piano", 0.7, null);
+    await engine.load();
+    engine.play(60, 100);
+
+    expect(startMock).not.toHaveBeenCalled();
+    expect(audioContextMock.resume).toHaveBeenCalled();
+  });
+
+  it("resumes the shared context from a user gesture", () => {
+    audioContextMock.state = "suspended";
+
+    const engine = createAudioEngine("splendid-grand-piano", 0.7, null);
+    engine.resumeFromUserGesture();
+
+    expect(audioContextMock.resume).toHaveBeenCalled();
+  });
+
+  it("treats Safari's interrupted state as resumable", () => {
+    audioContextMock.state = "interrupted";
+
+    const engine = createAudioEngine("splendid-grand-piano", 0.7, null);
+    engine.resumeFromUserGesture();
+
+    expect(audioContextMock.resume).toHaveBeenCalled();
   });
 });
 
