@@ -142,8 +142,8 @@ Clerk owns identity, Convex owns per-user data, and the two are joined by a Cler
 | `/sign-in/*`, `/sign-up/*` | Yes |
 | `/api/*` | Yes at the proxy; each handler authenticates itself |
 | `/__clerk/*` | Yes — Clerk frontend API |
+| `/articles`, `/articles/*` | Yes — public learning library (SEO/marketing for the free community) |
 | `/tools`, all other `/tools/*` | No |
-| `/articles`, `/articles/*` | No |
 | `/chat`, `/settings/*` | No |
 
 ### The `NEXT_PUBLIC_AUTH_DISABLED` bypass
