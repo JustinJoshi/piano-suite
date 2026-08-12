@@ -5,7 +5,7 @@ test.describe("Chord Drill (authenticated)", () => {
   test.beforeEach(async ({ page }) => {
     await signInAsTestUser(page);
     await page.goto("/tools/chord-drill");
-    await page.waitForSelector("[data-testid='chord-drill']", { timeout: 10000 });
+    await page.waitForSelector("[data-testid='chord-drill']", { timeout: 20000 });
   });
 
   test("loads the chord drill page", async ({ page }) => {

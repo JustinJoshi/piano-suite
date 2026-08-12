@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import {
   ONBOARDING_INSTANT_PARAM,
   ONBOARDING_RESET_PARAM,
@@ -71,16 +71,10 @@ function useClientMounted() {
   );
 }
 
-function useOnboardingStorageValue(resetOnMount: boolean): boolean {
+function useOnboardingStorageValue(): boolean {
   return useSyncExternalStore(
     subscribeToStorage,
-    () => {
-      if (resetOnMount) {
-        setCompletedInStorage(false);
-        return false;
-      }
-      return getHasCompletedFromStorage();
-    },
+    () => getHasCompletedFromStorage(),
     () => false
   );
 }
@@ -102,7 +96,13 @@ export function useOnboarding() {
       ? window.location.search.includes(ONBOARDING_RESET_PARAM)
       : false
   );
-  const isCompleted = useOnboardingStorageValue(resetOnMount);
+  const isCompleted = useOnboardingStorageValue();
+
+  useEffect(() => {
+    if (resetOnMount) {
+      setCompletedInStorage(false);
+    }
+  }, [resetOnMount]);
 
   const markComplete = useCallback(() => {
     setCompletedInStorage(true);

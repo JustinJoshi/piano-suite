@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -8,6 +8,11 @@ import { useAuthAccess } from "@/hooks/useAuthAccess";
 import { defaultTheme, isThemeId, type ThemeId } from "@/lib/themes";
 
 const THEME_STORAGE_KEY = "piano-suite-theme";
+
+// Use layout effect so the first client render matches the server snapshot
+// (mounted = false) and only flips to true after hydration, avoiding a
+// React hydration mismatch on theme-dependent visuals.
+const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 /**
  * Manages the active theme for the app.
@@ -20,6 +25,7 @@ const THEME_STORAGE_KEY = "piano-suite-theme";
 export function useThemePreference() {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const { canPersist } = useAuthAccess();
+  const [mounted, setMounted] = useState(false);
 
   const remoteTheme = useQuery(
     api.settings.getSetting,
@@ -55,9 +61,16 @@ export function useThemePreference() {
     }
   }, [canPersist, remoteTheme, setTheme]);
 
+  // Defer the mounted flag until after hydration so theme-dependent visuals
+  // (e.g. the active checkmark on theme cards) match between SSR and the
+  // initial client render, avoiding React hydration mismatches.
+  useIsomorphicLayoutEffect(() => {
+    setMounted(true);
+  }, []);
+
   return {
     theme: currentTheme,
     setTheme: (id: ThemeId) => setTheme(id),
-    mounted: theme !== undefined,
+    mounted,
   };
 }

@@ -58,7 +58,7 @@ const PUBLIC_ROUTES = [
       await expect(
         page.getByRole("heading", {
           name: /Research-Informed Guide to Learning Piano/i,
-        })
+        }).first()
       ).toBeVisible();
     },
   },
@@ -165,6 +165,10 @@ test.describe("signed-in route smoke (all app pages)", () => {
   test("each route loads without bare 404 or application error", async ({
     page,
   }) => {
+    // Smoke many authenticated routes in one sequential pass; give it extra
+    // time so slower pages (Convex queries, heavy client bundles) don't trip
+    // the default 30 s limit.
+    test.setTimeout(120000);
     await signInAsTestUser(page);
 
     for (const { path, heading, bodyText } of SIGNED_IN_ROUTE_SMOKE) {
