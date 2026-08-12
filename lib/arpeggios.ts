@@ -12,6 +12,7 @@ import {
   type MissThresholds,
   normalizeSequenceConfig,
 } from "@/lib/sequence-drill";
+import { normalizePc } from "@/lib/music-theory";
 
 export type ArpeggioSettings = {
   flashOnMiss: boolean;
@@ -24,6 +25,12 @@ export type ArpeggioSettings = {
   missThresholds: MissThresholds;
   /** Pitch classes (0–11) that never count as misses during the sequence. */
   ignoredPcs: number[];
+  /**
+   * When true, the current chord's LH pedal and RH sequence pitch classes are
+   * automatically added to the miss filter. Manual selections are still honored
+   * on top of the automatic ones.
+   */
+  autoFilter: boolean;
 };
 
 export const ARPEGGIO_CHORDS: SequenceDrill[] = [
@@ -242,6 +249,7 @@ export const DEFAULT_ARPEGGIO_SETTINGS: ArpeggioSettings = {
   breakTickSound: true,
   missThresholds: { ...DEFAULT_THRESHOLDS },
   ignoredPcs: [],
+  autoFilter: true,
 };
 
 /**
@@ -326,5 +334,21 @@ export function normalizeArpeggioSettings(
         : DEFAULT_ARPEGGIO_SETTINGS.breakTickSound,
     missThresholds: { good, hard },
     ignoredPcs,
+    autoFilter:
+      typeof raw.autoFilter === "boolean"
+        ? raw.autoFilter
+        : DEFAULT_ARPEGGIO_SETTINGS.autoFilter,
   };
+}
+
+/**
+ * Return the pitch classes from a chord that should be ignored automatically
+ * when auto-filter is enabled: the LH pedal plus the RH sequence.
+ */
+export function autoFilteredPcs(chord: SequenceDrill | null): number[] {
+  if (!chord) return [];
+  const pcs = new Set<number>();
+  for (const n of chord.lh) pcs.add(normalizePc(n.pc));
+  for (const n of chord.rh) pcs.add(normalizePc(n.pc));
+  return Array.from(pcs).sort((a, b) => a - b);
 }

@@ -11,6 +11,7 @@ import {
   ARPEGGIO_CHORDS,
   findArpeggioByRootPc,
   DEFAULT_ORDER,
+  autoFilteredPcs,
   type ArpeggioSettings,
 } from "@/lib/arpeggios";
 import {
@@ -92,6 +93,8 @@ export type ArpeggioEngine = {
   ignoredPcs: number[];
   toggleIgnoredPc: (pc: number) => void;
   setIgnoredPcs: (pcs: number[]) => void;
+  autoFilter: boolean;
+  setAutoFilter: (v: boolean) => void;
 
   // Anki
   ankiFollow: boolean;
@@ -193,6 +196,7 @@ export function useArpeggios(enabled: boolean): ArpeggioEngine {
   const ankiDefaultsAppliedRef = useRef(false);
   const pendingCardRef = useRef<{ rootPc: number; rootName: string } | null>(null);
   const ignoredPcsRef = useRef<number[]>(settings.ignoredPcs);
+  const effectiveIgnoredPcsRef = useRef<number[]>(settings.ignoredPcs);
 
   useEffect(() => {
     settingsRef.current = settings;
@@ -204,6 +208,14 @@ export function useArpeggios(enabled: boolean): ArpeggioEngine {
     breakTickSoundRef.current = settings.breakTickSound;
     lapChimeRef.current = settings.lapChime;
     ignoredPcsRef.current = settings.ignoredPcs;
+    effectiveIgnoredPcsRef.current = settings.autoFilter
+      ? Array.from(
+          new Set([
+            ...settings.ignoredPcs,
+            ...autoFilteredPcs(chord),
+          ])
+        ).sort((a, b) => a - b)
+      : settings.ignoredPcs;
   });
 
   // -------------------------------------------------------------------------
@@ -239,6 +251,16 @@ export function useArpeggios(enabled: boolean): ArpeggioEngine {
   const chord = useMemo(
     () => currentChord(ARPEGGIO_CHORDS, settings.config, chordIdx),
     [settings.config, chordIdx]
+  );
+
+  const effectiveIgnoredPcs = useMemo(
+    () =>
+      settings.autoFilter
+        ? Array.from(
+            new Set([...settings.ignoredPcs, ...autoFilteredPcs(chord)])
+          ).sort((a, b) => a - b)
+        : settings.ignoredPcs,
+    [settings.ignoredPcs, settings.autoFilter, chord]
   );
 
   const activeIds = useMemo(
@@ -467,7 +489,7 @@ export function useArpeggios(enabled: boolean): ArpeggioEngine {
           if (nextIdx === 0) {
             finishLap();
           }
-        } else if (!ignoredPcsRef.current.includes(normalizePc(pc))) {
+        } else if (!effectiveIgnoredPcsRef.current.includes(normalizePc(pc))) {
           setMissCountState((prev) => {
             missCountRef.current = prev + 1;
             return prev + 1;
@@ -792,6 +814,11 @@ export function useArpeggios(enabled: boolean): ArpeggioEngine {
     [updateSettings]
   );
 
+  const setAutoFilter = useCallback(
+    (v: boolean) => updateSettings({ autoFilter: v }),
+    [updateSettings]
+  );
+
   const setIgnoredPcs = useCallback(
     (pcs: number[]) => {
       const valid = pcs
@@ -854,9 +881,11 @@ export function useArpeggios(enabled: boolean): ArpeggioEngine {
     toggleChordIncluded,
     moveChord,
     resetOrder,
-    ignoredPcs: settings.ignoredPcs,
+    ignoredPcs: effectiveIgnoredPcs,
     toggleIgnoredPc,
     setIgnoredPcs,
+    autoFilter: settings.autoFilter,
+    setAutoFilter,
 
     ankiFollow,
     setAnkiFollow,

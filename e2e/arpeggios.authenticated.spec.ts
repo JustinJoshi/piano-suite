@@ -45,18 +45,41 @@ test.describe("Arpeggios (authenticated)", () => {
     await expect(chips).toHaveCount(7);
   });
 
-  test("miss filter can be toggled and preset to the root chord", async ({ page }) => {
-    await expect(page.getByText("Miss filter")).toBeVisible();
+  test("miss filter auto-filters current chord notes by default", async ({ page }) => {
+    await expect(page.getByText("Miss filter", { exact: true })).toBeVisible();
 
-    const cButton = page.getByTestId("miss-filter-pc-0");
-    await expect(cButton).toHaveAttribute("aria-pressed", "false");
-    await cButton.click();
-    await expect(cButton).toHaveAttribute("aria-pressed", "true");
+    // Auto-filter is on by default, so Bbm11 chord/sequence PCs are active.
+    const autoPcs = [0, 1, 3, 5, 8, 10]; // C, Db, Eb, F, Ab, Bb
+    for (const pc of autoPcs) {
+      await expect(page.getByTestId(`miss-filter-pc-${pc}`)).toHaveAttribute(
+        "aria-pressed",
+        "true"
+      );
+    }
 
-    await page.getByRole("button", { name: "Use root chord" }).click();
+    // A note outside the chord/sequence starts inactive and can be toggled.
+    const dButton = page.getByTestId("miss-filter-pc-2");
+    await expect(dButton).toHaveAttribute("aria-pressed", "false");
+    await dButton.click();
+    await expect(dButton).toHaveAttribute("aria-pressed", "true");
 
-    const rootPcs = [10, 5, 8]; // Bb, F, Ab for Bbm11
-    for (const pc of rootPcs) {
+    // Turning auto-filter off removes the automatic PCs but keeps the manual one.
+    const autoFilterRow = page
+      .getByText("Add notes into filter by default", { exact: true })
+      .locator("xpath=../..");
+    await autoFilterRow.getByRole("button", { name: "Off" }).click();
+
+    for (const pc of autoPcs) {
+      await expect(page.getByTestId(`miss-filter-pc-${pc}`)).toHaveAttribute(
+        "aria-pressed",
+        "false"
+      );
+    }
+    await expect(dButton).toHaveAttribute("aria-pressed", "true");
+
+    // Use chord & sequence preset fills the manual filter.
+    await page.getByRole("button", { name: "Use chord & sequence" }).click();
+    for (const pc of autoPcs) {
       await expect(page.getByTestId(`miss-filter-pc-${pc}`)).toHaveAttribute(
         "aria-pressed",
         "true"

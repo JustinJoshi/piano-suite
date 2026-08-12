@@ -14,6 +14,7 @@ import { useArpeggios } from "@/hooks/useArpeggios";
 import { useAuthAccess } from "@/hooks/useAuthAccess";
 import { cn } from "@/lib/utils";
 import { SHARP_NAMES } from "@/lib/music-theory";
+import { autoFilteredPcs } from "@/lib/arpeggios";
 import { ChevronUp, ChevronDown, RotateCcw } from "lucide-react";
 
 const GRADE_COLORS = {
@@ -117,6 +118,8 @@ export function Arpeggios() {
     ignoredPcs,
     toggleIgnoredPc,
     setIgnoredPcs,
+    autoFilter,
+    setAutoFilter,
 
     ankiFollow,
     setAnkiFollow,
@@ -439,11 +442,11 @@ export function Arpeggios() {
                   variant="outline"
                   size="sm"
                   onClick={() =>
-                    setIgnoredPcs(chord?.lh.map((n) => n.pc) ?? [])
+                    setIgnoredPcs(chord ? autoFilteredPcs(chord) : [])
                   }
                   disabled={!chord}
                 >
-                  Use root chord
+                  Use chord & sequence
                 </Button>
                 <Button
                   type="button"
@@ -455,6 +458,21 @@ export function Arpeggios() {
                 </Button>
               </div>
             </div>
+
+            <SettingRow
+              label="Add notes into filter by default"
+              tooltip="Always include the current chord's LH pedal and RH sequence notes in the miss filter."
+            >
+              <ToggleGroup
+                value={autoFilter}
+                onChange={setAutoFilter}
+                options={[
+                  { label: "Off", value: false },
+                  { label: "On", value: true },
+                ]}
+              />
+            </SettingRow>
+
             <div className="grid grid-cols-6 gap-2 sm:grid-cols-12">
               {SHARP_NAMES.map((name, pc) => {
                 const active = ignoredPcs.includes(pc);

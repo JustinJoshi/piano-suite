@@ -6,6 +6,7 @@ import {
   normalizeArpeggioSettings,
   ARPEGGIO_SETTINGS_KEY,
   DEFAULT_ARPEGGIO_SETTINGS,
+  autoFilteredPcs,
 } from "@/lib/arpeggios";
 import {
   activeSequence,
@@ -172,6 +173,25 @@ describe("normalizeArpeggioSettings", () => {
       ignoredPcs: [-1, 0, 5, 12, 3.5, "x", null] as unknown as number[],
     });
     expect(settings.ignoredPcs).toEqual([0, 5]);
+  });
+
+  it("defaults autoFilter to true", () => {
+    const settings = normalizeArpeggioSettings({});
+    expect(settings.autoFilter).toBe(true);
+  });
+
+  it("preserves autoFilter override", () => {
+    const settings = normalizeArpeggioSettings({ autoFilter: false });
+    expect(settings.autoFilter).toBe(false);
+  });
+
+  it("autoFilteredPcs returns LH pedal and RH sequence PCs for a chord", () => {
+    const chord = ARPEGGIO_CHORDS[0]!; // Bbm11
+    expect(autoFilteredPcs(chord)).toEqual([0, 1, 3, 5, 8, 10]);
+  });
+
+  it("autoFilteredPcs returns an empty array for a null chord", () => {
+    expect(autoFilteredPcs(null)).toEqual([]);
   });
 
   it("resets order to default if it does not contain all ids", () => {

@@ -169,4 +169,80 @@ describe("useArpeggios", () => {
       expect(result.current.missCount).toBe(1);
     });
   });
+
+  it("defaults autoFilter to true", async () => {
+    const { result } = renderHook(() => useArpeggios(true));
+
+    await waitFor(() => {
+      expect(result.current.chord?.id).toBe("Bbm11");
+    });
+
+    expect(result.current.autoFilter).toBe(true);
+  });
+
+  it("does not count chord/sequence notes as misses when autoFilter is on", async () => {
+    const { result } = renderHook(() => useArpeggios(true));
+
+    await waitFor(() => {
+      expect(result.current.chord?.id).toBe("Bbm11");
+    });
+
+    // Hold LH pedal
+    act(() => {
+      [10, 5, 8].forEach((pc) =>
+        window.dispatchEvent(new CustomEvent("midi-note-on", { detail: { note: pc + 60, pc } }))
+      );
+    });
+
+    await waitFor(() => {
+      expect(result.current.phase).toBe("sequence");
+    });
+
+    // First target is C (pc 0). Playing another chord/sequence note (Eb = pc 3)
+    // should not count as a miss because autoFilter is on.
+    act(() => {
+      window.dispatchEvent(new CustomEvent("midi-note-on", { detail: { note: 63, pc: 3 } }));
+    });
+
+    await waitFor(() => {
+      expect(result.current.missCount).toBe(0);
+    });
+  });
+
+  it("counts chord/sequence notes as misses when autoFilter is off", async () => {
+    const { result } = renderHook(() => useArpeggios(true));
+
+    await waitFor(() => {
+      expect(result.current.chord?.id).toBe("Bbm11");
+    });
+
+    act(() => {
+      result.current.setAutoFilter(false);
+    });
+
+    await waitFor(() => {
+      expect(result.current.autoFilter).toBe(false);
+    });
+
+    // Hold LH pedal
+    act(() => {
+      [10, 5, 8].forEach((pc) =>
+        window.dispatchEvent(new CustomEvent("midi-note-on", { detail: { note: pc + 60, pc } }))
+      );
+    });
+
+    await waitFor(() => {
+      expect(result.current.phase).toBe("sequence");
+    });
+
+    // With autoFilter off, Eb (pc 3) is not manually filtered and is not the
+    // current target, so it should count as a miss.
+    act(() => {
+      window.dispatchEvent(new CustomEvent("midi-note-on", { detail: { note: 63, pc: 3 } }));
+    });
+
+    await waitFor(() => {
+      expect(result.current.missCount).toBe(1);
+    });
+  });
 });

@@ -402,11 +402,12 @@ The tracking pipeline needs a health check before declaring it fully reliable.
 
 In `/tools/arpeggios`, re-articulating a left-hand root-chord note during the right-hand sequence should not count as a miss.
 
-- **Status:** Shipped. The drill now has a configurable miss filter with a root-chord preset; the exact MIDI note numbers that satisfied the left-hand hold are ignored during the sequence phase, while higher-octave copies of the same pitch class are still evaluated.
+- **Status:** Shipped. The drill now has a configurable miss filter. By default, "Add notes into filter by default" is on, so the current chord's left-hand pedal and right-hand sequence pitch classes are always ignored during the sequence phase; higher-octave copies of the same pitch class are still evaluated. Users can turn auto-filter off and manage the filter manually, or add extra notes on top of the automatic set.
 - **Files touched:**
   - `hooks/useArpeggios.ts`
   - `lib/arpeggios.ts`
-  - `lib/__tests__/arpeggios.test.ts` / `hooks/__tests__/useArpeggios.test.ts`
+  - `components/drills/arpeggios/arpeggios.tsx`
+  - `lib/__tests__/arpeggios.test.ts` / `hooks/__tests__/useArpeggios.test.ts` / `e2e/arpeggios.authenticated.spec.ts`
 
 ### Music ripple integration (audio file / microphone)
 
