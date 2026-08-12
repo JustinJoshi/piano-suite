@@ -16,12 +16,37 @@ import { useHeroChladniSettings } from "@/hooks/useHeroChladniSettings";
 import { useHeroQuasiperiodicSettings } from "@/hooks/useHeroQuasiperiodicSettings";
 import { useHeroMultigridSettings } from "@/hooks/useHeroMultigridSettings";
 import { isExperimentalAmbientKind } from "@/lib/experimental-features";
+import dynamic from "next/dynamic";
 import { ChladniBackground } from "@/components/welcome/chladni-background";
 import { QuasiperiodicBackground } from "@/components/welcome/quasiperiodic-background";
 import { MultigridBackground } from "@/components/welcome/multigrid-background";
-import { ChladniVisualization } from "@/components/welcome/chladni-visualization";
-import { JuliaVisualization } from "@/components/drills/julia/julia-visualization";
-import { LissajousVisualization } from "@/components/drills/lissajous/lissajous-visualization";
+import type { ChladniVisualizationProps } from "@/components/welcome/chladni-visualization";
+import type { JuliaVisualizationProps } from "@/components/drills/julia/julia-visualization";
+import type { LissajousVisualizationProps } from "@/components/drills/lissajous/lissajous-visualization";
+
+const ChladniVisualization = dynamic<ChladniVisualizationProps>(
+  () =>
+    import("@/components/welcome/chladni-visualization").then(
+      (m) => m.ChladniVisualization
+    ),
+  { ssr: false }
+);
+
+const JuliaVisualization = dynamic<JuliaVisualizationProps>(
+  () =>
+    import("@/components/drills/julia/julia-visualization").then(
+      (m) => m.JuliaVisualization
+    ),
+  { ssr: false }
+);
+
+const LissajousVisualization = dynamic<LissajousVisualizationProps>(
+  () =>
+    import("@/components/drills/lissajous/lissajous-visualization").then(
+      (m) => m.LissajousVisualization
+    ),
+  { ssr: false }
+);
 
 function AmbientRippleEffect({
   className,

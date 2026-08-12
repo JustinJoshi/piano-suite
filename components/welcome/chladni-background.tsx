@@ -1,9 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { randomMode } from "@/lib/chladni";
 import type { HeroChladniSettings } from "@/lib/chladni-hero-settings";
-import { ChladniVisualization } from "./chladni-visualization";
+import type { ChladniVisualizationProps } from "./chladni-visualization";
+
+const ChladniVisualization = dynamic<ChladniVisualizationProps>(
+  () => import("./chladni-visualization").then((m) => m.ChladniVisualization),
+  { ssr: false }
+);
 
 // ============================================================
 // CHLADNI ANIMATED BACKGROUND — Piano Suite Edition

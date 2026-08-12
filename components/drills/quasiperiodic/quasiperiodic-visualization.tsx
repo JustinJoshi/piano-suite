@@ -1,9 +1,19 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import * as THREE from "three";
+import {
+  Mesh,
+  OrthographicCamera,
+  PlaneGeometry,
+  Scene,
+  ShaderMaterial,
+  Vector2,
+  Vector3,
+  WebGLRenderer,
+} from "three";
 import { cssColorToRgb, mixRgb } from "@/lib/chladni";
 import { useThemeCssVars } from "@/hooks/useThemeCssVars";
+import { useVisibilityPause } from "@/hooks/useVisibilityPause";
 import type { WaveRecipe } from "@/lib/quasiperiodic";
 
 // ============================================================
@@ -126,9 +136,14 @@ export function QuasiperiodicVisualization({
   patternColor = null,
   className,
 }: QuasiperiodicVisualizationProps) {
-  const mountRef = useRef<HTMLDivElement>(null);
-  const materialRef = useRef<THREE.ShaderMaterial | null>(null);
+  const [mountRef, visible] = useVisibilityPause<HTMLDivElement>();
+  const materialRef = useRef<ShaderMaterial | null>(null);
+  const visibleRef = useRef(visible);
   const cssValues = useThemeCssVars(VAR_NAMES);
+
+  useEffect(() => {
+    visibleRef.current = visible;
+  }, [visible]);
 
   const [backgroundCss, innerCss, outerCss, glowCss] = cssValues;
 
@@ -139,12 +154,12 @@ export function QuasiperiodicVisualization({
     const width = Math.max(mount.clientWidth, 1);
     const height = Math.max(mount.clientHeight, 1);
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    const scene = new Scene();
+    const camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
-    let renderer: THREE.WebGLRenderer;
+    let renderer: WebGLRenderer;
     try {
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+      renderer = new WebGLRenderer({ antialias: true, alpha: false });
     } catch {
       return;
     }
@@ -157,13 +172,13 @@ export function QuasiperiodicVisualization({
     canvas.style.height = "100%";
     mount.appendChild(canvas);
 
-    const geometry = new THREE.PlaneGeometry(2, 2);
-    const material = new THREE.ShaderMaterial({
+    const geometry = new PlaneGeometry(2, 2);
+    const material = new ShaderMaterial({
       vertexShader,
       fragmentShader,
       uniforms: {
         uTime: { value: 0 },
-        uResolution: { value: new THREE.Vector2(width, height) },
+        uResolution: { value: new Vector2(width, height) },
         uFoldsA: { value: recipe.folds },
         uFreqA: { value: recipe.frequency },
         uPhaseA: { value: recipe.phase },
@@ -171,10 +186,10 @@ export function QuasiperiodicVisualization({
         uFreqB: { value: nextRecipe.frequency },
         uPhaseB: { value: nextRecipe.phase },
         uMorph: { value: morph },
-        uBackground: { value: new THREE.Vector3(...DEFAULT_BG) },
-        uLineInner: { value: new THREE.Vector3(...DEFAULT_INNER) },
-        uLineOuter: { value: new THREE.Vector3(...DEFAULT_OUTER) },
-        uGlow: { value: new THREE.Vector3(...DEFAULT_GLOW) },
+        uBackground: { value: new Vector3(...DEFAULT_BG) },
+        uLineInner: { value: new Vector3(...DEFAULT_INNER) },
+        uLineOuter: { value: new Vector3(...DEFAULT_OUTER) },
+        uGlow: { value: new Vector3(...DEFAULT_GLOW) },
         uZoom: { value: zoom },
         uThreshold: { value: 0.015 + lineThickness / 400 },
         uBreathe: { value: breathe },
@@ -184,13 +199,18 @@ export function QuasiperiodicVisualization({
     });
     materialRef.current = material;
 
-    const mesh = new THREE.Mesh(geometry, material);
+    const mesh = new Mesh(geometry, material);
     scene.add(mesh);
 
     let rafId = 0;
     let lastTime = performance.now();
 
     function animate(now: number) {
+      if (!visibleRef.current) {
+        lastTime = now;
+        rafId = requestAnimationFrame(animate);
+        return;
+      }
       const delta = now - lastTime;
       lastTime = now;
       material.uniforms.uTime.value += delta;
@@ -207,15 +227,20 @@ export function QuasiperiodicVisualization({
       material.uniforms.uResolution.value.set(w, h);
     }
 
-    window.addEventListener("resize", handleResize);
+    const resizeObserver =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(handleResize)
+        : null;
+    resizeObserver?.observe(mount);
     handleResize();
 
     return () => {
       cancelAnimationFrame(rafId);
-      window.removeEventListener("resize", handleResize);
+      resizeObserver?.disconnect();
       geometry.dispose();
       material.dispose();
       renderer.dispose();
+      renderer.forceContextLoss();
       if (canvas.parentElement === mount) {
         mount.removeChild(canvas);
       }

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { JuliaLab } from "../julia-lab";
 
 vi.mock("@/components/drills/julia/julia-visualization", () => ({
@@ -11,11 +11,13 @@ vi.mock("@/components/drills/saved-patterns-panel", () => ({
 }));
 
 describe("JuliaLab", () => {
-  it("renders the parameter controls and presets", () => {
+  it("renders the parameter controls and presets", async () => {
     render(<JuliaLab />);
 
     expect(screen.getByText("Parameters")).toBeInTheDocument();
-    expect(screen.getByTestId("julia-visualization")).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByTestId("julia-visualization")).toBeInTheDocument()
+    );
 
     for (const label of ["Seahorse", "Dendrite", "Spiral", "Dragon", "Dust"]) {
       expect(screen.getByRole("button", { name: label })).toBeInTheDocument();

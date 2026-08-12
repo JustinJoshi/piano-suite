@@ -1,11 +1,20 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChladniVisualization } from "@/components/welcome/chladni-visualization";
+import type { ChladniVisualizationProps } from "@/components/welcome/chladni-visualization";
 import { SavedPatternsPanel } from "@/components/drills/saved-patterns-panel";
+
+const ChladniVisualization = dynamic<ChladniVisualizationProps>(
+  () =>
+    import("@/components/welcome/chladni-visualization").then(
+      (m) => m.ChladniVisualization
+    ),
+  { ssr: false }
+);
 import { useHeroChladniSettings } from "@/hooks/useHeroChladniSettings";
 import { useHeroAtmosphereKind } from "@/hooks/useHeroAtmosphereKind";
 import { useAmbientEffects } from "@/hooks/useAmbientEffects";

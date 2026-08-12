@@ -1,10 +1,20 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import * as THREE from "three";
+import {
+  Mesh,
+  OrthographicCamera,
+  PlaneGeometry,
+  Scene,
+  ShaderMaterial,
+  Vector2,
+  Vector3,
+  WebGLRenderer,
+} from "three";
 import { cssColorToRgb, mixRgb } from "@/lib/chladni";
 import type { Complex } from "@/lib/julia";
 import { useThemeCssVars } from "@/hooks/useThemeCssVars";
+import { useVisibilityPause } from "@/hooks/useVisibilityPause";
 
 // ============================================================
 // JULIA VISUALIZATION — Reusable WebGL shader component
@@ -136,9 +146,14 @@ export function JuliaVisualization({
   timeScale = 1,
   className,
 }: JuliaVisualizationProps) {
-  const mountRef = useRef<HTMLDivElement>(null);
-  const materialRef = useRef<THREE.ShaderMaterial | null>(null);
+  const [mountRef, visible] = useVisibilityPause<HTMLDivElement>();
+  const materialRef = useRef<ShaderMaterial | null>(null);
+  const visibleRef = useRef(visible);
   const cssValues = useThemeCssVars(VAR_NAMES);
+
+  useEffect(() => {
+    visibleRef.current = visible;
+  }, [visible]);
 
   const [backgroundCss, innerCss, outerCss, glowCss] = cssValues;
 
@@ -149,12 +164,12 @@ export function JuliaVisualization({
     const width = Math.max(mount.clientWidth, 1);
     const height = Math.max(mount.clientHeight, 1);
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    const scene = new Scene();
+    const camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
-    let renderer: THREE.WebGLRenderer;
+    let renderer: WebGLRenderer;
     try {
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+      renderer = new WebGLRenderer({ antialias: true, alpha: false });
     } catch {
       return;
     }
@@ -167,20 +182,20 @@ export function JuliaVisualization({
     canvas.style.height = "100%";
     mount.appendChild(canvas);
 
-    const geometry = new THREE.PlaneGeometry(2, 2);
-    const material = new THREE.ShaderMaterial({
+    const geometry = new PlaneGeometry(2, 2);
+    const material = new ShaderMaterial({
       vertexShader,
       fragmentShader,
       uniforms: {
         uTime: { value: 0 },
-        uResolution: { value: new THREE.Vector2(width, height) },
-        uC: { value: new THREE.Vector2(...c) },
-        uNextC: { value: new THREE.Vector2(...nextC) },
+        uResolution: { value: new Vector2(width, height) },
+        uC: { value: new Vector2(...c) },
+        uNextC: { value: new Vector2(...nextC) },
         uMorph: { value: morph },
-        uBackground: { value: new THREE.Vector3(...DEFAULT_BG) },
-        uInner: { value: new THREE.Vector3(...DEFAULT_INNER) },
-        uOuter: { value: new THREE.Vector3(...DEFAULT_OUTER) },
-        uGlow: { value: new THREE.Vector3(...DEFAULT_GLOW) },
+        uBackground: { value: new Vector3(...DEFAULT_BG) },
+        uInner: { value: new Vector3(...DEFAULT_INNER) },
+        uOuter: { value: new Vector3(...DEFAULT_OUTER) },
+        uGlow: { value: new Vector3(...DEFAULT_GLOW) },
         uZoom: { value: zoom },
         uMaxIterations: { value: maxIterations },
         uEscapeRadius: { value: escapeRadius },
@@ -189,13 +204,18 @@ export function JuliaVisualization({
     });
     materialRef.current = material;
 
-    const mesh = new THREE.Mesh(geometry, material);
+    const mesh = new Mesh(geometry, material);
     scene.add(mesh);
 
     let rafId = 0;
     let lastTime = performance.now();
 
     function animate(now: number) {
+      if (!visibleRef.current) {
+        lastTime = now;
+        rafId = requestAnimationFrame(animate);
+        return;
+      }
       const delta = now - lastTime;
       lastTime = now;
       material.uniforms.uTime.value += delta;
@@ -212,15 +232,20 @@ export function JuliaVisualization({
       material.uniforms.uResolution.value.set(w, h);
     }
 
-    window.addEventListener("resize", handleResize);
+    const resizeObserver =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(handleResize)
+        : null;
+    resizeObserver?.observe(mount);
     handleResize();
 
     return () => {
       cancelAnimationFrame(rafId);
-      window.removeEventListener("resize", handleResize);
+      resizeObserver?.disconnect();
       geometry.dispose();
       material.dispose();
       renderer.dispose();
+      renderer.forceContextLoss();
       if (canvas.parentElement === mount) {
         mount.removeChild(canvas);
       }

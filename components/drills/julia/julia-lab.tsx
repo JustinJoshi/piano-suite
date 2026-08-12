@@ -1,10 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { JuliaVisualization } from "@/components/drills/julia/julia-visualization";
+import type { JuliaVisualizationProps } from "@/components/drills/julia/julia-visualization";
 import { SavedPatternsPanel } from "@/components/drills/saved-patterns-panel";
+
+const JuliaVisualization = dynamic<JuliaVisualizationProps>(
+  () =>
+    import("@/components/drills/julia/julia-visualization").then(
+      (m) => m.JuliaVisualization
+    ),
+  { ssr: false }
+);
 import { Pause, Play, Shuffle } from "lucide-react";
 import { JULIA_PRESETS, randomC, type Complex } from "@/lib/julia";
 import {

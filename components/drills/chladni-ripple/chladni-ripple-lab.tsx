@@ -1,12 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MidiConnectionBar } from "@/components/drills/midi-connection-bar";
-import { ChladniVisualization } from "@/components/welcome/chladni-visualization";
+import type { ChladniVisualizationProps } from "@/components/welcome/chladni-visualization";
 import { useMidi } from "@/hooks/useMidi";
+
+const ChladniVisualization = dynamic<ChladniVisualizationProps>(
+  () =>
+    import("@/components/welcome/chladni-visualization").then(
+      (m) => m.ChladniVisualization
+    ),
+  { ssr: false }
+);
 import { useChladniRipple } from "@/hooks/useChladniRipple";
 import { useAmbientEffects } from "@/hooks/useAmbientEffects";
 import { useAuthAccess } from "@/hooks/useAuthAccess";

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { cssColorToRgb, mixRgb } from "@/lib/chladni";
 import { useThemeCssVars } from "@/hooks/useThemeCssVars";
+import { useVisibilityPause } from "@/hooks/useVisibilityPause";
 import {
   blendRecipes,
   buildMultigridScene,
@@ -52,10 +53,15 @@ export function MultigridVisualization({
   // `viewMode` is accepted for API compatibility with persisted settings.
   void viewMode;
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const mountRef = useRef<HTMLDivElement>(null);
+  const [mountRef, visible] = useVisibilityPause<HTMLDivElement>();
+  const visibleRef = useRef(visible);
   const [size, setSize] = useState({ w: 1, h: 1 });
   const cssValues = useThemeCssVars(VAR_NAMES);
   const [bgCss, innerCss, primaryCss, accentCss, mutedCss, glowCss] = cssValues;
+
+  useEffect(() => {
+    visibleRef.current = visible;
+  }, [visible]);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -71,7 +77,7 @@ export function MultigridVisualization({
     });
     ro.observe(mount);
     return () => ro.disconnect();
-  }, []);
+  }, [mountRef]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -86,6 +92,8 @@ export function MultigridVisualization({
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    if (!visibleRef.current) return;
 
     const background = cssColorToRgb(bgCss || "#0c0a08");
     const override = patternColor?.trim() ? cssColorToRgb(patternColor) : null;
@@ -209,6 +217,7 @@ export function MultigridVisualization({
     accentCss,
     mutedCss,
     glowCss,
+    visible,
   ]);
 
   return (

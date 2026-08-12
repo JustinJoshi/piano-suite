@@ -1,11 +1,20 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { QuasiperiodicVisualization } from "@/components/drills/quasiperiodic/quasiperiodic-visualization";
+import type { QuasiperiodicVisualizationProps } from "@/components/drills/quasiperiodic/quasiperiodic-visualization";
 import { useHeroQuasiperiodicSettings } from "@/hooks/useHeroQuasiperiodicSettings";
+
+const QuasiperiodicVisualization = dynamic<QuasiperiodicVisualizationProps>(
+  () =>
+    import("@/components/drills/quasiperiodic/quasiperiodic-visualization").then(
+      (m) => m.QuasiperiodicVisualization
+    ),
+  { ssr: false }
+);
 import { useHeroAtmosphereKind } from "@/hooks/useHeroAtmosphereKind";
 import { useAmbientEffects } from "@/hooks/useAmbientEffects";
 import {

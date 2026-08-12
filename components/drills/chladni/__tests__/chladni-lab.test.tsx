@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { ChladniLab } from "../chladni-lab";
 import { DEFAULT_HERO_CHLADNI_SETTINGS } from "@/lib/chladni-hero-settings";
 
@@ -51,11 +51,13 @@ describe("ChladniLab", () => {
     setRouteBackground.mockClear();
   });
 
-  it("renders the parameter controls and presets", () => {
+  it("renders the parameter controls and presets", async () => {
     render(<ChladniLab />);
 
     expect(screen.getByText("Parameters")).toBeInTheDocument();
-    expect(screen.getByTestId("chladni-visualization")).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByTestId("chladni-visualization")).toBeInTheDocument()
+    );
 
     for (const label of ["Star", "Flower", "Lattice", "Maze", "Web"]) {
       expect(screen.getByRole("button", { name: label })).toBeInTheDocument();
