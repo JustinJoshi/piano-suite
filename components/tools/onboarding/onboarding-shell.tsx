@@ -22,6 +22,7 @@ export const OnboardingShell = forwardRef<HTMLDivElement, OnboardingShellProps>(
   ) {
     return (
       <div
+        data-testid="onboarding-shell"
         className={cn(
           "z-50 overflow-hidden bg-background",
           mode === "fixed" ? "fixed inset-0" : "absolute inset-0",

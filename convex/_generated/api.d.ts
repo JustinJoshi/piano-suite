@@ -8,6 +8,8 @@
  * @module
  */
 
+import type * as lib_auth from "../lib/auth.js";
+import type * as lib_entitlements from "../lib/entitlements.js";
 import type * as savedPatterns from "../savedPatterns.js";
 import type * as settings from "../settings.js";
 import type * as technique from "../technique.js";
@@ -21,6 +23,8 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "lib/auth": typeof lib_auth;
+  "lib/entitlements": typeof lib_entitlements;
   savedPatterns: typeof savedPatterns;
   settings: typeof settings;
   technique: typeof technique;
