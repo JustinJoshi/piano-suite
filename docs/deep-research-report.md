@@ -5,10 +5,10 @@
 > audit: method, per-tool findings with file:line evidence and best-practice
 > sources, and the consolidated priority list.
 >
-> **Status:** Phases 1–5 plus the articles-public change are **shipped** and
-> merged to `main` (PRs #39–#44). The consolidated priority list below has
+> **Status:** Phases 1–6 plus the articles-public change are **shipped** and
+> merged to `main` (PRs #39–#46). The consolidated priority list below has
 > been updated to show which items are fixed; unresolved findings remain for
-> Phases 6–12.
+> Phases 7–12.
 
 ## Method
 
@@ -479,7 +479,7 @@ runtime-swappable tokens; ThemeProvider wiring matches the AGENTS.md rule
 
 6. ~~three.js statically bundled into public routes~~ — **FIXED (Phase 5,
    PR #44).**
-7. Unbounded `.collect()` on event tables — Phase 6.
+7. ~~Unbounded `.collect()` on event tables~~ — **FIXED (Phase 6, PR #46).**
 8. 60fps React state churn (multigrid morph, ripple `setViz`, music-player
    progress context) — Phase 7.
 9. ~~No off-screen pausing (dual WebGL contexts at all times)~~ — **FIXED
@@ -493,8 +493,8 @@ runtime-swappable tokens; ThemeProvider wiring matches the AGENTS.md rule
     **FIXED** in PR #41; metadata/SEO remains).
 13. MIDI hygiene (stuck notes FIXED in Phase 2; CC64 sustain pedal open) —
     Phase 12.
-14. Convex `returns` validators, unused indexes, table-name args, eslint
-    plugin — Phase 6.
+14. ~~Convex `returns` validators, unused indexes, table-name args, eslint
+    plugin~~ — **FIXED (Phase 6, PR #46).**
 15. Test coverage gaps (`useChordDrill`, `audio-presets`, persistence
     hooks, edge-runtime split, coverage tooling) — Phases 9–10.
 16. ~~Eager sample loading~~ — **FIXED (Phase 2).** IndexedDB hygiene remains
@@ -510,7 +510,7 @@ runtime-swappable tokens; ThemeProvider wiring matches the AGENTS.md rule
   deck badges, dead dark mode, global-error hex, theme-fallbacks module).
 - E2E: stale pricing assertion (`auth-protection.spec.ts:54`), brittle
   selectors, shared-user isolation, device project.
-- Convex nits: redundant `db.get`, N+1 import, `.filter()` in clears,
+- Convex nits: ~~redundant `db.get`~~, ~~N+1 import~~, `.filter()` in clears,
   `v.string()` unions, savedPatterns Pro gate, thin tests.
 - Audio nits: triplicated `getAudioContext`, per-frame `Float32Array`,
   silent decode failures, unbounded CacheStorage.

@@ -7,8 +7,8 @@
 > Next.js 16, React 19, Convex, Clerk + Billing, Tailwind v4, smplr/Web
 > Audio/Web MIDI, Vercel AI SDK v7, three.js, Vitest/RTL/Playwright.
 >
-> **Status:** Phases 1–5 plus the articles-public change are **shipped** and
-> merged to `main` (PRs #39–#44). Phases 6–12 remain available to pick up.
+> **Status:** Phases 1–6 plus the articles-public change are **shipped** and
+> merged to `main` (PRs #39–#46). Phases 7–12 remain available to pick up.
 >
 > **How phases work:** one phase = one turn of work. Each phase is
 > independently mergeable, gets its own worktree/branch
@@ -113,7 +113,9 @@ with `DefaultChatTransport`; the API returns
 
 E2E passed (48 specs).
 
-## Phase 6 — Convex scaling + validation (P1)
+## Phase 6 — Convex scaling + validation (P1) ✅ Shipped
+
+**PR:** #46 · **Branch:** `kimi/phase-6-convex-scaling`
 
 - `convex/tracking.ts` — five `list*Events` `.collect()` →
   `.order("desc").take(N)`; batched clears; `returns` validators (15 fns)
