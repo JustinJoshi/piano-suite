@@ -3,6 +3,45 @@ import { v } from "convex/values";
 import { optionalUserId } from "./lib/auth";
 import { ensureUserIdWithSync } from "./lib/entitlements";
 
+const DEFAULT_EVENT_LIMIT = 1000;
+const MAX_EVENT_LIMIT = 5000;
+
+function effectiveLimit(limit: number | undefined): number {
+  return Math.min(Math.max(1, limit ?? DEFAULT_EVENT_LIMIT), MAX_EVENT_LIMIT);
+}
+
+const practiceEventValidator = v.object({
+  _id: v.id("practiceEvents"),
+  _creationTime: v.number(),
+  userId: v.id("users"),
+  tool: v.string(),
+  chord: v.optional(v.string()),
+  fromDeg: v.optional(v.string()),
+  toDeg: v.optional(v.string()),
+  root: v.optional(v.string()),
+  quality: v.optional(v.string()),
+  mode: v.optional(v.string()),
+  progression: v.optional(v.string()),
+  key: v.optional(v.string()),
+  stepLabel: v.optional(v.string()),
+  reactionTimeMs: v.number(),
+  grade: v.optional(v.string()),
+  redo: v.boolean(),
+  timestamp: v.number(),
+});
+
+const missEventValidator = v.object({
+  _id: v.id("missEvents"),
+  _creationTime: v.number(),
+  userId: v.id("users"),
+  tool: v.string(),
+  chord: v.string(),
+  fromDeg: v.string(),
+  toDeg: v.string(),
+  played: v.string(),
+  timestamp: v.number(),
+});
+
 async function listEventsForUserOrEmpty<T>(
   ctx: Parameters<typeof optionalUserId>[0],
   load: (userId: Awaited<ReturnType<typeof optionalUserId>> & {}) => Promise<T[]>
@@ -19,61 +58,79 @@ async function listEventsForUserOrEmpty<T>(
 // --------------------------------------------------------------------------
 
 export const listChordDrillEvents = query({
-  args: {},
-  handler: async (ctx) => {
+  args: { limit: v.optional(v.number()) },
+  returns: v.array(practiceEventValidator),
+  handler: async (ctx, args) => {
     return await listEventsForUserOrEmpty(ctx, async (userId) =>
       await ctx.db
         .query("practiceEvents")
-        .withIndex("by_user_tool", (q) => q.eq("userId", userId).eq("tool", "chord-drill"))
-        .collect()
+        .withIndex("by_user_tool", (q) =>
+          q.eq("userId", userId).eq("tool", "chord-drill")
+        )
+        .order("desc")
+        .take(effectiveLimit(args.limit))
     );
   },
 });
 
 export const listArpeggioEvents = query({
-  args: {},
-  handler: async (ctx) => {
+  args: { limit: v.optional(v.number()) },
+  returns: v.array(practiceEventValidator),
+  handler: async (ctx, args) => {
     return await listEventsForUserOrEmpty(ctx, async (userId) =>
       await ctx.db
         .query("practiceEvents")
-        .withIndex("by_user_tool", (q) => q.eq("userId", userId).eq("tool", "arpeggios"))
-        .collect()
+        .withIndex("by_user_tool", (q) =>
+          q.eq("userId", userId).eq("tool", "arpeggios")
+        )
+        .order("desc")
+        .take(effectiveLimit(args.limit))
     );
   },
 });
 
 export const listArpeggioMissEvents = query({
-  args: {},
-  handler: async (ctx) => {
+  args: { limit: v.optional(v.number()) },
+  returns: v.array(missEventValidator),
+  handler: async (ctx, args) => {
     return await listEventsForUserOrEmpty(ctx, async (userId) =>
       await ctx.db
         .query("missEvents")
         .withIndex("by_user", (q) => q.eq("userId", userId))
-        .collect()
+        .order("desc")
+        .take(effectiveLimit(args.limit))
     );
   },
 });
 
 export const listRootCycleEvents = query({
-  args: {},
-  handler: async (ctx) => {
+  args: { limit: v.optional(v.number()) },
+  returns: v.array(practiceEventValidator),
+  handler: async (ctx, args) => {
     return await listEventsForUserOrEmpty(ctx, async (userId) =>
       await ctx.db
         .query("practiceEvents")
-        .withIndex("by_user_tool", (q) => q.eq("userId", userId).eq("tool", "root-cycling"))
-        .collect()
+        .withIndex("by_user_tool", (q) =>
+          q.eq("userId", userId).eq("tool", "root-cycling")
+        )
+        .order("desc")
+        .take(effectiveLimit(args.limit))
     );
   },
 });
 
 export const listProgressionEvents = query({
-  args: {},
-  handler: async (ctx) => {
+  args: { limit: v.optional(v.number()) },
+  returns: v.array(practiceEventValidator),
+  handler: async (ctx, args) => {
     return await listEventsForUserOrEmpty(ctx, async (userId) =>
       await ctx.db
         .query("practiceEvents")
-        .withIndex("by_user_tool", (q) => q.eq("userId", userId).eq("tool", "progression"))
-        .collect()
+        .withIndex("by_user_tool", (q) =>
+          q.eq("userId", userId).eq("tool", "progression")
+        )
+        .order("desc")
+        .take(effectiveLimit(args.limit))
     );
   },
 });
@@ -89,6 +146,7 @@ export const logChordDrillEvent = mutation({
     redo: v.boolean(),
     grade: v.optional(v.string()),
   },
+  returns: v.id("practiceEvents"),
   handler: async (ctx, args) => {
     const userId = await ensureUserIdWithSync(ctx);
     return await ctx.db.insert("practiceEvents", {
@@ -108,13 +166,14 @@ export const updateChordDrillGrade = mutation({
     eventId: v.id("practiceEvents"),
     grade: v.string(),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
     const userId = await ensureUserIdWithSync(ctx);
-    const event = await ctx.db.get(args.eventId);
+    const event = await ctx.db.get("practiceEvents", args.eventId);
     if (!event || event.userId !== userId || event.tool !== "chord-drill") {
       throw new Error("Event not found");
     }
-    await ctx.db.patch(args.eventId, { grade: args.grade });
+    await ctx.db.patch("practiceEvents", args.eventId, { grade: args.grade });
   },
 });
 
@@ -125,6 +184,7 @@ export const logArpeggioTransition = mutation({
     toDeg: v.string(),
     reactionTimeMs: v.number(),
   },
+  returns: v.id("practiceEvents"),
   handler: async (ctx, args) => {
     const userId = await ensureUserIdWithSync(ctx);
     return await ctx.db.insert("practiceEvents", {
@@ -147,6 +207,7 @@ export const logArpeggioMiss = mutation({
     toDeg: v.string(),
     played: v.string(),
   },
+  returns: v.id("missEvents"),
   handler: async (ctx, args) => {
     const userId = await ensureUserIdWithSync(ctx);
     return await ctx.db.insert("missEvents", {
@@ -171,6 +232,7 @@ export const logRootCycleEvent = mutation({
     toDeg: v.optional(v.string()),
     reactionTimeMs: v.number(),
   },
+  returns: v.id("practiceEvents"),
   handler: async (ctx, args) => {
     const userId = await ensureUserIdWithSync(ctx);
     return await ctx.db.insert("practiceEvents", {
@@ -197,6 +259,7 @@ export const logProgressionEvent = mutation({
     chord: v.string(),
     reactionTimeMs: v.number(),
   },
+  returns: v.id("practiceEvents"),
   handler: async (ctx, args) => {
     const userId = await ensureUserIdWithSync(ctx);
     return await ctx.db.insert("practiceEvents", {
@@ -217,18 +280,27 @@ export const logProgressionEvent = mutation({
 // Mutations - clear logs
 // --------------------------------------------------------------------------
 
+const CLEAR_BATCH_SIZE = 1000;
+
 export const clearChordDrillEventsByChord = mutation({
   args: { chord: v.string() },
+  returns: v.null(),
   handler: async (ctx, args) => {
     const userId = await ensureUserIdWithSync(ctx);
-    const events = await ctx.db
-      .query("practiceEvents")
-      .withIndex("by_user_chord", (q) => q.eq("userId", userId).eq("chord", args.chord))
-      .collect();
-    for (const event of events) {
-      if (event.tool === "chord-drill") {
-        await ctx.db.delete(event._id);
-      }
+
+    while (true) {
+      const events = await ctx.db
+        .query("practiceEvents")
+        .withIndex("by_user_chord", (q) =>
+          q.eq("userId", userId).eq("chord", args.chord)
+        )
+        .take(CLEAR_BATCH_SIZE);
+      const toDelete = events.filter((event) => event.tool === "chord-drill");
+      if (toDelete.length === 0) break;
+      await Promise.all(
+        toDelete.map((event) => ctx.db.delete("practiceEvents", event._id))
+      );
+      if (events.length < CLEAR_BATCH_SIZE) break;
     }
   },
 });
@@ -239,27 +311,49 @@ export const clearArpeggioEventsByTransition = mutation({
     fromDeg: v.string(),
     toDeg: v.string(),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
     const userId = await ensureUserIdWithSync(ctx);
-    const events = await ctx.db
-      .query("practiceEvents")
-      .withIndex("by_user_tool", (q) => q.eq("userId", userId).eq("tool", "arpeggios"))
-      .filter((q) =>
-        q.and(
-          q.eq(q.field("chord"), args.chord),
-          q.eq(q.field("fromDeg"), args.fromDeg),
-          q.eq(q.field("toDeg"), args.toDeg)
+
+    while (true) {
+      const events = await ctx.db
+        .query("practiceEvents")
+        .withIndex("by_user_tool", (q) =>
+          q.eq("userId", userId).eq("tool", "arpeggios")
         )
-      )
-      .collect();
-    const misses = await ctx.db
-      .query("missEvents")
-      .withIndex("by_user_transition", (q) =>
-        q.eq("userId", userId).eq("chord", args.chord).eq("fromDeg", args.fromDeg).eq("toDeg", args.toDeg)
-      )
-      .collect();
-    for (const event of events) await ctx.db.delete(event._id);
-    for (const miss of misses) await ctx.db.delete(miss._id);
+        // eslint-disable-next-line convex/no-filter-in-query
+        .filter((q) =>
+          q.and(
+            q.eq(q.field("chord"), args.chord),
+            q.eq(q.field("fromDeg"), args.fromDeg),
+            q.eq(q.field("toDeg"), args.toDeg)
+          )
+        )
+        .take(CLEAR_BATCH_SIZE);
+      if (events.length === 0) break;
+      await Promise.all(
+        events.map((event) => ctx.db.delete("practiceEvents", event._id))
+      );
+      if (events.length < CLEAR_BATCH_SIZE) break;
+    }
+
+    while (true) {
+      const misses = await ctx.db
+        .query("missEvents")
+        .withIndex("by_user_transition", (q) =>
+          q
+            .eq("userId", userId)
+            .eq("chord", args.chord)
+            .eq("fromDeg", args.fromDeg)
+            .eq("toDeg", args.toDeg)
+        )
+        .take(CLEAR_BATCH_SIZE);
+      if (misses.length === 0) break;
+      await Promise.all(
+        misses.map((miss) => ctx.db.delete("missEvents", miss._id))
+      );
+      if (misses.length < CLEAR_BATCH_SIZE) break;
+    }
   },
 });
 
@@ -270,20 +364,31 @@ export const clearRootCycleEventsByGroup = mutation({
     fromDeg: v.optional(v.string()),
     toDeg: v.optional(v.string()),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
     const userId = await ensureUserIdWithSync(ctx);
-    const events = await ctx.db
-      .query("practiceEvents")
-      .withIndex("by_user_tool", (q) => q.eq("userId", userId).eq("tool", "root-cycling"))
-      .filter((q) => {
-        const filters = [q.eq(q.field("mode"), args.mode)];
-        if (args.quality) filters.push(q.eq(q.field("quality"), args.quality));
-        if (args.fromDeg) filters.push(q.eq(q.field("fromDeg"), args.fromDeg));
-        if (args.toDeg) filters.push(q.eq(q.field("toDeg"), args.toDeg));
-        return q.and(...filters);
-      })
-      .collect();
-    for (const event of events) await ctx.db.delete(event._id);
+
+    while (true) {
+      const events = await ctx.db
+        .query("practiceEvents")
+        .withIndex("by_user_tool", (q) =>
+          q.eq("userId", userId).eq("tool", "root-cycling")
+        )
+        // eslint-disable-next-line convex/no-filter-in-query
+        .filter((q) => {
+          const filters = [q.eq(q.field("mode"), args.mode)];
+          if (args.quality) filters.push(q.eq(q.field("quality"), args.quality));
+          if (args.fromDeg) filters.push(q.eq(q.field("fromDeg"), args.fromDeg));
+          if (args.toDeg) filters.push(q.eq(q.field("toDeg"), args.toDeg));
+          return q.and(...filters);
+        })
+        .take(CLEAR_BATCH_SIZE);
+      if (events.length === 0) break;
+      await Promise.all(
+        events.map((event) => ctx.db.delete("practiceEvents", event._id))
+      );
+      if (events.length < CLEAR_BATCH_SIZE) break;
+    }
   },
 });
 
@@ -292,19 +397,30 @@ export const clearProgressionEventsByProgression = mutation({
     progression: v.string(),
     key: v.string(),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
     const userId = await ensureUserIdWithSync(ctx);
-    const events = await ctx.db
-      .query("practiceEvents")
-      .withIndex("by_user_tool", (q) => q.eq("userId", userId).eq("tool", "progression"))
-      .filter((q) =>
-        q.and(
-          q.eq(q.field("progression"), args.progression),
-          q.eq(q.field("key"), args.key)
+
+    while (true) {
+      const events = await ctx.db
+        .query("practiceEvents")
+        .withIndex("by_user_tool", (q) =>
+          q.eq("userId", userId).eq("tool", "progression")
         )
-      )
-      .collect();
-    for (const event of events) await ctx.db.delete(event._id);
+        // eslint-disable-next-line convex/no-filter-in-query
+        .filter((q) =>
+          q.and(
+            q.eq(q.field("progression"), args.progression),
+            q.eq(q.field("key"), args.key)
+          )
+        )
+        .take(CLEAR_BATCH_SIZE);
+      if (events.length === 0) break;
+      await Promise.all(
+        events.map((event) => ctx.db.delete("practiceEvents", event._id))
+      );
+      if (events.length < CLEAR_BATCH_SIZE) break;
+    }
   },
 });
 
@@ -354,6 +470,12 @@ export const bulkImportTracking = mutation({
       })
     ),
   },
+  returns: v.object({
+    chordDrillCount: v.number(),
+    arpeggioCount: v.number(),
+    arpeggioMissCount: v.number(),
+    rootCycleCount: v.number(),
+  }),
   handler: async (ctx, args) => {
     const userId = await ensureUserIdWithSync(ctx);
 

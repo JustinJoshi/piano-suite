@@ -56,7 +56,7 @@ describe("webhook entitlement mirror (WP2 hardening)", () => {
     });
     expect(patched).toBe(userId);
 
-    const row = await t.run(async (ctx) => ctx.db.get(userId));
+    const row = await t.run(async (ctx) => ctx.db.get("users", userId));
     expect(row?.syncEntitled).toBe(true);
     expect(row?.entitlementSource).toBe("webhook");
 
@@ -65,7 +65,7 @@ describe("webhook entitlement mirror (WP2 hardening)", () => {
       entitled: false,
       secret: WEBHOOK_SECRET,
     });
-    const revoked = await t.run(async (ctx) => ctx.db.get(userId));
+    const revoked = await t.run(async (ctx) => ctx.db.get("users", userId));
     expect(revoked?.syncEntitled).toBe(false);
   });
 

@@ -46,20 +46,20 @@ type ClerkIdentity = NonNullable<
 
 async function syncUserProfile(
   ctx: MutationCtx,
-  existingId: Id<"users">,
+  existing: {
+    _id: Id<"users">;
+    email?: string | null;
+    name?: string | null;
+    imageUrl?: string | null;
+  },
   identity: ClerkIdentity
 ) {
-  const existing = await ctx.db.get("users", existingId);
-  if (!existing) {
-    return;
-  }
-
   if (
     existing.email !== identity.email ||
     existing.name !== identity.name ||
     existing.imageUrl !== identity.pictureUrl
   ) {
-    await ctx.db.patch(existingId, {
+    await ctx.db.patch("users", existing._id, {
       email: identity.email,
       name: identity.name,
       imageUrl: identity.pictureUrl,
@@ -83,7 +83,7 @@ export async function ensureUserId(ctx: MutationCtx): Promise<Id<"users">> {
     .unique();
 
   if (existing) {
-    await syncUserProfile(ctx, existing._id, identity);
+    await syncUserProfile(ctx, existing, identity);
     return existing._id;
   }
 

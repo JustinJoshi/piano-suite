@@ -1,6 +1,7 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
+import convexPlugin from "@convex-dev/eslint-plugin";
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -14,6 +15,9 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Ignore build artifacts and node_modules inside other agents' worktrees.
     ".worktrees/**",
+    // Convex generated files are rewritten by the CLI and carry their own
+    // eslint-disable directives that conflict with this config.
+    "convex/_generated/**",
   ]),
   {
     files: [
@@ -36,6 +40,20 @@ const eslintConfig = defineConfig([
       "react-hooks/set-state-in-effect": "off",
       "react-hooks/preserve-manual-memoization": "off",
       "react-hooks/exhaustive-deps": "warn",
+    },
+  },
+  {
+    files: ["convex/**/*.ts"],
+    plugins: {
+      convex: convexPlugin,
+    },
+    rules: {
+      "convex/require-args-validator": "error",
+      "convex/explicit-table-ids": "error",
+      "convex/no-collect-in-query": "error",
+      // Filter is acceptable in clear mutations when no purpose-built index
+      // exists, but warn so future additions are considered.
+      "convex/no-filter-in-query": "warn",
     },
   },
 ]);

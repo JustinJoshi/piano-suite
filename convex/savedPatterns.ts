@@ -42,7 +42,8 @@ export const listSavedPatterns = query({
     const patterns = await ctx.db
       .query("savedPatterns")
       .withIndex("by_user_tool", (q) => q.eq("userId", userId).eq("tool", tool))
-      .collect();
+      .order("desc")
+      .take(1000);
 
     return patterns
       .map((p) => ({
@@ -72,7 +73,7 @@ export const savePattern = mutation({
     const existing = await ctx.db
       .query("savedPatterns")
       .withIndex("by_user_tool", (q) => q.eq("userId", userId).eq("tool", tool))
-      .collect();
+      .take(MAX_PATTERNS_PER_TOOL);
 
     if (existing.length >= MAX_PATTERNS_PER_TOOL) {
       throw new Error(
@@ -100,14 +101,14 @@ export const renamePattern = mutation({
   handler: async (ctx, args) => {
     const userId = await ensureUserId(ctx);
     const name = normalizeName(args.name);
-    const pattern = await ctx.db.get(args.patternId);
+    const pattern = await ctx.db.get("savedPatterns", args.patternId);
     if (!pattern) {
       throw new Error("Pattern not found");
     }
     if (pattern.userId !== userId) {
       throw new Error("Unauthorized");
     }
-    await ctx.db.patch(args.patternId, {
+    await ctx.db.patch("savedPatterns", args.patternId, {
       name,
       updatedAt: Date.now(),
     });
@@ -121,13 +122,13 @@ export const deletePattern = mutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     const userId = await ensureUserId(ctx);
-    const pattern = await ctx.db.get(args.patternId);
+    const pattern = await ctx.db.get("savedPatterns", args.patternId);
     if (!pattern) {
       throw new Error("Pattern not found");
     }
     if (pattern.userId !== userId) {
       throw new Error("Unauthorized");
     }
-    await ctx.db.delete(args.patternId);
+    await ctx.db.delete("savedPatterns", args.patternId);
   },
 });

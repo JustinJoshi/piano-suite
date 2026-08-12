@@ -67,7 +67,7 @@ export const applyWebhookEntitlement = mutation({
     if (!user) {
       return null;
     }
-    await ctx.db.patch(user._id, {
+    await ctx.db.patch("users", user._id, {
       syncEntitled: args.entitled,
       entitlementSource: "webhook",
     });
@@ -110,7 +110,7 @@ export const applyWebhookProfile = mutation({
     if (args.name !== undefined) patch.name = args.name;
     if (args.imageUrl !== undefined) patch.imageUrl = args.imageUrl;
     if (Object.keys(patch).length > 0) {
-      await ctx.db.patch(user._id, patch);
+      await ctx.db.patch("users", user._id, patch);
     }
     return user._id;
   },

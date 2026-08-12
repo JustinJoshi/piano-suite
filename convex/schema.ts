@@ -16,8 +16,7 @@ export default defineSchema({
     // Who last set `syncEntitled` (e.g. "webhook").
     entitlementSource: v.optional(v.string()),
   })
-    .index("by_clerkId", ["clerkId"])
-    .index("by_email", ["email"]),
+    .index("by_clerkId", ["clerkId"]),
 
   // Timing events from the Reflex Drill EXT tracking tab:
   // chord-drill first-chord times, arpeggio transitions, root-cycling attempts,
@@ -39,10 +38,8 @@ export default defineSchema({
     redo: v.boolean(),
     timestamp: v.number(),
   })
-    .index("by_user", ["userId"])
     .index("by_user_tool", ["userId", "tool"])
-    .index("by_user_chord", ["userId", "chord"])
-    .index("by_user_timestamp", ["userId", "timestamp"]),
+    .index("by_user_chord", ["userId", "chord"]),
 
   // Daily technique habit sessions (exercise name, BPM, notes).
   techniqueSessions: defineTable({
@@ -85,6 +82,5 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   })
-    .index("by_user_tool", ["userId", "tool"])
-    .index("by_user", ["userId"]),
+    .index("by_user_tool", ["userId", "tool"]),
 });

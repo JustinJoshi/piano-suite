@@ -41,7 +41,7 @@ export const setSetting = mutation({
       .unique();
 
     if (existing) {
-      await ctx.db.patch(existing._id, { value: args.value });
+      await ctx.db.patch("settings", existing._id, { value: args.value });
     } else {
       await ctx.db.insert("settings", {
         userId,
