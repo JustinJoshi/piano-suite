@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
+  createMidiScheduler,
   detectFileKind,
   dispatchMusicNoteOn,
   dispatchMusicNoteOff,
   frequencyToNote,
   isSupportedMusicFile,
   parseMidiFile,
-  scheduleMidiNotes,
 } from "@/lib/music-player";
 
 // Minimal valid MIDI file: single track, one note-on / note-off for C4.
@@ -118,14 +118,37 @@ describe("dispatchMusicNoteOn / dispatchMusicNoteOff", () => {
   });
 });
 
-describe("scheduleMidiNotes", () => {
+function createMockAudioContext() {
+  let time = 0;
+  return {
+    get currentTime() {
+      return time;
+    },
+    advance(ms: number) {
+      time += ms / 1000;
+    },
+    state: "running",
+    resume: vi.fn(),
+    destination: {},
+  } as unknown as BaseAudioContext;
+}
+
+describe("createMidiScheduler", () => {
+  let ctx: ReturnType<typeof createMockAudioContext>;
+
   beforeEach(() => {
+    ctx = createMockAudioContext();
     vi.useFakeTimers();
   });
 
   afterEach(() => {
     vi.useRealTimers();
   });
+
+  function advance(ms: number) {
+    ctx.advance(ms);
+    vi.advanceTimersByTime(ms);
+  }
 
   it("dispatches note-on and note-off events at scheduled times", () => {
     const onListener = vi.fn();
@@ -138,22 +161,23 @@ describe("scheduleMidiNotes", () => {
       { note: 64, pc: 4, velocity: 100, time: 0.2, duration: 0.1 },
     ];
 
-    scheduleMidiNotes(notes, 0);
+    const scheduler = createMidiScheduler(ctx);
+    scheduler.schedule(notes, 0, {});
 
-    expect(onListener).not.toHaveBeenCalled();
-
-    vi.advanceTimersByTime(5);
+    // The first note-on is within the scheduler's lookahead window, so it
+    // fires synchronously when scheduled.
     expect(onListener).toHaveBeenCalledTimes(1);
     expect(onListener.mock.calls[0][0].detail.note).toBe(60);
 
-    vi.advanceTimersByTime(100);
+    advance(100);
     expect(offListener).toHaveBeenCalledTimes(1);
     expect(offListener.mock.calls[0][0].detail.note).toBe(60);
 
-    vi.advanceTimersByTime(100);
+    advance(100);
     expect(onListener).toHaveBeenCalledTimes(2);
     expect(onListener.mock.calls[1][0].detail.note).toBe(64);
 
+    scheduler.stop();
     window.removeEventListener("music-note-on", onListener);
     window.removeEventListener("music-note-off", offListener);
   });
@@ -167,15 +191,59 @@ describe("scheduleMidiNotes", () => {
       { note: 64, pc: 4, velocity: 100, time: 1, duration: 0.5 },
     ];
 
-    scheduleMidiNotes(notes, 800);
+    const scheduler = createMidiScheduler(ctx);
+    scheduler.schedule(notes, 800, {});
     expect(onListener).not.toHaveBeenCalled();
 
-    vi.advanceTimersByTime(150);
+    advance(150);
     expect(onListener).not.toHaveBeenCalled();
 
-    vi.advanceTimersByTime(100);
+    advance(100);
     expect(onListener).toHaveBeenCalledTimes(1);
     expect(onListener.mock.calls[0][0].detail.note).toBe(64);
+
+    scheduler.stop();
+    window.removeEventListener("music-note-on", onListener);
+  });
+
+  it("calls onNoteOn, onNoteOff, and onComplete callbacks", () => {
+    const onNoteOn = vi.fn();
+    const onNoteOff = vi.fn();
+    const onComplete = vi.fn();
+
+    const notes = [
+      { note: 60, pc: 0, velocity: 100, time: 0, duration: 0.1 },
+    ];
+
+    const scheduler = createMidiScheduler(ctx);
+    scheduler.schedule(notes, 0, { onNoteOn, onNoteOff, onComplete });
+
+    advance(5);
+    expect(onNoteOn).toHaveBeenCalledTimes(1);
+
+    advance(100);
+    expect(onNoteOff).toHaveBeenCalledTimes(1);
+
+    advance(100);
+    expect(onComplete).toHaveBeenCalledTimes(1);
+
+    scheduler.stop();
+  });
+
+  it("stop() prevents pending events from firing", () => {
+    const onListener = vi.fn();
+    window.addEventListener("music-note-on", onListener);
+
+    const notes = [
+      { note: 60, pc: 0, velocity: 100, time: 1, duration: 0.1 },
+    ];
+
+    const scheduler = createMidiScheduler(ctx);
+    scheduler.schedule(notes, 0, {});
+    scheduler.stop();
+
+    advance(1500);
+    expect(onListener).not.toHaveBeenCalled();
 
     window.removeEventListener("music-note-on", onListener);
   });
