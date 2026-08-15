@@ -13,7 +13,6 @@ vi.mock("@/hooks/useMusicPlayer", () => ({
     file: null,
     state: "idle",
     isPlaying: false,
-    progress: 0,
     duration: 0,
     volume: 0.8,
     error: null,
@@ -23,6 +22,7 @@ vi.mock("@/hooks/useMusicPlayer", () => ({
     stop: mockStop,
     setVolume: mockSetVolume,
   }),
+  useMusicPlayerProgress: () => 0,
 }));
 
 const mockSetMusicEnabled = vi.fn();

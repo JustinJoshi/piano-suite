@@ -9,7 +9,29 @@ import {
   type ChladniRippleControls,
   type ChladniRippleVizState,
   type MidiImpulse,
+  type ModePair,
 } from "@/lib/chladni-ripple";
+
+function modePairsEqual(a: ModePair, b: ModePair): boolean {
+  return a[0] === b[0] && a[1] === b[1];
+}
+
+function vizStatesEqual(
+  a: ChladniRippleVizState,
+  b: ChladniRippleVizState
+): boolean {
+  return (
+    modePairsEqual(a.mode, b.mode) &&
+    modePairsEqual(a.nextMode, b.nextMode) &&
+    modePairsEqual(a.activeMode, b.activeMode) &&
+    a.morph === b.morph &&
+    a.secondaryBlend === b.secondaryBlend &&
+    a.lineThickness === b.lineThickness &&
+    a.lineIntensity === b.lineIntensity &&
+    a.breathe === b.breathe &&
+    a.activePc === b.activePc
+  );
+}
 
 export type UseChladniRippleOptions = {
   heldNotes: readonly number[];
@@ -108,8 +130,14 @@ export function useChladniRipple({
         now,
         controls.decayMs
       );
-      setViz(
-        mapMidiToChladni(heldNotesRef.current, impulsesRef.current, now, controls)
+      const nextViz = mapMidiToChladni(
+        heldNotesRef.current,
+        impulsesRef.current,
+        now,
+        controls
+      );
+      setViz((current) =>
+        vizStatesEqual(current, nextViz) ? current : nextViz
       );
       rafId = requestAnimationFrame(tick);
     };

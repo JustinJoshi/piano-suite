@@ -63,30 +63,44 @@ function MultigridBackgroundInner({
       const delta = now - lastTime;
       lastTime = now;
 
-      if (autoMorphRef.current && morphSpeedRef.current > 0) {
-        let nextMorph =
-          morphRef.current + delta / (morphSpeedRef.current * 1000);
+      let nextMorph = morphRef.current + delta / (morphSpeedRef.current * 1000);
 
-        if (nextMorph >= 1) {
-          const arrived = nextRecipeRef.current;
-          const fresh = randomRecipe();
-          recipeRef.current = arrived;
-          nextRecipeRef.current = fresh;
-          nextMorph = 0;
-          setRecipe(arrived);
-          setNextRecipe(fresh);
-        }
-
-        morphRef.current = nextMorph;
-        setMorph(nextMorph);
+      if (nextMorph >= 1) {
+        const arrived = nextRecipeRef.current;
+        const fresh = randomRecipe();
+        recipeRef.current = arrived;
+        nextRecipeRef.current = fresh;
+        nextMorph = 0;
+        setRecipe(arrived);
+        setNextRecipe(fresh);
       }
+
+      morphRef.current = nextMorph;
+      setMorph(nextMorph);
 
       rafId = requestAnimationFrame(animate);
     }
 
-    rafId = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(rafId);
-  }, []);
+    function startLoop() {
+      if (rafId === 0) {
+        lastTime = performance.now();
+        rafId = requestAnimationFrame(animate);
+      }
+    }
+
+    function stopLoop() {
+      if (rafId !== 0) {
+        cancelAnimationFrame(rafId);
+        rafId = 0;
+      }
+    }
+
+    if (autoMorphRef.current && morphSpeedRef.current > 0) {
+      startLoop();
+    }
+
+    return () => stopLoop();
+  }, [settings.autoMorph, settings.morphSpeed]);
 
   return (
     <MultigridVisualization
