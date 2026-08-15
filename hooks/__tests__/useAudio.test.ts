@@ -20,9 +20,16 @@ function createMockAudioContext() {
     };
   }> = [];
 
+  let time = 0;
+
   const ctx = {
     state: "running",
-    currentTime: 0,
+    get currentTime() {
+      return time;
+    },
+    advance(ms: number) {
+      time += ms / 1000;
+    },
     resume: vi.fn().mockResolvedValue(undefined),
     createOscillator: vi.fn(() => {
       const osc = {
@@ -133,6 +140,7 @@ describe("useAudio", () => {
     expect(onBeat).toHaveBeenCalledWith(0);
 
     act(() => {
+      mockCtx.advance(1000);
       vi.advanceTimersByTime(1000);
     });
 

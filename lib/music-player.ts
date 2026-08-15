@@ -12,6 +12,7 @@
 
 import { Midi } from "@tonejs/midi";
 import { YIN } from "pitchfinder";
+import { Scheduler } from "smplr";
 
 export type MusicPlayerFileKind = "midi" | "audio";
 
@@ -150,57 +151,85 @@ export function frequencyToNote(frequency: number): {
   };
 }
 
+export type MidiScheduler = {
+  /**
+   * Schedule MIDI note events relative to the current moment and dispatch global
+   * music-note events.
+   *
+   * `progressMs` is how much of the song has already been played, so notes
+   * before that time are skipped.
+   */
+  schedule(
+    notes: readonly MusicPlayerNote[],
+    progressMs: number,
+    options: {
+      onNoteOn?: (note: MusicPlayerNote) => void;
+      onNoteOff?: (note: MusicPlayerNote) => void;
+      onComplete?: () => void;
+    }
+  ): void;
+  /** Cancel all pending note events. */
+  stop(): void;
+};
+
 /**
- * Schedule MIDI note events relative to the current moment and dispatch global
- * music-note events. Returns a function that cancels all pending timeouts.
+ * Create a lookahead MIDI scheduler tied to an AudioContext clock.
  *
- * `progressMs` is how much of the song has already been played, so notes
- * before that time are skipped.
+ * Uses smplr's Scheduler so events are dispatched against
+ * `ctx.currentTime` instead of wall-clock `setTimeout`. This keeps timing
+ * accurate when the tab is backgrounded or under heavy load.
  */
-export function scheduleMidiNotes(
-  notes: readonly MusicPlayerNote[],
-  progressMs: number,
-  options: {
-    onNoteOn?: (note: MusicPlayerNote) => void;
-    onNoteOff?: (note: MusicPlayerNote) => void;
-    onComplete?: () => void;
-  } = {}
-): () => void {
-  const timeouts: ReturnType<typeof setTimeout>[] = [];
+export function createMidiScheduler(
+  ctx: BaseAudioContext,
+  options: { lookaheadMs?: number; intervalMs?: number } = {}
+): MidiScheduler {
+  const scheduler = Scheduler(ctx, {
+    lookaheadMs: options.lookaheadMs ?? 25,
+    intervalMs: options.intervalMs ?? 25,
+  });
 
-  for (const note of notes) {
-    const noteOnTime = note.time * 1000 - progressMs;
-    if (noteOnTime + note.duration * 1000 <= 0) continue; // already finished
+  return {
+    schedule(notes, progressMs, callbacks) {
+      const now = ctx.currentTime;
 
-    const onDelay = Math.max(0, noteOnTime);
-    const onTimeout = setTimeout(() => {
-      dispatchMusicNoteOn(note.note, note.velocity);
-      options.onNoteOn?.(note);
+      for (const note of notes) {
+        const noteStartMs = note.time * 1000;
+        const noteEndMs = noteStartMs + note.duration * 1000;
+        if (noteEndMs <= progressMs) continue; // already finished
 
-      const offTimeout = setTimeout(() => {
-        dispatchMusicNoteOff(note.note);
-        options.onNoteOff?.(note);
-      }, Math.max(0, note.duration * 1000));
-      timeouts.push(offTimeout);
-    }, onDelay);
-    timeouts.push(onTimeout);
-  }
+        const onTime = now + (noteStartMs - progressMs) / 1000;
+        const offTime = onTime + note.duration;
 
-  const lastNote = notes[notes.length - 1];
-  if (lastNote) {
-    const completeDelay = Math.max(
-      0,
-      lastNote.time * 1000 + lastNote.duration * 1000 - progressMs
-    );
-    const completeTimeout = setTimeout(() => {
-      options.onComplete?.();
-    }, completeDelay);
-    timeouts.push(completeTimeout);
-  }
+        scheduler.schedule(
+          { note: note.note, velocity: note.velocity, time: onTime },
+          () => {
+            dispatchMusicNoteOn(note.note, note.velocity);
+            callbacks.onNoteOn?.(note);
+          }
+        );
 
-  return () => {
-    timeouts.forEach(clearTimeout);
-    timeouts.length = 0;
+        scheduler.schedule({ note: note.note, time: offTime }, () => {
+          dispatchMusicNoteOff(note.note);
+          callbacks.onNoteOff?.(note);
+        });
+      }
+
+      const lastNote = notes[notes.length - 1];
+      if (lastNote) {
+        const completeTime =
+          now +
+          (lastNote.time * 1000 +
+            lastNote.duration * 1000 -
+            progressMs) /
+            1000;
+        scheduler.schedule({ note: 0, time: completeTime }, () => {
+          callbacks.onComplete?.();
+        });
+      }
+    },
+    stop() {
+      scheduler.stop();
+    },
   };
 }
 

@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import {
+  createMidiScheduler,
   createPitchDetector,
   detectFileKind,
   dispatchMusicNoteOff,
@@ -19,7 +20,6 @@ import {
   isSupportedMusicFile,
   parseMidiFile,
   readFileAsArrayBuffer,
-  scheduleMidiNotes,
   type MusicPlayerFile,
   type MusicPlayerNote,
   type MusicPlayerState,
@@ -103,6 +103,8 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
     progressSubscribersRef.current.forEach((cb) => cb());
   }, []);
   const cancelScheduleRef = useRef<(() => void) | null>(null);
+  const startTimeRef = useRef<number | null>(null);
+  const progressAtStartRef = useRef(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioSourceRef = useRef<MediaElementAudioSourceNode | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -326,10 +328,14 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
       if (!active) return;
 
       if (parsed.kind === "midi") {
-        const nextProgress = progressRef.current + 0.016; // ~60fps
-        progressRef.current = nextProgress;
-        notifyProgressSubscribers();
-        if (nextProgress >= duration) {
+        const ctx = getAudioContext();
+        if (ctx && startTimeRef.current !== null) {
+          progressRef.current =
+            progressAtStartRef.current +
+            (ctx.currentTime - startTimeRef.current);
+          notifyProgressSubscribers();
+        }
+        if (progressRef.current >= duration) {
           cleanup();
           setIsPlaying(false);
           setState("ready");
@@ -357,25 +363,30 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
       await ensureAudioContextResumed();
       if (!active) return;
 
+      const ctx = getAudioContext();
+      if (!ctx) return;
+
       if (parsed.kind === "midi") {
-        cancelSchedule = scheduleMidiNotes(
-          parsed.notes,
-          progressRef.current * 1000,
-          {
-            onNoteOn: (note: MusicPlayerNote) => {
-              activeNotesRef.current.add(note.note);
-            },
-            onNoteOff: (note: MusicPlayerNote) => {
-              activeNotesRef.current.delete(note.note);
-            },
-            onComplete: () => {
-              if (!active) return;
-              cleanup();
-              setIsPlaying(false);
-              setState("ready");
-            },
-          }
-        );
+        const scheduler = createMidiScheduler(ctx);
+        cancelSchedule = () => scheduler.stop();
+
+        progressAtStartRef.current = progressRef.current;
+        startTimeRef.current = ctx.currentTime;
+
+        scheduler.schedule(parsed.notes, progressRef.current * 1000, {
+          onNoteOn: (note: MusicPlayerNote) => {
+            activeNotesRef.current.add(note.note);
+          },
+          onNoteOff: (note: MusicPlayerNote) => {
+            activeNotesRef.current.delete(note.note);
+          },
+          onComplete: () => {
+            if (!active) return;
+            cleanup();
+            setIsPlaying(false);
+            setState("ready");
+          },
+        });
         rafId = requestAnimationFrame(tick);
       } else if (parsed.kind === "audio") {
         const audio = audioRef.current;

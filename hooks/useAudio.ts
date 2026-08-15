@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useCallback, useState, useEffect } from "react";
+import { Scheduler } from "smplr";
 
 export type AudioOptions = {
   frequency?: number;
@@ -9,6 +10,8 @@ export type AudioOptions = {
   decay?: number;
   type?: OscillatorType;
   volume?: number;
+  /** Absolute AudioContext time at which to start the tone. */
+  time?: number;
 };
 
 export type MetronomeControls = {
@@ -55,6 +58,7 @@ function playTone(options: AudioOptions) {
     decay = duration * 0.9,
     type = "sine",
     volume = 0.35,
+    time,
   } = options;
 
   const osc = ctx.createOscillator();
@@ -63,7 +67,7 @@ function playTone(options: AudioOptions) {
   osc.type = type;
   osc.frequency.value = frequency;
 
-  const now = ctx.currentTime;
+  const now = time ?? ctx.currentTime;
   gain.gain.setValueAtTime(0.0001, now);
   gain.gain.exponentialRampToValueAtTime(volume, now + attack);
   gain.gain.exponentialRampToValueAtTime(0.0001, now + attack + decay);
@@ -97,7 +101,7 @@ export function useAudio() {
     const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     return !!Ctx;
   });
-  const metronomeRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const metronomeRef = useRef<(() => void) | null>(null);
   const [metronomeRunning, setMetronomeRunning] = useState(false);
 
   const playChime = useCallback((options: AudioOptions = {}) => {
@@ -120,6 +124,14 @@ export function useAudio() {
     });
   }, []);
 
+  const stopMetronome = useCallback(() => {
+    if (metronomeRef.current) {
+      metronomeRef.current();
+      metronomeRef.current = null;
+    }
+    setMetronomeRunning(false);
+  }, []);
+
   const startMetronome = useCallback(
     (bpm: number, onBeat?: (beat: number) => void): MetronomeControls => {
       const ctx = getAudioContext();
@@ -127,56 +139,55 @@ export function useAudio() {
         return { start: () => {}, stop: () => {}, running: false };
       }
 
-      let beat = 0;
-      const intervalMs = (60 / bpm) * 1000;
+      // Stop any existing metronome first.
+      stopMetronome();
 
-      const tick = () => {
-        playTone({
-          frequency: beat === 0 ? 1200 : 880,
-          duration: 0.08,
-          type: "triangle",
-          volume: 0.3,
+      const beatInterval = 60 / bpm;
+      const scheduler = Scheduler(ctx, { lookaheadMs: 25, intervalMs: 25 });
+      let nextTime = ctx.currentTime;
+      let beat = 0;
+
+      const scheduleNext = () => {
+        const currentBeat = beat;
+        const currentTime = nextTime;
+        scheduler.schedule({ note: 0, time: currentTime }, () => {
+          playTone({
+            frequency: currentBeat === 0 ? 1200 : 880,
+            duration: 0.08,
+            type: "triangle",
+            volume: 0.3,
+            time: currentTime,
+          });
+          onBeat?.(currentBeat);
         });
-        onBeat?.(beat);
         beat = (beat + 1) % 4;
+        nextTime += beatInterval;
       };
 
-      // Stop any existing metronome first.
-      if (metronomeRef.current) {
-        clearInterval(metronomeRef.current);
+      // Schedule an initial window of beats so the first tick can fire
+      // immediately and several future beats are queued.
+      for (let i = 0; i < 4; i++) {
+        scheduleNext();
       }
 
-      tick();
-      metronomeRef.current = setInterval(tick, intervalMs);
+      metronomeRef.current = () => scheduler.stop();
       setMetronomeRunning(true);
 
       return {
         start: () => {},
         stop: () => {
-          if (metronomeRef.current) {
-            clearInterval(metronomeRef.current);
-            metronomeRef.current = null;
-          }
-          setMetronomeRunning(false);
+          stopMetronome();
         },
         running: true,
       };
     },
-    []
+    [stopMetronome]
   );
-
-  const stopMetronome = useCallback(() => {
-    if (metronomeRef.current) {
-      clearInterval(metronomeRef.current);
-      metronomeRef.current = null;
-    }
-    setMetronomeRunning(false);
-  }, []);
 
   useEffect(() => {
     return () => {
       if (metronomeRef.current) {
-        clearInterval(metronomeRef.current);
+        metronomeRef.current();
       }
     };
   }, []);
