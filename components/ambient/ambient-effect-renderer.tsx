@@ -15,11 +15,13 @@ import { useExperimentalFeatures } from "@/hooks/useExperimentalFeatures";
 import { useHeroChladniSettings } from "@/hooks/useHeroChladniSettings";
 import { useHeroQuasiperiodicSettings } from "@/hooks/useHeroQuasiperiodicSettings";
 import { useHeroMultigridSettings } from "@/hooks/useHeroMultigridSettings";
+import { useVisibilityPause } from "@/hooks/useVisibilityPause";
 import { isExperimentalAmbientKind } from "@/lib/experimental-features";
 import dynamic from "next/dynamic";
 import { ChladniBackground } from "@/components/welcome/chladni-background";
 import { QuasiperiodicBackground } from "@/components/welcome/quasiperiodic-background";
 import { MultigridBackground } from "@/components/welcome/multigrid-background";
+import { cn } from "@/lib/utils";
 import type { ChladniVisualizationProps } from "@/components/welcome/chladni-visualization";
 import type { JuliaVisualizationProps } from "@/components/drills/julia/julia-visualization";
 import type { LissajousVisualizationProps } from "@/components/drills/lissajous/lissajous-visualization";
@@ -112,6 +114,13 @@ function AmbientJuliaEffect({ className }: { className?: string }) {
   const nextCRef = useRef(nextC);
   const morphRef = useRef(0);
 
+  const [containerRef, visible] = useVisibilityPause<HTMLDivElement>();
+  const visibleRef = useRef(visible);
+
+  useEffect(() => {
+    visibleRef.current = visible;
+  }, [visible]);
+
   useEffect(() => {
     cRef.current = c;
   }, [c]);
@@ -124,6 +133,12 @@ function AmbientJuliaEffect({ className }: { className?: string }) {
     let lastTime = performance.now();
 
     function animate(now: number) {
+      if (!visibleRef.current) {
+        lastTime = now;
+        rafId = requestAnimationFrame(animate);
+        return;
+      }
+
       const delta = now - lastTime;
       lastTime = now;
       const step = delta / AMBIENT_JULIA.morphSpeedMs;
@@ -147,17 +162,19 @@ function AmbientJuliaEffect({ className }: { className?: string }) {
   }, []);
 
   return (
-    <JuliaVisualization
-      c={c}
-      nextC={nextC}
-      morph={morph}
-      zoom={AMBIENT_JULIA.zoom}
-      maxIterations={AMBIENT_JULIA.maxIterations}
-      escapeRadius={AMBIENT_JULIA.escapeRadius}
-      colorSoftness={AMBIENT_JULIA.colorSoftness}
-      timeScale={AMBIENT_JULIA.timeScale}
-      className={className}
-    />
+    <div ref={containerRef} className={cn("h-full w-full", className)}>
+      <JuliaVisualization
+        c={c}
+        nextC={nextC}
+        morph={morph}
+        zoom={AMBIENT_JULIA.zoom}
+        maxIterations={AMBIENT_JULIA.maxIterations}
+        escapeRadius={AMBIENT_JULIA.escapeRadius}
+        colorSoftness={AMBIENT_JULIA.colorSoftness}
+        timeScale={AMBIENT_JULIA.timeScale}
+        className="h-full w-full"
+      />
+    </div>
   );
 }
 
@@ -174,6 +191,13 @@ function AmbientLissajousEffect({ className }: { className?: string }) {
   const nextParamsRef = useRef(nextParams);
   const morphRef = useRef(0);
 
+  const [containerRef, visible] = useVisibilityPause<HTMLDivElement>();
+  const visibleRef = useRef(visible);
+
+  useEffect(() => {
+    visibleRef.current = visible;
+  }, [visible]);
+
   useEffect(() => {
     paramsRef.current = params;
   }, [params]);
@@ -186,6 +210,12 @@ function AmbientLissajousEffect({ className }: { className?: string }) {
     let lastTime = performance.now();
 
     function animate(now: number) {
+      if (!visibleRef.current) {
+        lastTime = now;
+        rafId = requestAnimationFrame(animate);
+        return;
+      }
+
       const delta = now - lastTime;
       lastTime = now;
       const step = delta / AMBIENT_LISSAJOUS.morphSpeedMs;
@@ -209,17 +239,19 @@ function AmbientLissajousEffect({ className }: { className?: string }) {
   }, []);
 
   return (
-    <LissajousVisualization
-      params={params}
-      nextParams={nextParams}
-      morph={morph}
-      sweepSpeed={AMBIENT_LISSAJOUS.sweepSpeed}
-      trailFade={AMBIENT_LISSAJOUS.trailFade}
-      lineThickness={AMBIENT_LISSAJOUS.lineThickness}
-      zoom={AMBIENT_LISSAJOUS.zoom}
-      colorSoftness={AMBIENT_LISSAJOUS.colorSoftness}
-      className={className}
-    />
+    <div ref={containerRef} className={cn("h-full w-full", className)}>
+      <LissajousVisualization
+        params={params}
+        nextParams={nextParams}
+        morph={morph}
+        sweepSpeed={AMBIENT_LISSAJOUS.sweepSpeed}
+        trailFade={AMBIENT_LISSAJOUS.trailFade}
+        lineThickness={AMBIENT_LISSAJOUS.lineThickness}
+        zoom={AMBIENT_LISSAJOUS.zoom}
+        colorSoftness={AMBIENT_LISSAJOUS.colorSoftness}
+        className="h-full w-full"
+      />
+    </div>
   );
 }
 

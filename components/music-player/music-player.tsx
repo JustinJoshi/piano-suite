@@ -9,7 +9,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useMusicPlayer } from "@/hooks/useMusicPlayer";
+import {
+  useMusicPlayer,
+  useMusicPlayerProgress,
+} from "@/hooks/useMusicPlayer";
 import { useAudioSettings } from "@/hooks/useAudioSettings";
 import { cn } from "@/lib/utils";
 import { Play, Pause, Square, Upload, Volume2, Music2, Piano } from "lucide-react";
@@ -26,7 +29,6 @@ export function MusicPlayer({ className }: { className?: string }) {
     file,
     state,
     isPlaying,
-    progress,
     duration,
     volume,
     error,
@@ -36,6 +38,7 @@ export function MusicPlayer({ className }: { className?: string }) {
     stop,
     setVolume,
   } = useMusicPlayer();
+  const progress = useMusicPlayerProgress();
   const { settings, setMusicEnabled } = useAudioSettings();
 
   const inputRef = useRef<HTMLInputElement>(null);

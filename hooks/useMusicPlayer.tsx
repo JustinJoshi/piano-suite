@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type ReactNode,
@@ -29,7 +30,6 @@ export type MusicPlayerContextValue = {
   file: MusicPlayerFile | null;
   state: MusicPlayerState;
   isPlaying: boolean;
-  progress: number;
   duration: number;
   volume: number;
   error: string | null;
@@ -38,9 +38,16 @@ export type MusicPlayerContextValue = {
   pause: () => void;
   stop: () => void;
   setVolume: (v: number) => void;
+  subscribeProgress: (callback: () => void) => () => void;
 };
 
 const MusicPlayerContext = createContext<MusicPlayerContextValue | null>(null);
+
+// Module-level progress ref so the public subscription hook can read the
+// current playback position without adding progress to the context value.
+// The provider is the only writer; this is safe because MusicPlayerProvider
+// is a global singleton mounted in the root layout.
+const progressRef = { current: 0 };
 
 function getAudioContext(): AudioContext | null {
   if (typeof window === "undefined") return null;
@@ -84,14 +91,17 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
   const [parsed, setParsed] = useState<ParsedMusic | null>(null);
   const [state, setState] = useState<MusicPlayerState>("idle");
   const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolumeState] = useState(0.8);
   const [error, setError] = useState<string | null>(null);
 
-  const progressRef = useRef(0);
+  const progressSubscribersRef = useRef<Set<() => void>>(new Set());
   const volumeRef = useRef(volume);
   const rafRef = useRef<number | null>(null);
+
+  const notifyProgressSubscribers = useCallback(() => {
+    progressSubscribersRef.current.forEach((cb) => cb());
+  }, []);
   const cancelScheduleRef = useRef<(() => void) | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioSourceRef = useRef<MediaElementAudioSourceNode | null>(null);
@@ -100,10 +110,7 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
   const detectorRef = useRef<ReturnType<typeof createPitchDetector> | null>(
     null
   );
-
-  useEffect(() => {
-    progressRef.current = progress;
-  }, [progress]);
+  const fftBufferRef = useRef<Float32Array<ArrayBuffer> | null>(null);
 
   useEffect(() => {
     volumeRef.current = volume;
@@ -174,8 +181,8 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
       setIsPlaying(false);
       setError(null);
       setState("loading");
-      setProgress(0);
       progressRef.current = 0;
+      notifyProgressSubscribers();
       setDuration(0);
       activeNotesRef.current.clear();
 
@@ -219,7 +226,13 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
         setState("error");
       }
     },
-    [cancelAnimationAndSchedule, stopAllActiveNotes, disposeAudio, file]
+    [
+      cancelAnimationAndSchedule,
+      stopAllActiveNotes,
+      disposeAudio,
+      file,
+      notifyProgressSubscribers,
+    ]
   );
 
   const setVolume = useCallback((v: number) => {
@@ -243,13 +256,13 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
 
   const stop = useCallback(() => {
     setIsPlaying(false);
-    setProgress(0);
     progressRef.current = 0;
+    notifyProgressSubscribers();
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
     }
     setState("ready");
-  }, []);
+  }, [notifyProgressSubscribers]);
 
   // Main playback loop. Runs whenever the user hits play and stays alive until
   // pause, stop, or a new file is loaded.
@@ -279,7 +292,10 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
       const analyser = analyserRef.current;
       if (!audio || !analyser) return;
 
-      const buffer = new Float32Array(analyser.fftSize);
+      if (!fftBufferRef.current || fftBufferRef.current.length !== analyser.fftSize) {
+        fftBufferRef.current = new Float32Array(analyser.fftSize);
+      }
+      const buffer = fftBufferRef.current;
       analyser.getFloatTimeDomainData(buffer);
 
       const ctx = getAudioContext();
@@ -312,7 +328,7 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
       if (parsed.kind === "midi") {
         const nextProgress = progressRef.current + 0.016; // ~60fps
         progressRef.current = nextProgress;
-        setProgress(nextProgress);
+        notifyProgressSubscribers();
         if (nextProgress >= duration) {
           cleanup();
           setIsPlaying(false);
@@ -323,7 +339,7 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
         const audio = audioRef.current;
         if (audio) {
           progressRef.current = audio.currentTime;
-          setProgress(audio.currentTime);
+          notifyProgressSubscribers();
           analyseAudioFrame();
           if (audio.ended) {
             cleanup();
@@ -393,7 +409,14 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
 
     start();
     return cleanup;
-  }, [isPlaying, parsed, file, duration, stopAllActiveNotes]);
+  }, [
+    isPlaying,
+    parsed,
+    file,
+    duration,
+    stopAllActiveNotes,
+    notifyProgressSubscribers,
+  ]);
 
   // Cleanup on unmount.
   useEffect(() => {
@@ -407,20 +430,43 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
     };
   }, [cancelAnimationAndSchedule, stopAllActiveNotes, disposeAudio, file?.src]);
 
-  const value: MusicPlayerContextValue = {
-    file,
-    state,
-    isPlaying,
-    progress,
-    duration,
-    volume,
-    error,
-    loadFile,
-    play,
-    pause,
-    stop,
-    setVolume,
-  };
+  const subscribeProgress = useCallback((callback: () => void) => {
+    progressSubscribersRef.current.add(callback);
+    return () => {
+      progressSubscribersRef.current.delete(callback);
+    };
+  }, []);
+
+  const value: MusicPlayerContextValue = useMemo(
+    () => ({
+      file,
+      state,
+      isPlaying,
+      duration,
+      volume,
+      error,
+      loadFile,
+      play,
+      pause,
+      stop,
+      setVolume,
+      subscribeProgress,
+    }),
+    [
+      file,
+      state,
+      isPlaying,
+      duration,
+      volume,
+      error,
+      loadFile,
+      play,
+      pause,
+      stop,
+      setVolume,
+      subscribeProgress,
+    ]
+  );
 
   return (
     <MusicPlayerContext.Provider value={value}>
@@ -437,4 +483,23 @@ export function useMusicPlayer(): MusicPlayerContextValue {
     );
   }
   return ctx;
+}
+
+/**
+ * Subscribe to the music player's playback progress.
+ *
+ * Returns the current progress in seconds and re-renders the caller on every
+ * animation frame while playing, without re-rendering other context consumers.
+ */
+export function useMusicPlayerProgress(): number {
+  const { subscribeProgress } = useMusicPlayer();
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    return subscribeProgress(() => {
+      setProgress(progressRef.current);
+    });
+  }, [subscribeProgress]);
+
+  return progress;
 }
