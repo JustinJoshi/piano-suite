@@ -146,4 +146,60 @@ describe("useAudio", () => {
 
     expect(onBeat).toHaveBeenCalledWith(1);
   });
+
+  it("cycles beats based on the configured beatsPerBar", () => {
+    const { result } = renderHook(() => useAudio());
+    const onBeat = vi.fn();
+
+    act(() => {
+      result.current.startMetronome(60, onBeat, { beatsPerBar: 3 });
+    });
+
+    expect(onBeat).toHaveBeenCalledWith(0);
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(onBeat).toHaveBeenCalledWith(1);
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(onBeat).toHaveBeenCalledWith(2);
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    // Should wrap back to 0 after 3 beats.
+    expect(onBeat).toHaveBeenCalledWith(0);
+  });
+
+  it("accents the first beat when accentFirstBeat is true", () => {
+    const { result } = renderHook(() => useAudio());
+
+    act(() => {
+      result.current.startMetronome(60, undefined, { accentFirstBeat: true });
+    });
+
+    // The first tick is the accented beat.
+    expect(mockCtx.__oscillators[0].frequency.value).toBe(1200);
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    // Subsequent ticks are unaccented.
+    const unaccentedOsc = mockCtx.__oscillators[mockCtx.__oscillators.length - 1];
+    expect(unaccentedOsc.frequency.value).toBe(880);
+  });
+
+  it("does not accent the first beat when accentFirstBeat is false", () => {
+    const { result } = renderHook(() => useAudio());
+
+    act(() => {
+      result.current.startMetronome(60, undefined, { accentFirstBeat: false });
+    });
+
+    expect(mockCtx.__oscillators[0].frequency.value).toBe(880);
+  });
 });

@@ -1,0 +1,76 @@
+import type { LucideIcon } from "lucide-react";
+import type { ComponentType } from "react";
+
+/**
+ * A field descriptor drives the settings form for a feature block.
+ * It is intentionally separate from the validation/normalization logic:
+ * the descriptor says *how* to render the editor, the normalizer says
+ * *what* the data means.
+ */
+export type FieldDescriptor =
+  | {
+      kind: "range";
+      key: string;
+      label: string;
+      min: number;
+      max: number;
+      step?: number;
+      helperText?: string;
+    }
+  | {
+      kind: "select";
+      key: string;
+      label: string;
+      options: { label: string; value: string | number }[];
+      helperText?: string;
+    }
+  | {
+      kind: "toggle";
+      key: string;
+      label: string;
+      helperText?: string;
+    };
+
+export type FeatureCategory =
+  | "rhythm"
+  | "technique"
+  | "theory"
+  | "visualization";
+
+/**
+ * A feature definition is the contract that turns a React component into a
+ * reusable, user-configurable block. The registry is the single source of truth
+ * for both the runtime renderer and the editor palette.
+ */
+export type FeatureDefinition<C extends Record<string, unknown>> = {
+  type: string;
+  category: FeatureCategory;
+  label: string;
+  description: string;
+  icon: LucideIcon;
+  fields: FieldDescriptor[];
+  defaultConfig: C;
+  normalizeConfig: (raw: unknown) => C;
+  component: ComponentType<C>;
+};
+
+/**
+ * Stored instance of a feature inside a custom practice page.
+ */
+export type FeatureBlock = {
+  id: string;
+  type: string;
+  version: number;
+  config: Record<string, unknown>;
+};
+
+/**
+ * A user-created practice page. Stored as JSON in localStorage (Free) or Convex
+ * (Pro / AUTH_DISABLED).
+ */
+export type PracticePage = {
+  id: string;
+  title: string;
+  blocks: FeatureBlock[];
+  updatedAt: number;
+};
