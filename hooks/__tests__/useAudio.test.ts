@@ -158,16 +158,19 @@ describe("useAudio", () => {
     expect(onBeat).toHaveBeenCalledWith(0);
 
     act(() => {
+      mockCtx.advance(1000);
       vi.advanceTimersByTime(1000);
     });
     expect(onBeat).toHaveBeenCalledWith(1);
 
     act(() => {
+      mockCtx.advance(1000);
       vi.advanceTimersByTime(1000);
     });
     expect(onBeat).toHaveBeenCalledWith(2);
 
     act(() => {
+      mockCtx.advance(1000);
       vi.advanceTimersByTime(1000);
     });
     // Should wrap back to 0 after 3 beats.
@@ -185,6 +188,7 @@ describe("useAudio", () => {
     expect(mockCtx.__oscillators[0].frequency.value).toBe(1200);
 
     act(() => {
+      mockCtx.advance(1000);
       vi.advanceTimersByTime(1000);
     });
 
