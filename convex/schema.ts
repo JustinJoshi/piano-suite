@@ -37,6 +37,7 @@ export default defineSchema({
     grade: v.optional(v.string()), // Again | Hard | Good | Easy
     redo: v.boolean(),
     timestamp: v.number(),
+    pageId: v.optional(v.string()), // custom-drill page id when tool === "workshop"
   })
     .index("by_user_tool", ["userId", "tool"])
     .index("by_user_chord", ["userId", "chord"]),
@@ -62,6 +63,7 @@ export default defineSchema({
     toDeg: v.string(),
     played: v.string(),
     timestamp: v.number(),
+    pageId: v.optional(v.string()), // custom-drill page id when tool === "workshop"
   })
     .index("by_user", ["userId"])
     .index("by_user_transition", ["userId", "chord", "fromDeg", "toDeg"]),

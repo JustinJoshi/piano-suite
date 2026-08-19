@@ -159,7 +159,7 @@ export function PracticePageEditor() {
   }, [showPalette]);
 
   return (
-    <DrillRuntimeProvider>
+    <DrillRuntimeProvider pageId={page.id}>
       <div className="mx-auto grid max-w-3xl gap-6 lg:max-w-5xl lg:grid-cols-[1fr_320px]">
         <div className="space-y-4">
           <input
