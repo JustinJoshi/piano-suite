@@ -587,7 +587,7 @@ export function Arpeggios() {
                 />
               </SettingRow>
 
-              <SettingRow label="Break before grading">
+              <SettingRow label="Break before grading" dataTestId="setting-row-break-seconds">
                 <input
                   type="number"
                   min={0}
@@ -595,10 +595,11 @@ export function Arpeggios() {
                   value={breakSeconds}
                   onChange={(e) => setBreakSeconds(parseFloat(e.target.value) || 0)}
                   className="h-8 w-20 rounded-lg border border-border bg-background px-2 text-sm outline-none focus:border-ring"
+                  data-testid="break-seconds-input"
                 />
               </SettingRow>
 
-              <SettingRow label="Break tick sound">
+              <SettingRow label="Break tick sound" dataTestId="setting-row-break-tick-sound">
                 <ToggleGroup
                   value={breakTickSound}
                   onChange={setBreakTickSound}
@@ -609,7 +610,7 @@ export function Arpeggios() {
                 />
               </SettingRow>
 
-              <SettingRow label="Auto-grade">
+              <SettingRow label="Auto-grade" dataTestId="setting-row-auto-grade">
                 <ToggleGroup
                   value={autoGrade}
                   onChange={setAutoGrade}

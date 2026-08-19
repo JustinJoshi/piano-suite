@@ -115,8 +115,8 @@ export function ChordDrillPanel() {
   }
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
-      <Card className="h-fit max-h-[640px] overflow-y-auto">
+    <div className="grid gap-4 lg:grid-cols-[280px_1fr]" data-testid="tracking-panel">
+      <Card className="h-fit max-h-[640px] overflow-y-auto" data-testid="tracking-list">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
             Chords
@@ -147,7 +147,7 @@ export function ChordDrillPanel() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card data-testid="tracking-chart">
         <CardHeader className="pb-2">
           <CardTitle className="font-heading text-lg">{activeChord ?? "—"}</CardTitle>
           <CardDescription>
