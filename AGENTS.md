@@ -52,6 +52,10 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `hooks/useHeroMultigridSettings.ts` | Home Multigrid appearance (localStorage + Convex when Pro) |
 | `lib/multigrid.ts` | De Bruijn multigrid → dual rhombus tiling math |
 | `lib/multigrid-hero-settings.ts` | Serializable home-hero Multigrid appearance |
+| `lib/logo-mark.ts` | Chladni grid → SVG brand-mark geometry, data URLs, favicon export |
+| `lib/logo-mark-settings.ts` | Serializable applied logo mark + presets / normalize / localStorage |
+| `hooks/useLogoMarkSettings.ts` | Applied logo mark; localStorage always; Convex when `canPersist` |
+| `components/brand/*` | `PianoSuiteMark`, `AppliedLogoMark`, `FaviconHost` |
 | `lib/ambient-effects.ts` | Per-route ambient backgrounds + float panel settings, soft viz defaults |
 | `hooks/useAmbientEffects.ts` | `AmbientEffectsProvider` + hook; localStorage always; Convex when `canPersist` |
 | `components/ambient/*` | Root ambient host, renderer, background, float panel |
@@ -370,7 +374,7 @@ npx convex dev
 
 ### Auth / MIDI / chat caveats
 
-- **Manual Clerk sign-in does not work in an automation/headless browser** — it hits a Cloudflare bot CAPTCHA that never resolves. Exercise authenticated flows through the Playwright E2E suite instead (it uses `setupClerkTestingToken` + a backend sign-in token). `/` and `/tools/chladni` (Pattern Lab) are public and need no sign-in — use them for quick manual/UI checks.
+- **Manual Clerk sign-in does not work in an automation/headless browser** — it hits a Cloudflare bot CAPTCHA that never resolves. Exercise authenticated flows through the Playwright E2E suite instead (it uses `setupClerkTestingToken` + a backend sign-in token). `/`, `/tools/chladni` (Pattern Lab), and `/tools/logo-lab` (Logo Lab) are public and need no sign-in — use them for quick manual/UI checks.
 - **MIDI drills** (`chord-drill`, `arpeggios`, `progression`, `root-cycling`, `chladni-ripple`) need Web MIDI hardware, which the VM lacks. For hardware-free verification use the Technique tracker (`/tools/technique`) or the visualization labs (`/tools/chladni`, `/tools/julia`, `/tools/lissajous`, `/tools/quasiperiodic`, `/tools/multigrid`); the E2E specs cover the drills without hardware.
 - **AI chat is not configured.** No `KIMI_CODE_API_KEY` / `KIMI_CODE_BASE_URL` / `KIMI_CODE_MODEL` / `ALLOWED_CLERK_USER_ID` secrets are provided, so `/chat` and `POST /api/chat` will not function until those are added. Everything else runs normally.
 

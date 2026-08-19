@@ -15,6 +15,10 @@ vi.mock("@/components/app-user-button", () => ({
   AppUserButton: () => <div data-testid="app-user-button" />,
 }));
 
+vi.mock("@/components/brand/applied-logo-mark", () => ({
+  AppliedLogoMark: () => <div data-testid="piano-suite-mark" />,
+}));
+
 vi.mock("@/components/tools/dashboard-nav", () => ({
   useDashboardNav: () => ({ open: false, setOpen: vi.fn() }),
 }));
