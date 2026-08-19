@@ -45,9 +45,10 @@ next-env.d.ts
 # clerk configuration (can include secrets)
 /.clerk/
 
-# playwright auth state and test-user tracking
+# playwright auth state, test-user tracking, and generated reports
 /playwright/.clerk/
 /test-results/
+/playwright-report/
 
 # launcher log
 .launcher.log
