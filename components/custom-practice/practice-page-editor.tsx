@@ -9,6 +9,7 @@ import { getFeatureDefinition } from "@/lib/feature-blocks/registry";
 import { FeaturePalette } from "@/components/custom-practice/feature-palette";
 import { FeatureSettingsPanel } from "@/components/custom-practice/feature-settings-panel";
 import { SortableBlockList } from "@/components/custom-practice/sortable-block-list";
+import { DrillRuntimeProvider } from "@/components/custom-practice/drill-runtime-provider";
 import {
   getPracticePage,
   setPracticePage,
@@ -158,66 +159,68 @@ export function PracticePageEditor() {
   }, [showPalette]);
 
   return (
-    <div className="mx-auto grid max-w-3xl gap-6 lg:max-w-5xl lg:grid-cols-[1fr_320px]">
-      <div className="space-y-4">
-        <input
-          type="text"
-          value={page.title}
-          onChange={(e) =>
-            updatePage((prev) => ({ ...prev, title: e.target.value }))
-          }
-          className="w-full bg-transparent text-2xl font-semibold tracking-tight text-foreground outline-none placeholder:text-muted-foreground"
-          placeholder="Untitled practice page"
-        />
-
-        {page.blocks.length === 0 ? (
-          <div
-            className={cn(
-              "rounded-xl border border-dashed border-border bg-card p-10 text-center"
-            )}
-          >
-            <p className="mb-4 text-muted-foreground">
-              This page is empty. Add your first feature to start practicing.
-            </p>
-            <Button onClick={() => openPalette()}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add feature
-            </Button>
-          </div>
-        ) : (
-          <SortableBlockList
-            blocks={page.blocks}
-            selectedBlockId={selectedBlockId}
-            onSelect={setSelectedBlockId}
-            onReorder={handleReorder}
-            onMoveUp={(id) => moveBlock(id, "up")}
-            onMoveDown={(id) => moveBlock(id, "down")}
-            onDuplicate={duplicateBlock}
-            onRemove={removeBlock}
-            onInsertAtIndex={openPalette}
+    <DrillRuntimeProvider>
+      <div className="mx-auto grid max-w-3xl gap-6 lg:max-w-5xl lg:grid-cols-[1fr_320px]">
+        <div className="space-y-4">
+          <input
+            type="text"
+            value={page.title}
+            onChange={(e) =>
+              updatePage((prev) => ({ ...prev, title: e.target.value }))
+            }
+            className="w-full bg-transparent text-2xl font-semibold tracking-tight text-foreground outline-none placeholder:text-muted-foreground"
+            placeholder="Untitled practice page"
           />
-        )}
 
-        {showPalette ? (
-          <FeaturePalette
-            onSelect={addBlock}
-            onCancel={closePalette}
-          />
-        ) : null}
+          {page.blocks.length === 0 ? (
+            <div
+              className={cn(
+                "rounded-xl border border-dashed border-border bg-card p-10 text-center"
+              )}
+            >
+              <p className="mb-4 text-muted-foreground">
+                This page is empty. Add your first feature to start practicing.
+              </p>
+              <Button onClick={() => openPalette()}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add feature
+              </Button>
+            </div>
+          ) : (
+            <SortableBlockList
+              blocks={page.blocks}
+              selectedBlockId={selectedBlockId}
+              onSelect={setSelectedBlockId}
+              onReorder={handleReorder}
+              onMoveUp={(id) => moveBlock(id, "up")}
+              onMoveDown={(id) => moveBlock(id, "down")}
+              onDuplicate={duplicateBlock}
+              onRemove={removeBlock}
+              onInsertAtIndex={openPalette}
+            />
+          )}
+
+          {showPalette ? (
+            <FeaturePalette
+              onSelect={addBlock}
+              onCancel={closePalette}
+            />
+          ) : null}
+        </div>
+
+        <div className="space-y-4">
+          {selectedBlock ? (
+            <FeatureSettingsPanel
+              block={selectedBlock}
+              onChange={(config) => updateBlockConfig(selectedBlock.id, config)}
+            />
+          ) : (
+            <div className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">
+              Select a feature to edit its settings.
+            </div>
+          )}
+        </div>
       </div>
-
-      <div className="space-y-4">
-        {selectedBlock ? (
-          <FeatureSettingsPanel
-            block={selectedBlock}
-            onChange={(config) => updateBlockConfig(selectedBlock.id, config)}
-          />
-        ) : (
-          <div className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">
-            Select a feature to edit its settings.
-          </div>
-        )}
-      </div>
-    </div>
+    </DrillRuntimeProvider>
   );
 }
