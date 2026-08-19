@@ -33,14 +33,14 @@ describe("useChladniRipple", () => {
   }
 
   it("starts in the idle pattern", () => {
-    const { result } = renderHook(() => useChladniRipple({}));
+    const { result } = renderHook(() => useChladniRipple({ heldNotes: [] }));
     runFrame();
     expect(result.current.viz.mode).toEqual(IDLE_MODE);
     expect(result.current.viz.activePc).toBeNull();
   });
 
   it("reacts to midi-note-on impulses with held notes", () => {
-    const { result } = renderHook(() => useChladniRipple({}));
+    const { result } = renderHook(() => useChladniRipple({ heldNotes: [] }));
 
     act(() => {
       window.dispatchEvent(
@@ -58,7 +58,7 @@ describe("useChladniRipple", () => {
   });
 
   it("reacts to music-note-on impulses", () => {
-    const { result } = renderHook(() => useChladniRipple({}));
+    const { result } = renderHook(() => useChladniRipple({ heldNotes: [] }));
 
     act(() => {
       window.dispatchEvent(

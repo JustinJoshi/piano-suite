@@ -3,12 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import type { MidiNoteEventDetail } from "@/hooks/useMidi";
 import {
-  mapMidiToChladni,
   normalizeVelocity,
   pruneImpulses,
+  type MidiImpulse,
+} from "@/lib/midi-impulse";
+import {
+  mapMidiToChladni,
   type ChladniRippleControls,
   type ChladniRippleVizState,
-  type MidiImpulse,
   type ModePair,
 } from "@/lib/chladni-ripple";
 
