@@ -27,13 +27,15 @@ function ToggleGroup({
   value,
   onChange,
   options,
+  dataTestId,
 }: {
   value: boolean;
   onChange: (v: boolean) => void;
   options: { label: string; value: boolean }[];
+  dataTestId?: string;
 }) {
   return (
-    <div className="inline-flex rounded-lg border border-border p-1">
+    <div className="inline-flex rounded-lg border border-border p-1" data-testid={dataTestId}>
       {options.map((opt) => (
         <button
           key={opt.label}
@@ -56,13 +58,18 @@ function SettingRow({
   label,
   tooltip,
   children,
+  dataTestId,
 }: {
   label: string;
   tooltip?: string;
   children: React.ReactNode;
+  dataTestId?: string;
 }) {
   return (
-    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+    <div
+      className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+      data-testid={dataTestId}
+    >
       <div className="space-y-0.5">
         <div className="text-sm font-medium">{label}</div>
         {tooltip ? (
@@ -389,6 +396,7 @@ export function Arpeggios() {
           <SettingRow
             label="Flash on Miss"
             tooltip="Briefly flash the target red when a wrong note is played."
+            dataTestId="setting-row-flash-on-miss"
           >
             <ToggleGroup
               value={flashOnMiss}
@@ -403,6 +411,7 @@ export function Arpeggios() {
           <SettingRow
             label="Show LH notes"
             tooltip="Show the left-hand pedal notes for the current chord."
+            dataTestId="setting-row-show-lh-notes"
           >
             <ToggleGroup
               value={showLh}
@@ -417,6 +426,7 @@ export function Arpeggios() {
           <SettingRow
             label="Lap Chime"
             tooltip="Play a short chime each time a full lap is completed."
+            dataTestId="setting-row-lap-chime"
           >
             <ToggleGroup
               value={lapChime}
@@ -445,6 +455,7 @@ export function Arpeggios() {
                     setIgnoredPcs(chord ? autoFilteredPcs(chord) : [])
                   }
                   disabled={!chord}
+                  data-testid="miss-filter-use-chord"
                 >
                   Use chord & sequence
                 </Button>
@@ -453,6 +464,7 @@ export function Arpeggios() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setIgnoredPcs([])}
+                  data-testid="miss-filter-clear"
                 >
                   Clear
                 </Button>
@@ -462,6 +474,7 @@ export function Arpeggios() {
             <SettingRow
               label="Add notes into filter by default"
               tooltip="Always include the current chord's LH pedal and RH sequence notes in the miss filter."
+              dataTestId="setting-row-auto-filter"
             >
               <ToggleGroup
                 value={autoFilter}
@@ -540,7 +553,7 @@ export function Arpeggios() {
             )}
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <SettingRow label="Automatic timer">
+              <SettingRow label="Automatic timer" dataTestId="setting-row-automatic-timer">
                 <ToggleGroup
                   value={autoTimer}
                   onChange={setAutoTimer}
@@ -551,7 +564,7 @@ export function Arpeggios() {
                 />
               </SettingRow>
 
-              <SettingRow label="Hide until go">
+              <SettingRow label="Hide until go" dataTestId="setting-row-hide-until-go">
                 <ToggleGroup
                   value={hideChordUntilGo}
                   onChange={setHideChordUntilGo}
@@ -562,7 +575,7 @@ export function Arpeggios() {
                 />
               </SettingRow>
 
-              <SettingRow label="Countdown seconds">
+              <SettingRow label="Countdown seconds" dataTestId="setting-row-countdown-seconds">
                 <input
                   type="number"
                   min={1}
@@ -570,6 +583,7 @@ export function Arpeggios() {
                   value={countdownSeconds}
                   onChange={(e) => setCountdownSeconds(parseFloat(e.target.value) || 3)}
                   className="h-8 w-20 rounded-lg border border-border bg-background px-2 text-sm outline-none focus:border-ring"
+                  data-testid="countdown-seconds-input"
                 />
               </SettingRow>
 

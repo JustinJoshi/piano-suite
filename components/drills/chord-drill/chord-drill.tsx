@@ -33,13 +33,15 @@ function ToggleGroup({
   value,
   onChange,
   options,
+  dataTestId,
 }: {
   value: boolean;
   onChange: (v: boolean) => void;
   options: { label: string; value: boolean }[];
+  dataTestId?: string;
 }) {
   return (
-    <div className="inline-flex rounded-lg border border-border p-1">
+    <div className="inline-flex rounded-lg border border-border p-1" data-testid={dataTestId}>
       {options.map((opt) => (
         <button
           key={opt.label}
@@ -62,13 +64,18 @@ function SettingRow({
   label,
   tooltip,
   children,
+  dataTestId,
 }: {
   label: string;
   tooltip?: string;
   children: React.ReactNode;
+  dataTestId?: string;
 }) {
   return (
-    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+    <div
+      className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+      data-testid={dataTestId}
+    >
       <div className="space-y-0.5">
         <div className="text-sm font-medium">{label}</div>
         {tooltip ? (
@@ -358,6 +365,7 @@ export function ChordDrill() {
               <button
                 key={m.id}
                 onClick={() => setMode(m.id as typeof mode)}
+                data-testid={`chord-drill-mode-${m.id}`}
                 className={cn(
                   "rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors",
                   mode === m.id
@@ -377,6 +385,7 @@ export function ChordDrill() {
                 <button
                   key={r.pc}
                   onClick={() => setRoot(r)}
+                  data-testid={`chord-drill-root-${r.pc}`}
                   className={cn(
                     "h-8 w-10 rounded-lg border text-sm font-medium transition-colors",
                     root.pc === r.pc
@@ -406,6 +415,7 @@ export function ChordDrill() {
                         <button
                           key={q.suffix}
                           onClick={() => setQualityIdx(globalIdx)}
+                          data-testid={`chord-drill-quality-${q.suffix.replace(/[^a-zA-Z0-9]/g, "")}`}
                           className={cn(
                             "rounded-lg border px-2.5 py-1.5 text-sm font-medium transition-colors",
                             qualityIdx === globalIdx
@@ -582,6 +592,7 @@ export function ChordDrill() {
                 <button
                   key={n}
                   onClick={() => setRepTarget(n)}
+                  data-testid={`chord-drill-rep-target-${n}`}
                   className={cn(
                     "h-8 w-10 rounded-lg border text-sm font-medium transition-colors",
                     repTarget === n
@@ -604,7 +615,11 @@ export function ChordDrill() {
             </div>
           </div>
 
-          <SettingRow label="Chord notes" tooltip="Show or hide the notes in the chord.">
+          <SettingRow
+            label="Chord notes"
+            tooltip="Show or hide the notes in the chord."
+            dataTestId="setting-row-chord-notes"
+          >
             <ToggleGroup
               value={showNotes}
               onChange={setShowNotes}
@@ -618,6 +633,7 @@ export function ChordDrill() {
           <SettingRow
             label="Reveal on finish"
             tooltip="Briefly reveal notes when a round completes."
+            dataTestId="setting-row-reveal-on-finish"
           >
             <ToggleGroup
               value={revealNotesOnFinish}
@@ -632,6 +648,7 @@ export function ChordDrill() {
           <SettingRow
             label="Require exact notes"
             tooltip="Fail if any extra notes are held beyond the target chord."
+            dataTestId="setting-row-require-exact-notes"
           >
             <ToggleGroup
               value={requireExactNotes}
@@ -646,6 +663,7 @@ export function ChordDrill() {
           <SettingRow
             label="Celebrate Good"
             tooltip="Confetti burst when first-chord time beats the Good threshold."
+            dataTestId="setting-row-celebrate-good"
           >
             <ToggleGroup
               value={celebrateGood}
@@ -657,7 +675,11 @@ export function ChordDrill() {
             />
           </SettingRow>
 
-          <SettingRow label="Per-chord reps" tooltip="Assign a custom rep count to any chord.">
+          <SettingRow
+            label="Per-chord reps"
+            tooltip="Assign a custom rep count to any chord."
+            dataTestId="setting-row-per-chord-reps"
+          >
             <div className="flex items-center gap-3" data-testid="per-chord-reps-row">
               <ToggleGroup
                 value={perChordRepsEnabled}
@@ -743,7 +765,7 @@ export function ChordDrill() {
             )}
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <SettingRow label="Automatic timer">
+              <SettingRow label="Automatic timer" dataTestId="setting-row-automatic-timer">
                 <ToggleGroup
                   value={autoTimer}
                   onChange={setAutoTimer}
@@ -754,7 +776,7 @@ export function ChordDrill() {
                 />
               </SettingRow>
 
-              <SettingRow label="Hide until go">
+              <SettingRow label="Hide until go" dataTestId="setting-row-hide-until-go">
                 <ToggleGroup
                   value={hideChordUntilGo}
                   onChange={setHideChordUntilGo}
@@ -776,7 +798,7 @@ export function ChordDrill() {
                 />
               </SettingRow>
 
-              <SettingRow label="Start countdown">
+              <SettingRow label="Start countdown" dataTestId="setting-row-start-countdown">
                 <ToggleGroup
                   value={startCountdownEnabled}
                   onChange={setStartCountdownEnabled}
@@ -809,7 +831,7 @@ export function ChordDrill() {
                 />
               </SettingRow>
 
-              <SettingRow label="Auto-grade">
+              <SettingRow label="Auto-grade" dataTestId="setting-row-auto-grade">
                 <ToggleGroup
                   value={autoGrade}
                   onChange={setAutoGrade}
