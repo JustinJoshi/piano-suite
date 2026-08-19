@@ -21,8 +21,11 @@ describe("useChladniRipple", () => {
   });
 
   function runFrame(now = 100) {
-    const cb = frames[frames.length - 1];
-    if (cb) {
+    // Run all pending animation callbacks so both the shared impulse layer
+    // and the Chladni mapper have a chance to advance.
+    const pending = [...frames];
+    frames.length = 0;
+    for (const cb of pending) {
       act(() => {
         cb(now);
       });
@@ -30,19 +33,14 @@ describe("useChladniRipple", () => {
   }
 
   it("starts in the idle pattern", () => {
-    const { result } = renderHook(() =>
-      useChladniRipple({ heldNotes: [] })
-    );
+    const { result } = renderHook(() => useChladniRipple({}));
     runFrame();
     expect(result.current.viz.mode).toEqual(IDLE_MODE);
     expect(result.current.viz.activePc).toBeNull();
   });
 
   it("reacts to midi-note-on impulses with held notes", () => {
-    const { result, rerender } = renderHook(
-      ({ heldNotes }) => useChladniRipple({ heldNotes }),
-      { initialProps: { heldNotes: [] as number[] } }
-    );
+    const { result } = renderHook(() => useChladniRipple({}));
 
     act(() => {
       window.dispatchEvent(
@@ -50,7 +48,6 @@ describe("useChladniRipple", () => {
           detail: { note: 60, pc: 0, velocity: 100 },
         })
       );
-      rerender({ heldNotes: [60] });
     });
 
     runFrame(50);
@@ -61,7 +58,7 @@ describe("useChladniRipple", () => {
   });
 
   it("reacts to music-note-on impulses", () => {
-    const { result } = renderHook(() => useChladniRipple({ heldNotes: [] }));
+    const { result } = renderHook(() => useChladniRipple({}));
 
     act(() => {
       window.dispatchEvent(

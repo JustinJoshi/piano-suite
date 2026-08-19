@@ -170,7 +170,6 @@ export function ChladniRippleLab() {
   const [ambientMessage, setAmbientMessage] = useState<string | null>(null);
 
   const { viz } = useChladniRipple({
-    heldNotes: midi.heldNotes,
     decayMs: params.decayMs,
     octaveComplexity: params.octaveComplexity,
     baseLineThickness: params.baseLineThickness,
