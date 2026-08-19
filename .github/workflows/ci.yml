@@ -69,9 +69,17 @@ jobs:
           if [ -n "${missing}" ]; then
             echo "E2E secrets missing:${missing}"
             echo "has-secrets=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "has-secrets=true" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+
+          if [[ "${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}" != pk_test_* ]]; then
+            echo "E2E skipped: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is not a Clerk development (pk_test_*) key."
+            echo "Automated Clerk E2E sign-in requires a development instance. Production (pk_live_*) keys will hang or fail bot detection."
+            echo "has-secrets=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "has-secrets=true" >> "$GITHUB_OUTPUT"
 
   e2e:
     runs-on: ubuntu-latest
