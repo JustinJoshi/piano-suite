@@ -20,6 +20,7 @@ import {
   Aperture,
   CreditCard,
   Volume2,
+  Wrench,
   X,
   Fingerprint,
 } from "lucide-react";
@@ -40,6 +41,7 @@ const toolLinks = [
   { name: "Progression", href: "/tools/progression", icon: ArrowRightLeft },
   { name: "Technique", href: "/tools/technique", icon: Timer },
   { name: "Tracking", href: "/tools/tracking", icon: BarChart3 },
+  { name: "Workshop", href: "/tools/workshop", icon: Wrench },
   { name: "Chladni Lab", href: "/tools/chladni", icon: Waves },
   { name: "Chladni Ripple", href: "/tools/chladni-ripple", icon: Activity },
   { name: "Julia Lab", href: "/tools/julia", icon: Sparkles },

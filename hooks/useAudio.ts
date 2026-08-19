@@ -20,6 +20,17 @@ export type MetronomeControls = {
   running: boolean;
 };
 
+export type MetronomeOptions = {
+  /** Number of beats per bar. Defaults to 4. */
+  beatsPerBar?: number;
+  /** Whether the first beat of each bar is accented. Defaults to true. */
+  accentFirstBeat?: boolean;
+  /** Frequency of the accented beat in Hz. Defaults to 1200. */
+  accentFrequency?: number;
+  /** Frequency of unaccented beats in Hz. Defaults to 880. */
+  normalFrequency?: number;
+};
+
 /**
  * Lazy-initialized shared AudioContext.
  *
@@ -133,7 +144,11 @@ export function useAudio() {
   }, []);
 
   const startMetronome = useCallback(
-    (bpm: number, onBeat?: (beat: number) => void): MetronomeControls => {
+    (
+      bpm: number,
+      onBeat?: (beat: number) => void,
+      options: MetronomeOptions = {}
+    ): MetronomeControls => {
       const ctx = getAudioContext();
       if (!ctx) {
         return { start: () => {}, stop: () => {}, running: false };
@@ -142,17 +157,26 @@ export function useAudio() {
       // Stop any existing metronome first.
       stopMetronome();
 
+      const {
+        beatsPerBar = 4,
+        accentFirstBeat = true,
+        accentFrequency = 1200,
+        normalFrequency = 880,
+      } = options;
+
       const beatInterval = 60 / bpm;
       const scheduler = Scheduler(ctx, { lookaheadMs: 25, intervalMs: 25 });
       let nextTime = ctx.currentTime;
       let beat = 0;
+      const maxBeat = Math.max(1, Math.floor(beatsPerBar));
 
       const scheduleNext = () => {
         const currentBeat = beat;
         const currentTime = nextTime;
         scheduler.schedule({ note: 0, time: currentTime }, () => {
+          const isAccent = accentFirstBeat && currentBeat === 0;
           playTone({
-            frequency: currentBeat === 0 ? 1200 : 880,
+            frequency: isAccent ? accentFrequency : normalFrequency,
             duration: 0.08,
             type: "triangle",
             volume: 0.3,
@@ -160,17 +184,31 @@ export function useAudio() {
           });
           onBeat?.(currentBeat);
         });
-        beat = (beat + 1) % 4;
+        beat = (beat + 1) % maxBeat;
         nextTime += beatInterval;
       };
 
-      // Schedule an initial window of beats so the first tick can fire
-      // immediately and several future beats are queued.
-      for (let i = 0; i < 4; i++) {
-        scheduleNext();
-      }
+      // Keep the scheduler queue filled ~500ms ahead so the metronome
+      // continues indefinitely. The refill loop only decides *what* to
+      // schedule; actual playback timing is handled by the scheduler against
+      // AudioContext.currentTime, so this setInterval does not introduce drift.
+      const scheduleWindowSec = 0.5;
+      const scheduleUpTo = (throughTime: number) => {
+        while (nextTime < throughTime) {
+          scheduleNext();
+        }
+      };
 
-      metronomeRef.current = () => scheduler.stop();
+      scheduleUpTo(ctx.currentTime + scheduleWindowSec);
+
+      const refillId = setInterval(() => {
+        scheduleUpTo(ctx.currentTime + scheduleWindowSec);
+      }, 100);
+
+      metronomeRef.current = () => {
+        clearInterval(refillId);
+        scheduler.stop();
+      };
       setMetronomeRunning(true);
 
       return {

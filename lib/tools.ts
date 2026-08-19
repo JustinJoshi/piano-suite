@@ -11,6 +11,7 @@ import {
   Hexagon,
   LayoutGrid,
   Activity,
+  Wrench,
   LucideIcon,
 } from "lucide-react";
 
@@ -69,6 +70,14 @@ export const tools: ToolDef[] = [
       "Review first-chord times, transition times, misses, and streaks over time.",
     icon: BarChart3,
     href: "/tools/tracking",
+    category: "practice",
+  },
+  {
+    title: "Workshop",
+    description:
+      "Build your own practice page from reusable features.",
+    icon: Wrench,
+    href: "/tools/workshop",
     category: "practice",
   },
   {
