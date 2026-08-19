@@ -82,11 +82,21 @@ Clerk + Convex docs recommend **different Clerk instances** for Production vs Pr
 | `ALLOWED_CLERK_USER_ID` | Prod Clerk user id | Dev Clerk user id (or same policy) | Dev user id |
 | `NEXT_PUBLIC_CLERK_SIGN_IN_URL` etc. | `/sign-in`, `/sign-up`, `/` fallbacks | same | optional |
 
+| Variable | GitHub Actions CI |
+|----------|-------------------|
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | `pk_test_…` (dedicated **CI-only** Clerk dev app) |
+| `CLERK_SECRET_KEY` | `sk_test_…` (same CI Clerk dev app) |
+| `NEXT_PUBLIC_CONVEX_URL` | Same production Convex deployment |
+| `E2E_CLERK_USER_EMAIL` / `E2E_CLERK_USER_PASSWORD` | Deterministic test user in the CI Clerk app |
+
 | Convex env | Production deployment | Preview deployments (project default) | Dev deployment |
 |------------|----------------------|----------------------------------------|----------------|
 | `CLERK_FRONTEND_API_URL` | `https://clerk.<your-domain>.com` | `https://<slug>.clerk.accounts.dev` | same as local FAPI |
+| `CLERK_FRONTEND_API_URL_EXTRA` | CI Clerk FAPI (`https://<ci-slug>.clerk.accounts.dev`) | — | CI Clerk FAPI (optional) |
 
 > Convex preview backends are **empty** each time. Set **Project → Environment variable defaults** for the Preview type so every new preview gets the **development** FAPI URL automatically ([Convex env docs](https://docs.convex.dev/production/environment-variables)).
+>
+> CI uses its own Clerk development app so `setupClerkTestingToken()` can bypass bot detection. Production Convex accepts that issuer via `CLERK_FRONTEND_API_URL_EXTRA` (`convex/auth.config.js` parses it as a comma-separated list).
 
 ---
 

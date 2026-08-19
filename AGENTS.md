@@ -110,6 +110,7 @@ Auth helpers live in `convex/lib/auth.ts`. Do not re-implement a local `currentU
 3. **Never throw into a root provider.** `AmbientEffectsProvider` and the theme hooks query Convex from the root layout, so a thrown query error unmounts the entire app. This is exactly what caused the post-login blank page on preview deploys.
 4. **Add `returns` validators** to new public queries and mutations.
 5. **Cover auth edge cases with `convex-test`.** See `convex/__tests__/settings-auth.test.ts` for the no-identity / no-user-row / first-write cases.
+6. **CI uses a separate Clerk development instance.** `convex/auth.config.js` reads `CLERK_FRONTEND_API_URL_EXTRA` as a comma-separated list of additional Clerk issuers so the CI test user can authenticate against the same Convex deployment. Production traffic should use the primary `CLERK_FRONTEND_API_URL`.
 
 ## Naming conventions
 

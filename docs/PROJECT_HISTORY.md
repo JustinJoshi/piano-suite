@@ -206,6 +206,7 @@ Queries must never throw for a signed-in user whose row does not exist yet. `set
    | `NEXT_PUBLIC_AUTH_DISABLED` | `true` opens **every** route without signing in — except on Vercel Production (never honored) and `/api/chat` (always allowlist-gated). Convex saves still need a session. Restart `npm run dev` after changing it — see [the bypass notes](#the-next_public_auth_disabled-bypass) |
    | `NEXT_PUBLIC_CLERK_SIGN_IN_URL` / `_SIGN_UP_URL` / `_FALLBACK_REDIRECT_URL` | Clerk redirect overrides |
    | `CLERK_AUTHORIZED_PARTIES` | Optional comma-separated origins for `clerkMiddleware` `authorizedParties` (recommended on Production after custom-domain cutover; see [`docs/phase-a-auth-cutover-plan.md`](docs/phase-a-auth-cutover-plan.md)) |
+   | `CLERK_FRONTEND_API_URL_EXTRA` | Comma-separated extra Clerk Frontend API URLs Convex should accept; use this so a dedicated **CI Clerk dev app** can authenticate against the same Convex deployment |
    | `E2E_CLERK_USER_EMAIL` / `E2E_CLERK_USER_PASSWORD` | Playwright test user (required to run E2E; password ≥ 8 chars) |
    | `E2E_ALLOW_AUTH_DISABLED` | skips the E2E guard that refuses to run with the bypass on |
 
@@ -356,6 +357,8 @@ End-to-end tests run with Playwright. A deterministic test user is created autom
 Make sure the **Convex dev server is running** before starting tests, because the authenticated tracking tests hit the local Convex backend.
 
 **Auth verification e2e** requires `NEXT_PUBLIC_AUTH_DISABLED` to be **unset** (not `true`), because these specs assert real Clerk gating. Global setup fails fast if the bypass is on unless `E2E_ALLOW_AUTH_DISABLED=true`.
+
+**CI E2E** uses a dedicated Clerk **development** instance so `setupClerkTestingToken()` can bypass bot detection. The production Convex deployment accepts that CI issuer via `CLERK_FRONTEND_API_URL_EXTRA`. See [`docs/phase-a-auth-cutover-plan.md`](docs/phase-a-auth-cutover-plan.md) for the env matrix.
 
 | Spec | Asserts |
 |------|---------|
