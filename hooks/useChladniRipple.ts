@@ -1,12 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { MidiNoteEventDetail } from "@/hooks/useMidi";
-import {
-  normalizeVelocity,
-  pruneImpulses,
-  type MidiImpulse,
-} from "@/lib/midi-impulse";
+import { useMidiImpulses } from "@/hooks/useMidiImpulses";
 import {
   mapMidiToChladni,
   type ChladniRippleControls,
@@ -36,7 +31,6 @@ function vizStatesEqual(
 }
 
 export type UseChladniRippleOptions = {
-  heldNotes: readonly number[];
   decayMs?: number;
   octaveComplexity?: number;
   baseLineThickness?: number;
@@ -53,16 +47,18 @@ export type UseChladniRippleResult = {
 
 /**
  * Drive Chladni viz props from MIDI held notes + decaying note-on impulses.
- * Listens to window `midi-note-on` for velocity; parent supplies `heldNotes`
- * from `useMidi`.
+ * Uses the shared `useMidiImpulses` foundation so the lab reacts to both
+ * live MIDI and uploaded songs, and skips React state updates when the
+ * computed viz state is unchanged.
  */
 export function useChladniRipple({
-  heldNotes,
   decayMs = 1200,
   octaveComplexity = 0.35,
   baseLineThickness = 28,
   baseIntensity = 0.45,
 }: UseChladniRippleOptions): UseChladniRippleResult {
+  const { heldNotes, impulses } = useMidiImpulses({ decayMs });
+
   const [viz, setViz] = useState<ChladniRippleVizState>(() =>
     mapMidiToChladni([], [], performance.now(), {
       decayMs,
@@ -72,8 +68,8 @@ export function useChladniRipple({
     })
   );
 
-  const impulsesRef = useRef<MidiImpulse[]>([]);
   const heldNotesRef = useRef(heldNotes);
+  const impulsesRef = useRef(impulses);
   const controlsRef = useRef({
     decayMs,
     octaveComplexity,
@@ -86,6 +82,10 @@ export function useChladniRipple({
   }, [heldNotes]);
 
   useEffect(() => {
+    impulsesRef.current = impulses;
+  }, [impulses]);
+
+  useEffect(() => {
     controlsRef.current = {
       decayMs,
       octaveComplexity,
@@ -95,48 +95,14 @@ export function useChladniRipple({
   }, [decayMs, octaveComplexity, baseLineThickness, baseIntensity]);
 
   useEffect(() => {
-    const onNoteOn = (event: Event) => {
-      const detail = (event as CustomEvent<MidiNoteEventDetail>).detail;
-      if (!detail) return;
-      const now = performance.now();
-      impulsesRef.current = pruneImpulses(
-        [
-          ...impulsesRef.current,
-          {
-            note: detail.note,
-            pc: detail.pc,
-            velocity: normalizeVelocity(detail.velocity),
-            bornAt: now,
-          },
-        ],
-        now,
-        controlsRef.current.decayMs
-      );
-    };
-
-    window.addEventListener("midi-note-on", onNoteOn);
-    window.addEventListener("music-note-on", onNoteOn);
-    return () => {
-      window.removeEventListener("midi-note-on", onNoteOn);
-      window.removeEventListener("music-note-on", onNoteOn);
-    };
-  }, []);
-
-  useEffect(() => {
     let rafId = 0;
 
     const tick = (now: number) => {
-      const controls = controlsRef.current;
-      impulsesRef.current = pruneImpulses(
-        impulsesRef.current,
-        now,
-        controls.decayMs
-      );
       const nextViz = mapMidiToChladni(
         heldNotesRef.current,
         impulsesRef.current,
         now,
-        controls
+        controlsRef.current
       );
       setViz((current) =>
         vizStatesEqual(current, nextViz) ? current : nextViz

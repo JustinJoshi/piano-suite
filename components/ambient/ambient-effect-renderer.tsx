@@ -11,7 +11,6 @@ import { randomRatio, type LissajousParams } from "@/lib/lissajous";
 import { useChladniRipple } from "@/hooks/useChladniRipple";
 import { useAmbientEffects } from "@/hooks/useAmbientEffects";
 import { useExperimentalFeatures } from "@/hooks/useExperimentalFeatures";
-import { useMidi } from "@/hooks/useMidi";
 import { useHeroChladniSettings } from "@/hooks/useHeroChladniSettings";
 import { useHeroQuasiperiodicSettings } from "@/hooks/useHeroQuasiperiodicSettings";
 import { useHeroMultigridSettings } from "@/hooks/useHeroMultigridSettings";
@@ -58,9 +57,7 @@ function AmbientRippleEffect({
   resolutionScale?: number;
 }) {
   const { settings } = useAmbientEffects();
-  const { heldNotes } = useMidi();
   const { viz } = useChladniRipple({
-    heldNotes,
     decayMs: settings.ripple.decayMs,
     octaveComplexity: settings.ripple.octaveComplexity,
     baseLineThickness: settings.ripple.baseLineThickness,
