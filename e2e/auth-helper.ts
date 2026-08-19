@@ -1,5 +1,5 @@
 import { Page } from "@playwright/test";
-import { clerk, setupClerkTestingToken } from "@clerk/testing/playwright";
+import { clerk } from "@clerk/testing/playwright";
 import { ONBOARDING_STORAGE_KEY } from "@/lib/onboarding";
 
 const E2E_CLERK_USER_EMAIL =
@@ -13,13 +13,17 @@ const E2E_CLERK_USER_EMAIL =
  * by Convex. This is required for SSR/Edge auth; the client-side-only
  * `signInParams` approach would not pass server-side checks.
  *
- * This helper also bypasses Clerk's bot detection with a testing token, and
- * marks the `/tools` onboarding flow as completed in localStorage so existing
- * specs are not blocked by the fullscreen overlay. Specs that explicitly test
- * onboarding can still force it with `?onboarding=reset`.
+ * We intentionally do NOT call `setupClerkTestingToken()` here. That helper is
+ * only valid for Clerk development instances and silently no-ops (or breaks)
+ * on production (`pk_live_*`) keys. The backend sign-in token used by
+ * `clerk.signIn()` is instance-agnostic, so we rely on it alone and accept the
+ * bot-detection risk in CI.
+ *
+ * This helper also marks the `/tools` onboarding flow as completed in
+ * localStorage so existing specs are not blocked by the fullscreen overlay.
+ * Specs that explicitly test onboarding can still force it with `?onboarding=reset`.
  */
 export async function signInAsTestUser(page: Page) {
-  await setupClerkTestingToken({ page });
   await page.goto("/");
   await clerk.signIn({ page, emailAddress: E2E_CLERK_USER_EMAIL });
   await page.evaluate((key) => {
