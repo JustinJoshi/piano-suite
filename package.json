@@ -13,6 +13,9 @@
     "test:unit:run": "vitest run",
     "test:coverage": "vitest run --coverage"
   },
+  "engines": {
+    "node": ">=22"
+  },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.20",
     "@ai-sdk/react": "^4.0.62",
