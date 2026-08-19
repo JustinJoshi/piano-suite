@@ -1,67 +1,70 @@
 import { test, expect } from "@playwright/test";
 import { signInAsTestUser } from "./auth-helper";
+import { ChordDrillPage } from "./pom/chord-drill-page";
 
 test.describe("Chord Drill (authenticated)", () => {
   test.beforeEach(async ({ page }) => {
     await signInAsTestUser(page);
-    await page.goto("/tools/chord-drill");
-    await page.waitForSelector("[data-testid='chord-drill']", { timeout: 20000 });
   });
 
   test("loads the chord drill page", async ({ page }) => {
-    await expect(page.getByRole("heading", { name: "Chord Drill" })).toBeVisible();
-    await expect(page.getByTestId("chord-drill")).toBeVisible();
-    await expect(page.getByTestId("chord-symbol")).toHaveText("Cmaj7");
+    const drill = new ChordDrillPage(page);
+    await drill.goto();
+    await drill.expectLoaded();
+    await drill.expectSymbol("Cmaj7");
   });
 
   test("can change mode, root, and quality", async ({ page }) => {
-    await page.getByRole("button", { name: "Family Cycle" }).click();
-    await expect(page.getByTestId("chord-symbol")).toContainText("maj7");
+    const drill = new ChordDrillPage(page);
+    await drill.goto();
 
-    await page.getByRole("button", { name: "G", exact: true }).click();
-    await expect(page.getByTestId("chord-symbol")).toContainText("G");
+    await drill.selectMode("family");
+    const familySymbol = await drill.getSymbol();
+    await expect(familySymbol).toContain("maj7");
 
-    await page.getByRole("button", { name: "Single Shape" }).click();
-    await page.getByRole("button", { name: "m7", exact: true }).first().click();
-    await expect(page.getByTestId("chord-symbol")).toHaveText("Gm7");
+    await drill.selectRoot(7); // G
+    const rootSymbol = await drill.getSymbol();
+    await expect(rootSymbol).toContain("G");
+
+    await drill.selectMode("single");
+    await drill.selectQuality("m7");
+    await drill.expectSymbol("Gm7");
   });
 
   test("toggling chord notes visibility", async ({ page }) => {
-    const notes = page.getByTestId("chord-notes");
-    await expect(notes).toHaveClass(/opacity-0/);
+    const drill = new ChordDrillPage(page);
+    await drill.goto();
 
-    await page.getByRole("button", { name: "Show" }).first().click();
-    await expect(notes).not.toHaveClass(/opacity-0/);
-    await expect(notes).toContainText("G");
+    await drill.expectNotesHidden();
+    await drill.toggleChordNotes(true);
+    await drill.expectNotesVisible();
   });
 
-  test("start is disabled without MIDI and enabled after connect attempt", async ({ page }) => {
-    // Web MIDI may not be available in the test browser, so the start button
-    // either stays disabled or reflects the unsupported state.
-    const startBtn = page.getByTestId("start-drill-btn");
-    await expect(startBtn).toBeVisible();
+  test("start button is visible", async ({ page }) => {
+    const drill = new ChordDrillPage(page);
+    await drill.goto();
+    await expect(drill.locator("start-drill-btn")).toBeVisible();
   });
 
   test("rep target custom input", async ({ page }) => {
-    const input = page.getByTestId("rep-custom-input");
-    await input.fill("16");
-    await input.blur();
-    await expect(input).toHaveValue("16");
+    const drill = new ChordDrillPage(page);
+    await drill.goto();
+    await drill.setCustomRepTarget(16);
   });
 
   test("shuffle picks a different chord", async ({ page }) => {
-    const before = await page.getByTestId("chord-symbol").textContent();
-    await page.getByTestId("shuffle-btn").click();
-    const after = await page.getByTestId("chord-symbol").textContent();
+    const drill = new ChordDrillPage(page);
+    await drill.goto();
+    const before = await drill.getSymbol();
+    await drill.shuffle();
+    const after = await drill.getSymbol();
     expect(after).not.toEqual(before);
   });
 
   test("per-chord reps modal opens and closes", async ({ page }) => {
-    const perChordRow = page.getByTestId("per-chord-reps-row");
-    await perChordRow.getByRole("button", { name: "On", exact: true }).click();
-    await page.getByTestId("manage-per-chord-reps-btn").click();
-    await expect(page.getByTestId("per-chord-reps-modal")).toBeVisible();
-    await page.getByRole("button", { name: "Save" }).click();
-    await expect(page.getByTestId("per-chord-reps-modal")).toBeHidden();
+    const drill = new ChordDrillPage(page);
+    await drill.goto();
+    await drill.openPerChordReps();
+    await drill.savePerChordReps();
   });
 });
