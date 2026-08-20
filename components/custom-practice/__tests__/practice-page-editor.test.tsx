@@ -2,9 +2,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { PracticePageEditor } from "@/components/custom-practice/practice-page-editor";
 import {
-  resetPracticePage,
-  setPracticePage,
+  resetPracticePageStore,
+  setPracticePageStore,
   createEmptyPracticePage,
+  createEmptyPracticePageStore,
 } from "@/lib/custom-practice-storage";
 
 vi.mock("@/hooks/useAuthAccess", () => ({
@@ -56,7 +57,7 @@ function createMockAudioContext() {
 
 describe("PracticePageEditor", () => {
   beforeEach(() => {
-    resetPracticePage();
+    resetPracticePageStore();
     vi.stubGlobal("AudioContext", vi.fn(createMockAudioContext));
     let uuidCount = 0;
     vi.stubGlobal("crypto", {
@@ -66,8 +67,17 @@ describe("PracticePageEditor", () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
-    resetPracticePage();
+    resetPracticePageStore();
   });
+
+  function seedWithPage(page = createEmptyPracticePage()) {
+    setPracticePageStore({
+      ...createEmptyPracticePageStore(),
+      pages: [page],
+      activePageId: page.id,
+    });
+    return page;
+  }
 
   it("renders an empty page with an add feature CTA", () => {
     render(<PracticePageEditor />);
@@ -98,8 +108,7 @@ describe("PracticePageEditor", () => {
   });
 
   it("inserts a block at the top placeholder", async () => {
-    const page = createEmptyPracticePage();
-    setPracticePage(page);
+    seedWithPage();
 
     render(<PracticePageEditor />);
 
@@ -118,8 +127,7 @@ describe("PracticePageEditor", () => {
   });
 
   it("duplicates a block from the hover toolbar", async () => {
-    const page = createEmptyPracticePage();
-    setPracticePage(page);
+    seedWithPage();
 
     render(<PracticePageEditor />);
 
@@ -144,8 +152,7 @@ describe("PracticePageEditor", () => {
   });
 
   it("removes a block from the hover toolbar", async () => {
-    const page = createEmptyPracticePage();
-    setPracticePage(page);
+    seedWithPage();
 
     render(<PracticePageEditor />);
 
@@ -167,5 +174,102 @@ describe("PracticePageEditor", () => {
     await waitFor(() => {
       expect(screen.queryByTestId("bpm-display")).not.toBeInTheDocument();
     });
+  });
+
+  it("creates a new page from the switcher and switches between pages", async () => {
+    const first = seedWithPage(
+      createEmptyPracticePage("Warmup")
+    );
+
+    render(<PracticePageEditor />);
+
+    // Rename happens via the title input; add a block to the first page so
+    // the two pages are visibly different.
+    fireEvent.click(screen.getByRole("button", { name: /add feature/i }));
+    fireEvent.click(screen.getByText("Metronome"));
+    await waitFor(() => {
+      expect(screen.getByTestId("bpm-display")).toBeInTheDocument();
+    });
+
+    // Create a second page.
+    fireEvent.click(screen.getByRole("button", { name: /new page/i }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("This page is empty. Add your first feature to start practicing.")
+      ).toBeInTheDocument();
+    });
+
+    const titleInput = screen.getByPlaceholderText(
+      "Untitled practice page"
+    ) as HTMLInputElement;
+    expect(titleInput.value).toBe("My Practice Page");
+
+    // Switch back to the first page via the select.
+    const select = screen.getByLabelText("Practice page") as HTMLSelectElement;
+    fireEvent.change(select, { target: { value: first.id } });
+
+    await waitFor(() => {
+      expect(screen.getByTestId("bpm-display")).toBeInTheDocument();
+    });
+  });
+
+  it("duplicates the current page from the switcher", async () => {
+    const page = seedWithPage(createEmptyPracticePage("Scales"));
+    // Give it a block so duplication has something to copy.
+    setPracticePageStore({
+      version: 2,
+      pages: [
+        {
+          ...page,
+          blocks: [
+            { id: "block-1", type: "metronome", version: 1, config: { bpm: 120 } },
+          ],
+        },
+      ],
+      activePageId: page.id,
+    });
+
+    render(<PracticePageEditor />);
+
+    fireEvent.click(screen.getByRole("button", { name: /duplicate page/i }));
+
+    await waitFor(() => {
+      const select = screen.getByLabelText(
+        "Practice page"
+      ) as HTMLSelectElement;
+      expect(select.selectedOptions[0]?.textContent).toContain("Scales (copy)");
+    });
+
+    expect(screen.getByTestId("bpm-display")).toBeInTheDocument();
+  });
+
+  it("deletes the current page after confirmation", () => {
+    const a = createEmptyPracticePage("Warmup");
+    const b = createEmptyPracticePage("Scales");
+    setPracticePageStore({
+      version: 2,
+      pages: [a, b],
+      activePageId: b.id,
+    });
+    window.confirm = vi.fn(() => true);
+
+    render(<PracticePageEditor />);
+
+    fireEvent.click(screen.getByRole("button", { name: /delete page/i }));
+
+    const select = screen.getByLabelText("Practice page") as HTMLSelectElement;
+    expect(select.selectedOptions[0]?.textContent).toContain("Warmup");
+    expect(select.options).toHaveLength(1);
+  });
+
+  it("disables delete when only one page remains", () => {
+    seedWithPage();
+
+    render(<PracticePageEditor />);
+
+    expect(
+      screen.getByRole("button", { name: /delete page/i })
+    ).toBeDisabled();
   });
 });
