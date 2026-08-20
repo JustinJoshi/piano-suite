@@ -9,21 +9,30 @@ import { getFeatureDefinition } from "@/lib/feature-blocks/registry";
 import { FeaturePalette } from "@/components/custom-practice/feature-palette";
 import { FeatureSettingsPanel } from "@/components/custom-practice/feature-settings-panel";
 import { SortableBlockList } from "@/components/custom-practice/sortable-block-list";
+import { PageSwitcher } from "@/components/custom-practice/page-switcher";
 import { DrillRuntimeProvider } from "@/components/custom-practice/drill-runtime-provider";
 import {
-  getPracticePage,
-  setPracticePage,
-  subscribePracticePage,
-  getServerPracticePage,
+  getPracticePageStore,
+  setPracticePageStore,
+  subscribePracticePageStore,
+  getServerPracticePageStore,
+  getActivePage,
+  setActivePageId,
+  upsertPracticePage,
+  deletePracticePage,
+  duplicatePracticePage,
+  createPracticePageInStore,
   generateId,
 } from "@/lib/custom-practice-storage";
 
 export function PracticePageEditor() {
-  const page = useSyncExternalStore(
-    subscribePracticePage,
-    getPracticePage,
-    getServerPracticePage
+  const store = useSyncExternalStore(
+    subscribePracticePageStore,
+    getPracticePageStore,
+    getServerPracticePageStore
   );
+
+  const page = useMemo(() => getActivePage(store), [store]);
 
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [showPalette, setShowPalette] = useState(false);
@@ -34,8 +43,40 @@ export function PracticePageEditor() {
     [page.blocks, selectedBlockId]
   );
 
+  // Drop block selection when the active page changes so the settings panel
+  // never edits a block that is no longer on screen. Adjusting state during
+  // render (guarded by a previous-id check) avoids a cascading effect.
+  const [lastPageId, setLastPageId] = useState(page.id);
+  if (page.id !== lastPageId) {
+    setLastPageId(page.id);
+    setSelectedBlockId(null);
+    setInsertIndex(null);
+    setShowPalette(false);
+  }
+
   function updatePage(updater: (prev: PracticePage) => PracticePage) {
-    setPracticePage(updater(page));
+    setPracticePageStore(upsertPracticePage(store, updater(page)));
+  }
+
+  function switchPage(pageId: string) {
+    setPracticePageStore(setActivePageId(store, pageId));
+  }
+
+  function createPage() {
+    setPracticePageStore(createPracticePageInStore(store));
+  }
+
+  function duplicatePage() {
+    setPracticePageStore(duplicatePracticePage(store, page.id));
+  }
+
+  function removePage() {
+    if (store.pages.length <= 1) return;
+    const confirmed = window.confirm(
+      `Delete "${page.title.trim() === "" ? "Untitled" : page.title}"? Its practice history is kept.`
+    );
+    if (!confirmed) return;
+    setPracticePageStore(deletePracticePage(store, page.id));
   }
 
   function openPalette(atIndex?: number) {
@@ -162,6 +203,14 @@ export function PracticePageEditor() {
     <DrillRuntimeProvider pageId={page.id}>
       <div className="mx-auto grid max-w-3xl gap-6 lg:max-w-5xl lg:grid-cols-[1fr_320px]">
         <div className="space-y-4">
+          <PageSwitcher
+            store={store}
+            onSelect={switchPage}
+            onCreate={createPage}
+            onDuplicate={duplicatePage}
+            onDelete={removePage}
+          />
+
           <input
             type="text"
             value={page.title}
