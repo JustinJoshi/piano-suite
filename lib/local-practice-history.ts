@@ -11,6 +11,8 @@ export const LOCAL_TRACKING_KEYS = {
   arpeggioMiss: "blocked-drill-arpeggio-miss-log",
   rootCycle: "blocked-drill-rootcycle-log",
   progression: "piano-suite-progression-log-v1",
+  workshop: "piano-suite-workshop-log-v1",
+  workshopMiss: "piano-suite-workshop-miss-log-v1",
 } as const;
 
 export const LOCAL_TECHNIQUE_KEY = "technique-habit-log-v1";
@@ -57,6 +59,24 @@ export type LocalProgressionEvent = {
   stepLabel: string;
   chord: string;
   ms: number;
+  ts: number;
+};
+
+export type LocalWorkshopEvent = {
+  id: string;
+  pageId: string;
+  target: string;
+  ms: number;
+  grade?: string | null;
+  misses: number;
+  ts: number;
+};
+
+export type LocalWorkshopMissEvent = {
+  id: string;
+  pageId: string;
+  target: string;
+  played: string;
   ts: number;
 };
 
@@ -210,6 +230,99 @@ export function appendLocalProgressionEvent(args: {
     ts: Date.now(),
   });
   writeArray(LOCAL_TRACKING_KEYS.progression, rows);
+}
+
+export function appendLocalWorkshopEvent(args: {
+  pageId: string;
+  target: string;
+  reactionTimeMs: number;
+  misses: number;
+  grade?: string;
+}): string {
+  const id = newId();
+  const rows = readArray<LocalWorkshopEvent>(LOCAL_TRACKING_KEYS.workshop);
+  rows.push({
+    id,
+    pageId: args.pageId,
+    target: args.target,
+    ms: args.reactionTimeMs,
+    misses: args.misses,
+    grade: args.grade ?? null,
+    ts: Date.now(),
+  });
+  writeArray(LOCAL_TRACKING_KEYS.workshop, rows);
+  return id;
+}
+
+export function appendLocalWorkshopMiss(args: {
+  pageId: string;
+  target: string;
+  played: string;
+}): void {
+  const rows = readArray<LocalWorkshopMissEvent>(LOCAL_TRACKING_KEYS.workshopMiss);
+  rows.push({
+    id: newId(),
+    pageId: args.pageId,
+    target: args.target,
+    played: args.played,
+    ts: Date.now(),
+  });
+  writeArray(LOCAL_TRACKING_KEYS.workshopMiss, rows);
+}
+
+export function listLocalWorkshopEvents(): Array<{
+  _id: string;
+  pageId: string;
+  chord: string;
+  reactionTimeMs: number;
+  grade?: string;
+  misses: number;
+  redo: boolean;
+  timestamp: number;
+}> {
+  return readArray<LocalWorkshopEvent>(LOCAL_TRACKING_KEYS.workshop).map((e) => ({
+    _id: e.id ?? `local_ws_${e.ts}_${e.target}`,
+    pageId: e.pageId,
+    chord: e.target,
+    reactionTimeMs: e.ms,
+    grade: e.grade ?? undefined,
+    misses: e.misses,
+    redo: false,
+    timestamp: e.ts,
+  }));
+}
+
+export function listLocalWorkshopMissEvents(): Array<{
+  _id: string;
+  pageId: string;
+  chord: string;
+  played: string;
+  timestamp: number;
+}> {
+  return readArray<LocalWorkshopMissEvent>(LOCAL_TRACKING_KEYS.workshopMiss).map(
+    (e) => ({
+      _id: e.id ?? `local_ws_miss_${e.ts}_${e.target}`,
+      pageId: e.pageId,
+      chord: e.target,
+      played: e.played,
+      timestamp: e.ts,
+    })
+  );
+}
+
+export function clearLocalWorkshopByPage(pageId: string): void {
+  writeArray(
+    LOCAL_TRACKING_KEYS.workshop,
+    readArray<LocalWorkshopEvent>(LOCAL_TRACKING_KEYS.workshop).filter(
+      (e) => e.pageId !== pageId
+    )
+  );
+  writeArray(
+    LOCAL_TRACKING_KEYS.workshopMiss,
+    readArray<LocalWorkshopMissEvent>(LOCAL_TRACKING_KEYS.workshopMiss).filter(
+      (e) => e.pageId !== pageId
+    )
+  );
 }
 
 export function listLocalChordDrillEvents(): LocalTrackingChordRow[] {
@@ -397,6 +510,8 @@ export function localTrackingEventCount(): number {
     readArray(LOCAL_TRACKING_KEYS.arpeggio).length +
     readArray(LOCAL_TRACKING_KEYS.arpeggioMiss).length +
     readArray(LOCAL_TRACKING_KEYS.rootCycle).length +
-    readArray(LOCAL_TRACKING_KEYS.progression).length
+    readArray(LOCAL_TRACKING_KEYS.progression).length +
+    readArray(LOCAL_TRACKING_KEYS.workshop).length +
+    readArray(LOCAL_TRACKING_KEYS.workshopMiss).length
   );
 }
