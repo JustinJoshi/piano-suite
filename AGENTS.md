@@ -85,6 +85,12 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `app/dev/welcome-lab/page.tsx` | Interactive lab for tuning welcome copy and style tokens |
 | `lib/dev-tools.ts` | Environment helpers for `/dev/*` pages and links (currently always enabled) |
 | `components/dev-tools-link.tsx` | Floating link to the dev lab |
+| `lib/feature-blocks/*` | Workshop feature-block registry, types, and per-block config schemas + editor field descriptors |
+| `components/feature-blocks/*` | Feature-block render components (metronome, drill timer, chord set) |
+| `components/custom-practice/*` | Workshop practice-page editor: sortable block list, feature palette (`/` shortcut), settings panel, `DrillRuntimeProvider` |
+| `lib/custom-practice-storage.ts` | `localStorage` persistence for custom practice pages (Free tier) |
+| `lib/drill-runtime.ts` / `hooks/useDrillRuntime.ts` | Shared drill runtime context (countdown → armed → timing → success → break → finished) driving workshop blocks; logs events to Convex (Pro) or local history (Free) |
+| `hooks/useChordTargets.ts` | Sequential / random chord-target generation from selected roots and quality groups |
 
 ## Welcome / onboarding conventions
 
