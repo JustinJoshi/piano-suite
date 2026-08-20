@@ -1,5 +1,5 @@
-import { ROOTS, QUALITY_GROUPS } from "@/lib/music-theory";
-import type { FieldDescriptor } from "@/lib/feature-blocks/types";
+import { ROOTS, QUALITY_GROUPS } from "../../music-theory";
+import type { FieldDescriptor } from "../types";
 
 export type ChordSetConfig = {
   roots: string[];

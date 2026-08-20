@@ -10,6 +10,8 @@ import { FeaturePalette } from "@/components/custom-practice/feature-palette";
 import { FeatureSettingsPanel } from "@/components/custom-practice/feature-settings-panel";
 import { SortableBlockList } from "@/components/custom-practice/sortable-block-list";
 import { PageSwitcher } from "@/components/custom-practice/page-switcher";
+import { WorkshopSyncBadge } from "@/components/custom-practice/workshop-sync-badge";
+import { useWorkshopSync } from "@/hooks/useWorkshopSync";
 import { DrillRuntimeProvider } from "@/components/custom-practice/drill-runtime-provider";
 import {
   getPracticePageStore,
@@ -26,6 +28,8 @@ import {
 } from "@/lib/custom-practice-storage";
 
 export function PracticePageEditor() {
+  const syncStatus = useWorkshopSync(true);
+
   const store = useSyncExternalStore(
     subscribePracticePageStore,
     getPracticePageStore,
@@ -210,6 +214,13 @@ export function PracticePageEditor() {
             onDuplicate={duplicatePage}
             onDelete={removePage}
           />
+
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs text-muted-foreground">
+              {store.pages.length} {store.pages.length === 1 ? "page" : "pages"}
+            </span>
+            <WorkshopSyncBadge status={syncStatus} />
+          </div>
 
           <input
             type="text"
