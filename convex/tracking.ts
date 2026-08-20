@@ -167,8 +167,9 @@ export const listMissEventsByTool = query({
     }
     return await ctx.db
       .query("missEvents")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .filter((q) => q.eq(q.field("tool"), args.tool))
+      .withIndex("by_user_tool", (q) =>
+        q.eq("userId", userId).eq("tool", args.tool),
+      )
       .order("desc")
       .take(effectiveLimit(args.limit));
   },

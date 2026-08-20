@@ -1,10 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useDrillRuntimeProvider } from "@/hooks/useDrillRuntime";
-import {
-  appendLocalWorkshopEvent,
-  appendLocalWorkshopMiss,
-} from "@/lib/local-practice-history";
+import { appendLocalWorkshopEvent } from "@/lib/local-practice-history";
 
 const start = vi.fn();
 const cancel = vi.fn();

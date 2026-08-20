@@ -66,6 +66,7 @@ export default defineSchema({
     pageId: v.optional(v.string()), // custom-drill page id when tool === "workshop"
   })
     .index("by_user", ["userId"])
+    .index("by_user_tool", ["userId", "tool"])
     .index("by_user_transition", ["userId", "chord", "fromDeg", "toDeg"]),
 
   settings: defineTable({
