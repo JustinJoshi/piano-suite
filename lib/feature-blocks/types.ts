@@ -36,6 +36,12 @@ export type FieldDescriptor =
       label: string;
       options: { label: string; value: string }[];
       helperText?: string;
+    }
+  | {
+      kind: "text";
+      key: string;
+      label: string;
+      placeholder?: string;
     };
 
 export type FeatureCategory =

@@ -1,6 +1,8 @@
 import { normalizeMetronomeConfig } from "./metronome/config";
 import { normalizeDrillTimerConfig } from "./drill-timer/config";
 import { normalizeChordSetConfig } from "./chord-set/config";
+import { normalizeTextBlockConfig } from "./text-block/config";
+import { normalizeMidiConnectionBarConfig } from "./midi-connection-bar/config";
 
 /**
  * Server-safe validation for stored practice pages.
@@ -20,6 +22,8 @@ const blockNormalizers: Record<string, BlockNormalizer> = {
   metronome: normalizeMetronomeConfig as BlockNormalizer,
   drillTimer: normalizeDrillTimerConfig as BlockNormalizer,
   chordSet: normalizeChordSetConfig as BlockNormalizer,
+  textBlock: normalizeTextBlockConfig as BlockNormalizer,
+  midiConnectionBar: normalizeMidiConnectionBarConfig as BlockNormalizer,
 };
 
 export type ValidatedBlock = {

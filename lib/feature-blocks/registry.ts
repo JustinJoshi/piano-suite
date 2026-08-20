@@ -1,7 +1,9 @@
-import { Timer, Hourglass, Music } from "lucide-react";
+import { Timer, Hourglass, Music, Type, Cable } from "lucide-react";
 import { MetronomeBlock } from "@/components/feature-blocks/metronome-block";
 import { DrillTimerBlock } from "@/components/feature-blocks/drill-timer-block";
 import { ChordSetBlock } from "@/components/feature-blocks/chord-set-block";
+import { TextBlock } from "@/components/feature-blocks/text-block";
+import { MidiConnectionBarBlock } from "@/components/feature-blocks/midi-connection-bar-block";
 import {
   metronomeDefaultConfig,
   normalizeMetronomeConfig,
@@ -17,6 +19,16 @@ import {
   normalizeChordSetConfig,
   chordSetFields,
 } from "@/lib/feature-blocks/chord-set/config";
+import {
+  textBlockDefaultConfig,
+  normalizeTextBlockConfig,
+  textBlockFields,
+} from "@/lib/feature-blocks/text-block/config";
+import {
+  midiConnectionBarDefaultConfig,
+  normalizeMidiConnectionBarConfig,
+  midiConnectionBarFields,
+} from "@/lib/feature-blocks/midi-connection-bar/config";
 import type { ComponentType } from "react";
 import type { FeatureDefinition } from "@/lib/feature-blocks/types";
 
@@ -53,6 +65,28 @@ export const featureRegistry = {
     defaultConfig: chordSetDefaultConfig,
     normalizeConfig: normalizeChordSetConfig,
     component: ChordSetBlock as ComponentType<Record<string, unknown>>,
+  } satisfies FeatureDefinition<Record<string, unknown>>,
+  textBlock: {
+    type: "textBlock",
+    category: "technique",
+    label: "Instructions",
+    description: "Add text instructions or notes to your practice page.",
+    icon: Type,
+    fields: textBlockFields,
+    defaultConfig: textBlockDefaultConfig,
+    normalizeConfig: normalizeTextBlockConfig,
+    component: TextBlock as ComponentType<Record<string, unknown>>,
+  } satisfies FeatureDefinition<Record<string, unknown>>,
+  midiConnectionBar: {
+    type: "midiConnectionBar",
+    category: "rhythm",
+    label: "MIDI connection",
+    description: "Show a MIDI keyboard connection status bar.",
+    icon: Cable,
+    fields: midiConnectionBarFields,
+    defaultConfig: midiConnectionBarDefaultConfig,
+    normalizeConfig: normalizeMidiConnectionBarConfig,
+    component: MidiConnectionBarBlock as ComponentType<Record<string, unknown>>,
   } satisfies FeatureDefinition<Record<string, unknown>>,
 };
 
