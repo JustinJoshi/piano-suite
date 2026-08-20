@@ -1,15 +1,14 @@
 "use client";
 
-import { useMemo, useState, useSyncExternalStore } from "react";
-import { Plus, Trash2, Copy, ArrowUp, ArrowDown } from "lucide-react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { PracticePage, FeatureBlock } from "@/lib/feature-blocks/types";
 import { getFeatureDefinition } from "@/lib/feature-blocks/registry";
-import { FeatureRenderer } from "@/components/feature-blocks/feature-renderer";
 import { FeaturePalette } from "@/components/custom-practice/feature-palette";
 import { FeatureSettingsPanel } from "@/components/custom-practice/feature-settings-panel";
+import { SortableBlockList } from "@/components/custom-practice/sortable-block-list";
 import {
   getPracticePage,
   setPracticePage,
@@ -27,6 +26,7 @@ export function PracticePageEditor() {
 
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [showPalette, setShowPalette] = useState(false);
+  const [insertIndex, setInsertIndex] = useState<number | null>(null);
 
   const selectedBlock = useMemo(
     () => page.blocks.find((b) => b.id === selectedBlockId) ?? null,
@@ -35,6 +35,16 @@ export function PracticePageEditor() {
 
   function updatePage(updater: (prev: PracticePage) => PracticePage) {
     setPracticePage(updater(page));
+  }
+
+  function openPalette(atIndex?: number) {
+    setInsertIndex(atIndex ?? null);
+    setShowPalette(true);
+  }
+
+  function closePalette() {
+    setInsertIndex(null);
+    setShowPalette(false);
   }
 
   function addBlock(type: string) {
@@ -48,12 +58,18 @@ export function PracticePageEditor() {
       config: { ...def.defaultConfig },
     };
 
+    const targetIndex = insertIndex ?? page.blocks.length;
+
     updatePage((prev) => ({
       ...prev,
-      blocks: [...prev.blocks, newBlock],
+      blocks: [
+        ...prev.blocks.slice(0, targetIndex),
+        newBlock,
+        ...prev.blocks.slice(targetIndex),
+      ],
     }));
     setSelectedBlockId(newBlock.id);
-    setShowPalette(false);
+    closePalette();
   }
 
   function updateBlockConfig(id: string, config: Record<string, unknown>) {
@@ -78,9 +94,6 @@ export function PracticePageEditor() {
   function duplicateBlock(id: string) {
     const block = page.blocks.find((b) => b.id === id);
     if (!block) return;
-
-    const def = getFeatureDefinition(block.type);
-    if (!def) return;
 
     const index = page.blocks.indexOf(block);
     const newBlock: FeatureBlock = {
@@ -116,6 +129,34 @@ export function PracticePageEditor() {
     updatePage((prev) => ({ ...prev, blocks: nextBlocks }));
   }
 
+  function handleReorder(blocks: FeatureBlock[]) {
+    updatePage((prev) => ({ ...prev, blocks }));
+  }
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (showPalette) return;
+      if (event.key !== "/") return;
+
+      const target = event.target;
+      if (target instanceof HTMLElement) {
+        const tagName = target.tagName.toLowerCase();
+        const isEditable =
+          tagName === "input" ||
+          tagName === "textarea" ||
+          target.isContentEditable;
+
+        if (isEditable) return;
+      }
+
+      event.preventDefault();
+      openPalette();
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showPalette]);
+
   return (
     <div className="mx-auto grid max-w-3xl gap-6 lg:max-w-5xl lg:grid-cols-[1fr_320px]">
       <div className="space-y-4">
@@ -130,99 +171,47 @@ export function PracticePageEditor() {
         />
 
         {page.blocks.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border bg-card p-10 text-center">
+          <div
+            className={cn(
+              "rounded-xl border border-dashed border-border bg-card p-10 text-center"
+            )}
+          >
             <p className="mb-4 text-muted-foreground">
               This page is empty. Add your first feature to start practicing.
             </p>
-            <Button onClick={() => setShowPalette(true)}>
+            <Button onClick={() => openPalette()}>
               <Plus className="mr-2 h-4 w-4" />
               Add feature
             </Button>
           </div>
         ) : (
-          <div className="space-y-3">
-            {page.blocks.map((block) => {
-              const isSelected = block.id === selectedBlockId;
-              return (
-                <Card
-                  key={block.id}
-                  onClick={() => setSelectedBlockId(block.id)}
-                  className={cn(
-                    "cursor-pointer transition-shadow",
-                    isSelected && "ring-2 ring-primary"
-                  )}
-                >
-                  <CardContent className="p-4">
-                    <FeatureRenderer blocks={[block]} />
-                  </CardContent>
-                </Card>
-              );
-            })}
-
-            <Button
-              variant="outline"
-              className="w-full border-dashed"
-              onClick={() => setShowPalette(true)}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Add feature
-            </Button>
-          </div>
+          <SortableBlockList
+            blocks={page.blocks}
+            selectedBlockId={selectedBlockId}
+            onSelect={setSelectedBlockId}
+            onReorder={handleReorder}
+            onMoveUp={(id) => moveBlock(id, "up")}
+            onMoveDown={(id) => moveBlock(id, "down")}
+            onDuplicate={duplicateBlock}
+            onRemove={removeBlock}
+            onInsertAtIndex={openPalette}
+          />
         )}
 
         {showPalette ? (
           <FeaturePalette
             onSelect={addBlock}
-            onCancel={() => setShowPalette(false)}
+            onCancel={closePalette}
           />
         ) : null}
       </div>
 
       <div className="space-y-4">
         {selectedBlock ? (
-          <>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => moveBlock(selectedBlock.id, "up")}
-                disabled={page.blocks[0]?.id === selectedBlock.id}
-              >
-                <ArrowUp className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => moveBlock(selectedBlock.id, "down")}
-                disabled={
-                  page.blocks[page.blocks.length - 1]?.id === selectedBlock.id
-                }
-              >
-                <ArrowDown className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => duplicateBlock(selectedBlock.id)}
-              >
-                <Copy className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                onClick={() => removeBlock(selectedBlock.id)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-
-            <FeatureSettingsPanel
-              block={selectedBlock}
-              onChange={(config) => updateBlockConfig(selectedBlock.id, config)}
-              onRemove={() => removeBlock(selectedBlock.id)}
-            />
-          </>
+          <FeatureSettingsPanel
+            block={selectedBlock}
+            onChange={(config) => updateBlockConfig(selectedBlock.id, config)}
+          />
         ) : (
           <div className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">
             Select a feature to edit its settings.

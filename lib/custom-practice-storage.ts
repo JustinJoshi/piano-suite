@@ -84,4 +84,17 @@ export function getServerPracticePage(): PracticePage {
   return createEmptyPracticePage();
 }
 
+/** Resets the in-memory singleton and localStorage. Exposed for tests. */
+export function resetPracticePage(): void {
+  currentPage = null;
+  listeners.clear();
+  if (typeof window !== "undefined") {
+    try {
+      window.localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // Ignore storage errors.
+    }
+  }
+}
+
 export { generateId, DEFAULT_PAGE_ID };

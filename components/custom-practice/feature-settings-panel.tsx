@@ -2,19 +2,16 @@
 
 import type { FeatureBlock, FieldDescriptor } from "@/lib/feature-blocks/types";
 import { getFeatureDefinition } from "@/lib/feature-blocks/registry";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type FeatureSettingsPanelProps = {
   block: FeatureBlock;
   onChange: (config: Record<string, unknown>) => void;
-  onRemove: () => void;
 };
 
 export function FeatureSettingsPanel({
   block,
   onChange,
-  onRemove,
 }: FeatureSettingsPanelProps) {
   const def = getFeatureDefinition(block.type);
   if (!def) return null;
@@ -39,14 +36,6 @@ export function FeatureSettingsPanel({
             onChange={(value) => updateField(field.key, value)}
           />
         ))}
-
-        <Button
-          variant="ghost"
-          className="w-full text-destructive hover:bg-destructive/10 hover:text-destructive"
-          onClick={onRemove}
-        >
-          Remove feature
-        </Button>
       </CardContent>
     </Card>
   );
