@@ -121,6 +121,50 @@ function FieldInput({
     );
   }
 
+  if (field.kind === "checkbox-group") {
+    const selected = Array.isArray(value)
+      ? value.filter((v): v is string => typeof v === "string")
+      : [];
+    return (
+      <div className="space-y-2">
+        <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          {field.label}
+        </label>
+        <div className="space-y-2">
+          {field.options.map((option) => {
+            const optionId = `${id}-${option.value}`;
+            const isChecked = selected.includes(option.value);
+            return (
+              <div key={option.value} className="flex items-center gap-2">
+                <input
+                  id={optionId}
+                  type="checkbox"
+                  checked={isChecked}
+                  onChange={(e) => {
+                    const next = e.target.checked
+                      ? [...selected, option.value]
+                      : selected.filter((v) => v !== option.value);
+                    onChange(next);
+                  }}
+                  className="h-4 w-4 accent-primary"
+                />
+                <label
+                  htmlFor={optionId}
+                  className="text-sm text-foreground"
+                >
+                  {option.label}
+                </label>
+              </div>
+            );
+          })}
+        </div>
+        {field.helperText ? (
+          <p className="text-xs text-muted-foreground">{field.helperText}</p>
+        ) : null}
+      </div>
+    );
+  }
+
   // toggle
   const checked = typeof value === "boolean" ? value : false;
   return (

@@ -29,6 +29,13 @@ export type FieldDescriptor =
       key: string;
       label: string;
       helperText?: string;
+    }
+  | {
+      kind: "checkbox-group";
+      key: string;
+      label: string;
+      options: { label: string; value: string }[];
+      helperText?: string;
     };
 
 export type FeatureCategory =
