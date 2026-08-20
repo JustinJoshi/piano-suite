@@ -27,6 +27,11 @@ vi.mock("@/convex/_generated/api", () => ({
       logPracticeEvent: {},
       logMissEvent: {},
     },
+    workshop: {
+      listCustomDrills: {},
+      upsertCustomDrill: {},
+      deleteCustomDrill: {},
+    },
   },
 }));
 

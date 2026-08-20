@@ -86,4 +86,20 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index("by_user_tool", ["userId", "tool"]),
+
+  // Workshop custom practice pages (Pro sync; Free keeps pages in localStorage).
+  // `clientPageId` is generated on the client and is the stable sync key.
+  // Deleted pages become tombstones (deleted=true) so deletions propagate to
+  // other devices instead of being resurrected by stale local copies.
+  customDrills: defineTable({
+    ownerId: v.id("users"),
+    clientPageId: v.string(),
+    title: v.string(),
+    blocks: v.array(v.any()), // envelope-validated in convex/workshop.ts
+    deleted: v.optional(v.boolean()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_owner", ["ownerId"])
+    .index("by_owner_client_id", ["ownerId", "clientPageId"]),
 });

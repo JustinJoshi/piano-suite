@@ -1,4 +1,4 @@
-import type { FieldDescriptor } from "@/lib/feature-blocks/types";
+import type { FieldDescriptor } from "../types";
 
 export type DrillTimerConfig = {
   countdownSeconds: number;
