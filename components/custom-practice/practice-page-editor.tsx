@@ -8,6 +8,7 @@ import type { PracticePage, FeatureBlock } from "@/lib/feature-blocks/types";
 import { getFeatureDefinition } from "@/lib/feature-blocks/registry";
 import { FeaturePalette } from "@/components/custom-practice/feature-palette";
 import { FeatureSettingsPanel } from "@/components/custom-practice/feature-settings-panel";
+import { ShareMenu } from "@/components/custom-practice/share-menu";
 import { SortableBlockList } from "@/components/custom-practice/sortable-block-list";
 import { PageSwitcher } from "@/components/custom-practice/page-switcher";
 import { WorkshopSyncBadge } from "@/components/custom-practice/workshop-sync-badge";
@@ -279,6 +280,13 @@ export function PracticePageEditor() {
               Select a feature to edit its settings.
             </div>
           )}
+
+          <ShareMenu
+            clientPageId={page.id}
+            title={page.title}
+            blocks={page.blocks}
+            updatedAt={page.updatedAt}
+          />
         </div>
       </div>
     </DrillRuntimeProvider>

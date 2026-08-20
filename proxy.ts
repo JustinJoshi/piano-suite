@@ -52,9 +52,8 @@ export default clerkMiddleware(
       pathname === "/" ||
       pathname === "/pricing" ||
       pathname === "/tools/chladni" ||
-      // Articles are public: the library is marketing/SEO content for the
-      // free learning community, and the landing hero links to it.
-      ["/articles", "/dev", "/sign-in", "/sign-up", "/api", "/__clerk"].some(
+      // Workshop gallery + public drill pages are public for community sharing.
+      ["/articles", "/dev", "/sign-in", "/sign-up", "/api", "/__clerk", "/workshop"].some(
         (base) => isExactOrUnder(pathname, base)
       );
 
