@@ -165,6 +165,28 @@ function FieldInput({
     );
   }
 
+  if (field.kind === "text") {
+    const stringValue = typeof value === "string" ? value : "";
+    return (
+      <div className="space-y-2">
+        <label
+          htmlFor={id}
+          className="text-xs font-medium uppercase tracking-wider text-muted-foreground"
+        >
+          {field.label}
+        </label>
+        <textarea
+          id={id}
+          value={stringValue}
+          placeholder={field.placeholder}
+          onChange={(e) => onChange(e.target.value)}
+          rows={4}
+          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50"
+        />
+      </div>
+    );
+  }
+
   // toggle
   const checked = typeof value === "boolean" ? value : false;
   return (
