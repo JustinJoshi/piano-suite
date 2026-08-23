@@ -1,6 +1,6 @@
 "use client";
 
-import { Copy, Plus, Trash2 } from "lucide-react";
+import { Copy, LayoutTemplate, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { PracticePageStore } from "@/lib/custom-practice-storage";
 
@@ -10,6 +10,7 @@ type PageSwitcherProps = {
   onCreate: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
+  onTemplates: () => void;
 };
 
 export function PageSwitcher({
@@ -18,6 +19,7 @@ export function PageSwitcher({
   onCreate,
   onDuplicate,
   onDelete,
+  onTemplates,
 }: PageSwitcherProps) {
   const activePage =
     store.pages.find((p) => p.id === store.activePageId) ?? store.pages[0];
@@ -40,6 +42,16 @@ export function PageSwitcher({
       </select>
 
       <div className="flex items-center gap-1">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onTemplates}
+          aria-label="Templates"
+          title="New page from template"
+          className="h-9 w-9"
+        >
+          <LayoutTemplate className="h-4 w-4" />
+        </Button>
         <Button
           variant="outline"
           size="icon"

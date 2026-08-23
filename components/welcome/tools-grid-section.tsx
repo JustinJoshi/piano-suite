@@ -1,5 +1,5 @@
 import { ToolCard } from "@/components/tools/tool-card";
-import { tools } from "@/lib/tools";
+import { drillTools, insightTools, labTools } from "@/lib/tools";
 import { useWelcomeConfig } from "@/hooks/useWelcomeConfig";
 
 export function ToolsGridSection() {
@@ -22,7 +22,7 @@ export function ToolsGridSection() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {tools.map((tool) => (
+          {[...drillTools, ...insightTools, ...labTools].map((tool) => (
             <ToolCard
               key={tool.href}
               title={tool.title}

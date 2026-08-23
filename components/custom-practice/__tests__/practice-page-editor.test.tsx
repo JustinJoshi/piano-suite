@@ -63,6 +63,7 @@ function createMockAudioContext() {
 describe("PracticePageEditor", () => {
   beforeEach(() => {
     resetPracticePageStore();
+    window.localStorage.setItem("piano-suite:starter-picker-dismissed-v1", "true");
     vi.stubGlobal("AudioContext", vi.fn(createMockAudioContext));
     let uuidCount = 0;
     vi.stubGlobal("crypto", {
