@@ -59,6 +59,9 @@ next-env.d.ts
 
 # per-agent git worktrees
 .worktrees/
+
+# local tier-1 idea drafts (generate-ideas skill); never commit
+.ideas/
 clerk/billing.pulled.json
 .agents/
 skills-lock.json

@@ -283,6 +283,14 @@ Worktrees isolate the working directory and Git state, but they do **not** isola
 
 If you need fully isolated database state, run Convex against a separate project/deployment instead of the shared local backend.
 
+## Idea drafts (`.ideas/`)
+
+`~/piano-suite/.ideas/` is local-only, gitignored memory for the `generate-ideas` skill (tier-1 idea pipeline). Rules:
+
+- Never commit, push, or "clean up" files in `.ideas/`.
+- When brainstorming or generating feature ideas, read prior `.ideas/*.md` first and do not re-propose entries marked `rejected` or already `promoted → issue #N` unless you have a materially new angle.
+- Idea promotion to GitHub issues happens only when the user explicitly picks idea numbers.
+
 ## Finishing work
 
 When you complete a task, follow this checklist before telling the user you are done:
