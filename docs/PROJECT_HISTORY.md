@@ -477,6 +477,27 @@ Architecture and market research: `docs/custom-drill-builder-plan.md`,
 Verification: `npm run lint`, `npm run test:unit:run` (655 passed), `npm run build`,
 and `npm run test:e2e` (83 passed) all pass on the merged `main`.
 
+## Workshop-first navigation (2026-08)
+
+Product decision: the Workshop is the core of the app, not one tool among
+fifteen. `/tools` was a flat hub page + a flat 15-item sidebar, which buried
+the differentiator and overwhelmed new users.
+
+- `next.config.ts` redirects `/tools` → `/tools/workshop` (307; query params
+  like `?onboarding=reset` are preserved). The hub page and its decorative
+  search/bell chrome were removed; the sidebar is the navigation.
+- Sidebar sections: **Workshop** (emphasized first link) → **Ready-made
+  drills** (Chord Drill, Arpeggios, Root Cycling, Progression) → **Progress**
+  (Technique, Tracking) → **Labs** (collapsible, collapsed by default,
+  persisted in `localStorage`; experimental labs still gated by the
+  experimental-features flag). The "Welcome" nav item was dropped — the brand
+  wordmark already links home.
+- `lib/tools.ts` re-exports grouped registries: `workshopTool`, `drillTools`,
+  `insightTools`, `labTools`; `tools` remains the combined list (landing-page
+  grid unchanged). Logo Lab stays a sidebar-only lab entry.
+- The Workshop page gained a ready-made-drills shortcut strip ("In a hurry?")
+  framing pre-built drills as templates while the editor stays the focus.
+
 ## Roadmap
 
 - [x] Scaffold Next.js + Tailwind + shadcn/ui

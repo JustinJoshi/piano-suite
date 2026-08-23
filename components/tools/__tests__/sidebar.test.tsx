@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
+import { render, screen, cleanup, fireEvent } from "@testing-library/react";
+
 
 const useUserMock = vi.fn();
 
@@ -61,5 +62,64 @@ describe("Sidebar account label", () => {
 
     expect(screen.getByText("Ada Lovelace")).toBeInTheDocument();
     expect(screen.queryByText("Anonymous pianist")).not.toBeInTheDocument();
+  });
+});
+
+describe("Sidebar navigation sections", () => {
+  beforeEach(() => {
+    useUserMock.mockReturnValue({
+      isLoaded: true,
+      isSignedIn: false,
+      user: null,
+    });
+    window.localStorage.clear();
+  });
+
+  it("leads with the Workshop, not a Welcome item", () => {
+    render(<Sidebar />);
+
+    expect(screen.getByRole("link", { name: "Workshop" })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Welcome" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows ready-made drills and progress sections", () => {
+    render(<Sidebar />);
+
+    expect(screen.getByText("Ready-made drills")).toBeInTheDocument();
+    expect(screen.getByText("Progress")).toBeInTheDocument();
+    for (const name of [
+      "Chord Drill",
+      "Arpeggios",
+      "Root Cycling",
+      "Progression",
+      "Technique",
+      "Tracking",
+    ]) {
+      expect(screen.getByRole("link", { name })).toBeInTheDocument();
+    }
+  });
+
+  it("collapses labs until toggled open", async () => {
+    render(<Sidebar />);
+
+    const toggle = screen.getByRole("button", { name: "Labs" });
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(
+      screen.queryByRole("link", { name: "Chladni Lab" })
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(toggle);
+
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("link", { name: "Chladni Lab" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Logo Lab" })
+    ).toBeInTheDocument();
+    // Experimental labs stay hidden unless the flag is on.
+    expect(
+      screen.queryByRole("link", { name: "Multigrid Lab" })
+    ).not.toBeInTheDocument();
   });
 });

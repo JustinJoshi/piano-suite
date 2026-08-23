@@ -78,12 +78,14 @@ const PUBLIC_ROUTES = [
 /** Signed-in smoke: path → visible heading (or body text for brand-only pages). */
 const SIGNED_IN_ROUTE_SMOKE: Array<{
   path: string;
+  /** Expected URL after optional redirects (defaults to `path`). */
+  finalPath?: string;
   heading?: string | RegExp;
   bodyText?: string | RegExp;
 }> = [
   { path: "/", bodyText: "Piano Suite" },
   { path: "/pricing", heading: /Practice free\. Pro when you're ready\./i },
-  { path: "/tools", heading: "Tools" },
+  { path: "/tools", finalPath: "/tools/workshop", heading: "Workshop" },
   { path: "/tools/chord-drill", heading: /Chord Drill/i },
   { path: "/tools/arpeggios", heading: /Arpeggio/i },
   { path: "/tools/root-cycling", heading: /Root Cycling/i },
@@ -133,7 +135,10 @@ test.describe("auth protection (bypass off)", () => {
     await page.goto("/tools");
     await expectNotBare404(page);
     await expectNoApplicationError(page);
-    await expect(page.getByRole("heading", { name: "Tools" })).toBeVisible();
+    await expect(page).toHaveURL("/tools/workshop");
+    await expect(
+      page.getByRole("heading", { name: "Workshop" })
+    ).toBeVisible();
   });
 
   test("signed-in homepage loads without application error", async ({ page }) => {
@@ -171,14 +176,15 @@ test.describe("signed-in route smoke (all app pages)", () => {
     test.setTimeout(120000);
     await signInAsTestUser(page);
 
-    for (const { path, heading, bodyText } of SIGNED_IN_ROUTE_SMOKE) {
+    for (const { path, finalPath, heading, bodyText } of SIGNED_IN_ROUTE_SMOKE) {
       await page.goto(path);
       await expectNotBare404(page);
       await expectNoApplicationError(page);
-      if (path === "/") {
+      const expectedPath = finalPath ?? path;
+      if (expectedPath === "/") {
         await expect(page).toHaveURL("/");
       } else {
-        await expect(page).toHaveURL(new RegExp(`${path.replace(/\//g, "\\/")}$`));
+        await expect(page).toHaveURL(new RegExp(`${expectedPath.replace(/\//g, "\\/")}$`));
       }
       if (heading !== undefined) {
         await expect(
