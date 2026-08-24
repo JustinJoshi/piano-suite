@@ -113,12 +113,12 @@ export interface WelcomeConfig {
 
 export const defaultWelcomeConfig: WelcomeConfig = {
   hero: {
-    eyebrow: "a free tool kit for self-taught pianists",
+    eyebrow: "a free workshop for self-taught pianists",
     showEyebrow: true,
-    headline: "Learn piano with tools built for self-taught pianists.",
+    headline: "Build your own piano practice — or grab a drill and start playing.",
     subheadline:
-      "Evidence-based drills, guided onboarding, and articles that teach you how to practice.",
-    ctaText: "Start learning",
+      "Snap metronome, timer, and chord blocks together into your own drills, start instantly from a starter template, and share what you build with other self-taught pianists.",
+    ctaText: "Enter the Workshop",
     ctaHref: "/tools",
     align: "left",
   },
