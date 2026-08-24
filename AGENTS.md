@@ -214,6 +214,10 @@ mkdir -p .worktrees
 # Create a worktree + branch for the new task
 git worktree add .worktrees/<your-name>-<task-name> -b <your-name>/<task-name>
 cd .worktrees/<your-name>-<task-name>
+
+# Symlink the gitignored .env.local so Clerk/Convex keys and the local
+# Convex URL are available (e2e global setup needs CLERK_PUBLISHABLE_KEY).
+ln -s "$REPO_ROOT/.env.local" .env.local
 ```
 
 Example:
@@ -221,6 +225,7 @@ Example:
 ```bash
 git worktree add .worktrees/kimi-arpeggios -b kimi/arpeggios
 cd .worktrees/kimi-arpeggios
+ln -s "$REPO_ROOT/.env.local" .env.local
 ```
 
 Work inside that directory only. Commit incrementally. When done, merge the branch into `main` from the main worktree and remove the worktree:
