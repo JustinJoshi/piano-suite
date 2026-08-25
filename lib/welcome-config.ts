@@ -102,54 +102,47 @@ export interface WelcomeConfig {
 
 export const defaultWelcomeConfig: WelcomeConfig = {
   hero: {
-    eyebrow: "a free tool kit for self-taught pianists",
+    eyebrow: "a free workshop for self-taught pianists",
     showEyebrow: true,
-    headline: "Learn piano with tools built for self-taught pianists.",
+    headline:
+      "Build your own piano practice — or grab a drill and start playing.",
     subheadline:
-      "Evidence-based drills, guided onboarding, and articles that teach you how to practice.",
-    ctaText: "Start learning",
-    ctaHref: "/tools",
+      "Snap metronome, timer, and chord blocks together into your own drills, start instantly from a starter template, and share what you build with other self-taught pianists.",
+    ctaText: "Enter the Workshop",
+    ctaHref: "/tools/workshop",
     align: "left",
   },
   features: {
     sections: [
       {
-        id: "why-it-works",
+        id: "build-your-practice",
         number: "01",
-        label: "why it works",
-        title: "Re-reading a chord chart feels like practice. It isn't.",
+        label: "build your practice",
+        title: "Your drill, your blocks, your tempo.",
         body: [
-          "Going over a chart again and again feels productive, but it barely moves the needle. What actually builds the memory is retrieval: forcing yourself to produce the answer instead of just recognizing it. And what makes it last is spacing those retrievals over days instead of cramming them into one sitting.",
-          "The fastest way to waste practice time is to re-read something you already saw. Retrieval practice roughly doubled week-later retention over re-reading (Roediger & Karpicke, 2006).",
-          "That scheduling problem is exactly what Anki is for. It tracks, chord by chord, when you're about to forget something, and puts it back in front of you right before that happens. This drill doesn't reinvent any of that. It listens to whatever Anki already decided you need next.",
+          "A metronome. A timer. A chord target. Snap them together and you have a practice page. Change the chords, adjust the tempo, add instructions — the Workshop lets you build exactly the drill you need, then practice it right there.",
+          "No code, no setup. Press the slash key, pick a block, and start playing. Every page saves automatically and runs live on your keyboard.",
         ],
       },
       {
-        id: "the-actual-point",
+        id: "start-from-something-that-works",
         number: "02",
-        label: "the actual point",
-        title: "Knowing a chord isn't the same as playing it",
+        label: "start from something that works",
+        title: "Not sure where to begin? Grab a starter template.",
         body: [
-          "Flashcards are great at teaching you to name a chord. They can't teach your hands to find it, under time pressure, without looking. That's motor memory, and it needs a different kind of rep: hands off the keys, chord announced, play it, get timed.",
-          "Anki keeps the recall side sharp. The drill keeps the physical side honest.",
+          "First chords. ii-V-I warmup. Five-minute metronome sprint. Starter templates give you a runnable drill in one click — then you can change anything once you're inside.",
+          "Browse community drills shared by other self-taught pianists, fork a copy into your own Workshop, and make it yours.",
         ],
       },
       {
-        id: "how-it-works",
+        id: "why-these-drills-work",
         number: "03",
-        label: "how it actually works",
-        title: "One loop, two directions",
+        label: "why these drills work",
+        title: "Built on the science of remembering.",
         body: [
-          "Turn on Anki Sync and the loop runs itself. No manual chord picking, no separate app to babysit.",
-        ],
-      },
-      {
-        id: "not-new",
-        number: "04",
-        label: "not a new idea",
-        title: "This is how jazz pianists already practice",
-        body: [
-          "Drilling a voicing through every root, in time, until it stops requiring thought, is the standard route from theory to fluency in jazz piano, not a shortcut around it. This tool just puts a stopwatch and a spaced-repetition schedule underneath a practice habit that already exists.",
+          "Re-reading a chord chart feels like practice. It isn't. What actually builds memory is retrieval — forcing yourself to produce the answer instead of just recognizing it. Retrieval practice roughly doubled week-later retention over re-reading (Roediger & Karpicke, 2006).",
+          "Every drill in the Workshop is built on that principle. Enable Anki Sync and the Workshop loads your due cards automatically, scheduling reviews right before you forget. Or just pick chords manually — the motor-memory loop works either way.",
+          "Drilling a voicing through every root, in time, until it stops requiring thought, is the standard route from theory to fluency in jazz piano. This tool puts a stopwatch and a spaced-repetition schedule underneath a practice habit that already exists.",
         ],
         tags: [
           "Barry Harris — voicing drills",
@@ -158,19 +151,10 @@ export const defaultWelcomeConfig: WelcomeConfig = {
         ],
       },
       {
-        id: "companion-deck",
-        number: "05",
-        label: "the companion deck",
-        title: "The actual Anki deck behind this",
-        body: [
-          "Two ready-to-import decks: root-position 7ths and diminished 7ths across five keys (C-G-D-A-E), and the extended 9/11/13 voicings with LH/RH fingering built in. Both are plain tab-separated Anki exports. Import them via Anki's File → Import (Basic notetype) and they work with this drill out of the box, no add-on needed beyond AnkiConnect.",
-        ],
-      },
-      {
         id: "who-made-this",
-        number: "06",
+        number: "04",
         label: "who made this",
-        title: "A community, not just a toolkit",
+        title: "A community, not just a toolkit.",
         body: [
           "Lessons run $60 an hour and up, so a lot of us teach ourselves. Piano Suite started as the toolkit I wanted for that path, but it is becoming something bigger: a free community where self-taught pianists learn together, share what works, and build tools that actually help beginners.",
           "The project is open source. If you're teaching yourself too, questions and ideas are always welcome.",
@@ -182,10 +166,26 @@ export const defaultWelcomeConfig: WelcomeConfig = {
   },
   flow: {
     steps: [
-      { id: "anki", label: "anki", text: "Your due card names a chord" },
-      { id: "drill", label: "drill", text: "The drill loads that chord" },
-      { id: "midi", label: "midi", text: "You play it, timed, on real keys" },
-      { id: "anki-2", label: "anki", text: "The card flips so you can grade it" },
+      {
+        id: "pick",
+        label: "pick",
+        text: "Choose a starter template or start from scratch",
+      },
+      {
+        id: "build",
+        label: "build",
+        text: "Snap metronome, timer, and chord blocks together",
+      },
+      {
+        id: "play",
+        label: "play",
+        text: "Press Start and practice on real keys",
+      },
+      {
+        id: "share",
+        label: "share",
+        text: "Publish to the community or fork someone else's drill",
+      },
     ],
     layout: "auto",
   },
@@ -203,10 +203,10 @@ export const defaultWelcomeConfig: WelcomeConfig = {
     variant: "outline",
   },
   toolsGrid: {
-    eyebrow: "the toolkit",
-    title: "Tools that grow with you",
+    eyebrow: "also included",
+    title: "Starter drills and visual labs.",
     subtitle:
-      "From your first chord drill to advanced pattern labs, everything is designed to keep your practice healthy, focused, and effective.",
+      "The Workshop is the core. These tools and labs come built in — use them as-is or pull their blocks into your own practice pages.",
   },
   onboarding: {
     intro: {
