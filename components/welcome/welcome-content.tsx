@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FeatureSection } from "./feature-section";
 import { FlowSection } from "./flow-section";
 import { DeckSection } from "./deck-section";
@@ -62,6 +63,20 @@ export function WelcomeContent() {
       <footer className="border-t border-border/50 bg-card/80 py-8 backdrop-blur-md">
         <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground sm:px-6 lg:px-8">
           Piano Suite — a free practice community for self-taught pianists.
+          <div className="mt-2 space-x-4">
+            <Link
+              href="/terms"
+              className="underline-offset-2 hover:underline"
+            >
+              Terms
+            </Link>
+            <Link
+              href="/privacy"
+              className="underline-offset-2 hover:underline"
+            >
+              Privacy
+            </Link>
+          </div>
         </div>
       </footer>
     </>

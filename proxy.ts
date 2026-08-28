@@ -52,6 +52,9 @@ export default clerkMiddleware(
       pathname === "/" ||
       pathname === "/pricing" ||
       pathname === "/tools/chladni" ||
+      // Legal pages must be readable by anonymous visitors.
+      pathname === "/terms" ||
+      pathname === "/privacy" ||
       // Workshop gallery + public drill pages are public for community sharing.
       ["/articles", "/dev", "/sign-in", "/sign-up", "/api", "/__clerk", "/workshop"].some(
         (base) => isExactOrUnder(pathname, base)

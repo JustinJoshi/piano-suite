@@ -101,10 +101,24 @@ export function PricingPage() {
             ) : (
               <WaitlistCta />
             )}
-            <p className="mt-4 text-center text-sm text-muted-foreground">
-              Cancel anytime · Works with your Anki deck · MIDI keyboard required
-              for drills
-            </p>
+            <footer className="mt-4 text-center text-sm text-muted-foreground">
+              Cancel anytime · Works with your Anki deck · MIDI keyboard
+              required for drills
+              <div className="mt-2 space-x-4">
+                <Link
+                  href="/terms"
+                  className="underline-offset-2 hover:underline"
+                >
+                  Terms
+                </Link>
+                <Link
+                  href="/privacy"
+                  className="underline-offset-2 hover:underline"
+                >
+                  Privacy
+                </Link>
+              </div>
+            </footer>
           </div>
         </section>
 
