@@ -492,6 +492,23 @@ were removed; palette insertion is append-only (the marketplace replaces the
 palette in phase 3). `playwright.config.ts` accepts `E2E_PORT` so e2e can run
 beside services bound to port 3000.
 
+### Workshop rework — marketplace tab + chrome cleanup (2026-08)
+
+The editor became a single full-width grid page with two header controls: a
+pages dropdown (`components/custom-practice/pages-menu.tsx`: switch between
+custom pages, new/duplicate/delete, share toggle) and a Marketplace button
+(`/` opens it too). Empty pages render the grid canvas with guides forced on
+(`showGuides`) plus a hint pointing to the marketplace. The marketplace
+(`app/tools/workshop/marketplace`, `components/workshop-marketplace/`) shows
+a live interactive preview of every registry block inside a preview drill
+runtime (`pageId ""` → no practice-history logging); a plus button adds the
+component to the active page and flips to a check (click again removes one
+instance). Block settings moved behind a per-tile gear sharing the extracted
+`FieldInput` renderer, replacing the right-rail settings panel; the palette,
+page-switcher select, and settings rail were deleted. Pure page helpers
+(`appendBlockToPage`, `removeFirstBlockOfType`) live in
+`lib/custom-practice-storage.ts`.
+
 ## Roadmap
 
 - [x] Scaffold Next.js + Tailwind + shadcn/ui

@@ -1,0 +1,65 @@
+import { test, expect } from "@playwright/test";
+import { signInAsTestUser } from "./auth-helper";
+import { metronomeBlock, seedWorkshopPage } from "./workshop-seed";
+
+test.describe("/tools/workshop marketplace", () => {
+  test("marketplace add flow populates the workshop grid", async ({
+    page,
+  }) => {
+    await signInAsTestUser(page);
+    await seedWorkshopPage(page, []);
+    await page.goto("/tools/workshop");
+
+    // Blank workshop: an empty grid canvas plus the marketplace entry point.
+    await expect(page.getByTestId("workshop-grid")).toHaveAttribute(
+      "data-grid-empty",
+      "true"
+    );
+    await page
+      .getByRole("link", { name: /open the marketplace/i })
+      .click();
+    await expect(page).toHaveURL(/\/tools\/workshop\/marketplace$/);
+
+    // Plus adds the component; the button flips to an added state.
+    await page.getByRole("button", { name: /add metronome/i }).click();
+    await expect(
+      page.getByRole("button", { name: /metronome added/i })
+    ).toBeVisible();
+
+    // Back in the workshop, the component is on the grid and persists.
+    await page
+      .getByRole("link", { name: /back to workshop/i })
+      .click();
+    await expect(page).toHaveURL(/\/tools\/workshop$/);
+    await expect(page.getByTestId("bpm-display")).toHaveText("120 BPM");
+
+    await page.reload();
+    await expect(page.getByTestId("bpm-display")).toHaveText("120 BPM");
+  });
+
+  test("pages menu creates and switches between custom pages", async ({
+    page,
+  }) => {
+    await signInAsTestUser(page);
+    await seedWorkshopPage(page, [metronomeBlock("e2e-a", 100)]);
+    await page.goto("/tools/workshop");
+
+    await expect(page.getByTestId("bpm-display")).toHaveText("100 BPM");
+
+    await page.getByRole("button", { name: /e2e grid/i }).click();
+    await page.getByRole("button", { name: /new page/i }).click();
+
+    // The fresh page is a blank grid.
+    await expect(page.getByTestId("workshop-grid")).toHaveAttribute(
+      "data-grid-empty",
+      "true"
+    );
+
+    // Switch back to the seeded page.
+    await page.getByRole("button", { name: /^my practice page/i }).click();
+    await page
+      .getByRole("button", { name: "Switch to E2E Grid" })
+      .click();
+    await expect(page.getByTestId("bpm-display")).toHaveText("100 BPM");
+  });
+});

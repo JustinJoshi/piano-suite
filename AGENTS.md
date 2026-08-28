@@ -88,8 +88,9 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `lib/feature-blocks/*` | Workshop feature-block registry, types, and per-block config schemas + editor field descriptors |
 | `components/feature-blocks/*` | Feature-block render components (metronome, drill timer, chord set) |
 | `lib/workshop-grid.ts` | Pure Workshop grid layout math: canonical 4-column span model, size normalization/clamping, resize deltas, dnd-kit reorder |
-| `components/workshop-grid/*` | Draggable/resizable grid for the Workshop editor; grid chrome (guides) visible only while dragging; tiles persist `size` spans |
-| `components/custom-practice/*` | Workshop practice-page editor: grid-backed block list, feature palette (`/` shortcut), settings panel, `DrillRuntimeProvider` |
+| `components/workshop-grid/*` | Draggable/resizable grid for the Workshop editor; grid chrome (guides) visible only while dragging (or when empty via `showGuides`); tiles persist `size` spans and open settings behind a per-tile gear |
+| `components/workshop-marketplace/*` | Marketplace view for the Workshop: live interactive previews of every registry block with plus/check add-remove buttons; route at `/tools/workshop/marketplace` |
+| `components/custom-practice/*` | Workshop practice-page editor: full-width grid page, pages dropdown menu (`PagesMenu`, incl. share), `DrillRuntimeProvider`, shared `FieldInput` settings renderer |
 | `lib/custom-practice-storage.ts` | `localStorage` persistence for custom practice pages (Free tier) |
 | `lib/drill-runtime.ts` / `hooks/useDrillRuntime.ts` | Shared drill runtime context (countdown → armed → timing → success → break → finished) driving workshop blocks; logs events to Convex (Pro) or local history (Free) |
 | `hooks/useChordTargets.ts` | Sequential / random chord-target generation from selected roots and quality groups |
