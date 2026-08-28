@@ -78,12 +78,14 @@ const PUBLIC_ROUTES = [
 /** Signed-in smoke: path → visible heading (or body text for brand-only pages). */
 const SIGNED_IN_ROUTE_SMOKE: Array<{
   path: string;
+  /** Expected URL after optional redirects (defaults to `path`). */
+  finalPath?: string;
   heading?: string | RegExp;
   bodyText?: string | RegExp;
 }> = [
   { path: "/", bodyText: "Piano Suite" },
   { path: "/pricing", heading: /Practice free\. Pro when you're ready\./i },
-  { path: "/tools", heading: "Tools" },
+  { path: "/tools", finalPath: "/tools/workshop", heading: "Workshop" },
   { path: "/tools/chord-drill", heading: /Chord Drill/i },
   { path: "/tools/arpeggios", heading: /Arpeggio/i },
   { path: "/tools/root-cycling", heading: /Root Cycling/i },
@@ -104,56 +106,69 @@ const SIGNED_IN_ROUTE_SMOKE: Array<{
   { path: "/settings/billing", heading: "Billing" },
 ];
 
+const emptyStorageState = { cookies: [] as never[], origins: [] as never[] };
+
 test.describe("auth protection (bypass off)", () => {
   test.beforeAll(() => {
     assertAuthBypassOffForE2E();
   });
 
-  for (const route of PROTECTED_ROUTES) {
-    test(`unsigned ${route} redirects to sign-in (not bare 404)`, async ({
-      page,
-    }) => {
-      await page.goto(route);
-      await expectRedirectedToSignIn(page);
-    });
-  }
+  test.describe("unsigned", () => {
+    test.use({ storageState: emptyStorageState });
 
-  for (const { path, assert } of PUBLIC_ROUTES) {
-    test(`unsigned ${path} stays public`, async ({ page }) => {
-      await page.goto(path);
-      await expect(page).toHaveURL(path);
+    for (const route of PROTECTED_ROUTES) {
+      test(`unsigned ${route} redirects to sign-in (not bare 404)`, async ({
+        page,
+      }) => {
+        await page.goto(route);
+        await expectRedirectedToSignIn(page);
+      });
+    }
+
+    for (const { path, assert } of PUBLIC_ROUTES) {
+      test(`unsigned ${path} stays public`, async ({ page }) => {
+        await page.goto(path);
+        await expect(page).toHaveURL(path);
+        await expectNotBare404(page);
+        await expectNoApplicationError(page);
+        await assert(page);
+      });
+    }
+  });
+
+  test.describe("signed-in", () => {
+    test("signed-in user can open /tools after sign-in", async ({ page }) => {
+      await signInAsTestUser(page);
+      await page.goto("/tools");
       await expectNotBare404(page);
       await expectNoApplicationError(page);
-      await assert(page);
+      await expect(page).toHaveURL("/tools/workshop");
+      await expect(
+        page.getByRole("heading", { name: "Workshop" })
+      ).toBeVisible();
     });
-  }
 
-  test("signed-in user can open /tools after sign-in", async ({ page }) => {
-    await signInAsTestUser(page);
-    await page.goto("/tools");
-    await expectNotBare404(page);
-    await expectNoApplicationError(page);
-    await expect(page.getByRole("heading", { name: "Tools" })).toBeVisible();
-  });
+    test("signed-in homepage loads without application error", async ({
+      page,
+    }) => {
+      await signInAsTestUser(page);
+      await page.goto("/");
+      await expect(page).toHaveURL("/");
+      await expectNotBare404(page);
+      await expectNoApplicationError(page);
+      await expect(page.locator("body")).toContainText("Piano Suite");
+    });
 
-  test("signed-in homepage loads without application error", async ({ page }) => {
-    await signInAsTestUser(page);
-    await page.goto("/");
-    await expect(page).toHaveURL("/");
-    await expectNotBare404(page);
-    await expectNoApplicationError(page);
-    await expect(page.locator("body")).toContainText("Piano Suite");
-  });
-
-  test("deep link to tracking after sign-in reaches the tool", async ({
-    page,
-  }) => {
-    await signInAsTestUser(page);
-    await page.goto("/tools/tracking");
-    await expectNotBare404(page);
-    await expectNoApplicationError(page);
-    await expect(page).toHaveURL(/\/tools\/tracking/);
-    await expect(page.getByRole("heading", { name: "Tracking" })).toBeVisible();
+    test("deep link to tracking after sign-in reaches the tool", async ({
+      page,
+    }) => {
+      await signInAsTestUser(page);
+      await page.goto("/tools/tracking");
+      await expectNotBare404(page);
+      await expectNoApplicationError(page);
+      await expect(page).toHaveURL(/\/tools\/tracking/);
+      await expect(page.getByRole("heading", { name: "Tracking" })).toBeVisible();
+    });
   });
 });
 
@@ -171,14 +186,15 @@ test.describe("signed-in route smoke (all app pages)", () => {
     test.setTimeout(120000);
     await signInAsTestUser(page);
 
-    for (const { path, heading, bodyText } of SIGNED_IN_ROUTE_SMOKE) {
+    for (const { path, finalPath, heading, bodyText } of SIGNED_IN_ROUTE_SMOKE) {
       await page.goto(path);
       await expectNotBare404(page);
       await expectNoApplicationError(page);
-      if (path === "/") {
+      const expectedPath = finalPath ?? path;
+      if (expectedPath === "/") {
         await expect(page).toHaveURL("/");
       } else {
-        await expect(page).toHaveURL(new RegExp(`${path.replace(/\//g, "\\/")}$`));
+        await expect(page).toHaveURL(new RegExp(`${expectedPath.replace(/\//g, "\\/")}$`));
       }
       if (heading !== undefined) {
         await expect(

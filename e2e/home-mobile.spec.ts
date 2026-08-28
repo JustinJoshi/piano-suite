@@ -13,8 +13,20 @@ test.describe("home page mobile", () => {
     await expect(cta).toBeVisible();
     await expect(cta).toBeInViewport();
 
-    const supporting = page.getByText(/No account needed to explore/i);
+    const supporting = page.getByText(/explore the community gallery freely/i);
     await expect(supporting).toBeVisible();
+  });
+
+  test("shows Workshop how-it-works steps on mobile", async ({ page }) => {
+    await page.goto("/");
+    const steps = [
+      "Pick a starter drill or begin with a blank page",
+      "Press start and play, timed on real keys",
+      "Tweak the blocks or build your own routine",
+    ];
+    for (const text of steps) {
+      await expect(page.getByText(text, { exact: true })).toBeVisible();
+    }
   });
 
   test("shows Workshop flow steps in a vertical layout on mobile", async ({

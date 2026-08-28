@@ -16,6 +16,9 @@ try {
   // .env.local may not exist in CI; rely on injected environment variables.
 }
 
+const authDir = path.join(__dirname, "playwright", ".auth");
+const authFile = path.join(authDir, "user.json");
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
@@ -35,14 +38,16 @@ export default defineConfig({
       name: "setup",
       testMatch: /global\.setup\.ts/,
       teardown: "teardown",
+      use: { storageState: { cookies: [], origins: [] } },
     },
     {
       name: "teardown",
       testMatch: /global\.teardown\.ts/,
+      use: { storageState: { cookies: [], origins: [] } },
     },
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: { ...devices["Desktop Chrome"], storageState: authFile },
       dependencies: ["setup"],
     },
   ],

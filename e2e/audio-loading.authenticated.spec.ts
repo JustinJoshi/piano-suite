@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { signInAsTestUser } from "./auth-helper";
+import { SettingsPage } from "./pom/settings-page";
 
 /**
  * Delay soundfont fetches so the UI loading state is visible long enough to
@@ -24,8 +25,10 @@ test.describe("/settings/audio", () => {
     await signInAsTestUser(page);
     await delaySoundfontFetches(page);
 
-    await page.goto("/settings/audio");
-    await expect(page.getByRole("heading", { name: "Audio" })).toBeVisible();
+    const settings = new SettingsPage(page);
+    await settings.gotoTheme(); // Re-use navigation helper; audio page is linked from sidebar.
+    await settings.page.goto("/settings/audio");
+    await settings.expectHeading("Audio");
 
     const presetBtn = page.getByTestId("audio-preset-fluidr3-acoustic-grand-piano");
     await expect(presetBtn).toBeVisible();

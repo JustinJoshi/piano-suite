@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Wrench, Play } from "lucide-react";
 import { ToolCard } from "@/components/tools/tool-card";
-import { tools } from "@/lib/tools";
+import { drillTools, insightTools, labTools } from "@/lib/tools";
 import { useWelcomeConfig } from "@/hooks/useWelcomeConfig";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -10,7 +10,7 @@ export function ToolsGridSection() {
   const { config } = useWelcomeConfig();
   const { eyebrow, title, subtitle } = config.toolsGrid;
 
-  const otherTools = tools.filter((t) => t.href !== "/tools/workshop");
+  const otherTools = [...drillTools, ...insightTools, ...labTools];
 
   return (
     <section className="py-16 sm:py-20">

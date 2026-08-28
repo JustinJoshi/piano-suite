@@ -6,7 +6,7 @@ import {
 } from "./auth-assertions";
 
 const SIDEBAR_TOOLS = [
-  "Welcome",
+  "Workshop",
   "Chord Drill",
   "Arpeggios",
   "Root Cycling",
@@ -15,24 +15,31 @@ const SIDEBAR_TOOLS = [
   "Tracking",
 ];
 
-test.describe("/tools dashboard", () => {
-  test("redirects unauthenticated visitors to sign-in", async ({ page }) => {
-    assertAuthBypassOffForE2E();
-    await page.goto("/tools");
+const emptyStorageState = { cookies: [] as never[], origins: [] as never[] };
 
-    // Clerk middleware will redirect to /sign-in when there is no session.
-    await expectRedirectedToSignIn(page);
+test.describe("/tools dashboard", () => {
+  test.describe("unsigned", () => {
+    test.use({ storageState: emptyStorageState });
+
+    test("redirects unauthenticated visitors to sign-in", async ({ page }) => {
+      assertAuthBypassOffForE2E();
+      await page.goto("/tools");
+
+      // Clerk middleware will redirect to /sign-in when there is no session.
+      await expectRedirectedToSignIn(page);
+    });
   });
 
-  test("renders the authenticated tools page and sidebar navigation", async ({
+  test("lands on the Workshop and renders sidebar navigation", async ({
     page,
   }) => {
     await signInAsTestUser(page);
     await page.goto("/tools");
 
-    await expect(page.getByRole("heading", { name: "Tools" })).toBeVisible();
+    // /tools redirects to the Workshop, the core of the app.
+    await expect(page).toHaveURL("/tools/workshop");
     await expect(
-      page.getByRole("heading", { name: "Practice dashboard" })
+      page.getByRole("heading", { name: "Workshop" })
     ).toBeVisible();
 
     for (const name of SIDEBAR_TOOLS) {
@@ -42,37 +49,55 @@ test.describe("/tools dashboard", () => {
     }
   });
 
-  test("renders a card for each practice tool when authenticated", async ({
-    page,
-  }) => {
+  test("sidebar groups tools into sections", async ({ page }) => {
     await signInAsTestUser(page);
-    await page.goto("/tools");
+    await page.goto("/tools/workshop");
 
-    for (const name of SIDEBAR_TOOLS) {
-      await expect(
-        page.locator("[data-testid='tool-card-title']", { hasText: name })
-      ).toBeVisible();
-    }
+    const nav = page.locator("aside nav");
+    await expect(nav.getByText("Ready-made drills")).toBeVisible();
+    await expect(nav.getByText("Progress", { exact: true })).toBeVisible();
+    await expect(nav.getByRole("button", { name: "Labs" })).toBeVisible();
+
+    // Labs are tucked away but stay one click away.
+    const labsToggle = nav.getByRole("button", { name: "Labs" });
+    await expect(labsToggle).toHaveAttribute("aria-expanded", "false");
+    await labsToggle.click();
+    await expect(labsToggle).toHaveAttribute("aria-expanded", "true");
+    await expect(
+      nav.getByRole("link", { name: "Chladni Lab" })
+    ).toBeVisible();
   });
 
-  test("sidebar Welcome link navigates to the landing page", async ({
+  test("Workshop offers ready-made drill shortcuts", async ({ page }) => {
+    await signInAsTestUser(page);
+    await page.goto("/tools/workshop");
+
+    await expect(
+      page.getByText("In a hurry? Jump into a ready-made drill:")
+    ).toBeVisible();
+
+    await page
+      .getByRole("main")
+      .getByRole("link", { name: "Chord Drill" })
+      .click();
+    await expect(page).toHaveURL("/tools/chord-drill");
+    await expect(
+      page.getByRole("heading", { name: "Chord Drill" })
+    ).toBeVisible();
+  });
+
+  test("sidebar brand link navigates to the landing page", async ({
     page,
   }) => {
     await signInAsTestUser(page);
-    await page.goto("/tools");
+    await page.goto("/tools/workshop");
 
-    await page.locator("aside nav").getByRole("link", { name: "Welcome" }).click();
+    await page
+      .locator("aside")
+      .getByRole("link", { name: "Piano Suite" })
+      .click();
     await expect(page).toHaveURL("/");
     await expect(page.locator("body")).toContainText("Piano Suite");
-  });
-
-  test("dashboard cards link to their tool routes", async ({ page }) => {
-    await signInAsTestUser(page);
-    await page.goto("/tools");
-
-    await page.getByRole("main").getByRole("link", { name: "Tracking" }).click();
-    await expect(page).toHaveURL("/tools/tracking");
-    await expect(page.getByRole("heading", { name: "Tracking" })).toBeVisible();
   });
 
   test("mobile menu opens the sidebar drawer and navigates", async ({
@@ -80,7 +105,7 @@ test.describe("/tools dashboard", () => {
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await signInAsTestUser(page);
-    await page.goto("/tools");
+    await page.goto("/tools/workshop");
 
     const menuButton = page.getByTestId("dashboard-menu-button");
     await expect(menuButton).toBeVisible();

@@ -14,6 +14,8 @@ import { PageSwitcher } from "@/components/custom-practice/page-switcher";
 import { WorkshopSyncBadge } from "@/components/custom-practice/workshop-sync-badge";
 import { useWorkshopSync } from "@/hooks/useWorkshopSync";
 import { DrillRuntimeProvider } from "@/components/custom-practice/drill-runtime-provider";
+import { StarterPicker } from "@/components/custom-practice/starter-picker";
+import { buildTemplatePage, type StarterTemplate } from "@/lib/starter-templates";
 import {
   getPracticePageStore,
   setPracticePageStore,
@@ -27,6 +29,26 @@ import {
   createPracticePageInStore,
   generateId,
 } from "@/lib/custom-practice-storage";
+
+const STARTER_PICKER_KEY = "piano-suite:starter-picker-dismissed-v1";
+const STARTER_PICKER_EVENT = "piano-suite:starter-picker-change";
+
+function readStarterPickerDismissed(): boolean {
+  try {
+    return window.localStorage.getItem(STARTER_PICKER_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
+function subscribeToStarterPicker(callback: () => void) {
+  window.addEventListener("storage", callback);
+  window.addEventListener(STARTER_PICKER_EVENT, callback);
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener(STARTER_PICKER_EVENT, callback);
+  };
+}
 
 export function PracticePageEditor() {
   const syncStatus = useWorkshopSync(true);
@@ -42,11 +64,43 @@ export function PracticePageEditor() {
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [showPalette, setShowPalette] = useState(false);
   const [insertIndex, setInsertIndex] = useState<number | null>(null);
+  const [showTemplateLibrary, setShowTemplateLibrary] = useState(false);
+  const starterPickerDismissed = useSyncExternalStore(
+    subscribeToStarterPicker,
+    readStarterPickerDismissed,
+    () => true
+  );
 
   const selectedBlock = useMemo(
     () => page.blocks.find((b) => b.id === selectedBlockId) ?? null,
     [page.blocks, selectedBlockId]
   );
+
+  const showStarterPicker =
+    store.pages.length === 1 && page.blocks.length === 0 && !starterPickerDismissed;
+  const showTemplates = showStarterPicker || showTemplateLibrary;
+
+  function dismissStarterPicker() {
+    try {
+      window.localStorage.setItem(STARTER_PICKER_KEY, "true");
+    } catch {
+      // Storage may be disabled; the current session can still dismiss it.
+    }
+    window.dispatchEvent(new Event(STARTER_PICKER_EVENT));
+    setShowTemplateLibrary(false);
+  }
+
+  function selectStarterTemplate(template: StarterTemplate) {
+    const templatePage = buildTemplatePage(template);
+    const pageToStore =
+      page.blocks.length === 0 && store.pages.length === 1
+        ? { ...templatePage, id: page.id }
+        : templatePage;
+    setPracticePageStore(
+      upsertPracticePage(store, pageToStore)
+    );
+    dismissStarterPicker();
+  }
 
   // Drop block selection when the active page changes so the settings panel
   // never edits a block that is no longer on screen. Adjusting state during
@@ -214,6 +268,7 @@ export function PracticePageEditor() {
             onCreate={createPage}
             onDuplicate={duplicatePage}
             onDelete={removePage}
+            onTemplates={() => setShowTemplateLibrary(true)}
           />
 
           <div className="flex items-center justify-between gap-2">
@@ -233,7 +288,13 @@ export function PracticePageEditor() {
             placeholder="Untitled practice page"
           />
 
-          {page.blocks.length === 0 ? (
+           {showTemplates ? (
+             <StarterPicker
+               onSelect={selectStarterTemplate}
+               onDismiss={dismissStarterPicker}
+               canClose={!showStarterPicker}
+             />
+           ) : page.blocks.length === 0 ? (
             <div
               className={cn(
                 "rounded-xl border border-dashed border-border bg-card p-10 text-center"

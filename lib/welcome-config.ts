@@ -80,6 +80,17 @@ export interface WelcomeConfig {
     title: string;
     subtitle: string;
   };
+  howItWorks: {
+    eyebrow: string;
+    title: string;
+    steps: WelcomeFlowStepConfig[];
+  };
+  templateStrip: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    browseHref: string;
+  };
   onboarding: {
     intro: {
       hi: string;
@@ -207,6 +218,21 @@ export const defaultWelcomeConfig: WelcomeConfig = {
     title: "Starter drills and visual labs.",
     subtitle:
       "The Workshop is the core. These tools and labs come built in — use them as-is or pull their blocks into your own practice pages.",
+  },
+  howItWorks: {
+    eyebrow: "how the Workshop works",
+    title: "Make practice fit the way you learn",
+    steps: [
+      { id: "pick", label: "01", text: "Pick a starter drill or begin with a blank page" },
+      { id: "play", label: "02", text: "Press start and play, timed on real keys" },
+      { id: "build", label: "03", text: "Tweak the blocks or build your own routine" },
+    ],
+  },
+  templateStrip: {
+    eyebrow: "ready when you are",
+    title: "Start with a drill, not a blank page",
+    subtitle: "Use a starter routine as-is, then make it yours in the Workshop.",
+    browseHref: "/workshop",
   },
   onboarding: {
     intro: {
@@ -502,6 +528,33 @@ export function validateWelcomeConfig(
     subtitle: clampString(toolsGridInput.subtitle, base.toolsGrid.subtitle),
   };
 
+  const howItWorksInput = isObject(input.howItWorks) ? input.howItWorks : {};
+  const howItWorks: WelcomeConfig["howItWorks"] = {
+    eyebrow: clampString(howItWorksInput.eyebrow, base.howItWorks.eyebrow),
+    title: clampString(howItWorksInput.title, base.howItWorks.title),
+    steps: clampArray(
+      howItWorksInput.steps,
+      base.howItWorks.steps,
+      isValidFlowStep
+    ),
+  };
+
+  const templateStripInput = isObject(input.templateStrip)
+    ? input.templateStrip
+    : {};
+  const templateStrip: WelcomeConfig["templateStrip"] = {
+    eyebrow: clampString(templateStripInput.eyebrow, base.templateStrip.eyebrow),
+    title: clampString(templateStripInput.title, base.templateStrip.title),
+    subtitle: clampString(
+      templateStripInput.subtitle,
+      base.templateStrip.subtitle
+    ),
+    browseHref: clampString(
+      templateStripInput.browseHref,
+      base.templateStrip.browseHref
+    ),
+  };
+
   const onboardingInput = isObject(input.onboarding) ? input.onboarding : {};
   const introInput = isObject(onboardingInput.intro)
     ? onboardingInput.intro
@@ -567,6 +620,8 @@ export function validateWelcomeConfig(
     flow,
     decks,
     toolsGrid,
+    howItWorks,
+    templateStrip,
     onboarding,
     styleTokens,
   };

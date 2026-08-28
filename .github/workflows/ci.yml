@@ -86,6 +86,13 @@ jobs:
     needs: [build, check-e2e-secrets]
     if: needs.check-e2e-secrets.outputs.has-secrets == 'true'
     timeout-minutes: 15
+    # Global e2e lock: every run shares one Clerk dev instance and one test
+    # user, and global teardown deletes that user when a run finishes. A
+    # concurrent e2e job then loses its user mid-run ("No user found with
+    # email"), so jobs must queue instead of running in parallel.
+    concurrency:
+      group: e2e-clerk-test-user
+      cancel-in-progress: false
     env:
       CI: true
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
