@@ -67,6 +67,12 @@ vi.mock("@/lib/local-practice-history", () => ({
   appendLocalWorkshopMiss: vi.fn(),
 }));
 
+const captureEvent = vi.fn();
+
+vi.mock("@/lib/analytics", () => ({
+  captureEvent: (...args: unknown[]) => captureEvent(...args),
+}));
+
 describe("useDrillRuntimeProvider", () => {
   beforeEach(() => {
     mockPhase = "idle";
@@ -190,5 +196,62 @@ describe("useDrillRuntimeProvider", () => {
       })
     );
     expect(logPracticeEvent).not.toHaveBeenCalled();
+  });
+
+  it("emits drill_started when the drill starts", () => {
+    const { result } = renderHook(() =>
+      useDrillRuntimeProvider({ pageId: "page-1" })
+    );
+
+    act(() => {
+      result.current.start();
+    });
+
+    expect(captureEvent).toHaveBeenCalledWith("drill_started", {
+      pageId: "page-1",
+    });
+  });
+
+  it("emits drill_completed once on transition into finished", () => {
+    mockPhase = "timing";
+    const { result, rerender } = renderHook(() =>
+      useDrillRuntimeProvider({ pageId: "page-1" })
+    );
+
+    act(() => {
+      result.current.setTargets([
+        { id: "Cmaj7", symbol: "Cmaj7", notes: ["C", "E", "G", "B"], pcs: new Set([0, 4, 7, 11]) },
+      ]);
+    });
+
+    mockPhase = "finished";
+    rerender();
+
+    expect(captureEvent).toHaveBeenCalledWith("drill_completed", {
+      pageId: "page-1",
+    });
+    expect(captureEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it("emits drill_completed again on each new finished run", () => {
+    mockPhase = "finished";
+    const { result, rerender } = renderHook(() =>
+      useDrillRuntimeProvider({ pageId: "page-1" })
+    );
+
+    expect(captureEvent).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      mockPhase = "idle";
+      result.current.reset();
+    });
+    rerender();
+    expect(captureEvent).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      mockPhase = "finished";
+    });
+    rerender();
+    expect(captureEvent).toHaveBeenCalledTimes(2);
   });
 });
