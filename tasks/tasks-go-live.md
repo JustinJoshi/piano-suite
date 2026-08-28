@@ -53,13 +53,13 @@ command output named in the sub-task (test fail → pass, lint, build, e2e).
   - [x] 1.6 Mount PostHog provider in `app/layout.tsx`; verify `npm run build` passes
   - [x] 1.7 Sentry per Next 16 docs (read `node_modules/next/dist/docs/` first): client+server config, `onRequestError` hook, test capture locally; document DSN var in runbook
 
-- [ ] 2.0 Founding Pro waitlist (replaces billing pre-launch)
-  - [ ] 2.1 Write `convex/__tests__/waitlist.test.ts` FIRST: anonymous signup inserts with normalized email; duplicate email returns existing/`alreadyJoined` (no second row); invalid email rejected; `waitlistCount` returns count with `returns` validator; signed-in signup attaches optional `userId`. Run — expect FAIL
-  - [ ] 2.2 Add `waitlistSignups` (email, userId optional, createdAt, source) with `by_email` index to `convex/schema.ts`; implement `convex/waitlist.ts`. Re-run — expect PASS
-  - [ ] 2.3 Write `lib/__tests__/billing.test.ts` FIRST for `BILLING_ENABLED=false` default + waitlist label helpers. Expect FAIL → implement in `lib/billing.ts` → PASS
-  - [ ] 2.4 Write `waitlist-cta.test.tsx` FIRST: renders headline + email input; valid submit → success state; duplicate → friendly already-joined state; invalid → inline error. Expect FAIL → implement `components/waitlist/waitlist-cta.tsx` → PASS
-  - [ ] 2.5 Swap `PricingTable` → `WaitlistCta` on `/pricing` gated by `BILLING_ENABLED` (one-flag restore later); add FAQ tweak "Pro launches soon — join the Founding Pro waitlist"
-  - [ ] 2.6 Mount `WaitlistCta` in workshop runtime UI after first `finished` phase (once per session, dismissible, localStorage flag) — value-moment placement, never pre-drill
+- [x] 2.0 Founding Pro waitlist (replaces billing pre-launch)
+  - [x] 2.1 Write `convex/__tests__/waitlist.test.ts` FIRST: anonymous signup inserts with normalized email; duplicate email returns existing/`alreadyJoined` (no second row); invalid email rejected; `waitlistCount` returns count with `returns` validator; signed-in signup attaches optional `userId`. Run — expect FAIL
+  - [x] 2.2 Add `waitlistSignups` (email, userId optional, createdAt, source) with `by_email` index to `convex/schema.ts`; implement `convex/waitlist.ts`. Re-run — expect PASS
+  - [x] 2.3 Write `lib/__tests__/billing.test.ts` FIRST for `BILLING_ENABLED=false` default + waitlist label helpers. Expect FAIL → implement in `lib/billing.ts` → PASS
+  - [x] 2.4 Write `waitlist-cta.test.tsx` FIRST: renders headline + email input; valid submit → success state; duplicate → friendly already-joined state; invalid → inline error. Expect FAIL → implement `components/waitlist/waitlist-cta.tsx` → PASS
+  - [x] 2.5 Swap `PricingTable` → `WaitlistCta` on `/pricing` gated by `BILLING_ENABLED` (one-flag restore later); add FAQ tweak "Pro launches soon — join the Founding Pro waitlist"
+  - [x] 2.6 Mount `WaitlistCta` in workshop runtime UI after first `finished` phase (once per session, dismissible, localStorage flag) — value-moment placement, never pre-drill
 
 - [ ] 3.0 Terms + Privacy pages
   - [ ] 3.1 Write `e2e/go-live.spec.ts` FIRST: `/terms` + `/privacy` → 200, `expectNotBare404` + `expectNoApplicationError`, footer/nav link navigates. Run — expect FAIL (404)
