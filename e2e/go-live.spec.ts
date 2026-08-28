@@ -57,10 +57,11 @@ test.describe("go-live: waitlist replaces billing", () => {
   }) => {
     await page.goto("/pricing");
 
-    await page.getByLabel(/email/i).fill("e2e@example.com");
+    const email = `e2e-${Date.now()}@example.com`;
+    await page.getByLabel(/email/i).fill(email);
     await page.getByRole("button", { name: /join/i }).click();
 
-    await expect(page.getByText(/#1/i)).toBeVisible();
+    await expect(page.getByText(/you're in/i)).toBeVisible();
 
     const events = await page.evaluate(
       () =>
