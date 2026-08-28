@@ -117,5 +117,6 @@ export default defineSchema({
     source: v.optional(v.string()),
     createdAt: v.number(),
   })
-    .index("by_email", ["email"]),
+    .index("by_email", ["email"])
+    .index("by_position", ["position"]),
 });

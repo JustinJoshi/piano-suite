@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import type { QueryCtx } from "./_generated/server";
 import { ensureUserId } from "./lib/auth";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -10,6 +11,16 @@ function normalizeEmail(email: string): string {
     throw new Error("Invalid email address");
   }
   return trimmed;
+}
+
+// Rows are never deleted, so the max position doubles as the row count.
+async function latestPosition(ctx: QueryCtx): Promise<number> {
+  const latest = await ctx.db
+    .query("waitlistSignups")
+    .withIndex("by_position")
+    .order("desc")
+    .first();
+  return latest?.position ?? 0;
 }
 
 export const joinWaitlist = mutation({
@@ -38,8 +49,7 @@ export const joinWaitlist = mutation({
     const identity = await ctx.auth.getUserIdentity();
     const userId = identity ? await ensureUserId(ctx) : undefined;
 
-    const position =
-      (await ctx.db.query("waitlistSignups").collect()).length + 1;
+    const position = (await latestPosition(ctx)) + 1;
 
     await ctx.db.insert("waitlistSignups", {
       email,
@@ -57,7 +67,7 @@ export const waitlistCount = query({
   args: {},
   returns: v.number(),
   handler: async (ctx) => {
-    return (await ctx.db.query("waitlistSignups").collect()).length;
+    return await latestPosition(ctx);
   },
 });
 
