@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 import { existsSync } from "fs";
 import path from "path";
+import { withSentryConfig } from "@sentry/nextjs";
 
 // In a git worktree, node_modules lives in the main repo root while __dirname
 // points at the worktree. Resolve the project root by finding the Next.js
@@ -35,4 +36,12 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  // Skip source-map upload wherever the token is absent (dev, CI, preview);
+  // it switches on automatically once SENTRY_AUTH_TOKEN is provisioned.
+  sourcemaps: { disable: !process.env.SENTRY_AUTH_TOKEN },
+  disableLogger: true,
+});
