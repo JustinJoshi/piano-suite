@@ -41,17 +41,17 @@ command output named in the sub-task (test fail → pass, lint, build, e2e).
 
 ## Tasks
 
-- [ ] 0.0 Create feature branch
-  - [ ] 0.1 `git worktree add .worktrees/justin-go-live -b justin/go-live` from repo root; all work inside the worktree
+- [x] 0.0 Create feature branch
+  - [x] 0.1 `git worktree add .worktrees/justin-go-live -b justin/go-live` from repo root; all work inside the worktree
 
-- [ ] 1.0 Analytics + error monitoring
-  - [ ] 1.1 Add deps (`posthog-js`, `@sentry/nextjs`) — one commit, this branch owns package.json for the batch
-  - [ ] 1.2 Write `lib/__tests__/analytics.test.ts` FIRST: (a) rejects/never emits names outside the 3-event const list, (b) capture is a no-op when `NEXT_PUBLIC_POSTHOG_KEY` unset, (c) test-mode mirror lands in `window.__analyticsEvents`. Run `npx vitest run lib/__tests__/analytics.test.ts` — expect FAIL
-  - [ ] 1.3 Implement `lib/analytics.ts` (lazy posthog-js init, autocapture OFF, names from a const tuple). Re-run — expect PASS
-  - [ ] 1.4 Write event-emission tests for `useDrillRuntimeProvider` FIRST: `start()` → `drill_started`; transition to `finished` → `drill_completed` (payload includes `pageId`). Expect FAIL
-  - [ ] 1.5 Wire the two captures into `hooks/useDrillRuntime.ts` (start callback + finished transition, no pageId requirement for emission). Re-run — expect PASS; `npm run test:unit:run` green
-  - [ ] 1.6 Mount PostHog provider in `app/layout.tsx`; verify `npm run build` passes
-  - [ ] 1.7 Sentry per Next 16 docs (read `node_modules/next/dist/docs/` first): client+server config, `onRequestError` hook, test capture locally; document DSN var in runbook
+- [x] 1.0 Analytics + error monitoring
+  - [x] 1.1 Add deps (`posthog-js`, `@sentry/nextjs`) — one commit, this branch owns package.json for the batch
+  - [x] 1.2 Write `lib/__tests__/analytics.test.ts` FIRST: (a) rejects/never emits names outside the 3-event const list, (b) capture is a no-op when `NEXT_PUBLIC_POSTHOG_KEY` unset, (c) test-mode mirror lands in `window.__analyticsEvents`. Run `npx vitest run lib/__tests__/analytics.test.ts` — expect FAIL
+  - [x] 1.3 Implement `lib/analytics.ts` (lazy posthog-js init, autocapture OFF, names from a const tuple). Re-run — expect PASS
+  - [x] 1.4 Write event-emission tests for `useDrillRuntimeProvider` FIRST: `start()` → `drill_started`; transition to `finished` → `drill_completed` (payload includes `pageId`). Expect FAIL
+  - [x] 1.5 Wire the two captures into `hooks/useDrillRuntime.ts` (start callback + finished transition, no pageId requirement for emission). Re-run — expect PASS; `npm run test:unit:run` green
+  - [x] 1.6 Mount PostHog provider in `app/layout.tsx`; verify `npm run build` passes
+  - [x] 1.7 Sentry per Next 16 docs (read `node_modules/next/dist/docs/` first): client+server config, `onRequestError` hook, test capture locally; document DSN var in runbook
 
 - [ ] 2.0 Founding Pro waitlist (replaces billing pre-launch)
   - [ ] 2.1 Write `convex/__tests__/waitlist.test.ts` FIRST: anonymous signup inserts with normalized email; duplicate email returns existing/`alreadyJoined` (no second row); invalid email rejected; `waitlistCount` returns count with `returns` validator; signed-in signup attaches optional `userId`. Run — expect FAIL
