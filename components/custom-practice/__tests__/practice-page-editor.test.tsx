@@ -4,6 +4,7 @@ import { PracticePageEditor } from "@/components/custom-practice/practice-page-e
 import {
   resetPracticePageStore,
   setPracticePageStore,
+  getPracticePageStore,
   createEmptyPracticePage,
   createEmptyPracticePageStore,
 } from "@/lib/custom-practice-storage";
@@ -112,7 +113,7 @@ describe("PracticePageEditor", () => {
     expect(screen.queryByText("Cancel")).not.toBeInTheDocument();
   });
 
-  it("inserts a block at the top placeholder", async () => {
+  it("adds a block from the empty-state CTA", async () => {
     seedWithPage();
 
     render(<PracticePageEditor />);
@@ -129,6 +130,55 @@ describe("PracticePageEditor", () => {
     });
 
     expect(screen.getByTestId("bpm-display")).toHaveTextContent("120 BPM");
+  });
+
+  it("renders blocks inside the workshop grid", async () => {
+    seedWithPage();
+
+    render(<PracticePageEditor />);
+
+    fireEvent.click(screen.getByRole("button", { name: /add feature/i }));
+    fireEvent.click(screen.getByText("Metronome"));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("workshop-grid")).toBeInTheDocument();
+    });
+    expect(screen.getByTestId("bpm-display")).toBeInTheDocument();
+  });
+
+  it("persists a resized tile back to the store", async () => {
+    seedWithPage();
+
+    render(<PracticePageEditor />);
+
+    fireEvent.click(screen.getByRole("button", { name: /add feature/i }));
+    fireEvent.click(screen.getByText("Metronome"));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("workshop-grid")).toBeInTheDocument();
+    });
+
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
+      width: 400,
+      height: 160,
+      top: 0,
+      left: 0,
+      bottom: 160,
+      right: 400,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    } as DOMRect);
+
+    fireEvent.pointerDown(screen.getByLabelText("Resize tile"), {
+      clientX: 0,
+      clientY: 0,
+    });
+    fireEvent.pointerMove(window, { clientX: 410, clientY: 0 });
+    fireEvent.pointerUp(window);
+
+    const stored = getPracticePageStore().pages[0].blocks[0];
+    expect(stored.size).toEqual({ w: 3, h: 1 });
   });
 
   it("duplicates a block from the hover toolbar", async () => {

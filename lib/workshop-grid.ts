@@ -1,4 +1,4 @@
-import type { FeatureBlock } from "./types";
+import type { FeatureBlock } from "./feature-blocks/types";
 
 /**
  * Pure layout math for the Workshop grid.
@@ -32,10 +32,16 @@ export type MediaQueryFn = (query: string) => { matches: boolean };
 
 /**
  * Active grid column count for the current viewport. `match` is injectable
- * so tests can stub `window.matchMedia`.
+ * so tests can stub `window.matchMedia`. Environments without matchMedia
+ * (jsdom, old browsers) fall back to the smallest grid.
  */
 export function currentGridColumns(
-  match: MediaQueryFn = (query) => ({ matches: window.matchMedia(query).matches })
+  match: MediaQueryFn = (query) => ({
+    matches:
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia(query).matches,
+  })
 ): number {
   if (match(`(min-width: ${XL_BREAKPOINT_PX}px)`).matches) return MAX_GRID_COLUMNS;
   if (match(`(min-width: ${MD_BREAKPOINT_PX}px)`).matches) return 2;
@@ -64,7 +70,10 @@ function toInt(n: unknown): number | undefined {
 }
 
 /** Resolved size for a block: stored size, else the per-type default. */
-export function blockSize(block: Pick<FeatureBlock, "type" | "size">): BlockSize {
+export function blockSize(block: {
+  type: string;
+  size?: BlockSize;
+}): BlockSize {
   if (block.size) return block.size;
   return TYPE_DEFAULT_SIZES[block.type] ?? DEFAULT_SIZE;
 }

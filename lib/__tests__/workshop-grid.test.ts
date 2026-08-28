@@ -63,6 +63,17 @@ describe("currentGridColumns", () => {
   it("returns 4 columns at the large breakpoint", () => {
     expect(currentGridColumns(media([md, xl]))).toBe(4);
   });
+
+  it("falls back to 1 column when matchMedia is unavailable", () => {
+    const original = window.matchMedia;
+    // jsdom does not implement matchMedia.
+    (window as { matchMedia?: unknown }).matchMedia = undefined;
+    try {
+      expect(currentGridColumns()).toBe(1);
+    } finally {
+      window.matchMedia = original;
+    }
+  });
 });
 
 describe("blockSize", () => {

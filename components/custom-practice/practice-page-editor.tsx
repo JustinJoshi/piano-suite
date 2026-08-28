@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { PracticePage, FeatureBlock } from "@/lib/feature-blocks/types";
 import { getFeatureDefinition } from "@/lib/feature-blocks/registry";
+import { resizeBlocks } from "@/lib/workshop-grid";
 import { FeaturePalette } from "@/components/custom-practice/feature-palette";
 import { FeatureSettingsPanel } from "@/components/custom-practice/feature-settings-panel";
 import { ShareMenu } from "@/components/custom-practice/share-menu";
-import { SortableBlockList } from "@/components/custom-practice/sortable-block-list";
+import { WorkshopGrid } from "@/components/workshop-grid/workshop-grid";
 import { PageSwitcher } from "@/components/custom-practice/page-switcher";
 import { WorkshopSyncBadge } from "@/components/custom-practice/workshop-sync-badge";
 import { useWorkshopSync } from "@/hooks/useWorkshopSync";
@@ -41,7 +42,6 @@ export function PracticePageEditor() {
 
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [showPalette, setShowPalette] = useState(false);
-  const [insertIndex, setInsertIndex] = useState<number | null>(null);
 
   const selectedBlock = useMemo(
     () => page.blocks.find((b) => b.id === selectedBlockId) ?? null,
@@ -55,7 +55,6 @@ export function PracticePageEditor() {
   if (page.id !== lastPageId) {
     setLastPageId(page.id);
     setSelectedBlockId(null);
-    setInsertIndex(null);
     setShowPalette(false);
   }
 
@@ -84,13 +83,11 @@ export function PracticePageEditor() {
     setPracticePageStore(deletePracticePage(store, page.id));
   }
 
-  function openPalette(atIndex?: number) {
-    setInsertIndex(atIndex ?? null);
+  function openPalette() {
     setShowPalette(true);
   }
 
   function closePalette() {
-    setInsertIndex(null);
     setShowPalette(false);
   }
 
@@ -105,15 +102,9 @@ export function PracticePageEditor() {
       config: { ...def.defaultConfig },
     };
 
-    const targetIndex = insertIndex ?? page.blocks.length;
-
     updatePage((prev) => ({
       ...prev,
-      blocks: [
-        ...prev.blocks.slice(0, targetIndex),
-        newBlock,
-        ...prev.blocks.slice(targetIndex),
-      ],
+      blocks: [...prev.blocks, newBlock],
     }));
     setSelectedBlockId(newBlock.id);
     closePalette();
@@ -160,24 +151,12 @@ export function PracticePageEditor() {
     setSelectedBlockId(newBlock.id);
   }
 
-  function moveBlock(id: string, direction: "up" | "down") {
-    const index = page.blocks.findIndex((b) => b.id === id);
-    if (index === -1) return;
-    if (direction === "up" && index === 0) return;
-    if (direction === "down" && index === page.blocks.length - 1) return;
-
-    const nextIndex = direction === "up" ? index - 1 : index + 1;
-    const nextBlocks = [...page.blocks];
-    [nextBlocks[index], nextBlocks[nextIndex]] = [
-      nextBlocks[nextIndex],
-      nextBlocks[index],
-    ];
-
-    updatePage((prev) => ({ ...prev, blocks: nextBlocks }));
-  }
-
   function handleReorder(blocks: FeatureBlock[]) {
     updatePage((prev) => ({ ...prev, blocks }));
+  }
+
+  function handleResize(id: string, size: { w?: number; h?: number }) {
+    updatePage((prev) => ({ ...prev, blocks: resizeBlocks(prev.blocks, id, size) }));
   }
 
   useEffect(() => {
@@ -248,16 +227,12 @@ export function PracticePageEditor() {
               </Button>
             </div>
           ) : (
-            <SortableBlockList
+            <WorkshopGrid
               blocks={page.blocks}
-              selectedBlockId={selectedBlockId}
-              onSelect={setSelectedBlockId}
               onReorder={handleReorder}
-              onMoveUp={(id) => moveBlock(id, "up")}
-              onMoveDown={(id) => moveBlock(id, "down")}
+              onResize={handleResize}
               onDuplicate={duplicateBlock}
               onRemove={removeBlock}
-              onInsertAtIndex={openPalette}
             />
           )}
 
