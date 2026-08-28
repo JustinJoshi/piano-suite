@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Music, Zap, RefreshCw } from "lucide-react";
+import { Music, Zap, RefreshCw, Wrench } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DashboardMenuButton } from "@/components/tools/dashboard-nav";
 import { ChordDrillPanel } from "@/components/tracking/chord-drill-panel";
 import { ArpeggioPanel } from "@/components/tracking/arpeggio-panel";
 import { RootCyclingPanel } from "@/components/tracking/root-cycling-panel";
+import { WorkshopPanel } from "@/components/tracking/workshop-panel";
 import { ImportLocalStorage } from "@/components/tracking/import-local-storage";
 import { useToolUserReady } from "@/hooks/useToolUserReady";
 import { localPracticeBanner } from "@/lib/billing";
@@ -16,6 +17,7 @@ const tabs = [
   { id: "chords", label: "Chord Drill", icon: Music },
   { id: "arpeggios", label: "Arpeggios", icon: Zap },
   { id: "rootcycle", label: "Root Cycling", icon: RefreshCw },
+  { id: "workshop", label: "Workshop", icon: Wrench },
 ];
 
 export default function TrackingPage() {
@@ -87,6 +89,7 @@ export default function TrackingPage() {
               {activeTab === "chords" && <ChordDrillPanel />}
               {activeTab === "arpeggios" && <ArpeggioPanel />}
               {activeTab === "rootcycle" && <RootCyclingPanel />}
+              {activeTab === "workshop" && <WorkshopPanel />}
             </div>
 
             {canPersist ? <ImportLocalStorage /> : null}

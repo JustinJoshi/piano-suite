@@ -5,10 +5,10 @@
 > audit: method, per-tool findings with file:line evidence and best-practice
 > sources, and the consolidated priority list.
 >
-> **Status:** Phases 1–6 plus the articles-public change are **shipped** and
-> merged to `main` (PRs #39–#46). The consolidated priority list below has
-> been updated to show which items are fixed; unresolved findings remain for
-> Phases 7–12.
+> **Status:** Phases 1–9 plus the articles-public change, the MIDI-viz
+> foundation (Phase B), and Logo Lab are **shipped** and merged to `main`
+> (PRs #28, #38–#52). The consolidated priority list below has been updated
+> to show which items are fixed; unresolved findings remain for Phases 10–12.
 
 ## Method
 
@@ -48,11 +48,11 @@ genuinely static (`generateStaticParams`); `AmbientEffectsHost` uses
   (PR #44).** The lab components now dynamically import their visualization
   with `next/dynamic({ ssr: false })` so three.js is not in the initial
   `/tools/chladni` route bundle.
-- **`MusicPlayerProvider` re-renders every context consumer at 60fps during
+- ~~**`MusicPlayerProvider` re-renders every context consumer at 60fps during
   playback.** `hooks/useMusicPlayer.tsx:310-324` sets progress state every
   animation frame; the context value (`:407-420`) is a fresh object every
   render. Fix: progress in a ref/subscription; memoize the value. Effort:
-  medium.
+  medium.~~ — **FIXED in Phase 7 (PR #50).**
 - **Metadata/SEO broken three ways.** Only 3 routes define metadata
   (`app/layout.tsx:32`, `app/pricing/page.tsx:4`,
   `app/articles/[slug]/page.tsx:17`); every tool/settings/chat page is
@@ -251,17 +251,18 @@ convex-test usage matches the docs; sane CI defaults in
 
 ### Findings (highest impact first)
 
-1. **No CI at all — HIGH, low effort.** No `.github/` directory; the
-   AGENTS.md merge gate runs only if a human/agent remembers. (Phase 9.)
+1. ~~**No CI at all — HIGH, low effort.** No `.github/` directory; the
+   AGENTS.md merge gate runs only if a human/agent remembers.~~ — **FIXED
+   in Phase 9 (PR #52).**
 2. **`hooks/useChordDrill.ts` (942 lines) has zero tests — HIGH.** The
    flagship drill hook is untested while its peers all have suites.
    (Phase 10.)
-3. **Convex tests run under jsdom instead of edge-runtime — MED-HIGH, low
+3. ~~**Convex tests run under jsdom instead of edge-runtime — MED-HIGH, low
    effort.** `vitest.config.ts:8` sets jsdom globally; convex-test docs
-   recommend Vitest 4 `projects` with `edge-runtime` + `@edge-runtime/vm`.
-   (Phase 9.)
-4. **No coverage tooling — MED, low effort.** No `@vitest/coverage-v8`, no
-   `test:coverage` script. (Phase 9.)
+   recommend Vitest 4 `projects` with `edge-runtime` + `@edge-runtime/vm`.~~
+   — **FIXED in Phase 9 (PR #52).**
+4. ~~**No coverage tooling — MED, low effort.** No `@vitest/coverage-v8`, no
+   `test:coverage` script.~~ — **FIXED in Phase 9 (PR #52).**
 5. **Untested pure-logic lib files — MED.** `lib/audio-presets.ts` (371
    lines, preset ID validation), `lib/audio-upload.ts`, `lib/articles.ts`,
    `lib/tools.ts`, `lib/dev-tools.ts`; `lib/sequence-drill.ts` only covered
@@ -278,8 +279,9 @@ convex-test usage matches the docs; sane CI defaults in
    specs sign in as one shared user under `fullyParallel: true`; safe today
    only because the user is Free. Teardown deletes the user but an
    interrupted run leaves data behind; setup never clears it. (Phase 12.)
-9. **CI would test against `next dev`, not a production build — MED (once
-   CI exists).** Playwright recommends `next build && next start` in CI.
+9. ~~**CI would test against `next dev`, not a production build — MED (once
+   CI exists).** Playwright recommends `next build && next start` in CI.~~
+   — **FIXED in Phase 9 (PR #52).**
 10. **No `@testing-library/user-event`; 50+ raw `fireEvent` calls —
     LOW-MED.** Migrate incrementally.
 11. **Brittle CSS selectors in E2E — LOW.**
@@ -308,18 +310,19 @@ Sources: [MDN autoplay guide](https://developer.mozilla.org/en-US/docs/Web/Media
   `play()`; notes scheduled at a frozen `currentTime` burst out on resume.
   Fixed: one-time gesture listener + skip-scheduling guard +
   `resumeFromUserGesture()`.
-- **Song scheduling uses per-note `setTimeout` — drifts, throttles,
+- ~~**Song scheduling uses per-note `setTimeout` — drifts, throttles,
   doesn't scale.** `lib/music-player.ts:169-205` creates ~2 timers per note
   for the whole song; progress advances by `+0.016`/frame assuming 60fps
   (`hooks/useMusicPlayer.tsx:309-311`). Fix: lookahead scheduler against
-  `ctx.currentTime` (smplr 1.0 ships `Sequencer`/`Scheduler`). (Phase 8.)
+  `ctx.currentTime` (smplr 1.0 ships `Sequencer`/`Scheduler`).~~ — **FIXED
+  in Phase 8 (PR #51).**
 - **Race: async load continuation mutated a disposed engine** (FIXED in
   Phase 2) — disposed flag guards all post-`await` continuations.
 
 ### Medium impact
 
-- **Metronome drifts** (`hooks/useAudio.ts:149-150`, `setInterval`).
-  (Phase 8.)
+- ~~**Metronome drifts** (`hooks/useAudio.ts:149-150`, `setInterval`).~~
+  — **FIXED in Phase 8 (PR #51).**
 - **MIDI: stuck held notes on disconnect (FIXED); permission denial
   misreported as unsupported (FIXED in Phase 2).**
 - **Samples loaded eagerly even with sound off** (FIXED in Phase 2 —
@@ -364,12 +367,13 @@ Multigrid; renderer construction wrapped in try/catch.
   60fps — FIXED in Phase 5 (PR #44).** `hooks/useVisibilityPause.ts` pauses
   RAF loops when the visual leaves the viewport; applied to the four lab
   visualizations and the ambient host.
-- **60fps React state churn driving the multigrid ambient background.**
+- ~~**60fps React state churn driving the multigrid ambient background.**
   `MultigridBackgroundInner` calls `setMorph` every frame
   (`multigrid-background.tsx:49-80`) → full `blendRecipes` +
   `buildMultigridScene` rebuild + repaint per frame. Same pattern (less
   expensive) in ambient Julia/Lissajous and `useChladniRipple.ts:101-119`
-  (`setViz` every frame even with zero MIDI). (Phase 7.)
+  (`setViz` every frame even with zero MIDI).~~ — **FIXED in Phase 7
+  (PR #50).**
 
 ### Medium
 
@@ -480,15 +484,16 @@ runtime-swappable tokens; ThemeProvider wiring matches the AGENTS.md rule
 6. ~~three.js statically bundled into public routes~~ — **FIXED (Phase 5,
    PR #44).**
 7. ~~Unbounded `.collect()` on event tables~~ — **FIXED (Phase 6, PR #46).**
-8. 60fps React state churn (multigrid morph, ripple `setViz`, music-player
-   progress context) — Phase 7.
+8. ~~60fps React state churn (multigrid morph, ripple `setViz`, music-player
+   progress context)~~ — **FIXED in Phase 7 (PR #50).**
 9. ~~No off-screen pausing (dual WebGL contexts at all times)~~ — **FIXED
    (Phase 5, PR #44).**
-10. Per-note `setTimeout` song scheduling + drifting metronome — Phase 8.
+10. ~~Per-note `setTimeout` song scheduling + drifting metronome~~ — **FIXED
+    in Phase 8 (PR #51).**
 
 ### P2 — Medium
 
-11. No CI — Phase 9.
+11. ~~No CI~~ — **FIXED in Phase 9 (PR #52).**
 12. Metadata/SEO + articles-public decision — Phase 11 (articles public
     **FIXED** in PR #41; metadata/SEO remains).
 13. MIDI hygiene (stuck notes FIXED in Phase 2; CC64 sustain pedal open) —
@@ -496,7 +501,8 @@ runtime-swappable tokens; ThemeProvider wiring matches the AGENTS.md rule
 14. ~~Convex `returns` validators, unused indexes, table-name args, eslint
     plugin~~ — **FIXED (Phase 6, PR #46).**
 15. Test coverage gaps (`useChordDrill`, `audio-presets`, persistence
-    hooks, edge-runtime split, coverage tooling) — Phases 9–10.
+    hooks). Edge-runtime split and coverage tooling are **FIXED in Phase 9
+    (PR #52)**; remaining test authoring is Phase 10.
 16. ~~Eager sample loading~~ — **FIXED (Phase 2).** IndexedDB hygiene remains
     Phase 12.
 17. ~~`/api` blanket-public + prefix matching~~ — **FIXED (Phase 1, rule

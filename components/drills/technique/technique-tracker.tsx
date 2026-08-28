@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { useAudio } from "@/hooks/useAudio";
+import { MetronomeBlock } from "@/components/feature-blocks/metronome-block";
 import { useAuthAccess } from "@/hooks/useAuthAccess";
 import { useLocalPracticeHistoryVersion } from "@/hooks/useLocalPracticeHistory";
 import { localPracticeBanner } from "@/lib/billing";
+import { metronomeDefaultConfig } from "@/lib/feature-blocks/metronome/config";
 import {
   clearLocalTechniqueLog,
   readLocalTechniqueLog,
@@ -21,7 +22,7 @@ import {
 } from "@/lib/technique";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Play, Square, Check, Flame, RotateCcw } from "lucide-react";
+import { Check, Flame, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 function sessionsToLog(
@@ -39,7 +40,6 @@ function sessionsToLog(
 }
 
 export function TechniqueTracker() {
-  const { ready, startMetronome, stopMetronome, metronomeRunning } = useAudio();
   const { canPersist } = useAuthAccess();
   const localVersion = useLocalPracticeHistoryVersion();
   const sessions = useQuery(
@@ -52,7 +52,6 @@ export function TechniqueTracker() {
   const [exerciseName, setExerciseName] = useState("Czerny 5-Finger Pattern");
   const [bpm, setBpm] = useState(60);
   const [notesToday, setNotesToday] = useState("");
-  const [pulse, setPulse] = useState(false);
   const [saving, setSaving] = useState(false);
   const [clearing, setClearing] = useState(false);
 
@@ -66,21 +65,6 @@ export function TechniqueTracker() {
   const grid = useMemo(() => buildGrid(log, 28), [log]);
   const doneToday = !!log[today];
   const hasHistory = Object.keys(log).length > 0;
-
-  const toggleMetronome = useCallback(() => {
-    if (metronomeRunning) {
-      stopMetronome();
-      return;
-    }
-    startMetronome(bpm, () => setPulse((p) => !p));
-  }, [metronomeRunning, stopMetronome, startMetronome, bpm]);
-
-  // Keep the metronome tempo in sync while it is running.
-  useEffect(() => {
-    if (metronomeRunning) {
-      startMetronome(bpm, () => setPulse((p) => !p));
-    }
-  }, [bpm, metronomeRunning, startMetronome]);
 
   async function markDoneToday() {
     setSaving(true);
@@ -156,53 +140,14 @@ export function TechniqueTracker() {
             />
           </div>
 
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Metronome
-              </label>
-              <div className="flex items-center gap-3">
-                <div
-                  data-testid="pulse-dot"
-                  className={cn(
-                    "h-3 w-3 rounded-full transition-all duration-100",
-                    pulse && metronomeRunning
-                      ? "bg-primary shadow-[0_0_12px_2px_var(--primary-glow)]"
-                      : "bg-muted"
-                  )}
-                />
-                <span data-testid="bpm-display" className="font-heading text-2xl font-semibold">
-                  {bpm} BPM
-                </span>
-              </div>
-            </div>
-            <input
-              data-testid="bpm-slider"
-              type="range"
-              min={40}
-              max={160}
-              value={bpm}
-              onChange={(e) => setBpm(Number(e.target.value))}
-              className="w-full accent-primary"
-            />
-            <Button
-              data-testid="metronome-btn"
-              onClick={toggleMetronome}
-              disabled={!ready}
-              variant={metronomeRunning ? "destructive" : "default"}
-              className="w-full"
-            >
-              {metronomeRunning ? (
-                <>
-                  <Square className="h-4 w-4" /> Stop Metronome
-                </>
-              ) : (
-                <>
-                  <Play className="h-4 w-4" /> Start Metronome
-                </>
-              )}
-            </Button>
-          </div>
+          <MetronomeBlock
+            bpm={bpm}
+            onBpmChange={setBpm}
+            minBpm={40}
+            maxBpm={160}
+            beatsPerBar={metronomeDefaultConfig.beatsPerBar}
+            accentFirstBeat={metronomeDefaultConfig.accentFirstBeat}
+          />
 
           <div className="space-y-2">
             <label

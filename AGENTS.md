@@ -77,6 +77,8 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `proxy.ts` | Clerk route gate (Next 16 proxy convention); public-route list + `unauthenticatedUrl` redirect. `/api` is public by design — **every `app/api/**/route.ts` handler must authorize itself via `auth()`** (e.g. `/api/chat`) |
 | `app/error.tsx`, `app/global-error.tsx` | Error boundaries so a thrown query cannot blank the app |
 | `components/drills/drill-shell.tsx` | Shared layout wrapper for every tool page |
+| `lib/tools.ts` | Grouped tool registry (`workshopTool`, `drillTools`, `insightTools`, `labTools`) driving sidebar sections and the landing grid |
+| `components/tools/ready-made-drills.tsx` | Ready-made drill shortcut strip on the Workshop page |
 | `components/tools/dashboard-nav.tsx` | Dashboard drawer open state + mobile Menu button |
 | `components/tools/dashboard-shell.tsx` | Shared tools/settings shell (provider + sidebar + main) |
 | `lib/welcome-config.ts` | Typed copy + style-token config for the landing page and onboarding |
@@ -85,6 +87,12 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `app/dev/welcome-lab/page.tsx` | Interactive lab for tuning welcome copy and style tokens |
 | `lib/dev-tools.ts` | Environment helpers for `/dev/*` pages and links (currently always enabled) |
 | `components/dev-tools-link.tsx` | Floating link to the dev lab |
+| `lib/feature-blocks/*` | Workshop feature-block registry, types, and per-block config schemas + editor field descriptors |
+| `components/feature-blocks/*` | Feature-block render components (metronome, drill timer, chord set) |
+| `components/custom-practice/*` | Workshop practice-page editor: sortable block list, feature palette (`/` shortcut), settings panel, `DrillRuntimeProvider` |
+| `lib/custom-practice-storage.ts` | `localStorage` persistence for custom practice pages (Free tier) |
+| `lib/drill-runtime.ts` / `hooks/useDrillRuntime.ts` | Shared drill runtime context (countdown → armed → timing → success → break → finished) driving workshop blocks; logs events to Convex (Pro) or local history (Free) |
+| `hooks/useChordTargets.ts` | Sequential / random chord-target generation from selected roots and quality groups |
 
 ## Welcome / onboarding conventions
 
@@ -100,6 +108,15 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 3. **Log practice events to Convex.** The `practiceEvents` and `missEvents` tables are the source of truth for tracking. Do not store drill history only in component state or localStorage.
 4. **Keep Anki integration optional.** All Anki features must degrade gracefully when AnkiConnect is not running.
 5. **Add unit tests for pure logic.** Chord parsing, scoring, and Anki client behavior must be tested with Vitest. Hook behavior should be tested with React Testing Library.
+
+## Navigation conventions (Workshop-first)
+
+The Workshop is the core of the app, not one tool among many.
+
+1. **`/tools` redirects to `/tools/workshop`** via `next.config.ts` (307, query params preserved). Do not re-add a `/tools` hub page — the sidebar is the navigation.
+2. **Register new tools in `lib/tools.ts`** under the right group: `drillTools` (ready-made drills), `insightTools` (progress), or `labTools` (visual/brand explorers). The sidebar derives its sections from these registries; Logo Lab is the one sidebar-only lab entry.
+3. **Labs stay tucked away.** The Labs sidebar section is collapsible and collapsed by default. Experimental labs must be listed in `EXPERIMENTAL_TOOL_HREFS`.
+4. **Sidebar is a single-writer hotspot file.** See the hotspot list below before editing it in parallel with other agents.
 
 ## Convex auth conventions
 
@@ -197,6 +214,10 @@ mkdir -p .worktrees
 # Create a worktree + branch for the new task
 git worktree add .worktrees/<your-name>-<task-name> -b <your-name>/<task-name>
 cd .worktrees/<your-name>-<task-name>
+
+# Symlink the gitignored .env.local so Clerk/Convex keys and the local
+# Convex URL are available (e2e global setup needs CLERK_PUBLISHABLE_KEY).
+ln -s "$REPO_ROOT/.env.local" .env.local
 ```
 
 Example:
@@ -204,6 +225,7 @@ Example:
 ```bash
 git worktree add .worktrees/kimi-arpeggios -b kimi/arpeggios
 cd .worktrees/kimi-arpeggios
+ln -s "$REPO_ROOT/.env.local" .env.local
 ```
 
 Work inside that directory only. Commit incrementally. When done, merge the branch into `main` from the main worktree and remove the worktree:
@@ -276,6 +298,14 @@ Worktrees isolate the working directory and Git state, but they do **not** isola
 - **`node_modules` and lockfile:** The dependency tree is shared. If your task requires adding or removing dependencies, own `package.json`/`package-lock.json` for that batch and warn other active agents.
 
 If you need fully isolated database state, run Convex against a separate project/deployment instead of the shared local backend.
+
+## Idea drafts (`.ideas/`)
+
+`~/piano-suite/.ideas/` is local-only, gitignored memory for the `generate-ideas` skill (tier-1 idea pipeline). Rules:
+
+- Never commit, push, or "clean up" files in `.ideas/`.
+- When brainstorming or generating feature ideas, read prior `.ideas/*.md` first and do not re-propose entries marked `rejected` or already `promoted → issue #N` unless you have a materially new angle.
+- Idea promotion to GitHub issues happens only when the user explicitly picks idea numbers.
 
 ## Finishing work
 
