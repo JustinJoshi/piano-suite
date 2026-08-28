@@ -72,6 +72,6 @@ command output named in the sub-task (test fail → pass, lint, build, e2e).
   - [x] 4.3 Verify prod-shaped env: `npm run build` with `NEXT_PUBLIC_POSTHOG_KEY`, Sentry DSN, `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` set locally — no missing-var crashes
 
 - [ ] 5.0 Launch verification gate
-  - [ ] 5.1 Extend `e2e/go-live.spec.ts`: drill flow emits `drill_started`/`drill_completed` (read `window.__analyticsEvents`), waitlist submit visible post-drill. Run `npm run test:e2e`
-  - [ ] 5.2 Full gate: `npm run lint && npm run test:unit:run && npm run build && npm run test:e2e` — all green
+  - [x] 5.1 Extend `e2e/go-live.spec.ts`: drill flow emits `drill_started`/`drill_completed` (read `window.__analyticsEvents`), waitlist submit visible post-drill. Run `npm run test:e2e`
+  - [x] 5.2 Full gate: `npm run lint && npm run test:unit:run && npm run build && npm run test:e2e` — all green
   - [ ] 5.3 Execute runbook incognito checklist on preview: sign up → complete a drill → events in PostHog → waitlist signup row in Convex → legal pages reachable → `waitlistCount` increments
