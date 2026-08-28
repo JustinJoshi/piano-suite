@@ -1,6 +1,8 @@
 import type { LucideIcon } from "lucide-react";
 import type { ComponentType } from "react";
-import type { BlockSize } from "@/lib/workshop-grid";
+// Relative import: this module is bundled by the Convex toolchain, which
+// does not resolve the `@/` alias.
+import type { BlockSize } from "../workshop-grid";
 
 /**
  * A field descriptor drives the settings form for a feature block.
