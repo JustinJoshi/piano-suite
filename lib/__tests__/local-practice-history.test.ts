@@ -3,8 +3,13 @@ import {
   LOCAL_TRACKING_KEYS,
   appendLocalChordDrillEvent,
   appendLocalArpeggioTransition,
+  appendLocalWorkshopEvent,
+  appendLocalWorkshopMiss,
   listLocalChordDrillEvents,
   listLocalArpeggioEvents,
+  listLocalWorkshopEvents,
+  listLocalWorkshopMissEvents,
+  clearLocalWorkshopByPage,
   updateLocalChordDrillGrade,
   writeLocalTechniqueSession,
   readLocalTechniqueLog,
@@ -100,5 +105,52 @@ describe("local practice history", () => {
       reactionTimeMs: 500,
     });
     expect(listLocalRootCycleEvents()[0]?.quality).toBe("maj7");
+  });
+
+  it("appends workshop events and misses", () => {
+    const id = appendLocalWorkshopEvent({
+      pageId: "page-1",
+      target: "Cmaj7",
+      reactionTimeMs: 900,
+      misses: 1,
+      grade: "Good",
+    });
+    expect(id).toMatch(/^local_/);
+
+    appendLocalWorkshopMiss({
+      pageId: "page-1",
+      target: "Cmaj7",
+      played: "C,E,G",
+    });
+
+    const events = listLocalWorkshopEvents();
+    expect(events).toHaveLength(1);
+    expect(events[0]?.pageId).toBe("page-1");
+    expect(events[0]?.chord).toBe("Cmaj7");
+    expect(events[0]?.misses).toBe(1);
+    expect(events[0]?.grade).toBe("Good");
+
+    expect(listLocalWorkshopMissEvents()).toHaveLength(1);
+    expect(localTrackingEventCount()).toBeGreaterThanOrEqual(2);
+  });
+
+  it("clears workshop history by page", () => {
+    appendLocalWorkshopEvent({
+      pageId: "page-a",
+      target: "Dm7",
+      reactionTimeMs: 800,
+      misses: 0,
+    });
+    appendLocalWorkshopEvent({
+      pageId: "page-b",
+      target: "G7",
+      reactionTimeMs: 700,
+      misses: 0,
+    });
+    clearLocalWorkshopByPage("page-a");
+
+    const events = listLocalWorkshopEvents();
+    expect(events).toHaveLength(1);
+    expect(events[0]?.pageId).toBe("page-b");
   });
 });

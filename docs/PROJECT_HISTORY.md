@@ -28,6 +28,7 @@ This repository now contains:
 - A migrated **Progression** (`/tools/progression`) ported from Reflex Drill EXT, including ii-V-I and 12-bar blues drills in C/G/D/A/E, per-chord transition timing, auto-looping, step and loop chimes, optional Anki card flip on loop completion, and personal-best stats persisted via Convex.
 - A migrated **Root Cycling** (`/tools/root-cycling`) ported from Reflex Drill EXT, including chord mode with any quality and arpeggio mode with the canonical minor-11th shape, customizable root pools, per-attempt timing, and tracking aggregated by fixed idea across random keys.
 - A migrated **Technique habit tracker** (`/tools/technique`) ported from Reflex Drill EXT, including a built-in metronome, BPM logging, streak counter, 28-day practice grid, and a one-time import from the original `technique-habit-log-v1` localStorage key.
+- A **Workshop** (`/tools/workshop`) — a custom practice-page builder: users compose pages from feature blocks (metronome, drill timer, chord sets) via a dnd-kit sortable editor with inline insert placeholders and a `/` palette shortcut. Blocks are pure config validated per-block at render time (registry + `normalizeConfig`); a shared `DrillRuntimeProvider` drives countdown → armed → timing → success → break → finished across blocks, and `useChordTargets` generates sequential/random targets. Pages persist to `localStorage`; practice/miss events log to Convex (Pro, with `pageId`) or local history (Free) and surface in the Tracking dashboard's Workshop tab. See `docs/custom-drill-builder-plan.md` for the full architecture and remaining phases (cloud sync, sharing/gallery, versioning).
 - A **Chladni Pattern Lab** (`/tools/chladni`) — a public interactive square-plate waveform explorer for the landing-page hero shader, with live controls for modes, morph speed, line thickness, zoom, and secondary-wave blending. **Apply to home** copies the full Lab pattern onto the welcome hero; you can also set a pattern color and hero-scrim shade, or **Reset home** to the soft shipping defaults. Preferences persist in `localStorage` and sync to Convex when Pro (no account required to explore or apply locally).
 - A **Chladni Ripple** tool (`/tools/chladni-ripple`) — drives the Chladni visualization from live MIDI: pitch class → mode identity, octave → denser patterns, velocity → decaying intensity pulse, chords → secondary blend. Separate from the parameter explorer; Ambient actions can set Ripple as a Welcome / app-wide background. **Pop out while practicing** (float panel over Chord Drill and other tools) is a **Pro** feature.
 - A **Global Music Player** (embedded in Ripple Lab) — upload a MIDI or audio file to drive the Chladni Ripple visualization and piano sound anywhere on the site. MIDI playback is sample-accurate; audio playback uses best-effort monophonic pitch detection. Playback survives route changes and respects the MIDI-sounds toggle.
@@ -206,6 +207,7 @@ Queries must never throw for a signed-in user whose row does not exist yet. `set
    | `NEXT_PUBLIC_AUTH_DISABLED` | `true` opens **every** route without signing in — except on Vercel Production (never honored) and `/api/chat` (always allowlist-gated). Convex saves still need a session. Restart `npm run dev` after changing it — see [the bypass notes](#the-next_public_auth_disabled-bypass) |
    | `NEXT_PUBLIC_CLERK_SIGN_IN_URL` / `_SIGN_UP_URL` / `_FALLBACK_REDIRECT_URL` | Clerk redirect overrides |
    | `CLERK_AUTHORIZED_PARTIES` | Optional comma-separated origins for `clerkMiddleware` `authorizedParties` (recommended on Production after custom-domain cutover; see [`docs/phase-a-auth-cutover-plan.md`](docs/phase-a-auth-cutover-plan.md)) |
+   | `CLERK_FRONTEND_API_URL_EXTRA` | Comma-separated extra Clerk Frontend API URLs Convex should accept; use this so a dedicated **CI Clerk dev app** can authenticate against the same Convex deployment |
    | `E2E_CLERK_USER_EMAIL` / `E2E_CLERK_USER_PASSWORD` | Playwright test user (required to run E2E; password ≥ 8 chars) |
    | `E2E_ALLOW_AUTH_DISABLED` | skips the E2E guard that refuses to run with the bypass on |
 
@@ -357,6 +359,8 @@ Make sure the **Convex dev server is running** before starting tests, because th
 
 **Auth verification e2e** requires `NEXT_PUBLIC_AUTH_DISABLED` to be **unset** (not `true`), because these specs assert real Clerk gating. Global setup fails fast if the bypass is on unless `E2E_ALLOW_AUTH_DISABLED=true`.
 
+**CI E2E** uses a dedicated Clerk **development** instance so `setupClerkTestingToken()` can bypass bot detection. The production Convex deployment accepts that CI issuer via `CLERK_FRONTEND_API_URL_EXTRA`. See [`docs/phase-a-auth-cutover-plan.md`](docs/phase-a-auth-cutover-plan.md) for the env matrix.
+
 | Spec | Asserts |
 |------|---------|
 | `e2e/auth-protection.spec.ts` | Every protected route redirects to `/sign-in`; `/` and `/tools/chladni` stay public; signed-in `/tools`, homepage, and a tracking deep link render without a crash |
@@ -444,6 +448,34 @@ Test harness fixes:
 - `convex/_generated/api.d.ts` was regenerated to include the `lib/auth` and `lib/entitlements` exports added in earlier phases.
 
 Verification: `npm run lint`, `npm run test:unit:run` (568 passed), and `npm run test:e2e` (83 passed) all pass.
+
+## Workshop — custom practice pages (2026-08)
+
+Landed as a four-PR stacked chain (#54 metronome block + editor shell, #59 dnd-kit
+editor, #60 drill runtime + timer/chord-set blocks, #62 tracking integration).
+Architecture and market research: `docs/custom-drill-builder-plan.md`,
+`docs/drill-block-extraction-plan.md`, `docs/metronome-block-plan.md`.
+
+- `lib/feature-blocks/` registry: each block ships `type`, `label`, `description`,
+  icon, `fields` (editor form descriptors), `defaultConfig`, and `normalizeConfig`
+  (validation + defaults applied at render time; stored data is untrusted).
+  Hand-rolled validators instead of zod — no new dependency.
+- Blocks so far: `metronome` (also refactor-received by the Technique tracker),
+  `drillTimer`, `chordSet`. More blocks (note-sequence, MIDI bar, feedback viz,
+  Anki source) are planned in the extraction plan.
+- `hooks/useDrillRuntime.ts` + `lib/drill-runtime.ts` provide one shared drill
+  context per practice page (built on `useDrillTimer` + `useMidi` + `useAudio`);
+  blocks no-op outside a provider.
+- `convex/tracking.ts` gained generic `logPracticeEvent` / `logMissEvent` /
+  `listPracticeEventsByTool` / `listMissEventsByTool` / `clearPracticeEventsByPage`
+  with an optional `pageId`; `missEvents` gained a `by_user_tool` index. Free tier
+  writes workshop events to `lib/local-practice-history.ts`; `/tools/tracking` has
+  a Workshop tab.
+- Remaining phases (see plan): cloud sync (`customDrills` table, Pro), sharing /
+  gallery with forked-from attribution, and `schemaVersion` migration infra.
+
+Verification: `npm run lint`, `npm run test:unit:run` (655 passed), `npm run build`,
+and `npm run test:e2e` (83 passed) all pass on the merged `main`.
 
 ## Roadmap
 

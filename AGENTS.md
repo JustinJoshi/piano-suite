@@ -85,6 +85,12 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `app/dev/welcome-lab/page.tsx` | Interactive lab for tuning welcome copy and style tokens |
 | `lib/dev-tools.ts` | Environment helpers for `/dev/*` pages and links (currently always enabled) |
 | `components/dev-tools-link.tsx` | Floating link to the dev lab |
+| `lib/feature-blocks/*` | Workshop feature-block registry, types, and per-block config schemas + editor field descriptors |
+| `components/feature-blocks/*` | Feature-block render components (metronome, drill timer, chord set) |
+| `components/custom-practice/*` | Workshop practice-page editor: sortable block list, feature palette (`/` shortcut), settings panel, `DrillRuntimeProvider` |
+| `lib/custom-practice-storage.ts` | `localStorage` persistence for custom practice pages (Free tier) |
+| `lib/drill-runtime.ts` / `hooks/useDrillRuntime.ts` | Shared drill runtime context (countdown → armed → timing → success → break → finished) driving workshop blocks; logs events to Convex (Pro) or local history (Free) |
+| `hooks/useChordTargets.ts` | Sequential / random chord-target generation from selected roots and quality groups |
 
 ## Welcome / onboarding conventions
 
@@ -110,6 +116,7 @@ Auth helpers live in `convex/lib/auth.ts`. Do not re-implement a local `currentU
 3. **Never throw into a root provider.** `AmbientEffectsProvider` and the theme hooks query Convex from the root layout, so a thrown query error unmounts the entire app. This is exactly what caused the post-login blank page on preview deploys.
 4. **Add `returns` validators** to new public queries and mutations.
 5. **Cover auth edge cases with `convex-test`.** See `convex/__tests__/settings-auth.test.ts` for the no-identity / no-user-row / first-write cases.
+6. **CI uses a separate Clerk development instance.** `convex/auth.config.js` reads `CLERK_FRONTEND_API_URL_EXTRA` as a comma-separated list of additional Clerk issuers so the CI test user can authenticate against the same Convex deployment. Production traffic should use the primary `CLERK_FRONTEND_API_URL`.
 
 ## Naming conventions
 
@@ -275,6 +282,14 @@ Worktrees isolate the working directory and Git state, but they do **not** isola
 - **`node_modules` and lockfile:** The dependency tree is shared. If your task requires adding or removing dependencies, own `package.json`/`package-lock.json` for that batch and warn other active agents.
 
 If you need fully isolated database state, run Convex against a separate project/deployment instead of the shared local backend.
+
+## Idea drafts (`.ideas/`)
+
+`~/piano-suite/.ideas/` is local-only, gitignored memory for the `generate-ideas` skill (tier-1 idea pipeline). Rules:
+
+- Never commit, push, or "clean up" files in `.ideas/`.
+- When brainstorming or generating feature ideas, read prior `.ideas/*.md` first and do not re-propose entries marked `rejected` or already `promoted → issue #N` unless you have a materially new angle.
+- Idea promotion to GitHub issues happens only when the user explicitly picks idea numbers.
 
 ## Finishing work
 

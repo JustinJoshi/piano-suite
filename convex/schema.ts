@@ -37,6 +37,7 @@ export default defineSchema({
     grade: v.optional(v.string()), // Again | Hard | Good | Easy
     redo: v.boolean(),
     timestamp: v.number(),
+    pageId: v.optional(v.string()), // custom-drill page id when tool === "workshop"
   })
     .index("by_user_tool", ["userId", "tool"])
     .index("by_user_chord", ["userId", "chord"]),
@@ -62,8 +63,10 @@ export default defineSchema({
     toDeg: v.string(),
     played: v.string(),
     timestamp: v.number(),
+    pageId: v.optional(v.string()), // custom-drill page id when tool === "workshop"
   })
     .index("by_user", ["userId"])
+    .index("by_user_tool", ["userId", "tool"])
     .index("by_user_transition", ["userId", "chord", "fromDeg", "toDeg"]),
 
   settings: defineTable({
@@ -83,4 +86,24 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index("by_user_tool", ["userId", "tool"]),
+
+  // Workshop custom practice pages (Pro sync; Free keeps pages in localStorage).
+  // `clientPageId` is generated on the client and is the stable sync key.
+  // Deleted pages become tombstones (deleted=true) so deletions propagate to
+  // other devices instead of being resurrected by stale local copies.
+  customDrills: defineTable({
+    ownerId: v.id("users"),
+    clientPageId: v.string(),
+    title: v.string(),
+    blocks: v.array(v.any()), // envelope-validated in convex/workshop.ts
+    deleted: v.optional(v.boolean()),
+    isPublic: v.optional(v.boolean()),
+    forkedFrom: v.optional(v.id("customDrills")),
+    authorName: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_owner", ["ownerId"])
+    .index("by_owner_client_id", ["ownerId", "clientPageId"])
+    .index("by_public", ["isPublic"]),
 });
