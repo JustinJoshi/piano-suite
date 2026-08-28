@@ -5,6 +5,8 @@ import {
   MAX_HEIGHT,
   ROW_UNIT_PX,
   GAP_PX,
+  MD_BREAKPOINT_PX,
+  XL_BREAKPOINT_PX,
   blockSize,
   normalizeSize,
   clampSize,
@@ -12,6 +14,7 @@ import {
   sizeFromDelta,
   resizeBlocks,
   reorderBlocks,
+  currentGridColumns,
 } from "@/lib/workshop-grid";
 import type { FeatureBlock } from "@/lib/feature-blocks/types";
 
@@ -39,6 +42,26 @@ describe("workshop-grid constants", () => {
   it("keeps CSS row unit and gap in sync with the component layer", () => {
     expect(ROW_UNIT_PX).toBeGreaterThan(0);
     expect(GAP_PX).toBeGreaterThan(0);
+  });
+});
+
+describe("currentGridColumns", () => {
+  const media = (matches: string[]) => (query: string) => ({
+    matches: matches.includes(query),
+  });
+  const md = `(min-width: ${MD_BREAKPOINT_PX}px)`;
+  const xl = `(min-width: ${XL_BREAKPOINT_PX}px)`;
+
+  it("returns 1 column on small screens", () => {
+    expect(currentGridColumns(media([]))).toBe(1);
+  });
+
+  it("returns 2 columns at the medium breakpoint", () => {
+    expect(currentGridColumns(media([md]))).toBe(2);
+  });
+
+  it("returns 4 columns at the large breakpoint", () => {
+    expect(currentGridColumns(media([md, xl]))).toBe(4);
   });
 });
 

@@ -24,6 +24,24 @@ export const ROW_UNIT_PX = 160;
 /** Grid gap in px (Tailwind gap-4). Kept in sync with the grid component. */
 export const GAP_PX = 16;
 
+/** Breakpoints (Tailwind defaults) mirrored for resize math. */
+export const MD_BREAKPOINT_PX = 768;
+export const XL_BREAKPOINT_PX = 1280;
+
+export type MediaQueryFn = (query: string) => { matches: boolean };
+
+/**
+ * Active grid column count for the current viewport. `match` is injectable
+ * so tests can stub `window.matchMedia`.
+ */
+export function currentGridColumns(
+  match: MediaQueryFn = (query) => ({ matches: window.matchMedia(query).matches })
+): number {
+  if (match(`(min-width: ${XL_BREAKPOINT_PX}px)`).matches) return MAX_GRID_COLUMNS;
+  if (match(`(min-width: ${MD_BREAKPOINT_PX}px)`).matches) return 2;
+  return 1;
+}
+
 export type BlockSize = { w: number; h: number };
 
 const DEFAULT_SIZE: BlockSize = { w: 2, h: 1 };
