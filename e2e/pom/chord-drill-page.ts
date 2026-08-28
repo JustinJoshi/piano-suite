@@ -52,7 +52,9 @@ export class ChordDrillPage extends BasePage {
   }
 
   async toggleChordNotes(show: boolean) {
-    await this.toggleSetting("setting-row-chord-notes", show);
+    // The chord notes row uses Show/Hide labels, unlike the On/Off rows.
+    const row = this.locator("setting-row-chord-notes");
+    await row.locator("button", { hasText: show ? "Show" : "Hide" }).click();
   }
 
   async toggleRevealOnFinish(on: boolean) {
