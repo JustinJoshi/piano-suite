@@ -25,7 +25,22 @@ test.describe("home page mobile", () => {
       "Tweak the blocks or build your own routine",
     ];
     for (const text of steps) {
-      await expect(page.getByText(text)).toBeVisible();
+      await expect(page.getByText(text, { exact: true })).toBeVisible();
+    }
+  });
+
+  test("shows Workshop flow steps in a vertical layout on mobile", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const steps = [
+      "Choose a starter template or start from scratch",
+      "Snap metronome, timer, and chord blocks together",
+      "Press Start and practice on real keys",
+      "Publish to the community or fork someone else's drill",
+    ];
+    for (const text of steps) {
+      await expect(page.getByText(text, { exact: true })).toBeVisible();
     }
   });
 

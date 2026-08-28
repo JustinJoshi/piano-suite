@@ -13,7 +13,7 @@ import { AppliedLogoMark } from "@/components/brand/applied-logo-mark";
 import { Button } from "@/components/ui/button";
 
 const navLinks = [
-  { label: "Tools", href: "/tools" },
+  { label: "Workshop", href: "/tools/workshop" },
   { label: "Gallery", href: "/workshop" },
   { label: "Pricing", href: "/pricing" },
   { label: "Articles", href: "/articles" },
