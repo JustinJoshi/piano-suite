@@ -61,10 +61,10 @@ command output named in the sub-task (test fail → pass, lint, build, e2e).
   - [x] 2.5 Swap `PricingTable` → `WaitlistCta` on `/pricing` gated by `BILLING_ENABLED` (one-flag restore later); add FAQ tweak "Pro launches soon — join the Founding Pro waitlist"
   - [x] 2.6 Mount `WaitlistCta` in workshop runtime UI after first `finished` phase (once per session, dismissible, localStorage flag) — value-moment placement, never pre-drill
 
-- [ ] 3.0 Terms + Privacy pages
-  - [ ] 3.1 Write `e2e/go-live.spec.ts` FIRST: `/terms` + `/privacy` → 200, `expectNotBare404` + `expectNoApplicationError`, footer/nav link navigates. Run — expect FAIL (404)
-  - [ ] 3.2 Generate static pages from a template (TermsFeed-style): accounts, content ownership, no-warranty on practice data; Privacy discloses PostHog (analytics) + Sentry (error logs) + Clerk (auth) + Convex (data storage) — must match what 1.0 actually added
-  - [ ] 3.3 Link from pricing page footer + landing footer. Re-run e2e — expect PASS
+- [x] 3.0 Terms + Privacy pages
+  - [x] 3.1 Write `e2e/go-live.spec.ts` FIRST: `/terms` + `/privacy` → 200, `expectNotBare404` + `expectNoApplicationError`, footer/nav link navigates. Run — expect FAIL (404)
+  - [x] 3.2 Generate static pages from a template (TermsFeed-style): accounts, content ownership, no-warranty on practice data; Privacy discloses PostHog (analytics) + Sentry (error logs) + Clerk (auth) + Convex (data storage) — must match what 1.0 actually added
+  - [x] 3.3 Link from pricing page footer + landing footer. Re-run e2e — expect PASS
 
 - [ ] 4.0 Prod launch config + runbook
   - [ ] 4.1 Add `metadataBase` + canonical to `app/layout.tsx` (same commit discipline as 1.6; coordinate — hotspot); verify build
