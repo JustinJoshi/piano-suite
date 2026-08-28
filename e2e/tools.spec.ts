@@ -15,13 +15,19 @@ const SIDEBAR_TOOLS = [
   "Tracking",
 ];
 
-test.describe("/tools dashboard", () => {
-  test("redirects unauthenticated visitors to sign-in", async ({ page }) => {
-    assertAuthBypassOffForE2E();
-    await page.goto("/tools");
+const emptyStorageState = { cookies: [] as never[], origins: [] as never[] };
 
-    // Clerk middleware will redirect to /sign-in when there is no session.
-    await expectRedirectedToSignIn(page);
+test.describe("/tools dashboard", () => {
+  test.describe("unsigned", () => {
+    test.use({ storageState: emptyStorageState });
+
+    test("redirects unauthenticated visitors to sign-in", async ({ page }) => {
+      assertAuthBypassOffForE2E();
+      await page.goto("/tools");
+
+      // Clerk middleware will redirect to /sign-in when there is no session.
+      await expectRedirectedToSignIn(page);
+    });
   });
 
   test("lands on the Workshop and renders sidebar navigation", async ({

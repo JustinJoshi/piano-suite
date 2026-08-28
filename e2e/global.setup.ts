@@ -1,18 +1,28 @@
-import { clerkSetup } from "@clerk/testing/playwright";
+import { clerk, clerkSetup } from "@clerk/testing/playwright";
 import { createClerkClient } from "@clerk/backend";
 import { test as setup } from "@playwright/test";
 import fs from "fs";
 import path from "path";
+import { ONBOARDING_STORAGE_KEY } from "@/lib/onboarding";
 
 // Ensures that Clerk setup is done before any tests run.
 setup.describe.configure({ mode: "serial" });
 
+const authDir = path.join(__dirname, "../playwright/.auth");
+const authFile = path.join(authDir, "user.json");
+const testingTokenFile = path.join(authDir, "clerk-testing.json");
 const trackedUsersFile = path.join(__dirname, "../playwright/.clerk/signup-user.json");
 
-setup("global setup", async () => {
+setup("global setup", async ({ page }) => {
   // Clerk handles its own env loading when dotenv is true, but we already load
   // .env.local in playwright.config.ts so we disable duplicate loading here.
+  // clerkSetup populates CLERK_FAPI and CLERK_TESTING_TOKEN in process.env.
   await clerkSetup({ dotenv: false });
+  const CLERK_FAPI = process.env.CLERK_FAPI;
+  const CLERK_TESTING_TOKEN = process.env.CLERK_TESTING_TOKEN;
+  if (!CLERK_FAPI || !CLERK_TESTING_TOKEN) {
+    throw new Error("clerkSetup did not produce CLERK_FAPI / CLERK_TESTING_TOKEN.");
+  }
 
   // Auth verification specs expect real Clerk route protection. Bypass must be
   // off for local e2e (Production may still use the Hobby workaround until
@@ -63,14 +73,18 @@ setup("global setup", async () => {
     }
   }
 
-  // Ensure a deterministic test user exists. Using a +clerk_test email
-  // suppresses real email delivery (verification codes, notifications, etc.)
-  const email =
+  // Use a unique test email per run so concurrent or back-to-back CI runs do
+  // not fight over the same Clerk user. The +clerk_test sub-address suppresses
+  // real email delivery on Clerk's test instances.
+  const baseEmail =
     process.env.E2E_CLERK_USER_EMAIL || "e2e-piano-suite+clerk_test@example.com";
+  const runSuffix = process.env.GITHUB_RUN_ID || Date.now().toString();
+  const email = baseEmail.replace("@", `+${runSuffix}@`);
 
   const client = createClerkClient({ secretKey });
   const { data: existing } = await client.users.getUserList({ emailAddress: [email] });
 
+  let userId: string;
   if (existing.length === 0) {
     // Try creating the user without a phone number first. Some Clerk instances
     // require phone numbers; if creation fails because of that, retry with a
@@ -84,7 +98,9 @@ setup("global setup", async () => {
         lastName: "User",
       });
     } catch (err: unknown) {
-      const clerkError = err as { errors?: Array<{ longMessage?: string }>; message?: string } | undefined;
+      const clerkError = err as
+        | { errors?: Array<{ longMessage?: string }>; message?: string }
+        | undefined;
       const message = clerkError?.errors?.[0]?.longMessage || clerkError?.message || "";
       if (message.toLowerCase().includes("phone")) {
         user = await client.users.createUser({
@@ -98,12 +114,33 @@ setup("global setup", async () => {
         throw err;
       }
     }
-    trackUser(user.id, email);
+    userId = user.id;
+    trackUser(userId, email);
   } else {
     // Keep the password in sync with the environment in case it was changed.
-    await client.users.updateUser(existing[0].id, { password });
-    trackUser(existing[0].id, email);
+    userId = existing[0].id;
+    await client.users.updateUser(userId, { password });
+    trackUser(userId, email);
   }
+
+  // Sign in once and persist the session so every authenticated test can start
+  // already logged in. This avoids dozens of ticket-based sign-ins per run,
+  // which are slow and can race with Clerk's user lookup under load.
+  fs.mkdirSync(authDir, { recursive: true });
+  await page.goto("/");
+  await clerk.signIn({ page, emailAddress: email });
+  await page.waitForFunction(() => window.Clerk?.user !== null, { timeout: 10000 });
+  await page.evaluate((key) => {
+    localStorage.setItem(key, "true");
+  }, ONBOARDING_STORAGE_KEY);
+  await page.context().storageState({ path: authFile });
+
+  // Propagate the testing token to the test workers in case they need to
+  // install the FAPI bypass route on a fresh context.
+  fs.writeFileSync(
+    testingTokenFile,
+    JSON.stringify({ CLERK_FAPI, CLERK_TESTING_TOKEN, email }, null, 2)
+  );
 });
 
 function trackUser(userId: string, email: string) {

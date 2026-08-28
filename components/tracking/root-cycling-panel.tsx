@@ -149,8 +149,8 @@ export function RootCyclingPanel() {
   }
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[320px_1fr]">
-      <Card className="h-fit max-h-[640px] overflow-y-auto">
+    <div className="grid gap-4 lg:grid-cols-[320px_1fr]" data-testid="tracking-panel">
+      <Card className="h-fit max-h-[640px] overflow-y-auto" data-testid="tracking-list">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
             Ideas
@@ -181,7 +181,7 @@ export function RootCyclingPanel() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card data-testid="tracking-chart">
         <CardHeader className="pb-2">
           <CardTitle className="font-heading text-lg">{activeKey ?? "—"}</CardTitle>
           <CardDescription>

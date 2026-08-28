@@ -85,6 +85,7 @@ function NavLinks({
             <Link
               href={link.href}
               onClick={onNavigate}
+              data-testid={`sidebar-link-${link.title.toLowerCase().replace(/\s+/g, "-")}`}
               className={cn(
                 "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                 isActive
@@ -237,6 +238,7 @@ export function Sidebar() {
               <Link
                 href={workshopTool.href}
                 onClick={closeDrawer}
+                data-testid="sidebar-link-workshop"
                 className={cn(
                   "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold transition-colors",
                   workshopActive
@@ -282,6 +284,7 @@ export function Sidebar() {
                 <Link
                   href="/settings/theme"
                   onClick={closeDrawer}
+                  data-testid="sidebar-link-theme"
                   className={cn(
                     "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                     pathname === "/settings/theme"
@@ -304,6 +307,7 @@ export function Sidebar() {
                 <Link
                   href="/settings/atmosphere"
                   onClick={closeDrawer}
+                  data-testid="sidebar-link-atmosphere"
                   className={cn(
                     "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                     pathname === "/settings/atmosphere"
@@ -326,6 +330,7 @@ export function Sidebar() {
                 <Link
                   href="/settings/audio"
                   onClick={closeDrawer}
+                  data-testid="sidebar-link-audio"
                   className={cn(
                     "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                     pathname === "/settings/audio"
@@ -348,6 +353,7 @@ export function Sidebar() {
                 <Link
                   href="/settings/billing"
                   onClick={closeDrawer}
+                  data-testid="sidebar-link-billing"
                   className={cn(
                     "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                     pathname === "/settings/billing"
