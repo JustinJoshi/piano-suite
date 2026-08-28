@@ -51,6 +51,26 @@ test.describe("go-live: waitlist replaces billing", () => {
       page.getByRole("button", { name: /join/i })
     ).toBeVisible();
   });
+
+  test("waitlist submit emits pro_waitlist_click through the analytics mirror", async ({
+    page,
+  }) => {
+    await page.goto("/pricing");
+
+    await page.getByLabel(/email/i).fill("e2e@example.com");
+    await page.getByRole("button", { name: /join/i }).click();
+
+    await expect(page.getByText(/#1/i)).toBeVisible();
+
+    const events = await page.evaluate(
+      () =>
+        (window as unknown as { __analyticsEvents?: Array<{ name: string }> })
+          .__analyticsEvents ?? []
+    );
+    expect(
+      events.some((event) => event.name === "pro_waitlist_click")
+    ).toBe(true);
+  });
 });
 
 function screenFoundingHeadline(page: import("@playwright/test").Page) {
