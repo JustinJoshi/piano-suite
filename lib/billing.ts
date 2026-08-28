@@ -22,6 +22,21 @@ export const FREE_PLAN_SLUG = "free_user" as const;
 /** Feature that unlocks Convex practice history + cross-device prefs sync. */
 export const SYNC_FEATURE_SLUG = "sync" as const;
 
+/**
+ * Pre-launch switch: false gates Pro behind the Founding Pro waitlist
+ * (components/waitlist/waitlist-cta.tsx) instead of Clerk PricingTable.
+ * Flip to true at launch to restore the pricing table + Stripe offers.
+ */
+export const BILLING_ENABLED = false as const;
+
+export function foundingProHeadline(): string {
+  return "Become a Founding Pro";
+}
+
+export function foundingProSubcopy(): string {
+  return "Pro launches soon. Join the waitlist to lock in founding-member pricing and shape what gets built next.";
+}
+
 export type PlanSlug = typeof PRO_PLAN_SLUG | typeof FREE_PLAN_SLUG;
 export type FeatureSlug = typeof SYNC_FEATURE_SLUG;
 

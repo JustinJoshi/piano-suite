@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  BILLING_ENABLED,
   PRO_PLAN_SLUG,
   SYNC_FEATURE_SLUG,
   PRO_PRICING,
+  foundingProHeadline,
+  foundingProSubcopy,
   canPersistFromEntitlements,
   canUseFloatPanelFromEntitlements,
   floatPanelUpgradeCopy,
@@ -15,6 +18,17 @@ import {
   proMonthlyLabel,
   splitClerkBillingClaim,
 } from "@/lib/billing";
+
+describe("pre-launch billing gate", () => {
+  it("keeps billing disabled until launch (waitlist instead)", () => {
+    expect(BILLING_ENABLED).toBe(false);
+  });
+
+  it("exposes founding-pro waitlist copy", () => {
+    expect(foundingProHeadline()).toMatch(/founding/i);
+    expect(foundingProSubcopy()).toMatch(/waitlist/i);
+  });
+});
 
 describe("billing catalog", () => {
   it("locks Pro and sync slugs for Clerk has() checks", () => {
