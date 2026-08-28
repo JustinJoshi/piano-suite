@@ -67,7 +67,7 @@ const PUBLIC_ROUTES = [
     assert: async (page: import("@playwright/test").Page) => {
       await expect(
         page.getByRole("heading", {
-          name: /Practice free\. Pro when you're ready\./i,
+          name: /Practice free\. Pro is on the way\./i,
         })
       ).toBeVisible();
       await expect(page.getByRole("link", { name: "Pricing" })).toBeVisible();
