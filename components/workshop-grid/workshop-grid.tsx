@@ -94,6 +94,8 @@ export function GridBody({
 type WorkshopGridProps = GridCallbacks & {
   blocks: FeatureBlock[];
   onReorder: (blocks: FeatureBlock[]) => void;
+  /** Force the grid guides on (empty workshop shows the canvas). */
+  showGuides?: boolean;
 };
 
 /**
@@ -107,6 +109,7 @@ export function WorkshopGrid({
   onDuplicate,
   onRemove,
   onConfigChange,
+  showGuides,
 }: WorkshopGridProps) {
   const [gridActive, setGridActive] = useState(false);
 
@@ -142,6 +145,7 @@ export function WorkshopGrid({
       <GridBody
         blocks={blocks}
         gridActive={gridActive}
+        showGuides={showGuides}
         onResize={onResize}
         onDuplicate={onDuplicate}
         onRemove={onRemove}

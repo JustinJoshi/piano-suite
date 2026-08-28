@@ -87,6 +87,7 @@ export function PagesMenu({
                   key={page.id}
                   type="button"
                   aria-current={isActive ? "true" : undefined}
+                  aria-label={`Switch to ${title}`}
                   onClick={() => {
                     onSelect(page.id);
                     close();

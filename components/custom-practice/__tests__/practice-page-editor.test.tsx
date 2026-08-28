@@ -9,6 +9,12 @@ import {
   createEmptyPracticePageStore,
 } from "@/lib/custom-practice-storage";
 
+const { pushMock } = vi.hoisted(() => ({ pushMock: vi.fn() }));
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: pushMock }),
+}));
+
 vi.mock("@/hooks/useAuthAccess", () => ({
   useAuthAccess: vi.fn(() => ({
     canPersist: false,
@@ -64,7 +70,9 @@ function createMockAudioContext() {
 describe("PracticePageEditor", () => {
   beforeEach(() => {
     resetPracticePageStore();
+    pushMock.mockClear();
     vi.stubGlobal("AudioContext", vi.fn(createMockAudioContext));
+    vi.stubGlobal("matchMedia", vi.fn().mockReturnValue({ matches: false }));
     let uuidCount = 0;
     vi.stubGlobal("crypto", {
       randomUUID: vi.fn(() => `test-uuid-${++uuidCount}`),
@@ -85,78 +93,86 @@ describe("PracticePageEditor", () => {
     return page;
   }
 
-  it("renders an empty page with an add feature CTA", () => {
+  function seedWithBlock(config: Record<string, unknown> = { bpm: 120 }) {
+    const page = createEmptyPracticePage();
+    setPracticePageStore({
+      version: 2,
+      pages: [
+        {
+          ...page,
+          blocks: [{ id: "block-1", type: "metronome", version: 1, config }],
+        },
+      ],
+      activePageId: page.id,
+    });
+    return page;
+  }
+
+  function openPagesMenu() {
+    const current =
+      getPracticePageStore().pages.find(
+        (p) => p.id === getPracticePageStore().activePageId
+      ) ?? getPracticePageStore().pages[0];
+    const title = current.title.trim() || "Untitled";
+    fireEvent.click(screen.getAllByRole("button", { name: new RegExp(title, "i") })[0]);
+  }
+
+  it("renders a blank grid with guides when the page is empty", () => {
+    seedWithPage();
+
+    render(<PracticePageEditor />);
+
+    const grid = screen.getByTestId("workshop-grid");
+    expect(grid.getAttribute("data-grid-empty")).toBe("true");
+    expect(screen.getAllByTestId("grid-guide")).toHaveLength(4);
+    expect(
+      screen.getByRole("link", { name: /open the marketplace/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /add feature/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it("links the header marketplace button to the marketplace route", () => {
+    seedWithPage();
     render(<PracticePageEditor />);
 
     expect(
-      screen.getByText("This page is empty. Add your first feature to start practicing.")
-    ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /add feature/i })).toBeInTheDocument();
+      screen.getByRole("link", { name: /open the marketplace/i })
+    ).toHaveAttribute("href", "/tools/workshop/marketplace");
   });
 
-  it("opens the feature palette with the / shortcut", () => {
+  it("opens the marketplace with the / shortcut", () => {
+    seedWithPage();
     render(<PracticePageEditor />);
 
     fireEvent.keyDown(window, { key: "/" });
-
-    expect(screen.getByText("Cancel")).toBeInTheDocument();
-    expect(screen.getByText("Metronome")).toBeInTheDocument();
+    expect(pushMock).toHaveBeenCalledWith("/tools/workshop/marketplace");
   });
 
-  it("does not open the palette with / when an input is focused", () => {
+  it("does not open the marketplace with / when an input is focused", () => {
+    seedWithPage();
     render(<PracticePageEditor />);
 
     const titleInput = screen.getByPlaceholderText("Untitled practice page");
-    fireEvent.focus(titleInput);
     fireEvent.keyDown(titleInput, { key: "/" });
 
-    expect(screen.queryByText("Cancel")).not.toBeInTheDocument();
+    expect(pushMock).not.toHaveBeenCalled();
   });
 
-  it("adds a block from the empty-state CTA", async () => {
-    seedWithPage();
+  it("renders blocks inside the workshop grid", () => {
+    seedWithBlock();
 
     render(<PracticePageEditor />);
 
-    // Empty page has one CTA button, not a placeholder.
-    // Use the empty-state button instead.
-    const addButton = screen.getByRole("button", { name: /add feature/i });
-    fireEvent.click(addButton);
-
-    fireEvent.click(screen.getByText("Metronome"));
-
-    await waitFor(() => {
-      expect(screen.getByTestId("bpm-display")).toBeInTheDocument();
-    });
-
-    expect(screen.getByTestId("bpm-display")).toHaveTextContent("120 BPM");
-  });
-
-  it("renders blocks inside the workshop grid", async () => {
-    seedWithPage();
-
-    render(<PracticePageEditor />);
-
-    fireEvent.click(screen.getByRole("button", { name: /add feature/i }));
-    fireEvent.click(screen.getByText("Metronome"));
-
-    await waitFor(() => {
-      expect(screen.getByTestId("workshop-grid")).toBeInTheDocument();
-    });
+    expect(screen.getByTestId("workshop-grid")).toBeInTheDocument();
     expect(screen.getByTestId("bpm-display")).toBeInTheDocument();
   });
 
-  it("persists a resized tile back to the store", async () => {
-    seedWithPage();
+  it("persists a resized tile back to the store", () => {
+    seedWithBlock();
 
     render(<PracticePageEditor />);
-
-    fireEvent.click(screen.getByRole("button", { name: /add feature/i }));
-    fireEvent.click(screen.getByText("Metronome"));
-
-    await waitFor(() => {
-      expect(screen.getByTestId("workshop-grid")).toBeInTheDocument();
-    });
 
     vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
       width: 400,
@@ -181,122 +197,61 @@ describe("PracticePageEditor", () => {
     expect(stored.size).toEqual({ w: 3, h: 1 });
   });
 
-  it("duplicates a block from the hover toolbar", async () => {
-    seedWithPage();
+  it("duplicates a block from the tile toolbar", () => {
+    seedWithBlock();
 
     render(<PracticePageEditor />);
 
-    // Add one metronome block.
-    fireEvent.click(screen.getByRole("button", { name: /add feature/i }));
-    fireEvent.click(screen.getByText("Metronome"));
+    fireEvent.click(screen.getByLabelText("Duplicate"));
 
-    await waitFor(() => {
-      expect(screen.getByTestId("bpm-display")).toBeInTheDocument();
-    });
-
-    // Hover the block to reveal toolbar.
-    const block = screen.getByTestId("bpm-display").closest("[class*='group']") ?? screen.getByTestId("bpm-display").closest("div");
-    if (block) fireEvent.mouseEnter(block);
-
-    const duplicateButton = screen.getByLabelText("Duplicate");
-    fireEvent.click(duplicateButton);
-
-    await waitFor(() => {
+    return waitFor(() => {
       expect(screen.getAllByTestId("bpm-display")).toHaveLength(2);
     });
   });
 
-  it("removes a block from the hover toolbar", async () => {
-    seedWithPage();
+  it("removes a block from the tile toolbar", () => {
+    seedWithBlock();
 
     render(<PracticePageEditor />);
 
-    // Add one metronome block.
-    fireEvent.click(screen.getByRole("button", { name: /add feature/i }));
-    fireEvent.click(screen.getByText("Metronome"));
+    fireEvent.click(screen.getByLabelText("Remove"));
 
-    await waitFor(() => {
-      expect(screen.getByTestId("bpm-display")).toBeInTheDocument();
-    });
-
-    // Hover the block to reveal toolbar.
-    const block = screen.getByTestId("bpm-display").closest("[class*='group']") ?? screen.getByTestId("bpm-display").closest("div");
-    if (block) fireEvent.mouseEnter(block);
-
-    const removeButton = screen.getByLabelText("Remove");
-    fireEvent.click(removeButton);
-
-    await waitFor(() => {
+    return waitFor(() => {
       expect(screen.queryByTestId("bpm-display")).not.toBeInTheDocument();
     });
   });
 
-  it("creates a new page from the switcher and switches between pages", async () => {
-    const first = seedWithPage(
-      createEmptyPracticePage("Warmup")
-    );
+  it("creates a new page from the pages menu and switches between pages", () => {
+    const first = seedWithBlock();
 
     render(<PracticePageEditor />);
 
-    // Rename happens via the title input; add a block to the first page so
-    // the two pages are visibly different.
-    fireEvent.click(screen.getByRole("button", { name: /add feature/i }));
-    fireEvent.click(screen.getByText("Metronome"));
-    await waitFor(() => {
-      expect(screen.getByTestId("bpm-display")).toBeInTheDocument();
-    });
-
-    // Create a second page.
+    openPagesMenu();
     fireEvent.click(screen.getByRole("button", { name: /new page/i }));
 
-    await waitFor(() => {
-      expect(
-        screen.getByText("This page is empty. Add your first feature to start practicing.")
-      ).toBeInTheDocument();
-    });
+    const store = getPracticePageStore();
+    expect(store.pages).toHaveLength(2);
+    expect(store.pages[1].blocks).toHaveLength(0);
 
-    const titleInput = screen.getByPlaceholderText(
-      "Untitled practice page"
-    ) as HTMLInputElement;
-    expect(titleInput.value).toBe("My Practice Page");
-
-    // Switch back to the first page via the select.
-    const select = screen.getByLabelText("Practice page") as HTMLSelectElement;
-    fireEvent.change(select, { target: { value: first.id } });
-
-    await waitFor(() => {
-      expect(screen.getByTestId("bpm-display")).toBeInTheDocument();
-    });
+    openPagesMenu();
+    fireEvent.click(
+      screen.getByRole("button", { name: `Switch to ${first.title}` })
+    );
+    expect(getPracticePageStore().activePageId).toBe(first.id);
   });
 
-  it("duplicates the current page from the switcher", async () => {
-    const page = seedWithPage(createEmptyPracticePage("Scales"));
-    // Give it a block so duplication has something to copy.
-    setPracticePageStore({
-      version: 2,
-      pages: [
-        {
-          ...page,
-          blocks: [
-            { id: "block-1", type: "metronome", version: 1, config: { bpm: 120 } },
-          ],
-        },
-      ],
-      activePageId: page.id,
-    });
+  it("duplicates the current page from the pages menu", () => {
+    seedWithBlock();
 
     render(<PracticePageEditor />);
 
+    openPagesMenu();
     fireEvent.click(screen.getByRole("button", { name: /duplicate page/i }));
 
-    await waitFor(() => {
-      const select = screen.getByLabelText(
-        "Practice page"
-      ) as HTMLSelectElement;
-      expect(select.selectedOptions[0]?.textContent).toContain("Scales (copy)");
-    });
-
-    expect(screen.getByTestId("bpm-display")).toBeInTheDocument();
+    const store = getPracticePageStore();
+    expect(store.pages).toHaveLength(2);
+    expect(store.pages[1].title).toContain("copy");
+    expect(store.pages[1].blocks).toHaveLength(1);
   });
 
   it("deletes the current page after confirmation", () => {
@@ -311,20 +266,24 @@ describe("PracticePageEditor", () => {
 
     render(<PracticePageEditor />);
 
+    openPagesMenu();
     fireEvent.click(screen.getByRole("button", { name: /delete page/i }));
 
-    const select = screen.getByLabelText("Practice page") as HTMLSelectElement;
-    expect(select.selectedOptions[0]?.textContent).toContain("Warmup");
-    expect(select.options).toHaveLength(1);
+    const store = getPracticePageStore();
+    expect(store.pages).toHaveLength(1);
+    expect(store.pages[0].id).toBe(a.id);
   });
 
-  it("disables delete when only one page remains", () => {
+  it("opens the share panel from the pages menu", () => {
     seedWithPage();
 
     render(<PracticePageEditor />);
 
-    expect(
-      screen.getByRole("button", { name: /delete page/i })
-    ).toBeDisabled();
+    expect(screen.queryByText(/Upgrade to Pro to publish/i)).not.toBeInTheDocument();
+
+    openPagesMenu();
+    fireEvent.click(screen.getByRole("button", { name: /share page/i }));
+
+    expect(screen.getByText(/Upgrade to Pro to publish/i)).toBeInTheDocument();
   });
 });
