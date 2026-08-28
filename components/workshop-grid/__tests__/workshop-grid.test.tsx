@@ -29,12 +29,12 @@ function createMockAudioContext() {
   };
 }
 
-function block(id: string, size?: { w: number; h: number }): FeatureBlock {
+function block(id: string, size?: { w: number; h: number }, config?: Record<string, unknown>): FeatureBlock {
   return {
     id,
     type: "metronome",
     version: 1,
-    config: { bpm: 120 },
+    config: config ?? { bpm: 120 },
     ...(size ? { size } : {}),
   };
 }
@@ -47,6 +47,7 @@ const bodyProps = {
   onResize: vi.fn(),
   onDuplicate: vi.fn(),
   onRemove: vi.fn(),
+  onConfigChange: vi.fn(),
 };
 
 describe("WorkshopGrid", () => {
@@ -89,6 +90,21 @@ describe("WorkshopGrid", () => {
 
     const grid = screen.getByTestId("workshop-grid");
     expect(grid.getAttribute("data-grid-active")).toBe("true");
+    expect(screen.getAllByTestId("grid-guide")).toHaveLength(4);
+  });
+
+  it("renders an empty grid with visible guides when showGuides is set", () => {
+    renderBody(
+      <GridBody
+        blocks={[]}
+        gridActive={false}
+        showGuides={true}
+        {...bodyProps}
+      />
+    );
+
+    const grid = screen.getByTestId("workshop-grid");
+    expect(grid.getAttribute("data-grid-empty")).toBe("true");
     expect(screen.getAllByTestId("grid-guide")).toHaveLength(4);
   });
 
@@ -163,6 +179,7 @@ describe("WorkshopGrid", () => {
         onResize={vi.fn()}
         onDuplicate={onDuplicate}
         onRemove={onRemove}
+        onConfigChange={vi.fn()}
       />
     );
 
@@ -171,5 +188,45 @@ describe("WorkshopGrid", () => {
 
     fireEvent.click(screen.getByLabelText("Remove"));
     expect(onRemove).toHaveBeenCalledWith("a");
+  });
+
+  it("keeps tile settings hidden behind the gear button", () => {
+    renderBody(
+      <GridBody blocks={[block("a")]} gridActive={false} {...bodyProps} />
+    );
+
+    expect(screen.getByLabelText("Tile settings")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Beats per bar")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByLabelText("Tile settings"));
+    expect(screen.getByLabelText("Beats per bar")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByLabelText("Tile settings"));
+    expect(screen.queryByLabelText("Beats per bar")).not.toBeInTheDocument();
+  });
+
+  it("persists settings edits through onConfigChange", () => {
+    const onConfigChange = vi.fn();
+
+    renderBody(
+      <GridBody
+        blocks={[block("a", undefined, { bpm: 120, beatsPerBar: 4 })]}
+        gridActive={false}
+        onResize={vi.fn()}
+        onDuplicate={vi.fn()}
+        onRemove={vi.fn()}
+        onConfigChange={onConfigChange}
+      />
+    );
+
+    fireEvent.click(screen.getByLabelText("Tile settings"));
+    fireEvent.change(screen.getByLabelText("Beats per bar"), {
+      target: { value: "3" },
+    });
+
+    expect(onConfigChange).toHaveBeenCalledWith(
+      "a",
+      expect.objectContaining({ beatsPerBar: 3 })
+    );
   });
 });

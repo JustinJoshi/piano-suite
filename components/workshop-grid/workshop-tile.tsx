@@ -3,12 +3,20 @@
 import { useEffect, useRef, useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Copy, GripVertical, MoveDiagonal, Trash2 } from "lucide-react";
+import {
+  Copy,
+  GripVertical,
+  MoveDiagonal,
+  Settings,
+  Trash2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { FeatureBlock } from "@/lib/feature-blocks/types";
+import { getFeatureDefinition } from "@/lib/feature-blocks/registry";
 import { FeatureRenderer } from "@/components/feature-blocks/feature-renderer";
+import { FieldInput } from "@/components/custom-practice/field-input";
 import {
   blockSize,
   clampSize,
@@ -45,6 +53,7 @@ type WorkshopTileProps = {
   onResize: (id: string, size: { w?: number; h?: number }) => void;
   onDuplicate: (id: string) => void;
   onRemove: (id: string) => void;
+  onConfigChange: (id: string, config: Record<string, unknown>) => void;
 };
 
 export function WorkshopTile({
@@ -52,13 +61,23 @@ export function WorkshopTile({
   onResize,
   onDuplicate,
   onRemove,
+  onConfigChange,
 }: WorkshopTileProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: block.id });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: block.id });
 
   const size = clampSize(blockSize(block));
   const [resizing, setResizing] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const resizeStartRef = useRef<ResizeStart | null>(null);
+
+  const def = getFeatureDefinition(block.type);
 
   function onResizePointerDown(e: React.PointerEvent<HTMLButtonElement>) {
     const tileEl = e.currentTarget.closest("[data-workshop-tile]");
@@ -112,6 +131,13 @@ export function WorkshopTile({
     };
   }, [resizing, block.id, onResize]);
 
+  function updateField(key: string, value: unknown) {
+    const config = def
+      ? (def.normalizeConfig(block.config) as Record<string, unknown>)
+      : block.config;
+    onConfigChange(block.id, { ...config, [key]: value });
+  }
+
   return (
     <div
       ref={setNodeRef}
@@ -131,6 +157,24 @@ export function WorkshopTile({
       <Card className="h-full overflow-hidden">
         <CardContent className="p-4">
           <FeatureRenderer blocks={[block]} />
+
+          {settingsOpen && def ? (
+            <div
+              data-testid="tile-settings"
+              className="mt-4 space-y-4 border-t border-border pt-4"
+            >
+              {def.fields.map((field) => (
+                <FieldInput
+                  key={field.key}
+                  field={field}
+                  value={
+                    (block.config as Record<string, unknown>)[field.key]
+                  }
+                  onChange={(value) => updateField(field.key, value)}
+                />
+              ))}
+            </div>
+          ) : null}
         </CardContent>
       </Card>
 
@@ -138,7 +182,7 @@ export function WorkshopTile({
         className={cn(
           "absolute right-1 top-1 flex gap-1 transition-opacity",
           "opacity-100 md:opacity-0 md:group-hover:opacity-100",
-          resizing && "md:opacity-100"
+          (resizing || settingsOpen) && "md:opacity-100"
         )}
         onClick={(e) => e.stopPropagation()}
       >
@@ -161,6 +205,16 @@ export function WorkshopTile({
         >
           <GripVertical className="h-4 w-4" />
         </Button>
+        <ToolbarButton
+          icon={Settings}
+          label="Tile settings"
+          aria-expanded={settingsOpen}
+          className={cn(settingsOpen && "text-primary")}
+          onClick={(e) => {
+            e.stopPropagation();
+            setSettingsOpen((open) => !open);
+          }}
+        />
         <ToolbarButton
           icon={Copy}
           label="Duplicate"
@@ -201,11 +255,13 @@ function ToolbarButton({
   icon: Icon,
   label,
   className,
+  "aria-expanded": ariaExpanded,
   onClick,
 }: {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   className?: string;
+  "aria-expanded"?: boolean;
   onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }) {
   return (
@@ -215,6 +271,7 @@ function ToolbarButton({
       size="icon"
       className={cn("h-7 w-7", className)}
       aria-label={label}
+      aria-expanded={ariaExpanded}
       onClick={onClick}
     >
       <Icon className="h-4 w-4" />

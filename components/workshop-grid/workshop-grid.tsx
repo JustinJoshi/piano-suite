@@ -20,12 +20,15 @@ type GridCallbacks = {
   onResize: (id: string, size: { w?: number; h?: number }) => void;
   onDuplicate: (id: string) => void;
   onRemove: (id: string) => void;
+  onConfigChange: (id: string, config: Record<string, unknown>) => void;
 };
 
 type GridBodyProps = GridCallbacks & {
   blocks: FeatureBlock[];
   /** True while a drag is in progress; reveals the grid chrome. */
   gridActive: boolean;
+  /** Force the grid guides on (empty workshop shows the canvas). */
+  showGuides?: boolean;
 };
 
 /**
@@ -35,21 +38,26 @@ type GridBodyProps = GridCallbacks & {
 export function GridBody({
   blocks,
   gridActive,
+  showGuides = false,
   onResize,
   onDuplicate,
   onRemove,
+  onConfigChange,
 }: GridBodyProps) {
+  const showChrome = gridActive || showGuides;
   return (
     <div
       data-testid="workshop-grid"
       data-grid-active={gridActive ? "true" : undefined}
+      data-grid-empty={blocks.length === 0 ? "true" : undefined}
       className={cn(
         "relative grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4",
-        gridActive && "rounded-xl border border-dashed border-primary/40"
+        showChrome && "rounded-xl border border-dashed border-primary/40",
+        blocks.length === 0 && "min-h-[24rem] content-start"
       )}
       style={{ gridAutoRows: `minmax(${ROW_UNIT_PX}px, auto)` }}
     >
-      {gridActive ? (
+      {showChrome ? (
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 z-0 grid auto-rows-fr grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4"
@@ -75,6 +83,7 @@ export function GridBody({
             onResize={onResize}
             onDuplicate={onDuplicate}
             onRemove={onRemove}
+            onConfigChange={onConfigChange}
           />
         ))}
       </SortableContext>
@@ -97,6 +106,7 @@ export function WorkshopGrid({
   onResize,
   onDuplicate,
   onRemove,
+  onConfigChange,
 }: WorkshopGridProps) {
   const [gridActive, setGridActive] = useState(false);
 
@@ -135,6 +145,7 @@ export function WorkshopGrid({
         onResize={onResize}
         onDuplicate={onDuplicate}
         onRemove={onRemove}
+        onConfigChange={onConfigChange}
       />
     </DndContext>
   );
