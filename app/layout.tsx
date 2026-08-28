@@ -31,7 +31,16 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Canonical origin for metadata (OG, canonical URLs). Set
+// NEXT_PUBLIC_SITE_URL to the production domain in Vercel; the localhost
+// fallback keeps dev builds honest instead of emitting a wrong canonical.
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
+  alternates: {
+    canonical: "/",
+  },
   title: "Piano Suite",
   description:
     "A piano practice suite that connects Anki reviews to a MIDI keyboard so you drill chords with spaced repetition.",
