@@ -1,6 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 
+vi.mock("@/lib/billing", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/billing")>()),
+  BILLING_ENABLED: true,
+}));
+
 vi.mock("@clerk/nextjs", () => ({
   PricingTable: () => <div data-testid="pricing-table">PricingTable</div>,
   Show: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -20,9 +25,8 @@ vi.mock("@/components/app-user-button", () => ({
 }));
 
 import { PricingPage } from "@/components/pricing/pricing-page";
-import { BILLING_ENABLED } from "@/lib/billing";
 
-describe("PricingPage (pre-launch, BILLING_ENABLED=false)", () => {
+describe("PricingPage (BILLING_ENABLED=true)", () => {
   beforeEach(() => {
     Object.defineProperty(window, "matchMedia", {
       writable: true,
@@ -39,30 +43,18 @@ describe("PricingPage (pre-launch, BILLING_ENABLED=false)", () => {
     });
   });
 
-  it("renders waitlist hero, waitlist CTA, and launch FAQ", () => {
-    expect(BILLING_ENABLED).toBe(false);
-
+  it("restores the pricing table and billing-era copy", () => {
     render(<PricingPage />);
 
     expect(
       screen.getByRole("heading", {
-        name: /Practice free\. Pro is on the way\./i,
+        name: /Practice free\. Pro when you're ready\./i,
       })
     ).toBeInTheDocument();
-    expect(screen.queryByTestId("pricing-table")).not.toBeInTheDocument();
-    expect(screen.getAllByText(/founding pro/i).length).toBeGreaterThan(0);
-    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-    expect(screen.getByText("FAQ")).toBeInTheDocument();
-    expect(screen.getByText(/When does Pro launch\?/i)).toBeInTheDocument();
+    expect(screen.getByTestId("pricing-table")).toBeInTheDocument();
+    expect(screen.queryByLabelText(/email/i)).not.toBeInTheDocument();
     expect(
-      screen.queryByText(/Can I cancel anytime\?/i)
-    ).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: "Enter the drill" })
-    ).toHaveAttribute("href", "/tools");
-    expect(screen.getByRole("link", { name: "Pricing" })).toHaveAttribute(
-      "href",
-      "/pricing"
-    );
+      screen.getByText(/Can I cancel anytime\?/i)
+    ).toBeInTheDocument();
   });
 });
