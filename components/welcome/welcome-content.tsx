@@ -1,10 +1,11 @@
 "use client";
 
 import { FeatureSection } from "./feature-section";
-import { FlowSection } from "./flow-section";
 import { DeckSection } from "./deck-section";
 import { CtaSection } from "./cta-section";
 import { ToolsGridSection } from "./tools-grid-section";
+import { WorkshopHowItWorks } from "./workshop-how-it-works";
+import { StarterTemplatesSection } from "./starter-templates-section";
 
 /**
  * Pure marketing content for the welcome page.
@@ -16,11 +17,10 @@ import { ToolsGridSection } from "./tools-grid-section";
 export function WelcomeContent() {
   return (
     <>
+      <WorkshopHowItWorks />
+      <StarterTemplatesSection />
       <FeatureSection id="why-it-works" />
       <FeatureSection id="the-actual-point" />
-      <FeatureSection id="how-it-works">
-        <FlowSection />
-      </FeatureSection>
       <FeatureSection id="not-new" />
       <FeatureSection id="companion-deck">
         <DeckSection />

@@ -9,23 +9,20 @@ test.describe("home page mobile", () => {
     page,
   }) => {
     await page.goto("/");
-    const cta = page.getByRole("link", { name: /start learning/i }).first();
+    const cta = page.getByRole("link", { name: /enter the workshop/i }).first();
     await expect(cta).toBeVisible();
     await expect(cta).toBeInViewport();
 
-    const supporting = page.getByText(/No account needed to explore/i);
+    const supporting = page.getByText(/explore the community gallery freely/i);
     await expect(supporting).toBeVisible();
   });
 
-  test("shows Anki flow steps in a vertical layout on mobile", async ({
-    page,
-  }) => {
+  test("shows Workshop how-it-works steps on mobile", async ({ page }) => {
     await page.goto("/");
     const steps = [
-      "Your due card names a chord",
-      "The drill loads that chord",
-      "You play it, timed, on real keys",
-      "The card flips so you can grade it",
+      "Pick a starter drill or begin with a blank page",
+      "Press start and play, timed on real keys",
+      "Tweak the blocks or build your own routine",
     ];
     for (const text of steps) {
       await expect(page.getByText(text)).toBeVisible();

@@ -42,7 +42,7 @@ test.describe("/tools onboarding", () => {
     await expect(shell.getByText("Happy learning")).toBeVisible();
 
     await shell.getByRole("button", { name: /let's practice/i }).click();
-    await expect(page.getByRole("heading", { name: "Practice dashboard" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Workshop" })).toBeVisible();
   });
 
   test("skipping the flow releases the dashboard and persists completion", async ({
@@ -53,7 +53,7 @@ test.describe("/tools onboarding", () => {
 
     const shell = page.getByTestId("onboarding-shell");
     await shell.getByRole("button", { name: /skip/i }).click();
-    await expect(page.getByRole("heading", { name: "Practice dashboard" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Workshop" })).toBeVisible();
 
     // Revisit without reset: onboarding should not appear.
     await page.goto("/tools");
@@ -76,7 +76,7 @@ test.describe("/tools onboarding", () => {
 
     await page.goto("/tools");
     await expect(page.getByTestId("onboarding-shell")).not.toBeVisible();
-    await expect(page.getByRole("heading", { name: "Practice dashboard" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Workshop" })).toBeVisible();
   });
 
   test("shows onboarding when deep-linking to a tool for the first time", async ({
