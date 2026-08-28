@@ -2,6 +2,7 @@
 
 import { DrillRuntimeProvider as RuntimeProvider } from "@/lib/drill-runtime";
 import { useDrillRuntimeProvider } from "@/hooks/useDrillRuntime";
+import { PostDrillWaitlist } from "@/components/waitlist/post-drill-waitlist";
 
 export function DrillRuntimeProvider({
   pageId,
@@ -11,5 +12,10 @@ export function DrillRuntimeProvider({
   children: React.ReactNode;
 }) {
   const runtime = useDrillRuntimeProvider({ pageId });
-  return <RuntimeProvider value={runtime}>{children}</RuntimeProvider>;
+  return (
+    <RuntimeProvider value={runtime}>
+      {children}
+      <PostDrillWaitlist />
+    </RuntimeProvider>
+  );
 }
