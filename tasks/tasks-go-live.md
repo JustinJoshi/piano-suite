@@ -66,10 +66,10 @@ command output named in the sub-task (test fail → pass, lint, build, e2e).
   - [x] 3.2 Generate static pages from a template (TermsFeed-style): accounts, content ownership, no-warranty on practice data; Privacy discloses PostHog (analytics) + Sentry (error logs) + Clerk (auth) + Convex (data storage) — must match what 1.0 actually added
   - [x] 3.3 Link from pricing page footer + landing footer. Re-run e2e — expect PASS
 
-- [ ] 4.0 Prod launch config + runbook
-  - [ ] 4.1 Add `metadataBase` + canonical to `app/layout.tsx` (same commit discipline as 1.6; coordinate — hotspot); verify build
-  - [ ] 4.2 Write `docs/go-live-runbook.md`, ordered: (1) custom domain in Vercel (apex + www redirect), (2) Clerk prod instance + keys in Vercel **Production scope only** + domain in allowed origins, (3) `npx convex env set CLERK_FRONTEND_API_URL <prod-issuer>` against prod deployment, (4) `npx convex deploy` + **run seed functions against prod**, (5) PostHog/Sentry DSNs, (6) incognito checklist
-  - [ ] 4.3 Verify prod-shaped env: `npm run build` with `NEXT_PUBLIC_POSTHOG_KEY`, Sentry DSN, `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` set locally — no missing-var crashes
+- [x] 4.0 Prod launch config + runbook
+  - [x] 4.1 Add `metadataBase` + canonical to `app/layout.tsx` (same commit discipline as 1.6; coordinate — hotspot); verify build
+  - [x] 4.2 Write `docs/go-live-runbook.md`, ordered: (1) custom domain in Vercel (apex + www redirect), (2) Clerk prod instance + keys in Vercel **Production scope only** + domain in allowed origins, (3) `npx convex env set CLERK_FRONTEND_API_URL <prod-issuer>` against prod deployment, (4) `npx convex deploy` + **run seed functions against prod**, (5) PostHog/Sentry DSNs, (6) incognito checklist
+  - [x] 4.3 Verify prod-shaped env: `npm run build` with `NEXT_PUBLIC_POSTHOG_KEY`, Sentry DSN, `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` set locally — no missing-var crashes
 
 - [ ] 5.0 Launch verification gate
   - [ ] 5.1 Extend `e2e/go-live.spec.ts`: drill flow emits `drill_started`/`drill_completed` (read `window.__analyticsEvents`), waitlist submit visible post-drill. Run `npm run test:e2e`
