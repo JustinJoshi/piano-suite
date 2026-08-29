@@ -3,6 +3,7 @@ import {
   SENTRY_TRACES_SAMPLE_RATE,
   initClientSentry,
   initServerSentry,
+  scrubSentryEvent,
   sentryDsn,
 } from "@/lib/sentry";
 import * as Sentry from "@sentry/nextjs";
@@ -67,5 +68,28 @@ describe("sentry config", () => {
         dsn: "https://public@example.com/2",
       })
     );
+  });
+});
+
+describe("scrubSentryEvent", () => {
+  it("strips the user identity and request cookies", () => {
+    const event = {
+      event_id: "e1",
+      user: { id: "u1", email: "kid@example.com", ip_address: "10.0.0.1" },
+      request: { url: "https://x/", cookies: { __session: "jwt" } },
+      exception: { values: [{ type: "Error", value: "boom" }] },
+    };
+
+    const scrubbed = scrubSentryEvent(event) as Record<string, unknown>;
+
+    expect(scrubbed.user).toBeUndefined();
+    expect((scrubbed.request as Record<string, unknown>).cookies).toBeUndefined();
+    // The diagnostic value survives — only identity is removed.
+    expect(scrubbed.exception).toEqual(event.exception);
+  });
+
+  it("passes through events without user data untouched", () => {
+    const event = { event_id: "e2", message: "hello" };
+    expect(scrubSentryEvent(event)).toEqual(event);
   });
 });

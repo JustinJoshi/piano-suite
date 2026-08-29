@@ -10,6 +10,11 @@ legal/financial risk — treat them as higher priority than feature work.
 **Status: OPEN — flagged 2026-08-29 by the OpenExecutive committee review.
 Do NOT announce publicly until every item below is done.**
 
+> Progress 2026-08-29: items 1–3 are implemented on `justin/legal-tasks`
+> (age gate, `docs/music-rights-audit.md`, privacy-policy pass + Sentry PII
+> scrubbing) — see task list `tasks/tasks-go-live.md` § Priority 1. Item 4
+> (counsel review) remains with Justin.
+
 Piano Suite is a *mixed-audience* product (piano instruction plausibly
 attracts children). The FTC judges "child-directed" by **subject matter and
 design, not intent**. COPPA penalties run ~$53K per violation, and the

@@ -17,7 +17,7 @@ export default function PrivacyRoute() {
             Privacy Policy
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Last updated: August 28, 2026
+            Last updated: August 29, 2026
           </p>
 
           <div className="mt-8 space-y-6 text-sm leading-6 text-foreground/90">
@@ -66,6 +66,43 @@ export default function PrivacyRoute() {
                 They are processed locally to score your drills and never leave
                 your device.
               </p>
+            </section>
+
+            <section>
+              <h2 className="font-semibold text-foreground">
+                Children&apos;s privacy
+              </h2>
+              <p className="mt-2">
+                Piano Suite is intended for people 13 and older. Before you can
+                use the app — and before any analytics or error tracking can
+                load — we ask for your age. If you are under 13, the app stays
+                unavailable and we do not collect or share any information
+                about the visit.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="font-semibold text-foreground">
+                Data retention &amp; deletion
+              </h2>
+              <ul className="mt-2 list-disc space-y-1 pl-5">
+                <li>
+                  Free-tier practice history lives in your browser only and
+                  stays until you clear it.
+                </li>
+                <li>
+                  Synced data (Pro) is retained while your account is active.
+                </li>
+                <li>
+                  Email us and we will delete your account and all synced data
+                  within 30 days.
+                </li>
+                <li>
+                  Error logs sent to Sentry are stripped of identity fields
+                  (account identifiers, cookies) before they leave your
+                  browser.
+                </li>
+              </ul>
             </section>
 
             <section>
