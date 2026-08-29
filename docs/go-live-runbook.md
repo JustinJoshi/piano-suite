@@ -1,5 +1,10 @@
 # Go-Live Runbook
 
+> ⚠️ **Read [`IMPORTANT-NOTICES.md`](../IMPORTANT-NOTICES.md) first** — the
+> COPPA age gate, music-rights audit, and privacy-policy pass are hard
+> blockers that must be done before this runbook's public-announcement
+> steps.
+
 Ordered cutover from preview deployments to live production. Each step lists
 its verification before moving on. Total: ~2 focused days.
 
