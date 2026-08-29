@@ -11,9 +11,13 @@ import {
   deletePracticePage,
   duplicatePracticePage,
   createPracticePageInStore,
+  isStarterPage,
+  appendBlockToPage,
+  removeFirstBlockOfType,
   STORAGE_KEY,
   LEGACY_STORAGE_KEY,
 } from "@/lib/custom-practice-storage";
+import type { PracticePage } from "@/lib/feature-blocks/types";
 
 function makePage(overrides: Partial<ReturnType<typeof createEmptyPracticePage>> = {}) {
   return { ...createEmptyPracticePage(), ...overrides };
@@ -36,6 +40,28 @@ describe("custom-practice-storage", () => {
     expect(store.version).toBe(2);
     expect(store.pages).toHaveLength(1);
     expect(store.activePageId).toBe(store.pages[0].id);
+  });
+
+  it("seeds the fresh page with the ready-made drills starter tile", () => {
+    const store = createEmptyPracticePageStore();
+
+    expect(store.pages[0].blocks).toHaveLength(1);
+    expect(store.pages[0].blocks[0].type).toBe("drillShortcuts");
+  });
+
+  it("treats starter-only and empty pages as starter pages, not built pages", () => {
+    const starter = createEmptyPracticePageStore().pages[0];
+    expect(isStarterPage(starter)).toBe(true);
+    expect(isStarterPage(createEmptyPracticePage())).toBe(true);
+
+    const built = createEmptyPracticePage();
+    built.blocks.push({
+      id: "b1",
+      type: "metronome",
+      version: 1,
+      config: {},
+    });
+    expect(isStarterPage(built)).toBe(false);
   });
 
   it("loads a valid v2 store from localStorage", () => {
@@ -188,5 +214,44 @@ describe("custom-practice-storage", () => {
       expect(setActivePageId(store, "nope")).toBe(store);
       expect(setActivePageId(store, "page-a").activePageId).toBe("page-a");
     });
+  });
+});
+
+describe("marketplace block helpers", () => {
+  it("appendBlockToPage appends a configured block of the given type", () => {
+    const page = createEmptyPracticePage("P");
+    const next = appendBlockToPage(page, "metronome");
+
+    expect(next.blocks).toHaveLength(1);
+    expect(next.blocks[0].type).toBe("metronome");
+    expect(next.blocks[0].id).not.toBe("");
+    expect(Object.keys(next.blocks[0].config).length).toBeGreaterThan(0);
+  });
+
+  it("appendBlockToPage rejects unknown types", () => {
+    const page = createEmptyPracticePage("P");
+    expect(appendBlockToPage(page, "not-a-block")).toBe(page);
+  });
+
+  it("removeFirstBlockOfType removes only the first instance", () => {
+    const page: PracticePage = {
+      ...createEmptyPracticePage("P"),
+      blocks: [
+        { id: "a", type: "metronome", version: 1, config: {} },
+        { id: "b", type: "textBlock", version: 1, config: {} },
+        { id: "c", type: "metronome", version: 1, config: {} },
+      ],
+    };
+
+    const next = removeFirstBlockOfType(page, "metronome");
+    expect(next.blocks.map((b) => b.id)).toEqual(["b", "c"]);
+  });
+
+  it("removeFirstBlockOfType is a no-op when the type is absent", () => {
+    const page: PracticePage = {
+      ...createEmptyPracticePage("P"),
+      blocks: [{ id: "b", type: "textBlock", version: 1, config: {} }],
+    };
+    expect(removeFirstBlockOfType(page, "metronome")).toBe(page);
   });
 });

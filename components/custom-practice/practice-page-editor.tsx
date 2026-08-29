@@ -1,21 +1,26 @@
 "use client";
 
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ArrowRight } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { PracticePage, FeatureBlock } from "@/lib/feature-blocks/types";
-import { getFeatureDefinition } from "@/lib/feature-blocks/registry";
-import { FeaturePalette } from "@/components/custom-practice/feature-palette";
-import { FeatureSettingsPanel } from "@/components/custom-practice/feature-settings-panel";
+import { resizeBlocks } from "@/lib/workshop-grid";
+import { buildTemplatePage, type StarterTemplate } from "@/lib/starter-templates";
 import { ShareMenu } from "@/components/custom-practice/share-menu";
-import { SortableBlockList } from "@/components/custom-practice/sortable-block-list";
-import { PageSwitcher } from "@/components/custom-practice/page-switcher";
+import { PagesMenu } from "@/components/custom-practice/pages-menu";
 import { WorkshopSyncBadge } from "@/components/custom-practice/workshop-sync-badge";
+import { StarterPicker } from "@/components/custom-practice/starter-picker";
+import { WorkshopGrid } from "@/components/workshop-grid/workshop-grid";
 import { useWorkshopSync } from "@/hooks/useWorkshopSync";
 import { DrillRuntimeProvider } from "@/components/custom-practice/drill-runtime-provider";
-import { StarterPicker } from "@/components/custom-practice/starter-picker";
-import { buildTemplatePage, type StarterTemplate } from "@/lib/starter-templates";
 import {
   getPracticePageStore,
   setPracticePageStore,
@@ -27,9 +32,11 @@ import {
   deletePracticePage,
   duplicatePracticePage,
   createPracticePageInStore,
+  isStarterPage,
   generateId,
 } from "@/lib/custom-practice-storage";
 
+const MARKETPLACE_HREF = "/tools/workshop/marketplace";
 const STARTER_PICKER_KEY = "piano-suite:starter-picker-dismissed-v1";
 const STARTER_PICKER_EVENT = "piano-suite:starter-picker-change";
 
@@ -52,6 +59,7 @@ function subscribeToStarterPicker(callback: () => void) {
 
 export function PracticePageEditor() {
   const syncStatus = useWorkshopSync(true);
+  const router = useRouter();
 
   const store = useSyncExternalStore(
     subscribePracticePageStore,
@@ -61,57 +69,18 @@ export function PracticePageEditor() {
 
   const page = useMemo(() => getActivePage(store), [store]);
 
-  const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
-  const [showPalette, setShowPalette] = useState(false);
-  const [insertIndex, setInsertIndex] = useState<number | null>(null);
+  const [shareOpen, setShareOpen] = useState(false);
   const [showTemplateLibrary, setShowTemplateLibrary] = useState(false);
   const starterPickerDismissed = useSyncExternalStore(
     subscribeToStarterPicker,
     readStarterPickerDismissed,
     () => true
   );
-
-  const selectedBlock = useMemo(
-    () => page.blocks.find((b) => b.id === selectedBlockId) ?? null,
-    [page.blocks, selectedBlockId]
-  );
-
   const showStarterPicker =
-    store.pages.length === 1 && page.blocks.length === 0 && !starterPickerDismissed;
+    store.pages.length === 1 &&
+    isStarterPage(page) &&
+    !starterPickerDismissed;
   const showTemplates = showStarterPicker || showTemplateLibrary;
-
-  function dismissStarterPicker() {
-    try {
-      window.localStorage.setItem(STARTER_PICKER_KEY, "true");
-    } catch {
-      // Storage may be disabled; the current session can still dismiss it.
-    }
-    window.dispatchEvent(new Event(STARTER_PICKER_EVENT));
-    setShowTemplateLibrary(false);
-  }
-
-  function selectStarterTemplate(template: StarterTemplate) {
-    const templatePage = buildTemplatePage(template);
-    const pageToStore =
-      page.blocks.length === 0 && store.pages.length === 1
-        ? { ...templatePage, id: page.id }
-        : templatePage;
-    setPracticePageStore(
-      upsertPracticePage(store, pageToStore)
-    );
-    dismissStarterPicker();
-  }
-
-  // Drop block selection when the active page changes so the settings panel
-  // never edits a block that is no longer on screen. Adjusting state during
-  // render (guarded by a previous-id check) avoids a cascading effect.
-  const [lastPageId, setLastPageId] = useState(page.id);
-  if (page.id !== lastPageId) {
-    setLastPageId(page.id);
-    setSelectedBlockId(null);
-    setInsertIndex(null);
-    setShowPalette(false);
-  }
 
   function updatePage(updater: (prev: PracticePage) => PracticePage) {
     setPracticePageStore(upsertPracticePage(store, updater(page)));
@@ -138,58 +107,24 @@ export function PracticePageEditor() {
     setPracticePageStore(deletePracticePage(store, page.id));
   }
 
-  function openPalette(atIndex?: number) {
-    setInsertIndex(atIndex ?? null);
-    setShowPalette(true);
-  }
-
-  function closePalette() {
-    setInsertIndex(null);
-    setShowPalette(false);
-  }
-
-  function addBlock(type: string) {
-    const def = getFeatureDefinition(type);
-    if (!def) return;
-
-    const newBlock: FeatureBlock = {
-      id: generateId(),
-      type,
-      version: 1,
-      config: { ...def.defaultConfig },
-    };
-
-    const targetIndex = insertIndex ?? page.blocks.length;
-
-    updatePage((prev) => ({
-      ...prev,
-      blocks: [
-        ...prev.blocks.slice(0, targetIndex),
-        newBlock,
-        ...prev.blocks.slice(targetIndex),
-      ],
-    }));
-    setSelectedBlockId(newBlock.id);
-    closePalette();
-  }
-
-  function updateBlockConfig(id: string, config: Record<string, unknown>) {
-    updatePage((prev) => ({
-      ...prev,
-      blocks: prev.blocks.map((b) =>
-        b.id === id ? { ...b, config } : b
-      ),
-    }));
-  }
-
-  function removeBlock(id: string) {
-    updatePage((prev) => ({
-      ...prev,
-      blocks: prev.blocks.filter((b) => b.id !== id),
-    }));
-    if (selectedBlockId === id) {
-      setSelectedBlockId(null);
+  function dismissStarterPicker() {
+    try {
+      window.localStorage.setItem(STARTER_PICKER_KEY, "true");
+    } catch {
+      // Storage may be disabled; the current session can still dismiss it.
     }
+    window.dispatchEvent(new Event(STARTER_PICKER_EVENT));
+    setShowTemplateLibrary(false);
+  }
+
+  function selectStarterTemplate(template: StarterTemplate) {
+    const templatePage = buildTemplatePage(template);
+    const pageToStore =
+      isStarterPage(page) && store.pages.length === 1
+        ? { ...templatePage, id: page.id }
+        : templatePage;
+    setPracticePageStore(upsertPracticePage(store, pageToStore));
+    setShowTemplateLibrary(false);
   }
 
   function duplicateBlock(id: string) {
@@ -211,32 +146,35 @@ export function PracticePageEditor() {
         ...prev.blocks.slice(index + 1),
       ],
     }));
-    setSelectedBlockId(newBlock.id);
   }
 
-  function moveBlock(id: string, direction: "up" | "down") {
-    const index = page.blocks.findIndex((b) => b.id === id);
-    if (index === -1) return;
-    if (direction === "up" && index === 0) return;
-    if (direction === "down" && index === page.blocks.length - 1) return;
-
-    const nextIndex = direction === "up" ? index - 1 : index + 1;
-    const nextBlocks = [...page.blocks];
-    [nextBlocks[index], nextBlocks[nextIndex]] = [
-      nextBlocks[nextIndex],
-      nextBlocks[index],
-    ];
-
-    updatePage((prev) => ({ ...prev, blocks: nextBlocks }));
+  function removeBlock(id: string) {
+    updatePage((prev) => ({
+      ...prev,
+      blocks: prev.blocks.filter((b) => b.id !== id),
+    }));
   }
 
   function handleReorder(blocks: FeatureBlock[]) {
     updatePage((prev) => ({ ...prev, blocks }));
   }
 
+  function handleResize(id: string, size: { w?: number; h?: number }) {
+    updatePage((prev) => ({
+      ...prev,
+      blocks: resizeBlocks(prev.blocks, id, size),
+    }));
+  }
+
+  function handleConfigChange(id: string, config: Record<string, unknown>) {
+    updatePage((prev) => ({
+      ...prev,
+      blocks: prev.blocks.map((b) => (b.id === id ? { ...b, config } : b)),
+    }));
+  }
+
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if (showPalette) return;
       if (event.key !== "/") return;
 
       const target = event.target;
@@ -251,32 +189,27 @@ export function PracticePageEditor() {
       }
 
       event.preventDefault();
-      openPalette();
+      router.push(MARKETPLACE_HREF);
     }
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [showPalette]);
+  }, [router]);
 
   return (
     <DrillRuntimeProvider pageId={page.id}>
-      <div className="mx-auto grid max-w-3xl gap-6 lg:max-w-5xl lg:grid-cols-[1fr_320px]">
-        <div className="space-y-4">
-          <PageSwitcher
+      <div className="flex min-h-full flex-1 flex-col gap-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <PagesMenu
             store={store}
+            shareOpen={shareOpen}
             onSelect={switchPage}
             onCreate={createPage}
             onDuplicate={duplicatePage}
             onDelete={removePage}
+            onToggleShare={() => setShareOpen((open) => !open)}
             onTemplates={() => setShowTemplateLibrary(true)}
           />
-
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-xs text-muted-foreground">
-              {store.pages.length} {store.pages.length === 1 ? "page" : "pages"}
-            </span>
-            <WorkshopSyncBadge status={syncStatus} />
-          </div>
 
           <input
             type="text"
@@ -284,71 +217,65 @@ export function PracticePageEditor() {
             onChange={(e) =>
               updatePage((prev) => ({ ...prev, title: e.target.value }))
             }
-            className="w-full bg-transparent text-2xl font-semibold tracking-tight text-foreground outline-none placeholder:text-muted-foreground"
+            className="min-w-0 flex-1 basis-48 rounded-lg border border-transparent bg-transparent px-2 py-1.5 text-lg font-semibold tracking-tight text-foreground outline-none transition-colors placeholder:text-muted-foreground hover:border-border focus:border-primary/50"
             placeholder="Untitled practice page"
+            aria-label="Practice page title"
           />
 
-           {showTemplates ? (
-             <StarterPicker
-               onSelect={selectStarterTemplate}
-               onDismiss={dismissStarterPicker}
-               canClose={!showStarterPicker}
-             />
-           ) : page.blocks.length === 0 ? (
-            <div
-              className={cn(
-                "rounded-xl border border-dashed border-border bg-card p-10 text-center"
-              )}
-            >
-              <p className="mb-4 text-muted-foreground">
-                This page is empty. Add your first feature to start practicing.
-              </p>
-              <Button onClick={() => openPalette()}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add feature
-              </Button>
-            </div>
-          ) : (
-            <SortableBlockList
-              blocks={page.blocks}
-              selectedBlockId={selectedBlockId}
-              onSelect={setSelectedBlockId}
-              onReorder={handleReorder}
-              onMoveUp={(id) => moveBlock(id, "up")}
-              onMoveDown={(id) => moveBlock(id, "down")}
-              onDuplicate={duplicateBlock}
-              onRemove={removeBlock}
-              onInsertAtIndex={openPalette}
-            />
-          )}
+          <WorkshopSyncBadge status={syncStatus} />
 
-          {showPalette ? (
-            <FeaturePalette
-              onSelect={addBlock}
-              onCancel={closePalette}
-            />
-          ) : null}
+          <Link
+            href={MARKETPLACE_HREF}
+            aria-label="Open the marketplace"
+            className={cn(buttonVariants({ size: "sm" }), "gap-2")}
+          >
+            Marketplace
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
 
-        <div className="space-y-4">
-          {selectedBlock ? (
-            <FeatureSettingsPanel
-              block={selectedBlock}
-              onChange={(config) => updateBlockConfig(selectedBlock.id, config)}
-            />
-          ) : (
-            <div className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">
-              Select a feature to edit its settings.
-            </div>
-          )}
-
+        {shareOpen ? (
           <ShareMenu
             clientPageId={page.id}
             title={page.title}
             blocks={page.blocks}
             updatedAt={page.updatedAt}
           />
-        </div>
+        ) : null}
+
+        {showTemplates ? (
+          <StarterPicker
+            onSelect={selectStarterTemplate}
+            onDismiss={dismissStarterPicker}
+            canClose={!showStarterPicker}
+          />
+        ) : (
+          <>
+            <WorkshopGrid
+              blocks={page.blocks}
+              onReorder={handleReorder}
+              onResize={handleResize}
+              onDuplicate={duplicateBlock}
+              onRemove={removeBlock}
+              onConfigChange={handleConfigChange}
+              showGuides={page.blocks.length === 0}
+              fill
+            />
+
+            {page.blocks.length === 0 ? (
+              <p className="text-center text-sm text-muted-foreground">
+                Your workshop is empty. Browse the{" "}
+                <Link
+                  href={MARKETPLACE_HREF}
+                  className="font-medium text-primary underline-offset-4 hover:underline"
+                >
+                  marketplace
+                </Link>{" "}
+                to add features.
+              </p>
+            ) : null}
+          </>
+        )}
       </div>
     </DrillRuntimeProvider>
   );

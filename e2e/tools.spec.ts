@@ -72,12 +72,16 @@ test.describe("/tools dashboard", () => {
     await signInAsTestUser(page);
     await page.goto("/tools/workshop");
 
+    // First run shows the template picker; scratch past it to the grid,
+    // which now carries the shortcuts as a tile.
+    await page.getByRole("button", { name: /start from scratch/i }).click();
+
+    const drillsTile = page.getByTestId("drill-shortcuts");
     await expect(
-      page.getByText("In a hurry? Jump into a ready-made drill:")
+      drillsTile.getByText("In a hurry? Jump into a ready-made drill:")
     ).toBeVisible();
 
-    await page
-      .getByRole("main")
+    await drillsTile
       .getByRole("link", { name: "Chord Drill" })
       .click();
     await expect(page).toHaveURL("/tools/chord-drill");

@@ -78,7 +78,8 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `app/error.tsx`, `app/global-error.tsx` | Error boundaries so a thrown query cannot blank the app |
 | `components/drills/drill-shell.tsx` | Shared layout wrapper for every tool page |
 | `lib/tools.ts` | Grouped tool registry (`workshopTool`, `drillTools`, `insightTools`, `labTools`) driving sidebar sections and the landing grid |
-| `components/tools/ready-made-drills.tsx` | Ready-made drill shortcut strip on the Workshop page |
+| `lib/feature-blocks/drill-shortcuts/config.ts` | Config for the ready-made drills tile (registry-derived content, no fields) |
+| `components/feature-blocks/drill-shortcuts-block.tsx` | Ready-made drill shortcuts as a movable Workshop grid tile |
 | `components/tools/dashboard-nav.tsx` | Dashboard drawer open state + mobile Menu button |
 | `components/tools/dashboard-shell.tsx` | Shared tools/settings shell (provider + sidebar + main) |
 | `lib/welcome-config.ts` | Typed copy + style-token config for the landing page and onboarding |
@@ -89,8 +90,11 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `components/dev-tools-link.tsx` | Floating link to the dev lab |
 | `lib/feature-blocks/*` | Workshop feature-block registry, types, and per-block config schemas + editor field descriptors |
 | `components/feature-blocks/*` | Feature-block render components (metronome, drill timer, chord set) |
-| `components/custom-practice/*` | Workshop practice-page editor: sortable block list, feature palette (`/` shortcut), settings panel, `DrillRuntimeProvider` |
-| `lib/custom-practice-storage.ts` | `localStorage` persistence for custom practice pages (Free tier) |
+| `lib/workshop-grid.ts` | Pure Workshop grid layout math: canonical 4-column span model, size normalization/clamping, resize deltas, dnd-kit reorder |
+| `components/workshop-grid/*` | Draggable/resizable grid for the Workshop editor; fills the page via `fill` (`data-grid-full`); grid chrome (guides) visible only while dragging (or when empty via `showGuides`); tiles persist `size` spans and open settings behind a per-tile gear |
+| `components/workshop-marketplace/*` | Marketplace view for the Workshop: live interactive previews of every registry block with plus/check add-remove buttons; route at `/tools/workshop/marketplace` |
+| `components/custom-practice/*` | Workshop practice-page editor: full-width grid page, pages dropdown menu (`PagesMenu`, incl. share), `DrillRuntimeProvider`, shared `FieldInput` settings renderer |
+| `lib/custom-practice-storage.ts` | `localStorage` persistence for custom practice pages (Free tier); fresh stores seed a `drillShortcuts` starter tile; `isStarterPage` gates onboarding |
 | `lib/drill-runtime.ts` / `hooks/useDrillRuntime.ts` | Shared drill runtime context (countdown → armed → timing → success → break → finished) driving workshop blocks; logs events to Convex (Pro) or local history (Free) |
 | `hooks/useChordTargets.ts` | Sequential / random chord-target generation from selected roots and quality groups |
 

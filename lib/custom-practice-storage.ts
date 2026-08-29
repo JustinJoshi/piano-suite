@@ -1,8 +1,12 @@
-import type { PracticePage } from "@/lib/feature-blocks/types";
+import type { PracticePage, FeatureBlock } from "@/lib/feature-blocks/types";
+import { getFeatureDefinition } from "@/lib/feature-blocks/registry";
 
 const STORAGE_KEY = "custom-practice-pages-v2";
 const LEGACY_STORAGE_KEY = "custom-practice-pages-v1";
 const DEFAULT_PAGE_ID = "default";
+
+/** Starter tile seeded on a fresh workshop so shortcuts live on the grid. */
+export const STARTER_TILE_TYPE = "drillShortcuts";
 
 export { STORAGE_KEY, LEGACY_STORAGE_KEY };
 
@@ -34,11 +38,22 @@ export function createEmptyPracticePage(title = "My Practice Page"): PracticePag
 
 export function createEmptyPracticePageStore(): PracticePageStore {
   const page = createEmptyPracticePage();
+  page.blocks = [
+    { id: generateId(), type: STARTER_TILE_TYPE, version: 1, config: {} },
+  ];
   return {
     version: 2,
     pages: [page],
     activePageId: page.id,
   };
+}
+
+/**
+ * True when the page holds nothing the user built — only starter tiles
+ * (or nothing at all). Drives first-run onboarding and template replacement.
+ */
+export function isStarterPage(page: PracticePage): boolean {
+  return page.blocks.every((b) => b.type === STARTER_TILE_TYPE);
 }
 
 function isValidPage(value: unknown): value is PracticePage {
@@ -245,6 +260,39 @@ function uniqueTitle(store: PracticePageStore, base: string): string {
   let n = 2;
   while (titles.has(`${base} ${n}`)) n += 1;
   return `${base} ${n}`;
+}
+
+/**
+ * Marketplace helper: appends a block of `type` (with default config) to
+ * `page`. Returns the page unchanged for unknown types.
+ */
+export function appendBlockToPage(page: PracticePage, type: string): PracticePage {
+  const def = getFeatureDefinition(type);
+  if (!def) return page;
+
+  const block: FeatureBlock = {
+    id: generateId(),
+    type,
+    version: 1,
+    config: { ...def.defaultConfig },
+  };
+  return { ...page, blocks: [...page.blocks, block] };
+}
+
+/**
+ * Marketplace helper: removes the first block of `type` from `page`
+ * (no-op when absent).
+ */
+export function removeFirstBlockOfType(
+  page: PracticePage,
+  type: string
+): PracticePage {
+  const index = page.blocks.findIndex((b) => b.type === type);
+  if (index === -1) return page;
+  return {
+    ...page,
+    blocks: page.blocks.filter((_, i) => i !== index),
+  };
 }
 
 export { generateId, DEFAULT_PAGE_ID };

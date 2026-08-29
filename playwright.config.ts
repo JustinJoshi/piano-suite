@@ -19,6 +19,13 @@ try {
 const authDir = path.join(__dirname, "playwright", ".auth");
 const authFile = path.join(authDir, "user.json");
 
+/**
+ * Dev machines often reserve port 3000 (e.g. a personal proxy service).
+ * Set E2E_PORT to run the app under test on another port; unset behavior
+ * is unchanged.
+ */
+const E2E_PORT = Number(process.env.E2E_PORT || 3000);
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
@@ -30,7 +37,7 @@ export default defineConfig({
     ["html", { open: "never", outputFolder: "playwright-report" }],
   ],
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL: `http://localhost:${E2E_PORT}`,
     trace: "on-first-retry",
   },
   projects: [
@@ -47,19 +54,23 @@ export default defineConfig({
     },
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"], storageState: authFile },
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: authFile,
+        baseURL: `http://localhost:${E2E_PORT}`,
+      },
       dependencies: ["setup"],
     },
   ],
   webServer: process.env.CI
     ? {
         command: "npm run start",
-        url: "http://localhost:3000",
+        url: `http://localhost:${E2E_PORT}`,
         reuseExistingServer: false,
       }
     : {
-        command: "npm run dev",
-        url: "http://localhost:3000",
+        command: E2E_PORT === 3000 ? "npm run dev" : `PORT=${E2E_PORT} npm run dev`,
+        url: `http://localhost:${E2E_PORT}`,
         reuseExistingServer: true,
       },
 });

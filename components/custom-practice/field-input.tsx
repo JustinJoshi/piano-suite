@@ -1,47 +1,12 @@
 "use client";
 
-import type { FeatureBlock, FieldDescriptor } from "@/lib/feature-blocks/types";
-import { getFeatureDefinition } from "@/lib/feature-blocks/registry";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { FieldDescriptor } from "@/lib/feature-blocks/types";
 
-type FeatureSettingsPanelProps = {
-  block: FeatureBlock;
-  onChange: (config: Record<string, unknown>) => void;
-};
-
-export function FeatureSettingsPanel({
-  block,
-  onChange,
-}: FeatureSettingsPanelProps) {
-  const def = getFeatureDefinition(block.type);
-  if (!def) return null;
-
-  const config = def.normalizeConfig(block.config) as Record<string, unknown>;
-
-  function updateField(key: string, value: unknown) {
-    onChange({ ...config, [key]: value });
-  }
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">{def.label} settings</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {def.fields.map((field) => (
-          <FieldInput
-            key={field.key}
-            field={field}
-            value={config[field.key]}
-            onChange={(value) => updateField(field.key, value)}
-          />
-        ))}
-      </CardContent>
-    </Card>
-  );
-}
-
-function FieldInput({
+/**
+ * Renders one settings field described by a FieldDescriptor.
+ * Shared by the workshop tile's gear panel (and any future settings UI).
+ */
+export function FieldInput({
   field,
   value,
   onChange,
@@ -148,10 +113,7 @@ function FieldInput({
                   }}
                   className="h-4 w-4 accent-primary"
                 />
-                <label
-                  htmlFor={optionId}
-                  className="text-sm text-foreground"
-                >
+                <label htmlFor={optionId} className="text-sm text-foreground">
                   {option.label}
                 </label>
               </div>

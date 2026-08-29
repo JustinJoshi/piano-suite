@@ -477,6 +477,56 @@ Architecture and market research: `docs/custom-drill-builder-plan.md`,
 Verification: `npm run lint`, `npm run test:unit:run` (655 passed), `npm run build`,
 and `npm run test:e2e` (83 passed) all pass on the merged `main`.
 
+## Workshop overhaul — phase 1: grid layout (2026-08)
+
+The Workshop editor replaced its vertical sortable list with a real grid
+(`components/workshop-grid/`). Tiles are draggable (dnd-kit rect sorting) and
+resizable via a corner handle; sizes persist as `{ w, h }` spans in canonical
+4-column units on `FeatureBlock.size` (optional — legacy blocks fall back to
+per-type defaults), carried through `lib/feature-blocks/schemas.ts` so Pro
+sync, sharing, and forks keep layouts. Pure layout math lives in
+`lib/workshop-grid.ts` (span clamping per breakpoint, resize pixel→unit
+deltas, reorder). Grid chrome (column guides, dashed border) renders only
+while a drag is active. Move up/down buttons and inline insert placeholders
+were removed; palette insertion is append-only (the marketplace replaces the
+palette in phase 3). `playwright.config.ts` accepts `E2E_PORT` so e2e can run
+beside services bound to port 3000.
+
+### Workshop rework — marketplace tab + chrome cleanup (2026-08)
+
+The editor became a single full-width grid page with two header controls: a
+pages dropdown (`components/custom-practice/pages-menu.tsx`: switch between
+custom pages, new/duplicate/delete, share toggle) and a Marketplace button
+(`/` opens it too). Empty pages render the grid canvas with guides forced on
+(`showGuides`) plus a hint pointing to the marketplace. The marketplace
+(`app/tools/workshop/marketplace`, `components/workshop-marketplace/`) shows
+a live interactive preview of every registry block inside a preview drill
+runtime (`pageId ""` → no practice-history logging); a plus button adds the
+component to the active page and flips to a check (click again removes one
+instance). Block settings moved behind a per-tile gear sharing the extracted
+`FieldInput` renderer, replacing the right-rail settings panel; the palette,
+page-switcher select, and settings rail were deleted. Pure page helpers
+(`appendBlockToPage`, `removeFirstBlockOfType`) live in
+`lib/custom-practice-storage.ts`.
+
+## Workshop overhaul — phase 2: the grid is the page (2026-08)
+
+The Workshop stopped being "a page with a grid section" and became a
+full-page grid canvas. `DrillShell` gained a `wide` opt-out from the centered
+`max-w-6xl` column, and the editor column stretches to the remaining page
+height (`WorkshopGrid` accepts `fill`, exposed as `data-grid-full`). The
+ready-made-drills strip above the editor was removed and rebuilt as a feature
+block: `drillShortcuts` (`lib/feature-blocks/drill-shortcuts/`,
+`components/feature-blocks/drill-shortcuts-block.tsx`) renders the
+`drillTools` shortcuts as a movable, resizable, removable tile (default span
+`{ w: 4, h: 1 }`, no config fields, registered in the marketplace). A fresh
+workshop seeds one `drillShortcuts` tile (`createEmptyPracticePageStore`);
+pages holding only starter tiles count as blank for onboarding
+(`isStarterPage`), so the template picker still appears on first run and
+templates still replace the fresh page in place. The tile ships in the
+getting-started starter templates; users with existing pages can add it from
+the marketplace.
+
 ## Workshop-first navigation (2026-08)
 
 Product decision: the Workshop is the core of the app, not one tool among

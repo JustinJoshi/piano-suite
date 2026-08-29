@@ -7,6 +7,8 @@ export type DrillShellProps = {
   children: React.ReactNode;
   right?: React.ReactNode;
   className?: string;
+  /** Drop the centered max-width so the content spans the full page. */
+  wide?: boolean;
   "data-testid"?: string;
 };
 
@@ -22,6 +24,7 @@ export function DrillShell({
   children,
   right,
   className,
+  wide = false,
   "data-testid": dataTestId,
 }: DrillShellProps) {
   return (
@@ -48,7 +51,12 @@ export function DrillShell({
       </header>
 
       <div className="flex min-h-full flex-1 flex-col p-4 sm:p-6 lg:p-8">
-        <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col">
+        <div
+          className={cn(
+            "flex min-h-full w-full flex-col",
+            !wide && "mx-auto max-w-6xl"
+          )}
+        >
           {children}
         </div>
       </div>

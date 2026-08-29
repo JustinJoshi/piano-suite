@@ -4,12 +4,15 @@ import Link from "next/link";
 import { drillTools } from "@/lib/tools";
 
 /**
- * Compact shortcuts from the Workshop to the ready-made drills, framed as
- * templates: start practicing immediately, or build your own page above.
+ * Ready-made drills tile: the workshop's jump-into-practice shortcuts,
+ * rendered as a movable, resizable grid tile instead of a fixed strip.
  */
-export function ReadyMadeDrills() {
+export function DrillShortcutsBlock() {
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div
+      data-testid="drill-shortcuts"
+      className="flex h-full flex-wrap items-center gap-2"
+    >
       <span className="text-sm text-muted-foreground">
         In a hurry? Jump into a ready-made drill:
       </span>

@@ -1,5 +1,8 @@
 import type { LucideIcon } from "lucide-react";
 import type { ComponentType } from "react";
+// Relative import: this module is bundled by the Convex toolchain, which
+// does not resolve the `@/` alias.
+import type { BlockSize } from "../workshop-grid";
 
 /**
  * A field descriptor drives the settings form for a feature block.
@@ -69,12 +72,15 @@ export type FeatureDefinition<C extends Record<string, unknown>> = {
 
 /**
  * Stored instance of a feature inside a custom practice page.
+ * `size` is the Workshop grid tile span in canonical column/row units;
+ * absent for legacy blocks (renderers fall back to per-type defaults).
  */
 export type FeatureBlock = {
   id: string;
   type: string;
   version: number;
   config: Record<string, unknown>;
+  size?: BlockSize;
 };
 
 /**

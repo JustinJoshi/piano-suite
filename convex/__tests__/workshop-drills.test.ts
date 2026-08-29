@@ -141,6 +141,30 @@ describe("workshop customDrills sync", () => {
     ).rejects.toThrow();
   });
 
+  it("round-trips block sizes for a pro user", async () => {
+    const t = convexTest(schema, modules);
+    const asPro = t.withIdentity(proIdentity);
+
+    const result = await asPro.mutation(
+      api.workshop.upsertCustomDrill,
+      samplePage({
+        blocks: [
+          {
+            id: "block-1",
+            type: "metronome",
+            version: 1,
+            config: { bpm: 120 },
+            size: { w: 2, h: 1 },
+          },
+        ],
+      })
+    );
+    expect(result.accepted).toBe(true);
+
+    const rows = await asPro.query(api.workshop.listCustomDrills, {});
+    expect(rows[0].blocks[0].size).toEqual({ w: 2, h: 1 });
+  });
+
   it("tombstones deletions and propagates them via list", async () => {
     const t = convexTest(schema, modules);
     const asPro = t.withIdentity(proIdentity);

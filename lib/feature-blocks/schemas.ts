@@ -3,6 +3,8 @@ import { normalizeDrillTimerConfig } from "./drill-timer/config";
 import { normalizeChordSetConfig } from "./chord-set/config";
 import { normalizeTextBlockConfig } from "./text-block/config";
 import { normalizeMidiConnectionBarConfig } from "./midi-connection-bar/config";
+import { normalizeDrillShortcutsConfig } from "./drill-shortcuts/config";
+import { normalizeSize } from "../workshop-grid";
 
 /**
  * Server-safe validation for stored practice pages.
@@ -24,6 +26,7 @@ const blockNormalizers: Record<string, BlockNormalizer> = {
   chordSet: normalizeChordSetConfig as BlockNormalizer,
   textBlock: normalizeTextBlockConfig as BlockNormalizer,
   midiConnectionBar: normalizeMidiConnectionBarConfig as BlockNormalizer,
+  drillShortcuts: normalizeDrillShortcutsConfig as BlockNormalizer,
 };
 
 export type ValidatedBlock = {
@@ -87,11 +90,14 @@ export function normalizeStoredBlock(raw: unknown): ValidatedBlock | null {
   }
 
   const version = block.version;
+  const size = normalizeSize(block.size);
+
   return {
     id,
     type,
     version: isFiniteInt(version, 1, 1000) ? version : 1,
     config: normalize(block.config),
+    ...(size ? { size } : {}),
   };
 }
 
