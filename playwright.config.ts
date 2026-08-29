@@ -16,15 +16,12 @@ try {
   // .env.local may not exist in CI; rely on injected environment variables.
 }
 
+// Worktrees share the machine but not the port: E2E_PORT=3001 npm run
+// test:e2e runs the suite against this worktree's own dev server.
+const E2E_PORT = Number(process.env.E2E_PORT || 3000);
+
 const authDir = path.join(__dirname, "playwright", ".auth");
 const authFile = path.join(authDir, "user.json");
-
-/**
- * Dev machines often reserve port 3000 (e.g. a personal proxy service).
- * Set E2E_PORT to run the app under test on another port; unset behavior
- * is unchanged.
- */
-const E2E_PORT = Number(process.env.E2E_PORT || 3000);
 
 export default defineConfig({
   testDir: "./e2e",

@@ -15,6 +15,7 @@ import type * as settings from "../settings.js";
 import type * as technique from "../technique.js";
 import type * as tracking from "../tracking.js";
 import type * as users from "../users.js";
+import type * as waitlist from "../waitlist.js";
 import type * as workshop from "../workshop.js";
 
 import type {
@@ -31,6 +32,7 @@ declare const fullApi: ApiFromModules<{
   technique: typeof technique;
   tracking: typeof tracking;
   users: typeof users;
+  waitlist: typeof waitlist;
   workshop: typeof workshop;
 }>;
 

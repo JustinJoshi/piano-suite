@@ -528,7 +528,6 @@ getting-started starter templates; users with existing pages can add it from
 the marketplace.
 
 ## Workshop-first navigation (2026-08)
-
 Product decision: the Workshop is the core of the app, not one tool among
 fifteen. `/tools` was a flat hub page + a flat 15-item sidebar, which buried
 the differentiator and overwhelmed new users.
@@ -547,6 +546,27 @@ the differentiator and overwhelmed new users.
   grid unchanged). Logo Lab stays a sidebar-only lab entry.
 - The Workshop page gained a ready-made-drills shortcut strip ("In a hurry?")
   framing pre-built drills as templates while the editor stays the focus.
+
+## Go-live pre-launch gate (2026-08)
+
+Six-item pre-launch checklist (see `tasks/tasks-go-live.md` for the task list and
+`docs/go-live-runbook.md` for the ops cutover). Launch posture: free tools stay
+free, billing stays off, Pro gated behind a Founding Pro waitlist.
+
+- `lib/analytics.ts`: three-event PostHog wrapper (`drill_started`,
+  `drill_completed` from `hooks/useDrillRuntime.ts`, `pro_waitlist_click` from
+  the waitlist CTA). No-op without `NEXT_PUBLIC_POSTHOG_KEY`; mirrors captures
+  to `window.__analyticsEvents` for e2e. Sentry wired via
+  `lib/sentry.ts` + `instrumentation.ts` / `instrumentation-client.ts`
+  (no-op without a DSN).
+- `convex/waitlist.ts` + `waitlistSignups` table: anonymous-allowed email
+  signups, dedupe on normalized email, O(1) position/count via a
+  `by_position` index. `BILLING_ENABLED` flag in `lib/billing.ts` swaps
+  `/pricing` between waitlist CTA (current) and Clerk `PricingTable`
+  (launch).
+- `app/terms` + `app/privacy`: public legal pages (proxy.ts allowlist),
+  linked from pricing + landing footers.
+- `app/layout.tsx` metadata derives from `NEXT_PUBLIC_SITE_URL`.
 
 ## Roadmap
 

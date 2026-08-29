@@ -66,12 +66,17 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `components/ensure-signed-in-user.tsx` | Bootstraps Convex `users` row on Clerk sign-in (homepage settings before tools) |
 | `lib/auth-disabled.ts` | Opt-in bypass: `isAuthDisabled()` (`=== "true"` only) for client UI; `isAuthBypassEffective()` for server gates — never true when `VERCEL_ENV === "production"`. Hobby Vercel may set temporarily (see README Deploy) |
 | `lib/clerk-authorized-parties.ts` | Parse `CLERK_AUTHORIZED_PARTIES` for `clerkMiddleware` `authorizedParties` (Phase A / production) |
-| `lib/billing.ts` | Clerk Billing plan/feature slugs (`pro`, `sync`) + `canPersistFromEntitlements` / `canUseFloatPanelFromEntitlements` + JWT `pla`/`fea` helpers; apply Dashboard catalog via `docs/clerk-billing-setup.md` |
 | `lib/local-practice-history.ts` | Free-tier browser practice history (Reflex-compatible keys); drills write when `!canPersist` |
 | `convex/lib/entitlements.ts` | `ensureUserIdWithSync` — Pro/`sync` JWT gate for tracking, technique, and settings writes |
 | `hooks/useLocalPracticeHistory.ts` | Version bump when local history changes (Tracking/Technique refresh) |
-| `components/pricing/*` | Public `/pricing` marketing page (Clerk `PricingTable`) |
+| `components/pricing/*` | Public `/pricing` marketing page — pre-launch renders the Founding Pro waitlist; Clerk `PricingTable` when `BILLING_ENABLED` |
+| `lib/analytics.ts` | Three-event PostHog wrapper (`ANALYTICS_EVENTS`); no-op without key; mirrors to `window.__analyticsEvents` for e2e. Emit via `captureEvent`, never per-page |
+| `components/analytics/analytics-provider.tsx` | Mounts `initAnalytics()` in the root layout |
+| `lib/sentry.ts` + `instrumentation*.ts` | Sentry init (no-op without DSN); Next 16 instrumentation convention, `onRequestError` wired |
+| `convex/waitlist.ts` + `components/waitlist/*` | Founding Pro waitlist: anonymous-allowed email signup (`joinWaitlist`), dedupe by normalized email; CTA on `/pricing` and post-drill (`PostDrillWaitlist`) |
+| `lib/billing.ts` | Clerk Billing plan/feature slugs (`pro`, `sync`) + `BILLING_ENABLED` pre-launch gate + `canPersistFromEntitlements` / `canUseFloatPanelFromEntitlements` + JWT `pla`/`fea` helpers; apply Dashboard catalog via `docs/clerk-billing-setup.md` |
 | `app/settings/billing/page.tsx` | Signed-in plan management (Clerk `PricingTable`) |
+| `app/terms`, `app/privacy` | Public legal pages (proxy.ts allowlist); Privacy must disclose every analytics/error processor actually wired |
 | `lib/chat-auth.ts` | Chat API allowlist decisions (`authorizeChatAccess`); always session + `ALLOWED_CLERK_USER_ID` — the `AUTH_DISABLED` bypass never opens the paid endpoint |
 | `convex/lib/auth.ts` | `optionalUserId` (queries), `ensureUserId` (mutations, upserts the row), `requireUserId` (throws) |
 | `proxy.ts` | Clerk route gate (Next 16 proxy convention); public-route list + `unauthenticatedUrl` redirect. `/api` is public by design — **every `app/api/**/route.ts` handler must authorize itself via `auth()`** (e.g. `/api/chat`) |

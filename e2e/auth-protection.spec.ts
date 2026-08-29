@@ -67,7 +67,7 @@ const PUBLIC_ROUTES = [
     assert: async (page: import("@playwright/test").Page) => {
       await expect(
         page.getByRole("heading", {
-          name: /Practice free\. Pro when you're ready\./i,
+          name: /Practice free\. Pro is on the way\./i,
         })
       ).toBeVisible();
       await expect(page.getByRole("link", { name: "Pricing" })).toBeVisible();
@@ -84,7 +84,7 @@ const SIGNED_IN_ROUTE_SMOKE: Array<{
   bodyText?: string | RegExp;
 }> = [
   { path: "/", bodyText: "Piano Suite" },
-  { path: "/pricing", heading: /Practice free\. Pro when you're ready\./i },
+  { path: "/pricing", heading: /Practice free\. Pro is on the way\./i },
   { path: "/tools", finalPath: "/tools/workshop", heading: "Workshop" },
   { path: "/tools/chord-drill", heading: /Chord Drill/i },
   { path: "/tools/arpeggios", heading: /Arpeggio/i },

@@ -11,6 +11,7 @@ import { AudioEngineHost } from "@/components/audio/audio-engine-host";
 import { AudioSettingsProvider } from "@/hooks/useAudioSettings";
 import { ExperimentalFeaturesProvider } from "@/hooks/useExperimentalFeatures";
 import { MusicPlayerProvider } from "@/hooks/useMusicPlayer";
+import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
 import { defaultTheme, themeIds } from "@/lib/themes";
 import "./globals.css";
 
@@ -30,7 +31,16 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Canonical origin for metadata (OG, canonical URLs). Set
+// NEXT_PUBLIC_SITE_URL to the production domain in Vercel; the localhost
+// fallback keeps dev builds honest instead of emitting a wrong canonical.
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
+  alternates: {
+    canonical: "/",
+  },
   title: "Piano Suite",
   description:
     "A piano practice suite that connects Anki reviews to a MIDI keyboard so you drill chords with spaced repetition.",
@@ -61,9 +71,11 @@ export default function RootLayout({
                 <AudioSettingsProvider>
                   <AmbientEffectsProvider>
                     <MusicPlayerProvider>
-                      <AmbientEffectsHost />
-                      <AudioEngineHost />
-                      {children}
+                      <AnalyticsProvider>
+                        <AmbientEffectsHost />
+                        <AudioEngineHost />
+                        {children}
+                      </AnalyticsProvider>
                     </MusicPlayerProvider>
                   </AmbientEffectsProvider>
                 </AudioSettingsProvider>

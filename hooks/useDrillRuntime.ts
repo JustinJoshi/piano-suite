@@ -12,7 +12,12 @@ import {
   appendLocalWorkshopEvent,
   appendLocalWorkshopMiss,
 } from "@/lib/local-practice-history";
+import { captureEvent } from "@/lib/analytics";
 import type { ChordTarget, DrillPhase } from "@/lib/drill-runtime";
+
+function emitAnalytics(name: "drill_started" | "drill_completed", pageId: string) {
+  captureEvent(name, pageId ? { pageId } : {});
+}
 
 export type DrillRuntimeOptions = {
   pageId?: string;
@@ -155,6 +160,7 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
     setTargetIndex(0);
     setMisses(0);
     missReportedRef.current = false;
+    emitAnalytics("drill_started", pageIdRef.current);
     timer.start();
   }, [timer]);
 
@@ -179,11 +185,14 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
     currentTargetRef.current = currentTarget;
   }, [currentTarget]);
 
-  // Reset miss-report flag whenever we enter timing for a new target.
+  // Reset miss-report flag on timing entry; emit completion on finished entry.
   const phaseRef = useRef<DrillPhase>("idle");
   useEffect(() => {
     if (timer.phase === "timing" && phaseRef.current !== "timing") {
       missReportedRef.current = false;
+    }
+    if (timer.phase === "finished" && phaseRef.current !== "finished") {
+      emitAnalytics("drill_completed", pageIdRef.current);
     }
     phaseRef.current = timer.phase;
   }, [timer.phase]);

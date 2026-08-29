@@ -106,4 +106,17 @@ export default defineSchema({
     .index("by_owner", ["ownerId"])
     .index("by_owner_client_id", ["ownerId", "clientPageId"])
     .index("by_public", ["isPublic"]),
+
+  // Founding Pro waitlist (pre-launch; billing is disabled until launch).
+  // Anonymous signups allowed by design — the value moment happens before
+  // any auth wall. Dedupe key is the normalized email.
+  waitlistSignups: defineTable({
+    email: v.string(),
+    userId: v.optional(v.id("users")),
+    position: v.number(),
+    source: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_email", ["email"])
+    .index("by_position", ["position"]),
 });
