@@ -2,6 +2,12 @@ import { test, expect } from "@playwright/test";
 import { assertAuthBypassOffForE2E } from "./auth-assertions";
 
 test.describe("chat API auth gate", () => {
+  test.describe.configure({ mode: "serial" });
+
+  // The chromium project injects a signed-in storage state; this spec's
+  // premise is a request with NO session, so opt out explicitly.
+  test.use({ storageState: { cookies: [], origins: [] } });
+
   test.beforeAll(() => {
     assertAuthBypassOffForE2E();
   });
