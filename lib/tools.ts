@@ -15,22 +15,38 @@ import {
   LucideIcon,
 } from "lucide-react";
 
+/**
+ * Tool registry powering the sidebar sections and the Workshop landing.
+ *
+ * Group order mirrors the information architecture: the Workshop is the
+ * core of the app, ready-made drills are shortcuts (templates), progress
+ * tools review practice history, and labs are exploratory visualizations.
+ */
+
 export interface ToolDef {
   title: string;
   description: string;
   icon: LucideIcon;
   href: string;
-  category: "practice" | "lab";
+  category: "workshop" | "drill" | "insight" | "lab";
 }
 
-export const tools: ToolDef[] = [
+export const workshopTool: ToolDef = {
+  title: "Workshop",
+  description: "Build your own practice page from reusable features.",
+  icon: Wrench,
+  href: "/tools/workshop",
+  category: "workshop",
+};
+
+export const drillTools: ToolDef[] = [
   {
     title: "Chord Drill",
     description:
       "Blocked-practice chord drill with timer, stats, and AnkiConnect integration.",
     icon: Music,
     href: "/tools/chord-drill",
-    category: "practice",
+    category: "drill",
   },
   {
     title: "Arpeggios",
@@ -38,7 +54,7 @@ export const tools: ToolDef[] = [
       "Practice 7-note minor-11 arpeggio cells with two-phase root and sequence drilling.",
     icon: Zap,
     href: "/tools/arpeggios",
-    category: "practice",
+    category: "drill",
   },
   {
     title: "Root Cycling",
@@ -46,7 +62,7 @@ export const tools: ToolDef[] = [
       "Drill one fixed chord or arpeggio idea across random roots in all 12 keys.",
     icon: RefreshCw,
     href: "/tools/root-cycling",
-    category: "practice",
+    category: "drill",
   },
   {
     title: "Progression",
@@ -54,15 +70,18 @@ export const tools: ToolDef[] = [
       "Loop ii-V-I and 12-bar blues progressions with per-chord transition timing.",
     icon: ArrowRightLeft,
     href: "/tools/progression",
-    category: "practice",
+    category: "drill",
   },
+];
+
+export const insightTools: ToolDef[] = [
   {
     title: "Technique",
     description:
       "Daily technique habit tracker with metronome, BPM log, and a 28-day grid.",
     icon: Timer,
     href: "/tools/technique",
-    category: "practice",
+    category: "insight",
   },
   {
     title: "Tracking",
@@ -70,16 +89,11 @@ export const tools: ToolDef[] = [
       "Review first-chord times, transition times, misses, and streaks over time.",
     icon: BarChart3,
     href: "/tools/tracking",
-    category: "practice",
+    category: "insight",
   },
-  {
-    title: "Workshop",
-    description:
-      "Build your own practice page from reusable features.",
-    icon: Wrench,
-    href: "/tools/workshop",
-    category: "practice",
-  },
+];
+
+export const labTools: ToolDef[] = [
   {
     title: "Chladni Lab",
     description:
@@ -130,5 +144,9 @@ export const tools: ToolDef[] = [
   },
 ];
 
-export const practiceTools = tools.filter((tool) => tool.category === "practice");
-export const labTools = tools.filter((tool) => tool.category === "lab");
+export const tools: ToolDef[] = [
+  workshopTool,
+  ...drillTools,
+  ...insightTools,
+  ...labTools,
+];

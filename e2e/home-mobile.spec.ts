@@ -9,26 +9,38 @@ test.describe("home page mobile", () => {
     page,
   }) => {
     await page.goto("/");
-    const cta = page.getByRole("link", { name: /start learning/i }).first();
+    const cta = page.getByRole("link", { name: /enter the workshop/i }).first();
     await expect(cta).toBeVisible();
     await expect(cta).toBeInViewport();
 
-    const supporting = page.getByText(/No account needed to explore/i);
+    const supporting = page.getByText(/explore the community gallery freely/i);
     await expect(supporting).toBeVisible();
   });
 
-  test("shows Anki flow steps in a vertical layout on mobile", async ({
+  test("shows Workshop how-it-works steps on mobile", async ({ page }) => {
+    await page.goto("/");
+    const steps = [
+      "Pick a starter drill or begin with a blank page",
+      "Press start and play, timed on real keys",
+      "Tweak the blocks or build your own routine",
+    ];
+    for (const text of steps) {
+      await expect(page.getByText(text, { exact: true })).toBeVisible();
+    }
+  });
+
+  test("shows Workshop flow steps in a vertical layout on mobile", async ({
     page,
   }) => {
     await page.goto("/");
     const steps = [
-      "Your due card names a chord",
-      "The drill loads that chord",
-      "You play it, timed, on real keys",
-      "The card flips so you can grade it",
+      "Choose a starter template or start from scratch",
+      "Snap metronome, timer, and chord blocks together",
+      "Press Start and practice on real keys",
+      "Publish to the community or fork someone else's drill",
     ];
     for (const text of steps) {
-      await expect(page.getByText(text)).toBeVisible();
+      await expect(page.getByText(text, { exact: true })).toBeVisible();
     }
   });
 

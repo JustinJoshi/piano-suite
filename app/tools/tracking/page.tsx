@@ -71,6 +71,7 @@ export default function TrackingPage() {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
+                      data-testid={`tracking-tab-${tab.id}`}
                       className={cn(
                         "inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
                         activeTab === tab.id

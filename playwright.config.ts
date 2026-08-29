@@ -16,6 +16,9 @@ try {
   // .env.local may not exist in CI; rely on injected environment variables.
 }
 
+const authDir = path.join(__dirname, "playwright", ".auth");
+const authFile = path.join(authDir, "user.json");
+
 /**
  * Dev machines often reserve port 3000 (e.g. a personal proxy service).
  * Set E2E_PORT to run the app under test on another port; unset behavior
@@ -42,14 +45,20 @@ export default defineConfig({
       name: "setup",
       testMatch: /global\.setup\.ts/,
       teardown: "teardown",
+      use: { storageState: { cookies: [], origins: [] } },
     },
     {
       name: "teardown",
       testMatch: /global\.teardown\.ts/,
+      use: { storageState: { cookies: [], origins: [] } },
     },
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: authFile,
+        baseURL: `http://localhost:${E2E_PORT}`,
+      },
       dependencies: ["setup"],
     },
   ],

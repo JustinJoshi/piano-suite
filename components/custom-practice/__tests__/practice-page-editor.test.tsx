@@ -71,6 +71,7 @@ describe("PracticePageEditor", () => {
   beforeEach(() => {
     resetPracticePageStore();
     pushMock.mockClear();
+    window.localStorage.setItem("piano-suite:starter-picker-dismissed-v1", "true");
     vi.stubGlobal("AudioContext", vi.fn(createMockAudioContext));
     vi.stubGlobal("matchMedia", vi.fn().mockReturnValue({ matches: false }));
     let uuidCount = 0;

@@ -6,7 +6,7 @@ A modern, full-stack platform for piano practice, music theory learning, and AI-
 
 Piano Suite is the next iteration of the Reflex Drill EXT practice tools. The original project was a collection of standalone HTML pages for targeted piano drills—chord recognition, progression fluency, and technique tracking. This repo re-architects those tools into a scalable, cloud-connected application where learners can practice, read articles, chat with an AI music tutor, and track progress across devices.
 
-The goal is to give piano players a single place to:
+ The goal is to give piano players a single place to:
 
 - **Practice interactively** with Web MIDI and Web Audio drills.
 - **Learn music theory** through articles and guided explainers.
@@ -28,7 +28,7 @@ This repository now contains:
 - A migrated **Progression** (`/tools/progression`) ported from Reflex Drill EXT, including ii-V-I and 12-bar blues drills in C/G/D/A/E, per-chord transition timing, auto-looping, step and loop chimes, optional Anki card flip on loop completion, and personal-best stats persisted via Convex.
 - A migrated **Root Cycling** (`/tools/root-cycling`) ported from Reflex Drill EXT, including chord mode with any quality and arpeggio mode with the canonical minor-11th shape, customizable root pools, per-attempt timing, and tracking aggregated by fixed idea across random keys.
 - A migrated **Technique habit tracker** (`/tools/technique`) ported from Reflex Drill EXT, including a built-in metronome, BPM logging, streak counter, 28-day practice grid, and a one-time import from the original `technique-habit-log-v1` localStorage key.
-- A **Workshop** (`/tools/workshop`) — a custom practice-page builder: users compose pages from feature blocks (metronome, drill timer, chord sets) via a dnd-kit sortable editor with inline insert placeholders and a `/` palette shortcut. Blocks are pure config validated per-block at render time (registry + `normalizeConfig`); a shared `DrillRuntimeProvider` drives countdown → armed → timing → success → break → finished across blocks, and `useChordTargets` generates sequential/random targets. Pages persist to `localStorage`; practice/miss events log to Convex (Pro, with `pageId`) or local history (Free) and surface in the Tracking dashboard's Workshop tab. See `docs/custom-drill-builder-plan.md` for the full architecture and remaining phases (cloud sync, sharing/gallery, versioning).
+ - A **Workshop** (`/tools/workshop`) — the primary practice surface: users can start from curated starter templates or compose pages from feature blocks (metronome, drill timer, chord sets) via a dnd-kit sortable editor with inline insert placeholders and a `/` palette shortcut. Blocks are pure config validated per-block at render time (registry + `normalizeConfig`); a shared `DrillRuntimeProvider` drives countdown → armed → timing → success → break → finished across blocks, and `useChordTargets` generates sequential/random targets. Pages persist to `localStorage`; practice/miss events log to Convex (Pro, with `pageId`) or local history (Free) and surface in the Tracking dashboard's Workshop tab. See `docs/custom-drill-builder-plan.md` for the full architecture and remaining phases (cloud sync, sharing/gallery, versioning).
 - A **Chladni Pattern Lab** (`/tools/chladni`) — a public interactive square-plate waveform explorer for the landing-page hero shader, with live controls for modes, morph speed, line thickness, zoom, and secondary-wave blending. **Apply to home** copies the full Lab pattern onto the welcome hero; you can also set a pattern color and hero-scrim shade, or **Reset home** to the soft shipping defaults. Preferences persist in `localStorage` and sync to Convex when Pro (no account required to explore or apply locally).
 - A **Chladni Ripple** tool (`/tools/chladni-ripple`) — drives the Chladni visualization from live MIDI: pitch class → mode identity, octave → denser patterns, velocity → decaying intensity pulse, chords → secondary blend. Separate from the parameter explorer; Ambient actions can set Ripple as a Welcome / app-wide background. **Pop out while practicing** (float panel over Chord Drill and other tools) is a **Pro** feature.
 - A **Global Music Player** (embedded in Ripple Lab) — upload a MIDI or audio file to drive the Chladni Ripple visualization and piano sound anywhere on the site. MIDI playback is sample-accurate; audio playback uses best-effort monophonic pitch detection. Playback survives route changes and respects the MIDI-sounds toggle.
@@ -508,6 +508,27 @@ instance). Block settings moved behind a per-tile gear sharing the extracted
 page-switcher select, and settings rail were deleted. Pure page helpers
 (`appendBlockToPage`, `removeFirstBlockOfType`) live in
 `lib/custom-practice-storage.ts`.
+
+## Workshop-first navigation (2026-08)
+
+Product decision: the Workshop is the core of the app, not one tool among
+fifteen. `/tools` was a flat hub page + a flat 15-item sidebar, which buried
+the differentiator and overwhelmed new users.
+
+- `next.config.ts` redirects `/tools` → `/tools/workshop` (307; query params
+  like `?onboarding=reset` are preserved). The hub page and its decorative
+  search/bell chrome were removed; the sidebar is the navigation.
+- Sidebar sections: **Workshop** (emphasized first link) → **Ready-made
+  drills** (Chord Drill, Arpeggios, Root Cycling, Progression) → **Progress**
+  (Technique, Tracking) → **Labs** (collapsible, collapsed by default,
+  persisted in `localStorage`; experimental labs still gated by the
+  experimental-features flag). The "Welcome" nav item was dropped — the brand
+  wordmark already links home.
+- `lib/tools.ts` re-exports grouped registries: `workshopTool`, `drillTools`,
+  `insightTools`, `labTools`; `tools` remains the combined list (landing-page
+  grid unchanged). Logo Lab stays a sidebar-only lab entry.
+- The Workshop page gained a ready-made-drills shortcut strip ("In a hurry?")
+  framing pre-built drills as templates while the editor stays the focus.
 
 ## Roadmap
 

@@ -46,6 +46,7 @@ next-env.d.ts
 /.clerk/
 
 # playwright auth state, test-user tracking, and generated reports
+/playwright/.auth/
 /playwright/.clerk/
 /test-results/
 /playwright-report/

@@ -20,6 +20,19 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: resolveProjectRoot(),
   },
+  // The Workshop is the core of the app: /tools lands on it. Ready-made
+  // drills remain direct routes and are linked from the Workshop page and
+  // sidebar. Temporary (307) so the destination can evolve without cached
+  // client redirects.
+  async redirects() {
+    return [
+      {
+        source: "/tools",
+        destination: "/tools/workshop",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

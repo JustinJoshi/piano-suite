@@ -7,8 +7,9 @@
 > Next.js 16, React 19, Convex, Clerk + Billing, Tailwind v4, smplr/Web
 > Audio/Web MIDI, Vercel AI SDK v7, three.js, Vitest/RTL/Playwright.
 >
-> **Status:** Phases 1–6 plus the articles-public change are **shipped** and
-> merged to `main` (PRs #39–#46). Phases 7–12 remain available to pick up.
+> **Status:** Phases 1–9 plus the articles-public change, the MIDI-viz
+> foundation (Phase B), and Logo Lab are **shipped** and merged to `main`
+> (PRs #28, #38–#52). Phases 10–12 remain available to pick up.
 >
 > **How phases work:** one phase = one turn of work. Each phase is
 > independently mergeable, gets its own worktree/branch
@@ -127,7 +128,9 @@ E2E passed (48 specs).
 - `package.json` — `@convex-dev/eslint-plugin` (own lockfile this batch)
 - Tests: update/extend `convex/__tests__/`
 
-## Phase 7 — 60fps React state churn (P1)
+## Phase 7 — 60fps React state churn (P1) ✅ Shipped
+
+**PR:** #50 · **Branch:** `kimi/phase-7-state-churn`
 
 - `hooks/useMusicPlayer.tsx` — `progress` (:310-324) out of context into
   ref/subscription; `useMemo` the value (:407-420); reuse the pitch-detection
@@ -137,7 +140,9 @@ E2E passed (48 specs).
 - `hooks/useChladniRipple.ts:101-119` — skip `setViz` when idle
 - `components/ambient/ambient-effect-renderer.tsx:97-122,159-184` — same
 
-## Phase 8 — Lookahead audio scheduling (P1)
+## Phase 8 — Lookahead audio scheduling (P1) ✅ Shipped
+
+**PR:** #51 · **Branch:** `kimi/phase-8-scheduler`
 
 - `lib/music-player.ts:169-205` — replace per-note `setTimeout` pairs with a
   lookahead scheduler against `ctx.currentTime` (evaluate smplr 1.0
@@ -146,7 +151,9 @@ E2E passed (48 specs).
 - `hooks/useAudio.ts:149-150` — metronome onto the same pattern
 - Tests: scheduler-window cases with a fake clock
 
-## Phase 9 — CI + test infrastructure (P2)
+## Phase 9 — CI + test infrastructure (P2) ✅ Shipped
+
+**PR:** #52 · **Branch:** `kimi/phase-9-ci-infrastructure`
 
 - `.github/workflows/ci.yml` — lint + unit + build on PRs; e2e job against
   `next build && next start` with Clerk/Convex secrets
