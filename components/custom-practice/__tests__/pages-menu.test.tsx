@@ -23,6 +23,7 @@ const handlers = {
   onDuplicate: vi.fn(),
   onDelete: vi.fn(),
   onToggleShare: vi.fn(),
+  onTemplates: vi.fn(),
 };
 
 describe("PagesMenu", () => {
@@ -116,6 +117,10 @@ describe("PagesMenu", () => {
     open();
     fireEvent.click(screen.getByRole("button", { name: /share page/i }));
     expect(handlers.onToggleShare).toHaveBeenCalledTimes(1);
+
+    open();
+    fireEvent.click(screen.getByRole("button", { name: /templates/i }));
+    expect(handlers.onTemplates).toHaveBeenCalledTimes(1);
   });
 
   it("disables delete when only one page exists", () => {

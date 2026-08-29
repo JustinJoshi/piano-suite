@@ -2,13 +2,21 @@ import { test, expect } from "@playwright/test";
 import { signInAsTestUser } from "./auth-helper";
 import { metronomeBlock, seedWorkshopPage } from "./workshop-seed";
 
+const STARTER_PICKER_KEY = "piano-suite:starter-picker-dismissed-v1";
+
 test.describe("/tools/workshop marketplace", () => {
-  test("marketplace add flow populates the workshop grid", async ({
+  test("first run: templates, blank grid, marketplace add flow", async ({
     page,
   }) => {
     await signInAsTestUser(page);
     await seedWorkshopPage(page, []);
+    // Remove the dismissed flag to exercise the real first-run state.
+    await page.evaluate((key) => localStorage.removeItem(key), STARTER_PICKER_KEY);
     await page.goto("/tools/workshop");
+
+    // First run greets with ready-made templates.
+    await expect(page.getByText("How do you want to start?")).toBeVisible();
+    await page.getByRole("button", { name: /start from scratch/i }).click();
 
     // Blank workshop: an empty grid canvas plus the marketplace entry point.
     await expect(page.getByTestId("workshop-grid")).toHaveAttribute(

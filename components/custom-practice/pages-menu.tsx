@@ -1,7 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, Copy, Globe, Plus, Trash2 } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  Copy,
+  Globe,
+  LayoutTemplate,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { PracticePageStore } from "@/lib/custom-practice-storage";
@@ -14,6 +22,7 @@ type PagesMenuProps = {
   onDuplicate: () => void;
   onDelete: () => void;
   onToggleShare: () => void;
+  onTemplates: () => void;
 };
 
 function pageTitle(store: PracticePageStore): string {
@@ -33,6 +42,7 @@ export function PagesMenu({
   onDuplicate,
   onDelete,
   onToggleShare,
+  onTemplates,
 }: PagesMenuProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -112,6 +122,11 @@ export function PagesMenu({
           <div className="my-1.5 border-t border-border" />
 
           <MenuAction icon={Plus} label="New page" onClick={() => { onCreate(); close(); }} />
+          <MenuAction
+            icon={LayoutTemplate}
+            label="Templates…"
+            onClick={() => { onTemplates(); close(); }}
+          />
           <MenuAction icon={Copy} label="Duplicate page" onClick={() => { onDuplicate(); close(); }} />
           <MenuAction
             icon={Trash2}

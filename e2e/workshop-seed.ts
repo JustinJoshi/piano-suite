@@ -39,6 +39,8 @@ export async function seedWorkshopPage(page: Page, blocks: unknown[]) {
           activePageId: pageId,
         })
       );
+      // Seeded scenarios test the grid, not the first-run template picker.
+      localStorage.setItem("piano-suite:starter-picker-dismissed-v1", "true");
     },
     { key: STORAGE_KEY, pageId: WORKSHOP_PAGE_ID, seedBlocks: blocks }
   );
