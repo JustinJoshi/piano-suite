@@ -509,6 +509,24 @@ page-switcher select, and settings rail were deleted. Pure page helpers
 (`appendBlockToPage`, `removeFirstBlockOfType`) live in
 `lib/custom-practice-storage.ts`.
 
+## Workshop overhaul — phase 2: the grid is the page (2026-08)
+
+The Workshop stopped being "a page with a grid section" and became a
+full-page grid canvas. `DrillShell` gained a `wide` opt-out from the centered
+`max-w-6xl` column, and the editor column stretches to the remaining page
+height (`WorkshopGrid` accepts `fill`, exposed as `data-grid-full`). The
+ready-made-drills strip above the editor was removed and rebuilt as a feature
+block: `drillShortcuts` (`lib/feature-blocks/drill-shortcuts/`,
+`components/feature-blocks/drill-shortcuts-block.tsx`) renders the
+`drillTools` shortcuts as a movable, resizable, removable tile (default span
+`{ w: 4, h: 1 }`, no config fields, registered in the marketplace). A fresh
+workshop seeds one `drillShortcuts` tile (`createEmptyPracticePageStore`);
+pages holding only starter tiles count as blank for onboarding
+(`isStarterPage`), so the template picker still appears on first run and
+templates still replace the fresh page in place. The tile ships in the
+getting-started starter templates; users with existing pages can add it from
+the marketplace.
+
 ## Workshop-first navigation (2026-08)
 
 Product decision: the Workshop is the core of the app, not one tool among
