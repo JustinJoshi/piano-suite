@@ -177,19 +177,18 @@ test.describe("signed-in route smoke (all app pages)", () => {
     assertAuthBypassOffForE2E();
   });
 
-  test("each route loads without bare 404 or application error", async ({
-    page,
-  }) => {
-    // Smoke many authenticated routes in one sequential pass; give it extra
-    // time so slower pages (Convex queries, heavy client bundles) don't trip
-    // the default 30 s limit.
-    test.setTimeout(120000);
-    await signInAsTestUser(page);
+  // One test per route so failures name the broken page, retries re-run a
+  // single route, and fullyParallel spreads the smoke pass across workers.
+  for (const { path, finalPath, heading, bodyText } of SIGNED_IN_ROUTE_SMOKE) {
+    test(`signed-in ${path} loads without bare 404 or application error`, async ({
+      page,
+    }) => {
+      await signInAsTestUser(page);
 
-    for (const { path, finalPath, heading, bodyText } of SIGNED_IN_ROUTE_SMOKE) {
       await page.goto(path);
       await expectNotBare404(page);
       await expectNoApplicationError(page);
+
       const expectedPath = finalPath ?? path;
       if (expectedPath === "/") {
         await expect(page).toHaveURL("/");
@@ -204,6 +203,6 @@ test.describe("signed-in route smoke (all app pages)", () => {
       if (bodyText !== undefined) {
         await expect(page.locator("body")).toContainText(bodyText);
       }
-    }
-  });
+    });
+  }
 });

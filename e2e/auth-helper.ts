@@ -60,6 +60,13 @@ export async function signInAsTestUser(page: Page) {
     });
   }
 
+  // Refresh the session JWT before returning. Every worker starts from the
+  // same storage state, and a stale __session cookie can get the next
+  // navigation bounced to /sign-in when many workers burst at once.
+  await page.evaluate(async () => {
+    await window.Clerk?.session?.getToken();
+  });
+
   await page.evaluate((key) => {
     localStorage.setItem(key, "true");
   }, ONBOARDING_STORAGE_KEY);
