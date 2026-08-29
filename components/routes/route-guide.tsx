@@ -67,9 +67,18 @@ export function RouteGuide({ routeId, decks }: RouteGuideProps) {
 
   if (!route) return null;
 
+  // Narrowed capture: TS cannot see the guard from inside hoisted
+  // function declarations, so closures below use this alias.
+  const activeRoute = route;
+
   function toggleStep(step: RouteStep) {
     saveRouteProgress(
-      markStep(progress, route.id, step.id, !isStepDone(progress, route.id, step.id))
+      markStep(
+        progress,
+        activeRoute.id,
+        step.id,
+        !isStepDone(progress, activeRoute.id, step.id)
+      )
     );
   }
 
@@ -97,7 +106,7 @@ export function RouteGuide({ routeId, decks }: RouteGuideProps) {
       : page;
     setPracticePageStore(upsertPracticePage(store, pageToStore));
 
-    saveRouteProgress(markStep(progress, route.id, "seed-workshop", true));
+    saveRouteProgress(markStep(progress, activeRoute.id, "seed-workshop", true));
     router.push("/tools/workshop");
   }
 
@@ -167,7 +176,6 @@ export function RouteGuide({ routeId, decks }: RouteGuideProps) {
 
                   <div className="mt-3">
                     <StepAction
-                      route={route}
                       step={step}
                       promptCopied={promptCopied}
                       onCopyPrompt={copySetupPrompt}
@@ -185,7 +193,6 @@ export function RouteGuide({ routeId, decks }: RouteGuideProps) {
 }
 
 type StepActionProps = {
-  route: LearningRoute;
   step: RouteStep;
   promptCopied: boolean;
   onCopyPrompt: () => void;
@@ -193,7 +200,6 @@ type StepActionProps = {
 };
 
 function StepAction({
-  route,
   step,
   promptCopied,
   onCopyPrompt,
