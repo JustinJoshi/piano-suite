@@ -568,6 +568,25 @@ free, billing stays off, Pro gated behind a Founding Pro waitlist.
   linked from pricing + landing footers.
 - `app/layout.tsx` metadata derives from `NEXT_PUBLIC_SITE_URL`.
 
+## Legal gate: COPPA age gate + rights audit (2026-08)
+
+The OpenExecutive committee review flagged COPPA and music rights as launch
+blockers (see `IMPORTANT-NOTICES.md`, `tasks/tasks-go-live.md` Priority 1).
+
+- `lib/age-gate.ts` + `components/age-gate/`: neutral 13+ check that renders
+  above Clerk in the root layout — nothing (auth included) mounts before the
+  gate is answered, and under-13 visitors get a blocked screen with no data
+  collected. `shouldLoadTracking()` is the single switch gating PostHog
+  (`initAnalytics`) and client Sentry (`instrumentation-client.ts`); both init
+  only after the gate is passed.
+- `lib/sentry.ts`: `beforeSend` scrubber drops user identity and request
+  cookies before an event leaves the device (`sendDefaultPii` was already
+  false; PostHog autocapture stays off).
+- `app/privacy`: children's-privacy section + explicit retention/deletion
+  commitments (30-day deletion, identity-stripped error logs).
+- `docs/music-rights-audit.md`: asset inventory (currently clean — decks and
+  drill content are self-authored or generated) + policy for future additions.
+
 ## Roadmap
 
 - [x] Scaffold Next.js + Tailwind + shadcn/ui
