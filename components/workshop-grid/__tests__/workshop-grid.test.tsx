@@ -108,6 +108,26 @@ describe("WorkshopGrid", () => {
     expect(screen.getAllByTestId("grid-guide")).toHaveLength(4);
   });
 
+  it("stretches to the page when fill is set", () => {
+    renderBody(
+      <GridBody blocks={[block("a")]} gridActive={false} fill {...bodyProps} />
+    );
+
+    const grid = screen.getByTestId("workshop-grid");
+    expect(grid.getAttribute("data-grid-full")).toBe("true");
+    expect(grid.className).toContain("flex-1");
+  });
+
+  it("does not claim the page height by default", () => {
+    renderBody(
+      <GridBody blocks={[block("a")]} gridActive={false} {...bodyProps} />
+    );
+
+    const grid = screen.getByTestId("workshop-grid");
+    expect(grid.getAttribute("data-grid-full")).toBeNull();
+    expect(grid.className).not.toContain("flex-1");
+  });
+
   it("applies stored spans to tiles", () => {
     renderBody(
       <GridBody

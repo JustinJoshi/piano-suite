@@ -17,6 +17,19 @@ export function metronomeBlock(
   };
 }
 
+export function drillShortcutsBlock(
+  id: string,
+  size?: { w: number; h: number }
+) {
+  return {
+    id,
+    type: "drillShortcuts",
+    version: 1,
+    config: {},
+    ...(size ? { size } : {}),
+  };
+}
+
 /**
  * Seeds the workshop localStorage store. Must run on the app origin after
  * sign-in so Clerk's session cookie and the page store coexist.

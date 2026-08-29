@@ -1,6 +1,10 @@
 import { test, expect } from "@playwright/test";
 import { signInAsTestUser } from "./auth-helper";
-import { metronomeBlock, seedWorkshopPage } from "./workshop-seed";
+import {
+  metronomeBlock,
+  drillShortcutsBlock,
+  seedWorkshopPage,
+} from "./workshop-seed";
 
 test.describe("/tools/workshop grid", () => {
   test("drag to reposition persists across reload", async ({ page }) => {
@@ -65,6 +69,52 @@ test.describe("/tools/workshop grid", () => {
     await page.reload();
     await expect(page.locator("[data-workshop-tile]").first()).toHaveClass(
       /xl:col-span-3/
+    );
+  });
+
+  test("ready-made drills live on the grid, which fills the page", async ({
+    page,
+  }) => {
+    await signInAsTestUser(page);
+    await seedWorkshopPage(page, [
+      drillShortcutsBlock("e2e-drills"),
+      metronomeBlock("e2e-a", 100),
+    ]);
+    await page.goto("/tools/workshop");
+
+    const grid = page.getByTestId("workshop-grid");
+    await expect(grid).toHaveAttribute("data-grid-full", "true");
+
+    // The old above-the-grid strip is gone; the shortcuts are a tile.
+    const drillsTile = page.locator('[data-tile-id="e2e-drills"]');
+    await expect(drillsTile).toHaveCount(1);
+    await expect(
+      drillsTile.getByText("In a hurry?")
+    ).toBeVisible();
+    await expect(
+      drillsTile.getByRole("link", { name: /chord drill/i })
+    ).toHaveAttribute("href", "/tools/chord-drill");
+
+    // Drag the drills tile onto the metronome tile: order swaps, persists.
+    const metronomeTile = page.locator('[data-tile-id="e2e-a"]');
+    await drillsTile.getByLabel("Drag to reorder").hover();
+    await page.mouse.down();
+    const box = await metronomeTile.boundingBox();
+    if (!box) throw new Error("target tile has no bounding box");
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, {
+      steps: 12,
+    });
+    await page.mouse.up();
+
+    await expect(grid.locator("[data-workshop-tile]").first()).toHaveAttribute(
+      "data-tile-id",
+      "e2e-a"
+    );
+
+    await page.reload();
+    await expect(grid.locator("[data-workshop-tile]").first()).toHaveAttribute(
+      "data-tile-id",
+      "e2e-a"
     );
   });
 

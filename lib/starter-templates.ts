@@ -47,6 +47,7 @@ export const starterTemplates: StarterTemplate[] = [
         showLiveTimer: true,
       }),
       block("first-chords-midi", "midiConnectionBar", { compact: false }),
+      block("first-chords-drills", "drillShortcuts", {}),
     ],
   },
   {
@@ -211,6 +212,7 @@ export const starterTemplates: StarterTemplate[] = [
         text: "Write down what you want to remember from today's practice.",
       }),
       block("quick-notes-midi", "midiConnectionBar", { compact: false }),
+      block("quick-notes-drills", "drillShortcuts", {}),
     ],
   },
 ];

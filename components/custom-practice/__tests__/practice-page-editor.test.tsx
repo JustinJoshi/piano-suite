@@ -159,6 +159,60 @@ describe("PracticePageEditor", () => {
     expect(screen.getByText("How do you want to start?")).toBeInTheDocument();
   });
 
+  it("seeds a ready-made drills tile into a fresh page", () => {
+    setPracticePageStore(createEmptyPracticePageStore());
+
+    render(
+      <AudioSettingsProvider>
+        <PracticePageEditor />
+      </AudioSettingsProvider>
+    );
+
+    const grid = screen.getByTestId("workshop-grid");
+    expect(grid.getAttribute("data-grid-empty")).toBeNull();
+
+    const tile = grid.querySelector("[data-workshop-tile]");
+    expect(tile).not.toBeNull();
+    expect(tile?.querySelector('a[href="/tools/chord-drill"]')).not.toBeNull();
+
+    const stored = getPracticePageStore().pages[0].blocks[0];
+    expect(stored.type).toBe("drillShortcuts");
+  });
+
+  it("treats a fresh starter page as blank for the template picker", () => {
+    setPracticePageStore(createEmptyPracticePageStore());
+    window.localStorage.removeItem("piano-suite:starter-picker-dismissed-v1");
+
+    render(
+      <AudioSettingsProvider>
+        <PracticePageEditor />
+      </AudioSettingsProvider>
+    );
+
+    expect(screen.getByText("How do you want to start?")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /First chords/i }));
+
+    // The template replaces the fresh starter page in place.
+    const store = getPracticePageStore();
+    expect(store.pages).toHaveLength(1);
+    expect(store.pages[0].blocks.some((b) => b.type === "chordSet")).toBe(true);
+  });
+
+  it("stretches the grid across the whole workshop page", () => {
+    seedWithPage();
+
+    render(
+      <AudioSettingsProvider>
+        <PracticePageEditor />
+      </AudioSettingsProvider>
+    );
+
+    const grid = screen.getByTestId("workshop-grid");
+    expect(grid.getAttribute("data-grid-full")).toBe("true");
+    expect(grid.className).toContain("flex-1");
+  });
+
   it("renders a blank grid with guides when the page is empty", () => {
     seedWithPage();
 

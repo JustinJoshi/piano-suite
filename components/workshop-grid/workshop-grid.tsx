@@ -29,6 +29,8 @@ type GridBodyProps = GridCallbacks & {
   gridActive: boolean;
   /** Force the grid guides on (empty workshop shows the canvas). */
   showGuides?: boolean;
+  /** Stretch the grid over the remaining page height. */
+  fill?: boolean;
 };
 
 /**
@@ -39,6 +41,7 @@ export function GridBody({
   blocks,
   gridActive,
   showGuides = false,
+  fill = false,
   onResize,
   onDuplicate,
   onRemove,
@@ -50,8 +53,10 @@ export function GridBody({
       data-testid="workshop-grid"
       data-grid-active={gridActive ? "true" : undefined}
       data-grid-empty={blocks.length === 0 ? "true" : undefined}
+      data-grid-full={fill ? "true" : undefined}
       className={cn(
         "relative grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4",
+        fill && "flex-1",
         showChrome && "rounded-xl border border-dashed border-primary/40",
         blocks.length === 0 && "min-h-[24rem] content-start"
       )}
@@ -96,6 +101,8 @@ type WorkshopGridProps = GridCallbacks & {
   onReorder: (blocks: FeatureBlock[]) => void;
   /** Force the grid guides on (empty workshop shows the canvas). */
   showGuides?: boolean;
+  /** Stretch the grid over the remaining page height. */
+  fill?: boolean;
 };
 
 /**
@@ -110,6 +117,7 @@ export function WorkshopGrid({
   onRemove,
   onConfigChange,
   showGuides,
+  fill,
 }: WorkshopGridProps) {
   const [gridActive, setGridActive] = useState(false);
 
@@ -146,6 +154,7 @@ export function WorkshopGrid({
         blocks={blocks}
         gridActive={gridActive}
         showGuides={showGuides}
+        fill={fill}
         onResize={onResize}
         onDuplicate={onDuplicate}
         onRemove={onRemove}

@@ -11,6 +11,7 @@ import {
   deletePracticePage,
   duplicatePracticePage,
   createPracticePageInStore,
+  isStarterPage,
   appendBlockToPage,
   removeFirstBlockOfType,
   STORAGE_KEY,
@@ -39,6 +40,28 @@ describe("custom-practice-storage", () => {
     expect(store.version).toBe(2);
     expect(store.pages).toHaveLength(1);
     expect(store.activePageId).toBe(store.pages[0].id);
+  });
+
+  it("seeds the fresh page with the ready-made drills starter tile", () => {
+    const store = createEmptyPracticePageStore();
+
+    expect(store.pages[0].blocks).toHaveLength(1);
+    expect(store.pages[0].blocks[0].type).toBe("drillShortcuts");
+  });
+
+  it("treats starter-only and empty pages as starter pages, not built pages", () => {
+    const starter = createEmptyPracticePageStore().pages[0];
+    expect(isStarterPage(starter)).toBe(true);
+    expect(isStarterPage(createEmptyPracticePage())).toBe(true);
+
+    const built = createEmptyPracticePage();
+    built.blocks.push({
+      id: "b1",
+      type: "metronome",
+      version: 1,
+      config: {},
+    });
+    expect(isStarterPage(built)).toBe(false);
   });
 
   it("loads a valid v2 store from localStorage", () => {

@@ -5,6 +5,9 @@ const STORAGE_KEY = "custom-practice-pages-v2";
 const LEGACY_STORAGE_KEY = "custom-practice-pages-v1";
 const DEFAULT_PAGE_ID = "default";
 
+/** Starter tile seeded on a fresh workshop so shortcuts live on the grid. */
+export const STARTER_TILE_TYPE = "drillShortcuts";
+
 export { STORAGE_KEY, LEGACY_STORAGE_KEY };
 
 /**
@@ -35,11 +38,22 @@ export function createEmptyPracticePage(title = "My Practice Page"): PracticePag
 
 export function createEmptyPracticePageStore(): PracticePageStore {
   const page = createEmptyPracticePage();
+  page.blocks = [
+    { id: generateId(), type: STARTER_TILE_TYPE, version: 1, config: {} },
+  ];
   return {
     version: 2,
     pages: [page],
     activePageId: page.id,
   };
+}
+
+/**
+ * True when the page holds nothing the user built — only starter tiles
+ * (or nothing at all). Drives first-run onboarding and template replacement.
+ */
+export function isStarterPage(page: PracticePage): boolean {
+  return page.blocks.every((b) => b.type === STARTER_TILE_TYPE);
 }
 
 function isValidPage(value: unknown): value is PracticePage {

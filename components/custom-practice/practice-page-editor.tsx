@@ -32,6 +32,7 @@ import {
   deletePracticePage,
   duplicatePracticePage,
   createPracticePageInStore,
+  isStarterPage,
   generateId,
 } from "@/lib/custom-practice-storage";
 
@@ -77,7 +78,7 @@ export function PracticePageEditor() {
   );
   const showStarterPicker =
     store.pages.length === 1 &&
-    page.blocks.length === 0 &&
+    isStarterPage(page) &&
     !starterPickerDismissed;
   const showTemplates = showStarterPicker || showTemplateLibrary;
 
@@ -119,7 +120,7 @@ export function PracticePageEditor() {
   function selectStarterTemplate(template: StarterTemplate) {
     const templatePage = buildTemplatePage(template);
     const pageToStore =
-      page.blocks.length === 0 && store.pages.length === 1
+      isStarterPage(page) && store.pages.length === 1
         ? { ...templatePage, id: page.id }
         : templatePage;
     setPracticePageStore(upsertPracticePage(store, pageToStore));
@@ -197,7 +198,7 @@ export function PracticePageEditor() {
 
   return (
     <DrillRuntimeProvider pageId={page.id}>
-      <div className="space-y-4">
+      <div className="flex min-h-full flex-1 flex-col gap-4">
         <div className="flex flex-wrap items-center gap-2">
           <PagesMenu
             store={store}
@@ -258,6 +259,7 @@ export function PracticePageEditor() {
               onRemove={removeBlock}
               onConfigChange={handleConfigChange}
               showGuides={page.blocks.length === 0}
+              fill
             />
 
             {page.blocks.length === 0 ? (
