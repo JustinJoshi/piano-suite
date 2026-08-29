@@ -89,6 +89,10 @@ describe("blockSize", () => {
     expect(blockSize(block("a", "midiConnectionBar")).w).toBe(4);
   });
 
+  it("defaults the ready-made drills tile to full width", () => {
+    expect(blockSize(block("a", "drillShortcuts"))).toEqual({ w: 4, h: 1 });
+  });
+
   it("falls back to a sane default for unknown types", () => {
     const size = blockSize(block("a", "mysteryBlock"));
     expect(size.w).toBeGreaterThanOrEqual(1);

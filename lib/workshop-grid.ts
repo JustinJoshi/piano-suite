@@ -58,6 +58,7 @@ const TYPE_DEFAULT_SIZES: Record<string, BlockSize> = {
   chordSet: { w: 2, h: 2 },
   textBlock: { w: 4, h: 1 },
   midiConnectionBar: { w: 4, h: 1 },
+  drillShortcuts: { w: 4, h: 1 },
 };
 
 function clamp(n: number, min: number, max: number): number {

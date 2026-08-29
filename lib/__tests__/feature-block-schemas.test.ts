@@ -19,6 +19,20 @@ describe("normalizeStoredBlock size handling", () => {
     expect(block?.size).toEqual({ w: 3, h: 2 });
   });
 
+  it("accepts a drillShortcuts block so the tile persists", () => {
+    const block = normalizeStoredBlock({
+      id: "b1",
+      type: "drillShortcuts",
+      version: 1,
+      config: {},
+      size: { w: 4, h: 1 },
+    });
+
+    expect(block).not.toBeNull();
+    expect(block?.type).toBe("drillShortcuts");
+    expect(block?.size).toEqual({ w: 4, h: 1 });
+  });
+
   it("clamps out-of-range sizes instead of dropping the block", () => {
     const block = normalizeStoredBlock({
       id: "b1",

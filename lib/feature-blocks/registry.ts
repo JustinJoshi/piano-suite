@@ -1,9 +1,10 @@
-import { Timer, Hourglass, Music, Type, Cable } from "lucide-react";
+import { Timer, Hourglass, Music, Type, Cable, Zap } from "lucide-react";
 import { MetronomeBlock } from "@/components/feature-blocks/metronome-block";
 import { DrillTimerBlock } from "@/components/feature-blocks/drill-timer-block";
 import { ChordSetBlock } from "@/components/feature-blocks/chord-set-block";
 import { TextBlock } from "@/components/feature-blocks/text-block";
 import { MidiConnectionBarBlock } from "@/components/feature-blocks/midi-connection-bar-block";
+import { DrillShortcutsBlock } from "@/components/feature-blocks/drill-shortcuts-block";
 import {
   metronomeDefaultConfig,
   normalizeMetronomeConfig,
@@ -29,6 +30,11 @@ import {
   normalizeMidiConnectionBarConfig,
   midiConnectionBarFields,
 } from "@/lib/feature-blocks/midi-connection-bar/config";
+import {
+  drillShortcutsDefaultConfig,
+  normalizeDrillShortcutsConfig,
+  drillShortcutsFields,
+} from "@/lib/feature-blocks/drill-shortcuts/config";
 import type { ComponentType } from "react";
 import type { FeatureDefinition } from "@/lib/feature-blocks/types";
 
@@ -87,6 +93,17 @@ export const featureRegistry = {
     defaultConfig: midiConnectionBarDefaultConfig,
     normalizeConfig: normalizeMidiConnectionBarConfig,
     component: MidiConnectionBarBlock as ComponentType<Record<string, unknown>>,
+  } satisfies FeatureDefinition<Record<string, unknown>>,
+  drillShortcuts: {
+    type: "drillShortcuts",
+    category: "technique",
+    label: "Ready-made drills",
+    description: "Jump straight into a guided drill from your page.",
+    icon: Zap,
+    fields: drillShortcutsFields,
+    defaultConfig: drillShortcutsDefaultConfig,
+    normalizeConfig: normalizeDrillShortcutsConfig,
+    component: DrillShortcutsBlock as ComponentType<Record<string, unknown>>,
   } satisfies FeatureDefinition<Record<string, unknown>>,
 };
 
