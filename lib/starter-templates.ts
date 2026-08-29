@@ -215,6 +215,61 @@ export const starterTemplates: StarterTemplate[] = [
       block("quick-notes-drills", "drillShortcuts", {}),
     ],
   },
+  {
+    id: "music-theory-starter",
+    title: "Music theory starter",
+    description: "Chord practice, a timer, and your MIDI status — the theory route's page.",
+    category: "getting-started",
+    icon: BookOpen,
+    blocks: [
+      block("theory-starter-notes", "textBlock", {
+        text: "Keep Anki open beside the Chord Drill. Look up new chords on piano-chords.org, then drill until recall is instant.",
+      }),
+      block("theory-starter-set", "chordSet", {
+        roots: ["C", "F", "G", "D", "A", "E"],
+        qualityGroups: ["7th"],
+        order: "random",
+        requireExact: false,
+        goodThreshold: 0,
+        hardThreshold: 2,
+      }),
+      block("theory-starter-timer", "drillTimer", {
+        countdownSeconds: 3,
+        breakSeconds: 5,
+        multiRep: false,
+        showLiveTimer: true,
+      }),
+      block("theory-starter-midi", "midiConnectionBar", { compact: false }),
+      block("theory-starter-drills", "drillShortcuts", {}),
+    ],
+  },
+  {
+    id: "finger-flexibility-starter",
+    title: "Finger flexibility starter",
+    description: "Metronome, timer, and shortcuts — the finger flexibility route's page.",
+    category: "technique",
+    icon: Wrench,
+    blocks: [
+      block("flexibility-starter-notes", "textBlock", {
+        text: "Warm up your hands first, then start slower than feels necessary. Evenness beats speed.",
+      }),
+      block("flexibility-starter-metronome", "metronome", {
+        bpm: 60,
+        beatsPerBar: 4,
+        accentFirstBeat: true,
+        minBpm: 40,
+        maxBpm: 220,
+      }),
+      block("flexibility-starter-timer", "drillTimer", {
+        countdownSeconds: 3,
+        breakSeconds: 5,
+        multiRep: true,
+        showLiveTimer: true,
+      }),
+      block("flexibility-starter-midi", "midiConnectionBar", { compact: false }),
+      block("flexibility-starter-drills", "drillShortcuts", {}),
+    ],
+  },
 ];
 
 export function normalizeStarterTemplate(raw: unknown): StarterTemplate | null {

@@ -6,7 +6,7 @@
  * `flipCurrentCard`, etc.) rather than calling `callAnki` directly.
  */
 
-const DEFAULT_ANKI_CONNECT_URL = "http://127.0.0.1:8765";
+export const DEFAULT_ANKI_CONNECT_URL = "http://127.0.0.1:8765";
 
 export type AnkiEase = 1 | 2 | 3 | 4;
 
