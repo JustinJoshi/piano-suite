@@ -17,7 +17,7 @@ export default function PrivacyRoute() {
             Privacy Policy
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Last updated: August 29, 2026
+            Last updated: August 31, 2026
           </p>
 
           <div className="mt-8 space-y-6 text-sm leading-6 text-foreground/90">
@@ -73,11 +73,11 @@ export default function PrivacyRoute() {
                 Children&apos;s privacy
               </h2>
               <p className="mt-2">
-                Piano Suite is intended for people 13 and older. Before you can
-                use the app — and before any analytics or error tracking can
-                load — we ask for your age. If you are under 13, the app stays
-                unavailable and we do not collect or share any information
-                about the visit.
+                Piano Suite is intended for people 13 and older. We do not
+                knowingly collect personal information from children under 13.
+                If you believe a child under 13 has used Piano Suite, contact
+                us and we will delete any analytics or error data collected
+                during their visits.
               </p>
             </section>
 

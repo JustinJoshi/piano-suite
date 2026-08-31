@@ -131,6 +131,10 @@ describe("PracticePageEditor", () => {
     );
 
     expect(screen.getByText("How do you want to start?")).toBeInTheDocument();
+    expect(screen.getByText("Guided routes")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("picker-route-music-theory")
+    ).toHaveAttribute("href", "/routes/music-theory");
     expect(screen.queryByTestId("workshop-grid")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /First chords/i }));

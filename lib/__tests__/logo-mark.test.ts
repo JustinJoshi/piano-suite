@@ -10,6 +10,7 @@ import {
 } from "@/lib/logo-mark";
 import {
   DEFAULT_LOGO_MARK_SETTINGS,
+  isShippingLogoMark,
   normalizeLogoMarkSettings,
 } from "@/lib/logo-mark-settings";
 
@@ -30,6 +31,23 @@ describe("normalizeLogoMarkSettings", () => {
     expect(n.threshold).toBe(0.45);
     expect(n.padding).toBe(0);
     expect(n.zoom).toBe(0.6);
+  });
+});
+
+describe("isShippingLogoMark", () => {
+  it("is true for the untouched default regardless of generation", () => {
+    expect(isShippingLogoMark(DEFAULT_LOGO_MARK_SETTINGS)).toBe(true);
+    expect(
+      isShippingLogoMark({ ...DEFAULT_LOGO_MARK_SETTINGS, generation: 7 })
+    ).toBe(true);
+  });
+
+  it("is false once any appearance field changes", () => {
+    const custom = normalizeLogoMarkSettings({
+      ...DEFAULT_LOGO_MARK_SETTINGS,
+      mode: [2, 3],
+    });
+    expect(isShippingLogoMark(custom)).toBe(false);
   });
 });
 

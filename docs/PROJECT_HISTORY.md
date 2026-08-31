@@ -527,6 +527,29 @@ templates still replace the fresh page in place. The tile ships in the
 getting-started starter templates; users with existing pages can add it from
 the marketplace.
 
+## Guided routes — the zero-to-playing starter package (2026-08)
+
+The committee review demanded an opinionated first run; Guided Routes is
+that. `/routes` (public, proxy allowlist) picks between **Music theory**
+(Anki + chord decks → Chord Drill with Anki Sync → Progression) and **Finger
+flexibility** (hand care → Technique tracker → Arpeggios). Each route is a
+config-driven checklist in `lib/routes.ts` (step kinds: read / external /
+anki-setup / tool / seed-workshop) with device-local progress
+(`piano-suite:route-progress-v1`, a cached snapshot consumed via
+`useSyncExternalStore` + custom event). The Anki step carries a deliberately
+quiet button that copies a self-contained setup prompt — install Anki,
+AnkiConnect `2055492159`, import both bundled decks — with the deck file
+contents embedded by the server page from `public/*.txt` so the prompt can
+never drift from the shipped decks. The final step seeds a Workshop page
+(`music-theory-starter` / `finger-flexibility-starter` starter templates),
+replacing a starter-only page in place. `RouteGuide` receives `routeId`,
+not the route object: the Lucide icon cannot cross the RSC serialization
+boundary. The Workshop's first-run starter picker embeds the routes too:
+`RouteCards` (client component, same registry + progress store) renders both
+routes as compact cards above the template categories with live progress, so
+the zero-to-playing path is the first thing the "How do you want to start?"
+page offers.
+
 ## Workshop-first navigation (2026-08)
 Product decision: the Workshop is the core of the app, not one tool among
 fifteen. `/tools` was a flat hub page + a flat 15-item sidebar, which buried
@@ -586,6 +609,18 @@ blockers (see `IMPORTANT-NOTICES.md`, `tasks/tasks-go-live.md` Priority 1).
   commitments (30-day deletion, identity-stripped error logs).
 - `docs/music-rights-audit.md`: asset inventory (currently clean — decks and
   drill content are self-authored or generated) + policy for future additions.
+
+Removed 2026-08-31: the age gate itself was pulled by owner decision (the
+birthday check never shipped well) — `lib/age-gate.ts`,
+`components/age-gate/`, and the tracking gate went with it, and client
+Sentry inits unconditionally again. The Sentry PII scrubber and the privacy
+disclosures stay. The COPPA item in `IMPORTANT-NOTICES.md` is OPEN again.
+
+Same day, the shipping brand mark went back to the original beamed
+eighth-notes (`app/icon.svg` + lucide `Music` in navbar/sidebar). Logo Lab
+keeps working: `isShippingLogoMark()` treats default-valued settings as
+"no custom mark", so the note shows until someone actually applies a
+Chladni mark, after which `AppliedLogoMark`/`FaviconHost` render it again.
 
 ## Roadmap
 

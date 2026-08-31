@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Compass, Hammer, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { starterTemplates, type StarterTemplate } from "@/lib/starter-templates";
+import { RouteCards } from "@/components/routes/route-cards";
 import { cn } from "@/lib/utils";
 
 type StarterPickerProps = {
@@ -35,8 +36,9 @@ export function StarterPicker({ onSelect, onDismiss, canClose = true }: StarterP
           <p className="text-xs font-semibold uppercase tracking-widest text-primary">Your Workshop</p>
           <CardTitle className="mt-2 text-2xl">How do you want to start?</CardTitle>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            Pick a ready-made practice page and start playing, or make a page from scratch.
-            You can change every block later.
+            New to the piano? Follow a guided route, pick a ready-made
+            practice page, or start from scratch — every block stays
+            editable.
           </p>
         </div>
         {canClose ? (
@@ -51,6 +53,13 @@ export function StarterPicker({ onSelect, onDismiss, canClose = true }: StarterP
         ) : null}
       </CardHeader>
       <CardContent className="space-y-5">
+        <section>
+          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-primary">
+            Guided routes
+          </h3>
+          <RouteCards />
+        </section>
+
         {(Object.keys(categoryLabels) as Array<keyof typeof categoryLabels>).map((category) => {
           const templates = starterTemplates.filter((template) => template.category === category);
           return (
@@ -90,6 +99,10 @@ export function StarterPicker({ onSelect, onDismiss, canClose = true }: StarterP
             <Hammer className="h-4 w-4" />
             Start from scratch
           </button>
+          <Link href="/routes" onClick={onDismiss} className="inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-primary hover:bg-primary/10">
+            <Compass className="h-4 w-4" />
+            Follow a guided route
+          </Link>
           <Link href="/workshop" onClick={onDismiss} className="inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-primary hover:bg-primary/10">
             <Compass className="h-4 w-4" />
             Browse community drills

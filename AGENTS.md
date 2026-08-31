@@ -57,7 +57,7 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `lib/logo-mark.ts` | Chladni grid → SVG brand-mark geometry, data URLs, favicon export |
 | `lib/logo-mark-settings.ts` | Serializable applied logo mark + presets / normalize / localStorage |
 | `hooks/useLogoMarkSettings.ts` | Applied logo mark; localStorage always; Convex when `canPersist` |
-| `components/brand/*` | `PianoSuiteMark`, `AppliedLogoMark`, `FaviconHost` |
+| `components/brand/*` | `PianoSuiteMark`, `AppliedLogoMark`, `FaviconHost`; the musical-note mark (`app/icon.svg`, lucide `Music`) is the shipping default — custom Chladni marks apply only after Logo Lab's Apply (`isShippingLogoMark` decides) |
 | `lib/ambient-effects.ts` | Per-route ambient backgrounds + float panel settings, soft viz defaults |
 | `hooks/useAmbientEffects.ts` | `AmbientEffectsProvider` + hook; localStorage always; Convex when `canPersist` |
 | `components/ambient/*` | Root ambient host, renderer, background, float panel |
@@ -73,7 +73,6 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `lib/analytics.ts` | Three-event PostHog wrapper (`ANALYTICS_EVENTS`); no-op without key; mirrors to `window.__analyticsEvents` for e2e. Emit via `captureEvent`, never per-page |
 | `components/analytics/analytics-provider.tsx` | Mounts `initAnalytics()` in the root layout |
 | `lib/sentry.ts` + `instrumentation*.ts` | Sentry init (no-op without DSN); Next 16 instrumentation convention, `onRequestError` wired; `beforeSend` PII scrubber |
-| `lib/age-gate.ts` + `components/age-gate/*` | COPPA gate: neutral 13+ check rendered above Clerk in the root layout; `shouldLoadTracking()` gates PostHog + client Sentry — never init tracking for an unanswered/under-13 visitor |
 | `convex/waitlist.ts` + `components/waitlist/*` | Founding Pro waitlist: anonymous-allowed email signup (`joinWaitlist`), dedupe by normalized email; CTA on `/pricing` and post-drill (`PostDrillWaitlist`) |
 | `lib/billing.ts` | Clerk Billing plan/feature slugs (`pro`, `sync`) + `BILLING_ENABLED` pre-launch gate + `canPersistFromEntitlements` / `canUseFloatPanelFromEntitlements` + JWT `pla`/`fea` helpers; apply Dashboard catalog via `docs/clerk-billing-setup.md` |
 | `app/settings/billing/page.tsx` | Signed-in plan management (Clerk `PricingTable`) |
@@ -84,6 +83,10 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `app/error.tsx`, `app/global-error.tsx` | Error boundaries so a thrown query cannot blank the app |
 | `components/drills/drill-shell.tsx` | Shared layout wrapper for every tool page |
 | `lib/tools.ts` | Grouped tool registry (`workshopTool`, `drillTools`, `insightTools`, `labTools`) driving sidebar sections and the landing grid |
+| `lib/routes.ts` | Guided-route registry + progress math (steps: read / external / anki-setup / tool / seed-workshop); progress is a cached `useSyncExternalStore` snapshot over localStorage |
+| `lib/anki-setup-prompt.ts` | Builds the self-contained Anki setup prompt (deck contents embedded by the route page from `public/*.txt`) |
+| `components/routes/*` | `RouteGuide` step checklist + `RouteCards` compact cards (embedded in the Workshop starter picker); server pages pass `routeId` + deck files, never the icon-bearing route object (RSC boundary) |
+| `app/routes`, `app/routes/[routeId]` | Public guided-route pages (proxy allowlist) |
 | `lib/feature-blocks/drill-shortcuts/config.ts` | Config for the ready-made drills tile (registry-derived content, no fields) |
 | `components/feature-blocks/drill-shortcuts-block.tsx` | Ready-made drill shortcuts as a movable Workshop grid tile |
 | `components/tools/dashboard-nav.tsx` | Dashboard drawer open state + mobile Menu button |

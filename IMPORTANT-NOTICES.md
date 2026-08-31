@@ -14,6 +14,11 @@ Do NOT announce publicly until every item below is done.**
 > (age gate, `docs/music-rights-audit.md`, privacy-policy pass + Sentry PII
 > scrubbing) — see task list `tasks/tasks-go-live.md` § Priority 1. Item 4
 > (counsel review) remains with Justin.
+>
+> Update 2026-08-31: the age gate (item 1) was **removed by owner decision**
+> (Justin) — the birthday check never shipped well and was pulled. The COPPA
+> exposure described below is therefore OPEN again for tracking; item 3's
+> Sentry PII scrubbing and privacy-policy disclosures remain in place.
 
 Piano Suite is a *mixed-audience* product (piano instruction plausibly
 attracts children). The FTC judges "child-directed" by **subject matter and

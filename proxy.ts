@@ -52,6 +52,8 @@ export default clerkMiddleware(
       pathname === "/" ||
       pathname === "/pricing" ||
       pathname === "/tools/chladni" ||
+      // Guided routes are help content; activation starts before sign-up.
+      isExactOrUnder(pathname, "/routes") ||
       // Legal pages must be readable by anonymous visitors.
       pathname === "/terms" ||
       pathname === "/privacy" ||
