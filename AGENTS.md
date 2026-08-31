@@ -6,7 +6,14 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Project Direction
 
-Piano Suite is repositioning as a **free learning community for self-taught pianists**. Docs, copy, and new features should reinforce welcome, inclusivity, and beginner success. The README and landing page speak to beginners first; deep technical history and architecture live in `docs/PROJECT_HISTORY.md`.
+**Read [`docs/NORTH-STAR.md`](docs/NORTH-STAR.md) before proposing a feature, writing copy, or starting a UI change.** It holds the one-sentence product definition, the eight themes that decide close calls, and the non-goals list. The ordered roadmap — audit, phases, launch sequence — is [`docs/overhaul-plan.md`](docs/overhaul-plan.md); the current phase's task list is `tasks/tasks-phase-1-front-door.md`.
+
+Piano Suite is **a workshop for building your own piano practice**, for self-taught pianists. Docs, copy, and new features should reinforce welcome, inclusivity, and beginner success. The README and landing page speak to beginners first; deep technical history and architecture live in `docs/PROJECT_HISTORY.md`.
+
+Two rules from the North Star that change how you should build:
+
+- **Demote, don't delete.** New capability ships as a Workshop feature block, not a new top-level tool page. Existing standalone pages are being converted into blocks — do not add to the sidebar.
+- **Free at the front.** No sign-in wall before value. Sign-in buys sync and publishing, never access.
 
 # Primitive Layer Conventions
 

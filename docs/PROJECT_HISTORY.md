@@ -653,6 +653,27 @@ is planned in [`docs/missing-features-plan.md`](docs/missing-features-plan.md).
 Phase A (production auth cutover) detail:
 [`docs/phase-a-auth-cutover-plan.md`](docs/phase-a-auth-cutover-plan.md).
 
+## The overhaul plan (2026-08-31)
+
+After 345 commits in ~36 days, the product had grown enormous everywhere except
+at its stated center: six visualization labs against six Workshop blocks, an 18-entry
+sidebar and a 12-card landing grid in front of a component shelf you could read
+out loud in ten seconds. Two documents replace the accumulated tier lists as the
+active direction:
+
+- [`docs/NORTH-STAR.md`](NORTH-STAR.md) — the one-sentence product definition,
+  eight decision-rule themes, and a binding non-goals list. Read before proposing
+  any feature.
+- [`docs/overhaul-plan.md`](overhaul-plan.md) — the audit, the eight-phase
+  roadmap, and the launch sequence. Supersedes the tier lists in
+  `tier-0-workshop-first-plan.md` and `workshop-first-ux-plan.md`.
+
+The load-bearing decision is **demote, don't delete**: every standalone tool page
+becomes a Workshop feature block. That collapses the navigation and deepens the
+component shelf in one motion, which is the prerequisite for both the community
+marketplace and the AI page assembler. Current phase:
+`tasks/tasks-phase-1-front-door.md`.
+
 ## License
 
 MIT
