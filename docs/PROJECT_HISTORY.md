@@ -610,6 +610,18 @@ blockers (see `IMPORTANT-NOTICES.md`, `tasks/tasks-go-live.md` Priority 1).
 - `docs/music-rights-audit.md`: asset inventory (currently clean — decks and
   drill content are self-authored or generated) + policy for future additions.
 
+Removed 2026-08-31: the age gate itself was pulled by owner decision (the
+birthday check never shipped well) — `lib/age-gate.ts`,
+`components/age-gate/`, and the tracking gate went with it, and client
+Sentry inits unconditionally again. The Sentry PII scrubber and the privacy
+disclosures stay. The COPPA item in `IMPORTANT-NOTICES.md` is OPEN again.
+
+Same day, the shipping brand mark went back to the original beamed
+eighth-notes (`app/icon.svg` + lucide `Music` in navbar/sidebar). Logo Lab
+keeps working: `isShippingLogoMark()` treats default-valued settings as
+"no custom mark", so the note shows until someone actually applies a
+Chladni mark, after which `AppliedLogoMark`/`FaviconHost` render it again.
+
 ## Roadmap
 
 - [x] Scaffold Next.js + Tailwind + shadcn/ui

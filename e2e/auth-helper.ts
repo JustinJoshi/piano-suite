@@ -1,7 +1,6 @@
 import { Page } from "@playwright/test";
 import { clerk, setupClerkTestingToken } from "@clerk/testing/playwright";
 import { ONBOARDING_STORAGE_KEY } from "@/lib/onboarding";
-import { AGE_GATE_STORAGE_KEY } from "@/lib/age-gate";
 import fs from "fs";
 import path from "path";
 
@@ -48,12 +47,6 @@ function ensureTestingToken() {
 export async function signInAsTestUser(page: Page) {
   ensureTestingToken();
   await setupClerkTestingToken({ page });
-  // The age gate renders before Clerk (COPPA); tests that exercise sign-in
-  // must present an already-passed gate or the Clerk UI never mounts.
-  await page.addInitScript(
-    ({ key }) => localStorage.setItem(key, "eligible"),
-    { key: AGE_GATE_STORAGE_KEY }
-  );
   await page.goto("/");
 
   const isSignedIn = await page

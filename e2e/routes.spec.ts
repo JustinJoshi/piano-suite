@@ -1,13 +1,11 @@
 import { test, expect } from "@playwright/test";
-import { eligibleAgeGateState } from "./age-gate";
 
 /**
  * Guided routes are public (activation starts before sign-up); progress is
- * device-local, so these tests run in an unauthenticated context that has
- * already passed the COPPA age gate (otherwise the gate hides the app).
+ * device-local, so these tests run in an unauthenticated context.
  */
 test.describe("/routes", () => {
-  test.use({ storageState: eligibleAgeGateState() });
+  test.use({ storageState: { cookies: [], origins: [] } });
 
   test("route picker is reachable without signing in", async ({ page }) => {
     await page.goto("/routes");

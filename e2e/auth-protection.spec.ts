@@ -1,6 +1,5 @@
 import { test, expect } from "@playwright/test";
 import { signInAsTestUser } from "./auth-helper";
-import { eligibleAgeGateState } from "./age-gate";
 import {
   assertAuthBypassOffForE2E,
   expectNoApplicationError,
@@ -113,9 +112,9 @@ test.describe("auth protection (bypass off)", () => {
   });
 
   test.describe("unsigned", () => {
-    // Empty auth storage, but past the COPPA age gate so unsigned
-    // public pages render their content instead of the gate form.
-    test.use({ storageState: eligibleAgeGateState() });
+    test.use({
+      storageState: { cookies: [] as never[], origins: [] as never[] },
+    });
 
     for (const route of PROTECTED_ROUTES) {
       test(`unsigned ${route} redirects to sign-in (not bare 404)`, async ({
