@@ -85,7 +85,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build, check-e2e-secrets]
     if: needs.check-e2e-secrets.outputs.has-secrets == 'true'
-    timeout-minutes: 15
+    # 40 min: the shared Clerk dev instance periodically degrades to 8s+ per
+    # FAPI call, roughly doubling suite time (observed 2026-08-31).
+    timeout-minutes: 40
     # Global e2e lock: every run shares one Clerk dev instance and one test
     # user, and global teardown deletes that user when a run finishes. A
     # concurrent e2e job then loses its user mid-run ("No user found with
