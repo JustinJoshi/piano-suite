@@ -85,7 +85,7 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `lib/tools.ts` | Grouped tool registry (`workshopTool`, `drillTools`, `insightTools`, `labTools`) driving sidebar sections and the landing grid |
 | `lib/routes.ts` | Guided-route registry + progress math (steps: read / external / anki-setup / tool / seed-workshop); progress is a cached `useSyncExternalStore` snapshot over localStorage |
 | `lib/anki-setup-prompt.ts` | Builds the self-contained Anki setup prompt (deck contents embedded by the route page from `public/*.txt`) |
-| `components/routes/*` | `RouteGuide` step checklist; server pages pass `routeId` + deck files, never the icon-bearing route object (RSC boundary) |
+| `components/routes/*` | `RouteGuide` step checklist + `RouteCards` compact cards (embedded in the Workshop starter picker); server pages pass `routeId` + deck files, never the icon-bearing route object (RSC boundary) |
 | `app/routes`, `app/routes/[routeId]` | Public guided-route pages (proxy allowlist) |
 | `lib/feature-blocks/drill-shortcuts/config.ts` | Config for the ready-made drills tile (registry-derived content, no fields) |
 | `components/feature-blocks/drill-shortcuts-block.tsx` | Ready-made drill shortcuts as a movable Workshop grid tile |

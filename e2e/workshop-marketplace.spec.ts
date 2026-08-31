@@ -16,6 +16,11 @@ test.describe("/tools/workshop marketplace", () => {
 
     // First run greets with ready-made templates.
     await expect(page.getByText("How do you want to start?")).toBeVisible();
+    // Guided routes lead the picker.
+    await expect(page.getByTestId("picker-route-music-theory")).toBeVisible();
+    await expect(
+      page.getByTestId("picker-route-finger-flexibility")
+    ).toBeVisible();
     await page.getByRole("button", { name: /start from scratch/i }).click();
 
     // Blank workshop: an empty grid canvas plus the marketplace entry point.

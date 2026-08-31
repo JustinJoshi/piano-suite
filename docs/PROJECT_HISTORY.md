@@ -544,7 +544,11 @@ never drift from the shipped decks. The final step seeds a Workshop page
 (`music-theory-starter` / `finger-flexibility-starter` starter templates),
 replacing a starter-only page in place. `RouteGuide` receives `routeId`,
 not the route object: the Lucide icon cannot cross the RSC serialization
-boundary.
+boundary. The Workshop's first-run starter picker embeds the routes too:
+`RouteCards` (client component, same registry + progress store) renders both
+routes as compact cards above the template categories with live progress, so
+the zero-to-playing path is the first thing the "How do you want to start?"
+page offers.
 
 ## Workshop-first navigation (2026-08)
 Product decision: the Workshop is the core of the app, not one tool among
