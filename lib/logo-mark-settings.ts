@@ -180,6 +180,18 @@ export function normalizeLogoMarkSettings(
   };
 }
 
+/**
+ * True when the settings still describe the shipping Chladni mark.
+ * Consumers render the musical-note brand instead; `generation` is ignored
+ * so Apply/Reset churn does not flip the decision.
+ */
+export function isShippingLogoMark(settings: LogoMarkSettings): boolean {
+  const { generation: _generation, ...rest } = settings;
+  const { generation: _defaultGeneration, ...defaultRest } =
+    DEFAULT_LOGO_MARK_SETTINGS;
+  return JSON.stringify(rest) === JSON.stringify(defaultRest);
+}
+
 export function readLogoMarkSettingsFromLocalStorage(): LogoMarkSettings | null {
   if (typeof window === "undefined") return null;
   try {
