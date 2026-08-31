@@ -42,6 +42,9 @@ export default defineConfig({
       name: "setup",
       testMatch: /global\.setup\.ts/,
       teardown: "teardown",
+      // Sign-in drives the Clerk dev instance over the network; it has been
+      // observed taking 8s+ per FAPI call, so the default 30s is not enough.
+      timeout: 180_000,
       use: { storageState: { cookies: [], origins: [] } },
     },
     {
