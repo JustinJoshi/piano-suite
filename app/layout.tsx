@@ -12,6 +12,7 @@ import { AudioSettingsProvider } from "@/hooks/useAudioSettings";
 import { ExperimentalFeaturesProvider } from "@/hooks/useExperimentalFeatures";
 import { MusicPlayerProvider } from "@/hooks/useMusicPlayer";
 import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
+import { AgeGate } from "@/components/age-gate/age-gate";
 import { defaultTheme, themeIds } from "@/lib/themes";
 import "./globals.css";
 
@@ -65,23 +66,25 @@ export default function RootLayout({
           storageKey="piano-suite-theme"
           themes={[...themeIds]}
         >
-          <ClerkProvider appearance={{ theme: shadcn }}>
-            <ConvexClientProvider>
-              <ExperimentalFeaturesProvider>
-                <AudioSettingsProvider>
-                  <AmbientEffectsProvider>
-                    <MusicPlayerProvider>
-                      <AnalyticsProvider>
-                        <AmbientEffectsHost />
-                        <AudioEngineHost />
-                        {children}
-                      </AnalyticsProvider>
-                    </MusicPlayerProvider>
-                  </AmbientEffectsProvider>
-                </AudioSettingsProvider>
-              </ExperimentalFeaturesProvider>
-            </ConvexClientProvider>
-          </ClerkProvider>
+          <AgeGate>
+            <ClerkProvider appearance={{ theme: shadcn }}>
+              <ConvexClientProvider>
+                <ExperimentalFeaturesProvider>
+                  <AudioSettingsProvider>
+                    <AmbientEffectsProvider>
+                      <MusicPlayerProvider>
+                        <AnalyticsProvider>
+                          <AmbientEffectsHost />
+                          <AudioEngineHost />
+                          {children}
+                        </AnalyticsProvider>
+                      </MusicPlayerProvider>
+                    </AmbientEffectsProvider>
+                  </AudioSettingsProvider>
+                </ExperimentalFeaturesProvider>
+              </ConvexClientProvider>
+            </ClerkProvider>
+          </AgeGate>
         </ThemeProvider>
       </body>
     </html>

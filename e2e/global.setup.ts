@@ -4,6 +4,7 @@ import { test as setup } from "@playwright/test";
 import fs from "fs";
 import path from "path";
 import { ONBOARDING_STORAGE_KEY } from "@/lib/onboarding";
+import { AGE_GATE_STORAGE_KEY } from "@/lib/age-gate";
 
 // Ensures that Clerk setup is done before any tests run.
 setup.describe.configure({ mode: "serial" });
@@ -127,12 +128,20 @@ setup("global setup", async ({ page }) => {
   // already logged in. This avoids dozens of ticket-based sign-ins per run,
   // which are slow and can race with Clerk's user lookup under load.
   fs.mkdirSync(authDir, { recursive: true });
+  // The age gate renders before Clerk (COPPA); seed a passed gate before the
+  // first navigation so the Clerk sign-in UI mounts, then the saved storage
+  // state carries the flag to every authenticated test. The real gate flow is
+  // covered by e2e/age-gate.spec.ts with an empty storage state.
+  await page.addInitScript(
+    ({ onboardingKey, ageGateKey }) => {
+      localStorage.setItem(onboardingKey, "true");
+      localStorage.setItem(ageGateKey, "eligible");
+    },
+    { onboardingKey: ONBOARDING_STORAGE_KEY, ageGateKey: AGE_GATE_STORAGE_KEY }
+  );
   await page.goto("/");
   await clerk.signIn({ page, emailAddress: email });
   await page.waitForFunction(() => window.Clerk?.user !== null, { timeout: 10000 });
-  await page.evaluate((key) => {
-    localStorage.setItem(key, "true");
-  }, ONBOARDING_STORAGE_KEY);
   await page.context().storageState({ path: authFile });
 
   // Propagate the testing token to the test workers in case they need to

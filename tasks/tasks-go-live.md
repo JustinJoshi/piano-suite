@@ -4,6 +4,18 @@ Source: CSO go-live plan. Scope: the 6 pre-launch items only. Launch stays froze
 free tools, no Clerk Billing, waitlist instead. Every code task is TDD — write the
 test, watch it fail, implement, watch it pass.
 
+## Priority 1 — LEGAL BLOCKER (outranks every task below)
+
+Source: `IMPORTANT-NOTICES.md` (OpenExecutive committee review, 2026-08-29).
+**Do NOT announce publicly until all of 0.1–0.5 are done.** These outrank
+section 5.x and all feature work.
+
+- [x] 0.1 Age gate: neutral 13+ check firing *before* PostHog/Sentry load, so under-13 visitors are never tracked (`lib/age-gate.ts` + `components/age-gate/`, TDD) — evidence: `npx vitest run lib/__tests__/age-gate.test.ts components/age-gate/__tests__/age-gate.test.tsx` (17 tests), `e2e/age-gate.spec.ts`
+- [x] 0.2 Sentry PII scrubbing: `sendDefaultPii: false` + `beforeSend` scrub; confirm PostHog autocapture stays OFF (leak audit) — evidence: `lib/__tests__/sentry.test.ts` `scrubSentryEvent`; `autocapture: false` in `lib/analytics.ts`
+- [x] 0.3 Privacy policy pass: name PostHog/Sentry/Convex/Clerk as processors, add data-retention window + deletion path (user-facing) — evidence: `app/privacy/page.tsx` children's-privacy + retention sections
+- [x] 0.4 Music rights audit: inventory every MIDI file / arrangement in the repo and record provenance (`docs/music-rights-audit.md`); arrangements are derivative works — evidence: audit doc, status CLEAN
+- [ ] 0.5 Counsel review (human task, owner: Justin): budget $1–3K fixed-fee privacy review of age gate + policy; confirm the app operates under an LLC
+
 ## Relevant Files
 
 - `lib/analytics.ts` - NEW: analytics wrapper; constrained event names, no-op without PostHog key, test-mode window log
