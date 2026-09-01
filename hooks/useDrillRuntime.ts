@@ -7,13 +7,13 @@ import { useDrillTimer } from "@/hooks/useDrillTimer";
 import { useMidi } from "@/hooks/useMidi";
 import { useAuthAccess } from "@/hooks/useAuthAccess";
 import { evaluateChordAttempt } from "@/lib/scoring";
-import { gradeForTime } from "@/lib/chord-drill";
+import { gradeForMisses } from "@/lib/sequence-drill";
 import {
   appendLocalWorkshopEvent,
   appendLocalWorkshopMiss,
 } from "@/lib/local-practice-history";
 import { captureEvent } from "@/lib/analytics";
-import type { ChordTarget, DrillPhase } from "@/lib/drill-runtime";
+import type { ChordTarget, DrillPhase, DrillRuntimeConfig } from "@/lib/drill-runtime";
 
 function emitAnalytics(name: "drill_started" | "drill_completed", pageId: string) {
   captureEvent(name, pageId ? { pageId } : {});
@@ -21,19 +21,19 @@ function emitAnalytics(name: "drill_started" | "drill_completed", pageId: string
 
 export type DrillRuntimeOptions = {
   pageId?: string;
-  countdownSeconds?: number;
-  breakSeconds?: number;
-  requireExact?: boolean;
-};
+} & Partial<DrillRuntimeConfig>;
 
-const DEFAULT_GRADE_THRESHOLDS = { good: 2000, hard: 4000 };
+const DEFAULT_GRADE_THRESHOLDS = { good: 0, hard: 2 };
 
 export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
   const {
     pageId = "",
     countdownSeconds = 3,
     breakSeconds = 5,
+    multiRep = true,
     requireExact = false,
+    goodThreshold = DEFAULT_GRADE_THRESHOLDS.good,
+    hardThreshold = DEFAULT_GRADE_THRESHOLDS.hard,
   } = options;
 
   const [targets, setTargetsState] = useState<ChordTarget[]>([]);
@@ -56,6 +56,7 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
   const canPersistRef = useRef(canPersist);
   const pageIdRef = useRef(pageId);
   const missesRef = useRef(misses);
+  const thresholdsRef = useRef({ good: goodThreshold, hard: hardThreshold });
 
   useEffect(() => {
     logPracticeEventRef.current = logPracticeEventMutation;
@@ -63,6 +64,7 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
     canPersistRef.current = canPersist;
     pageIdRef.current = pageId;
     missesRef.current = misses;
+    thresholdsRef.current = { good: goodThreshold, hard: hardThreshold };
   });
 
   const logSuccess = useCallback((elapsedMs: number) => {
@@ -70,7 +72,12 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
     const id = pageIdRef.current;
     if (!target || !id) return;
 
-    const gradeResult = gradeForTime(elapsedMs, DEFAULT_GRADE_THRESHOLDS);
+    // Miss-count grading — the chord-set settings editor exposes these
+    // thresholds as "max misses for a Good/Hard grade".
+    const gradeResult = gradeForMisses(
+      missesRef.current,
+      thresholdsRef.current
+    );
 
     if (canPersistRef.current) {
       logPracticeEventRef.current({
@@ -135,7 +142,7 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
   const timer = useDrillTimer({
     countdownSeconds,
     breakSeconds,
-    multiRep: true,
+    multiRep,
     onSuccess,
   });
 

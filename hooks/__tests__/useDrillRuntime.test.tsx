@@ -11,12 +11,14 @@ const nextRep = vi.fn();
 let mockPhase = "idle";
 let mockHeldPcs = new Set<number>();
 let onSuccessCallback: ((elapsedMs: number) => void) | null = null;
+let timerOptions: Record<string, unknown> = {};
 
 const logPracticeEvent = vi.fn(() => Promise.resolve("eventId"));
 const logMissEvent = vi.fn(() => Promise.resolve("missId"));
 
 vi.mock("@/hooks/useDrillTimer", () => ({
   useDrillTimer: vi.fn((options: { onSuccess?: (elapsedMs: number) => void }) => {
+    timerOptions = options;
     onSuccessCallback = options.onSuccess ?? null;
     return {
       phase: mockPhase,
@@ -253,5 +255,133 @@ describe("useDrillRuntimeProvider", () => {
     });
     rerender();
     expect(captureEvent).toHaveBeenCalledTimes(2);
+  });
+
+  it("threads block config into the timer", () => {
+    renderHook(() =>
+      useDrillRuntimeProvider({
+        pageId: "page-1",
+        countdownSeconds: 7,
+        breakSeconds: 9,
+        multiRep: false,
+      })
+    );
+
+    expect(timerOptions).toMatchObject({
+      countdownSeconds: 7,
+      breakSeconds: 9,
+      multiRep: false,
+    });
+  });
+
+  it("extra notes pass when requireExact is off and fail when on", async () => {
+    // Earlier tests override this mock to canPersist: false; pin the
+    // Convex path for both sub-cases.
+    const { useAuthAccess } = await import("@/hooks/useAuthAccess");
+    (useAuthAccess as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      canPersist: true,
+    });
+
+    mockPhase = "timing";
+    // Cmaj7 (0,4,7,11) held plus an extra note (pc 2) — a superset.
+    const superset = new Set([0, 4, 7, 11, 2]);
+
+    const { result, rerender } = renderHook(({ requireExact }) =>
+      useDrillRuntimeProvider({ pageId: "page-1", requireExact })
+    , { initialProps: { requireExact: false } });
+
+    act(() => {
+      result.current.setTargets([
+        { id: "Cmaj7", symbol: "Cmaj7", notes: ["C", "E", "G", "B"], pcs: new Set([0, 4, 7, 11]) },
+      ]);
+    });
+
+    mockHeldPcs = superset;
+    rerender({ requireExact: false });
+    // Superset with requireExact=false: scored as a success.
+    expect(logPracticeEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ chord: "Cmaj7", grade: "Good" })
+    );
+
+    vi.clearAllMocks();
+    mockHeldPcs = new Set();
+
+    const second = renderHook(
+      ({ requireExact }) => useDrillRuntimeProvider({ pageId: "page-1", requireExact }),
+      { initialProps: { requireExact: true } }
+    );
+
+    act(() => {
+      second.result.current.setTargets([
+        { id: "Cmaj7", symbol: "Cmaj7", notes: ["C", "E", "G", "B"], pcs: new Set([0, 4, 7, 11]) },
+      ]);
+    });
+
+    mockHeldPcs = superset;
+    second.rerender({ requireExact: true });
+    // Same superset with requireExact=true: a miss, not a success.
+    expect(logMissEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ chord: "Cmaj7", played: "0,2,4,7,11" })
+    );
+    expect(logPracticeEvent).not.toHaveBeenCalled();
+  });
+
+  it("grades by miss count using the configured thresholds", async () => {
+    const { useAuthAccess } = await import("@/hooks/useAuthAccess");
+    (useAuthAccess as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      canPersist: true,
+    });
+
+    mockPhase = "timing";
+    // First render: wrong notes → one miss on the target.
+    mockHeldPcs = new Set([1, 5, 8]);
+
+    const { result, rerender } = renderHook(() =>
+      useDrillRuntimeProvider({
+        pageId: "page-1",
+        goodThreshold: 1,
+        hardThreshold: 3,
+      })
+    );
+
+    act(() => {
+      result.current.setTargets([
+        { id: "Cmaj7", symbol: "Cmaj7", notes: ["C", "E", "G", "B"], pcs: new Set([0, 4, 7, 11]) },
+      ]);
+    });
+
+    expect(logMissEvent).toHaveBeenCalledTimes(1);
+
+    // Then the correct chord lands: graded on the accumulated misses (1),
+    // which is within goodThreshold 1 → Good.
+    mockHeldPcs = new Set([0, 4, 7, 11]);
+    rerender();
+
+    expect(logPracticeEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ chord: "Cmaj7", grade: "Good" })
+    );
+  });
+
+  it("a miss beyond the good threshold grades Hard by default", () => {
+    mockPhase = "timing";
+    mockHeldPcs = new Set([1, 5, 8]);
+
+    const { result, rerender } = renderHook(() =>
+      useDrillRuntimeProvider({ pageId: "page-1" })
+    );
+
+    act(() => {
+      result.current.setTargets([
+        { id: "Cmaj7", symbol: "Cmaj7", notes: ["C", "E", "G", "B"], pcs: new Set([0, 4, 7, 11]) },
+      ]);
+    });
+
+    mockHeldPcs = new Set([0, 4, 7, 11]);
+    rerender();
+
+    // Default thresholds {good: 0, hard: 2}: one miss → Hard.
+    expect(logPracticeEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ grade: "Hard" })
+    );
   });
 });
