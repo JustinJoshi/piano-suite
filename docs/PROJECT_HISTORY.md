@@ -473,6 +473,10 @@ Architecture and market research: `docs/custom-drill-builder-plan.md`,
   a Workshop tab.
 - Remaining phases (see plan): cloud sync (`customDrills` table, Pro), sharing /
   gallery with forked-from attribution, and `schemaVersion` migration infra.
+  *(Update 2026-09-01: cloud sync shipped in `hooks/useWorkshopSync.ts` and the
+  public gallery shipped at `/workshop`. `forkCustomDrill` exists in
+  `convex/workshop.ts` with tests but no UI calls it, and `schemaVersion`
+  migration infra is still open — see `docs/audit-2026-09/`.)*
 
 Verification: `npm run lint`, `npm run test:unit:run` (655 passed), `npm run build`,
 and `npm run test:e2e` (83 passed) all pass on the merged `main`.
