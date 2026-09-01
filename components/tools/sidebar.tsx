@@ -257,16 +257,6 @@ export function Sidebar() {
                 {workshopTool.title}
               </Link>
             </li>
-            <li>
-              <Link
-                href="/routes"
-                onClick={closeDrawer}
-                data-testid="sidebar-link-routes"
-                className="flex items-center gap-3 rounded-lg px-3 py-1.5 pl-11 text-sm text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
-              >
-                Guided routes
-              </Link>
-            </li>
           </ul>
 
           <div className="mb-2 mt-6">
