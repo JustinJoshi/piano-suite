@@ -14,6 +14,7 @@ import {
   isStarterPage,
   appendBlockToPage,
   removeFirstBlockOfType,
+  importPublicPage,
   STORAGE_KEY,
   LEGACY_STORAGE_KEY,
 } from "@/lib/custom-practice-storage";
@@ -253,5 +254,119 @@ describe("marketplace block helpers", () => {
       blocks: [{ id: "b", type: "textBlock", version: 1, config: {} }],
     };
     expect(removeFirstBlockOfType(page, "metronome")).toBe(page);
+  });
+});
+
+describe("importPublicPage (save a copy)", () => {
+  const publicBlocks = [
+    { id: "src-1", type: "metronome", version: 1, config: { bpm: 90 } },
+    { id: "src-2", type: "textBlock", version: 1, config: { body: "hi" } },
+  ];
+
+  it("replaces a first-run starter page in place and activates the copy", () => {
+    const store = createEmptyPracticePageStore();
+    const starterId = store.pages[0].id;
+
+    const next = importPublicPage(store, {
+      title: "Community Warmup",
+      blocks: publicBlocks,
+    });
+
+    expect(next.pages).toHaveLength(1);
+    expect(next.pages[0].title).toBe("Community Warmup");
+    expect(next.pages[0].id).not.toBe(starterId);
+    expect(next.activePageId).toBe(next.pages[0].id);
+  });
+
+  it("appends after a real page and activates the copy", () => {
+    const existing = makePage({ id: "mine", title: "My Practice Page" });
+    existing.blocks.push({
+      id: "b1",
+      type: "metronome",
+      version: 1,
+      config: {},
+    });
+    const store = {
+      version: 2 as const,
+      pages: [existing],
+      activePageId: "mine",
+    };
+
+    const next = importPublicPage(store, {
+      title: "Community Warmup",
+      blocks: publicBlocks,
+    });
+
+    expect(next.pages).toHaveLength(2);
+    expect(next.pages[0].id).toBe("mine");
+    expect(next.pages[1].title).toBe("Community Warmup");
+    expect(next.activePageId).toBe(next.pages[1].id);
+  });
+
+  it("remints block ids and copies configs instead of referencing them", () => {
+    const store = createEmptyPracticePageStore();
+
+    const next = importPublicPage(store, {
+      title: "Community Warmup",
+      blocks: publicBlocks,
+    });
+
+    const imported = next.pages[0];
+    expect(imported.blocks.map((b) => b.id)).not.toContain("src-1");
+    expect(imported.blocks.map((b) => b.id)).not.toContain("src-2");
+    // Same content, new identities.
+    expect(imported.blocks.map((b) => b.type)).toEqual([
+      "metronome",
+      "textBlock",
+    ]);
+    expect(imported.blocks[0].config).toEqual({ bpm: 90 });
+    expect(imported.blocks[0].config).not.toBe(publicBlocks[0].config);
+  });
+
+  it("keeps two copies of the same source from colliding on title", () => {
+    const existing = makePage({ id: "mine", title: "My Practice Page" });
+    existing.blocks.push({
+      id: "b1",
+      type: "metronome",
+      version: 1,
+      config: {},
+    });
+    const store = {
+      version: 2 as const,
+      pages: [existing],
+      activePageId: "mine",
+    };
+
+    const once = importPublicPage(store, {
+      title: "Community Warmup",
+      blocks: publicBlocks,
+    });
+    const twice = importPublicPage(once, {
+      title: "Community Warmup",
+      blocks: publicBlocks,
+    });
+
+    expect(twice.pages).toHaveLength(3);
+    expect(twice.pages[1].title).toBe("Community Warmup");
+    expect(twice.pages[2].title).toBe("Community Warmup 2");
+    // Forking twice must not collide block ids either.
+    const ids = [
+      ...twice.pages[1].blocks,
+      ...twice.pages[2].blocks,
+    ].map((b) => b.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it("uses the provided id (mutation clientPageId) when given", () => {
+    const store = createEmptyPracticePageStore();
+
+    const next = importPublicPage(store, {
+      id: "from-convex",
+      title: "Community Warmup",
+      blocks: publicBlocks,
+    });
+
+    expect(next.pages[0].id).toBe("from-convex");
+    expect(next.activePageId).toBe("from-convex");
   });
 });

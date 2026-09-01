@@ -254,6 +254,47 @@ export function createPracticePageInStore(
   return { ...store, pages: [...store.pages, page], activePageId: page.id };
 }
 
+/**
+ * Save-a-copy helper for community pages (`/workshop/[id]`): imports a
+ * public drill's blocks as a new local page. Signed-in callers pass the
+ * `forkCustomDrill` mutation's `clientPageId` as `id` so a later Pro
+ * upgrade/sync matches the server row; unsigned callers omit it and get a
+ * fresh id.
+ *
+ * Block ids are reminted (copied ids collide when a user forks twice into
+ * the same store); configs are copied, never referenced. A first-run
+ * starter store (one starter page) is replaced in place, matching the
+ * starter-picker behavior; anything real is kept and the copy appended.
+ */
+export function importPublicPage(
+  store: PracticePageStore,
+  {
+    id,
+    title,
+    blocks,
+  }: { id?: string; title: string; blocks: FeatureBlock[] }
+): PracticePageStore {
+  const copy: PracticePage = {
+    id: id ?? generateId(),
+    title: uniqueTitle(store, title),
+    blocks: blocks.map((block) => ({
+      ...block,
+      id: generateId(),
+      config: { ...block.config },
+    })),
+    updatedAt: Date.now(),
+  };
+
+  const isFreshStarter =
+    store.pages.length === 1 && isStarterPage(store.pages[0]);
+
+  if (isFreshStarter) {
+    return { ...store, pages: [copy], activePageId: copy.id };
+  }
+
+  return { ...store, pages: [...store.pages, copy], activePageId: copy.id };
+}
+
 function uniqueTitle(store: PracticePageStore, base: string): string {
   const titles = new Set(store.pages.map((p) => p.title));
   if (!titles.has(base)) return base;

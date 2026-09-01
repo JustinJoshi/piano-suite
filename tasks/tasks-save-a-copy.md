@@ -41,18 +41,18 @@ Every code task is TDD: write the test, watch it fail, implement, watch it pass.
 
 ## Tasks
 
-- [ ] B.0 Branch
-  - [ ] B.0.1 Land Change A first. Branch from that.
+- [x] B.0 Branch
+  - [x] B.0.1 Land Change A first. Branch from that.
 
-- [ ] B.1 Local import helper
-  - [ ] B.1.1 Write tests in `custom-practice-storage.test.ts` FIRST:
+- [x] B.1 Local import helper
+  - [x] B.1.1 Write tests in `custom-practice-storage.test.ts` FIRST:
         starter store → page replaced and activated; store with a real page
         → appended and activated; block ids reminted; configs copied not
         referenced; second import of the same title gets ` 2`. Expect FAIL
-  - [ ] B.1.2 Implement `importPublicPage`. Re-run — expect PASS
+  - [x] B.1.2 Implement `importPublicPage`. Re-run — expect PASS
 
-- [ ] B.2 Save-copy button
-  - [ ] B.2.1 Write `save-copy-button.test.tsx` FIRST:
+- [x] B.2 Save-copy button
+  - [x] B.2.1 Write `save-copy-button.test.tsx` FIRST:
         unsigned → mutation **not** called, store written, router pushed
         to `/tools/workshop`;
         signed-in → `forkCustomDrill({ drillId })` called, store written
@@ -60,20 +60,20 @@ Every code task is TDD: write the test, watch it fail, implement, watch it pass.
         mutation returns `null` → error "This page is no longer available.",
         store unchanged, no navigate.
         Mock `useMutation` / `useAuthAccess` / `useRouter`. Expect FAIL
-  - [ ] B.2.2 Implement `SaveCopyButton`. Re-run — expect PASS
+  - [x] B.2.2 Implement `SaveCopyButton`. Re-run — expect PASS
 
-- [ ] B.3 Mount + attribution
-  - [ ] B.3.1 On `app/workshop/[id]/page.tsx`, render `SaveCopyButton` in
+- [x] B.3 Mount + attribution
+  - [x] B.3.1 On `app/workshop/[id]/page.tsx`, render `SaveCopyButton` in
         the header for any loaded public drill. Ungate Copy link (a URL is
         not a secret).
-  - [ ] B.3.2 When `drill.forkedFrom` is set, render
+  - [x] B.3.2 When `drill.forkedFrom` is set, render
         `Based on a community drill` linking to
         `/workshop/${drill.forkedFrom}` under the byline. Do not resolve
         the original author.
 
-- [ ] B.4 Gate
-  - [ ] B.4.1 `npm run lint && npm run test:unit:run && npm run build`
-  - [ ] B.4.2 Manual (local, one published page via Pro / AUTH_DISABLED):
+- [x] B.4 Gate
+  - [x] B.4.1 `npm run lint && npm run test:unit:run && npm run build`
+  - [x] B.4.2 Manual (local, one published page via Pro / AUTH_DISABLED):
         unsigned save → editor shows the copy after reload;
         signed-in save → Convex row exists, `isPublic` false,
         `forkedFrom` is the source, `/workshop/<new-id>` is not available.

@@ -2,18 +2,16 @@
 
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { ArrowLeft, Blocks, Copy } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { FeatureRenderer } from "@/components/feature-blocks/feature-renderer";
 import { DrillRuntimeProvider } from "@/components/custom-practice/drill-runtime-provider";
-import { useAuthAccess } from "@/hooks/useAuthAccess";
+import { SaveCopyButton } from "@/components/workshop/save-copy-button";
 
 export default function PublicDrillView() {
   const params = useParams();
-  const router = useRouter();
-  const { canAccess } = useAuthAccess();
   const drillId = params.id as string;
 
   const drill = useQuery(api.workshop.getPublicDrill, { drillId: drillId as never });
@@ -57,7 +55,8 @@ export default function PublicDrillView() {
           <ArrowLeft className="h-4 w-4" />
           Gallery
         </Link>
-        {canAccess && (
+        <div className="flex items-center gap-2">
+          {/* A URL is not a secret — copy works signed out. */}
           <Button
             size="sm"
             variant="outline"
@@ -68,7 +67,14 @@ export default function PublicDrillView() {
             <Copy className="mr-2 h-3.5 w-3.5" />
             Copy link
           </Button>
-        )}
+          <SaveCopyButton
+            drill={{
+              _id: drill._id,
+              title: drill.title,
+              blocks: drill.blocks,
+            }}
+          />
+        </div>
       </div>
 
       <h1 className="font-heading text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
@@ -83,6 +89,17 @@ export default function PublicDrillView() {
           </>
         )}
       </p>
+      {drill.forkedFrom && (
+        <p className="mt-1 text-sm text-muted-foreground">
+          Based on a{" "}
+          <Link
+            href={`/workshop/${drill.forkedFrom}`}
+            className="text-primary underline-offset-4 hover:underline"
+          >
+            community drill
+          </Link>
+        </p>
+      )}
 
       <div className="mt-8 space-y-6">
         <DrillRuntimeProvider pageId={drillId}>
