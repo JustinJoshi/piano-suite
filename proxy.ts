@@ -48,17 +48,30 @@ export default clerkMiddleware(
 
     const pathname = request.nextUrl.pathname;
 
+    // Ready-made drills are public (audit 2026-09, Phase 0.2): "Play now"
+    // must work for a first-time visitor. Signed-out practice writes to
+    // local history (lib/local-practice-history.ts).
+    const publicDrillRoutes = [
+      "/tools/chord-drill",
+      "/tools/arpeggios",
+      "/tools/root-cycling",
+      "/tools/progression",
+    ];
+
     const isPublicRoute =
       pathname === "/" ||
       pathname === "/pricing" ||
       pathname === "/tools/chladni" ||
+      publicDrillRoutes.includes(pathname) ||
       // Guided routes are help content; activation starts before sign-up.
       isExactOrUnder(pathname, "/routes") ||
       // Legal pages must be readable by anonymous visitors.
       pathname === "/terms" ||
       pathname === "/privacy" ||
-      // Workshop gallery + public drill pages are public for community sharing.
-      ["/articles", "/dev", "/sign-in", "/sign-up", "/api", "/__clerk", "/workshop"].some(
+      // Marketplace gallery + public drill pages are public for community
+      // sharing. /workshop is the legacy gallery path — public so old
+      // shared links redirect to /marketplace for anonymous visitors too.
+      ["/articles", "/dev", "/sign-in", "/sign-up", "/api", "/__clerk", "/marketplace", "/workshop"].some(
         (base) => isExactOrUnder(pathname, base)
       );
 

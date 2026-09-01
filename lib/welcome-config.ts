@@ -232,7 +232,7 @@ export const defaultWelcomeConfig: WelcomeConfig = {
     eyebrow: "ready when you are",
     title: "Start with a drill, not a blank page",
     subtitle: "Use a starter routine as-is, then make it yours in the Workshop.",
-    browseHref: "/workshop",
+    browseHref: "/marketplace",
   },
   onboarding: {
     intro: {

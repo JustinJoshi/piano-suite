@@ -473,6 +473,10 @@ Architecture and market research: `docs/custom-drill-builder-plan.md`,
   a Workshop tab.
 - Remaining phases (see plan): cloud sync (`customDrills` table, Pro), sharing /
   gallery with forked-from attribution, and `schemaVersion` migration infra.
+  *(Update 2026-09-01: cloud sync shipped in `hooks/useWorkshopSync.ts` and the
+  public gallery shipped at `/workshop`. `forkCustomDrill` exists in
+  `convex/workshop.ts` with tests but no UI calls it, and `schemaVersion`
+  migration infra is still open — see `docs/audit-2026-09/`.)*
 
 Verification: `npm run lint`, `npm run test:unit:run` (655 passed), `npm run build`,
 and `npm run test:e2e` (83 passed) all pass on the merged `main`.
@@ -621,6 +625,37 @@ eighth-notes (`app/icon.svg` + lucide `Music` in navbar/sidebar). Logo Lab
 keeps working: `isShippingLogoMark()` treats default-valued settings as
 "no custom mark", so the note shows until someone actually applies a
 Chladni mark, after which `AppliedLogoMark`/`FaviconHost` render it again.
+
+## Audit Phase 0 execution (2026-09)
+
+The September 2026 audit ([`docs/audit-2026-09/`](audit-2026-09/)) produced a
+phased roadmap; Phase 0 ("tell the truth") plus the audit's five first actions
+landed as code:
+
+- **Workshop settings actually work.** `DrillRuntimeProvider` threads the
+  page's `drillTimer` and `chordSet` block config into the drill runtime
+  (`runtimeOptionsFromBlocks`): countdown, break, multi-rep, require-exact,
+  and the miss-count grade thresholds. Previously six of eighteen settings
+  were editable and inert.
+- **The four ready-made drills are public** (proxy allowlist): Chord Drill,
+  Arpeggios, Root Cycling, and Progression work signed-out, writing to local
+  practice history.
+- **The marketplaces have one meaning each.** The community gallery moved
+  from `/workshop` to `/marketplace` (legacy path redirects); the Workshop
+  component picker moved to `/tools/workshop/blocks` ("Block library").
+- **On-screen keyboard.** A `keyboardDisplay` block (click, touch, or type
+  A W S E D…) injects notes through `pressVirtualNote` into the shared MIDI
+  session, and `MidiConnectionBar` embeds it whenever no hardware is
+  connected — so drills play with no MIDI controller, even on browsers
+  without Web MIDI.
+- **Fork button.** `/marketplace/[id]` forks via the existing
+  `forkCustomDrill` mutation (lineage recorded); signed-out forks land in
+  localStorage. `forkPageIntoStore` sanitizes untrusted blocks before they
+  enter the local store.
+- **Featured marketplace pages.** `lib/marketplace-seeds.ts` ships first
+  person starter pages so the gallery is never empty.
+- **Truth-in-UI.** Dev-lab link hidden in production (route stays reachable);
+  `/chat` removed from the navbar (route kept).
 
 ## Roadmap
 

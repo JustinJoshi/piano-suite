@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Loader2, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAudioSettings } from "@/hooks/useAudioSettings";
+import { KeyboardDisplayBlock } from "@/components/feature-blocks/keyboard-display-block";
 
 export type MidiConnectionBarProps = {
   supported: boolean;
@@ -15,11 +16,18 @@ export type MidiConnectionBarProps = {
   onConnect: () => void;
 };
 
+/** On-screen keyboard shown whenever no MIDI hardware is playing. */
+const fallbackKeyboard = (
+  <KeyboardDisplayBlock lowNote={48} octaves={2} showNoteNames computerKeys />
+);
+
 /**
  * Reusable MIDI input connection bar for drill pages.
  *
  * Shows a connect button when disconnected, a device selector when multiple
  * inputs are available, or a simple "Connected" status for a single device.
+ * Without hardware (or on browsers without Web MIDI), an on-screen keyboard
+ * takes over so every drill stays playable.
  */
 export function MidiConnectionBar({
   supported,
@@ -34,21 +42,28 @@ export function MidiConnectionBar({
 
   if (!supported) {
     return (
-      <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
-        {error ?? "Web MIDI is not supported in this browser."}
+      <div className="space-y-3">
+        <div className="rounded-lg border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
+          {error ?? "Web MIDI is not supported in this browser."} You can
+          still play with the on-screen keyboard below.
+        </div>
+        {fallbackKeyboard}
       </div>
     );
   }
 
   if (!connected) {
     return (
-      <div className="flex items-center gap-3">
-        <Button onClick={onConnect} data-testid="connect-midi-btn">
-          Connect MIDI Keyboard
-        </Button>
-        <span className="text-xs text-muted-foreground">
-          MIDI access required to play drills
-        </span>
+      <div className="space-y-3">
+        <div className="flex items-center gap-3">
+          <Button onClick={onConnect} data-testid="connect-midi-btn">
+            Connect MIDI Keyboard
+          </Button>
+          <span className="text-xs text-muted-foreground">
+            No controller? Play the keyboard below or type A W S E D…
+          </span>
+        </div>
+        {fallbackKeyboard}
       </div>
     );
   }

@@ -4,8 +4,8 @@ import { metronomeBlock, seedWorkshopPage } from "./workshop-seed";
 
 const STARTER_PICKER_KEY = "piano-suite:starter-picker-dismissed-v1";
 
-test.describe("/tools/workshop marketplace", () => {
-  test("first run: templates, blank grid, marketplace add flow", async ({
+test.describe("/tools/workshop block library", () => {
+  test("first run: templates, blank grid, block library add flow", async ({
     page,
   }) => {
     await signInAsTestUser(page);
@@ -23,15 +23,15 @@ test.describe("/tools/workshop marketplace", () => {
     ).toBeVisible();
     await page.getByRole("button", { name: /start from scratch/i }).click();
 
-    // Blank workshop: an empty grid canvas plus the marketplace entry point.
+    // Blank workshop: an empty grid canvas plus the block library entry point.
     await expect(page.getByTestId("workshop-grid")).toHaveAttribute(
       "data-grid-empty",
       "true"
     );
     await page
-      .getByRole("link", { name: /open the marketplace/i })
+      .getByRole("link", { name: /open the block library/i })
       .click();
-    await expect(page).toHaveURL(/\/tools\/workshop\/marketplace$/);
+    await expect(page).toHaveURL(/\/tools\/workshop\/blocks$/);
 
     // Plus adds the component; the button flips to an added state.
     await page.getByRole("button", { name: /add metronome/i }).click();

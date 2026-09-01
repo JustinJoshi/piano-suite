@@ -230,14 +230,14 @@ describe("PracticePageEditor", () => {
     expect(grid.getAttribute("data-grid-empty")).toBe("true");
     expect(screen.getAllByTestId("grid-guide")).toHaveLength(4);
     expect(
-      screen.getByRole("link", { name: /open the marketplace/i })
+      screen.getByRole("link", { name: /open the block library/i })
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: /add feature/i })
     ).not.toBeInTheDocument();
   });
 
-  it("links the header marketplace button to the marketplace route", () => {
+  it("links the header block-library button to the blocks route", () => {
     seedWithPage();
     render(
       <AudioSettingsProvider>
@@ -246,11 +246,11 @@ describe("PracticePageEditor", () => {
     );
 
     expect(
-      screen.getByRole("link", { name: /open the marketplace/i })
-    ).toHaveAttribute("href", "/tools/workshop/marketplace");
+      screen.getByRole("link", { name: /open the block library/i })
+    ).toHaveAttribute("href", "/tools/workshop/blocks");
   });
 
-  it("opens the marketplace with the / shortcut", () => {
+  it("opens the block library with the / shortcut", () => {
     seedWithPage();
     render(
       <AudioSettingsProvider>
@@ -259,10 +259,10 @@ describe("PracticePageEditor", () => {
     );
 
     fireEvent.keyDown(window, { key: "/" });
-    expect(pushMock).toHaveBeenCalledWith("/tools/workshop/marketplace");
+    expect(pushMock).toHaveBeenCalledWith("/tools/workshop/blocks");
   });
 
-  it("does not open the marketplace with / when an input is focused", () => {
+  it("does not open the block library with / when an input is focused", () => {
     seedWithPage();
     render(
       <AudioSettingsProvider>

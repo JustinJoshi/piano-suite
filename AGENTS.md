@@ -8,6 +8,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 Piano Suite is repositioning as a **free learning community for self-taught pianists**. Docs, copy, and new features should reinforce welcome, inclusivity, and beginner success. The README and landing page speak to beginners first; deep technical history and architecture live in `docs/PROJECT_HISTORY.md`.
 
+**Current roadmap: `docs/audit-2026-09/`.** The September 2026 audit sets the direction — the Workshop becomes a host for user-built practice tools shared through a marketplace, entered through three doors (Play / Explore / Learn). Before adding a feature, check `04-roadmap.md` Part 5 ("What *not* to do") and the tagged inventory in `01-feature-inventory.md`. The standing constraint: **the block library is the bottleneck, not the infrastructure** — prefer building a feature block over building a new page or lab.
+
 # Primitive Layer Conventions
 
 This project extracts shared capabilities from the original Reflex Drill HTML apps into reusable primitives. When building or migrating practice tools, follow these rules.
@@ -19,7 +21,7 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `lib/music-theory.ts` | Note names, pitch classes, chord parsing, chord building, quality definitions |
 | `lib/scoring.ts` | Comparing held MIDI notes to target pitch-class sets and sequences |
 | `lib/anki.ts` | Typed AnkiConnect HTTP client and helpers |
-| `lib/midi-session.ts` | Tab-scoped Web MIDI session store (access, devices, held notes); survives tool-page navigation |
+| `lib/midi-session.ts` | Tab-scoped Web MIDI session store (access, devices, held notes); survives tool-page navigation. `pressVirtualNote`/`releaseVirtualNote` inject on-screen keyboard notes through the same store so every drill scores them and the audio host plays them (`virtualActive` marks a no-hardware note source) |
 | `hooks/useMidi.ts` | React subscription to `midi-session`; note-on events include velocity |
 | `lib/midi-impulse.ts` | Generic MIDI/music note impulse math (velocity, decay, pruning) |
 | `hooks/useMidiImpulses.ts` | Shared MIDI + music reactive impulse layer; held notes + decaying impulses |
@@ -79,7 +81,7 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `app/terms`, `app/privacy` | Public legal pages (proxy.ts allowlist); Privacy must disclose every analytics/error processor actually wired |
 | `lib/chat-auth.ts` | Chat API allowlist decisions (`authorizeChatAccess`); always session + `ALLOWED_CLERK_USER_ID` — the `AUTH_DISABLED` bypass never opens the paid endpoint |
 | `convex/lib/auth.ts` | `optionalUserId` (queries), `ensureUserId` (mutations, upserts the row), `requireUserId` (throws) |
-| `proxy.ts` | Clerk route gate (Next 16 proxy convention); public-route list + `unauthenticatedUrl` redirect. `/api` is public by design — **every `app/api/**/route.ts` handler must authorize itself via `auth()`** (e.g. `/api/chat`) |
+| `proxy.ts` | Clerk route gate (Next 16 proxy convention); public-route list + `unauthenticatedUrl` redirect. The four ready-made drill routes and `/marketplace` (+ legacy `/workshop`) are public; `/api` is public by design — **every `app/api/**/route.ts` handler must authorize itself via `auth()`** (e.g. `/api/chat`) |
 | `app/error.tsx`, `app/global-error.tsx` | Error boundaries so a thrown query cannot blank the app |
 | `components/drills/drill-shell.tsx` | Shared layout wrapper for every tool page |
 | `lib/tools.ts` | Grouped tool registry (`workshopTool`, `drillTools`, `insightTools`, `labTools`) driving sidebar sections and the landing grid |
@@ -101,18 +103,21 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `components/feature-blocks/*` | Feature-block render components (metronome, drill timer, chord set) |
 | `lib/workshop-grid.ts` | Pure Workshop grid layout math: canonical 4-column span model, size normalization/clamping, resize deltas, dnd-kit reorder |
 | `components/workshop-grid/*` | Draggable/resizable grid for the Workshop editor; fills the page via `fill` (`data-grid-full`); grid chrome (guides) visible only while dragging (or when empty via `showGuides`); tiles persist `size` spans and open settings behind a per-tile gear |
-| `components/workshop-marketplace/*` | Marketplace view for the Workshop: live interactive previews of every registry block with plus/check add-remove buttons; route at `/tools/workshop/marketplace` |
+| `components/workshop-marketplace/*` | Block library view for the Workshop: live interactive previews of every registry block with plus/check add-remove buttons; route at `/tools/workshop/blocks` (renamed from `/tools/workshop/marketplace` — see audit Phase 0.3) |
 | `components/custom-practice/*` | Workshop practice-page editor: full-width grid page, pages dropdown menu (`PagesMenu`, incl. share), `DrillRuntimeProvider`, shared `FieldInput` settings renderer |
-| `lib/custom-practice-storage.ts` | `localStorage` persistence for custom practice pages (Free tier); fresh stores seed a `drillShortcuts` starter tile; `isStarterPage` gates onboarding |
-| `lib/drill-runtime.ts` / `hooks/useDrillRuntime.ts` | Shared drill runtime context (countdown → armed → timing → success → break → finished) driving workshop blocks; logs events to Convex (Pro) or local history (Free) |
+| `lib/custom-practice-storage.ts` | `localStorage` persistence for custom practice pages (Free tier); fresh stores seed a `drillShortcuts` starter tile; `isStarterPage` gates onboarding; `forkPageIntoStore` sanitizes and copies a public/featured page into the store (used by the marketplace fork button) |
+| `lib/drill-runtime.ts` / `hooks/useDrillRuntime.ts` | Shared drill runtime context (countdown → armed → timing → success → break → finished) driving workshop blocks; logs events to Convex (Pro) or local history (Free), graded by miss count via the chord-set thresholds. `runtimeOptionsFromBlocks` resolves the page's `drillTimer`/`chordSet` config into runtime options — `DrillRuntimeProvider` must receive `blocks` or the settings are inert |
 | `hooks/useChordTargets.ts` | Sequential / random chord-target generation from selected roots and quality groups |
+| `lib/feature-blocks/keyboard-display/*` | On-screen keyboard block: config (low note, octaves, note names, computer keys) + pure key geometry (`buildKeyboardLayout`, home-row A W S E D… mapping) |
+| `components/feature-blocks/keyboard-display-block.tsx` | Click/touch/QWERTY piano that injects notes via `pressVirtualNote`; `MidiConnectionBar` embeds it whenever no hardware is connected so every drill works without a controller |
+| `lib/marketplace-seeds.ts` | Featured pages that ship with the app so `/marketplace` is never empty; first-person author notes, registry-valid blocks |
 
 ## Welcome / onboarding conventions
 
 1. **Keep welcome copy and style tokens in `lib/welcome-config.ts`.** Landing-page and onboarding components should read from `useWelcomeConfig()` instead of hard-coding marketing copy or style values. This makes the section easy to iterate on from `/dev/welcome-lab`.
 2. **Mobile-first layout.** Hero feature cards, pillar slides, and tool grids must reflow for narrow viewports. Avoid fixed-height containers that clip content on small screens.
 3. **Wrap onboarding in `WelcomeConfigProvider`.** `DashboardShell` already wraps `<Onboarding />` with the provider; new onboarding entry points should do the same.
-4. **Dev lab is always enabled.** `/dev/welcome-lab` is public and reachable from any deployment so styling can be iterated without environment gating. Use `lib/dev-tools.ts` helpers rather than inlining `NODE_ENV` checks.
+4. **Dev lab is reachable everywhere, linked nowhere in production.** `/dev/welcome-lab` stays public so styling can be iterated from any deployment, but the floating entry link (`isDevToolsVisible()`) only renders outside production — dev tooling must not appear on public pages (audit Phase 0.4). Use `lib/dev-tools.ts` helpers rather than inlining `NODE_ENV` checks.
 
 ## Rules for tool pages
 

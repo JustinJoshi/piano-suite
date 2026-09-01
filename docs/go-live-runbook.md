@@ -4,6 +4,12 @@
 > COPPA age gate, music-rights audit, and privacy-policy pass are hard
 > blockers that must be done before this runbook's public-announcement
 > steps.
+>
+> Status 2026-09-01: the age gate was **removed** on 2026-08-31 by owner
+> decision, so the COPPA item is open again rather than done. Counsel review
+> has not happened. Both still block a *public* announcement; a private soft
+> launch to known testers does not wait on them. See
+> [`docs/audit-2026-09/05-soft-launch-plan.md`](audit-2026-09/05-soft-launch-plan.md) §1.
 
 Ordered cutover from preview deployments to live production. Each step lists
 its verification before moving on. Total: ~2 focused days.
@@ -78,6 +84,9 @@ On the production domain, in a clean incognito window:
 - [ ] Landing page renders; hero atmosphere visible
 - [ ] `/pricing` shows the **Founding Pro waitlist** (not a pricing table)
 - [ ] Complete one drill (workshop page) without signing in
+      *(Not possible today: `proxy.ts` protects `/tools/*`, so a signed-out
+      visitor is redirected to `/sign-in`. Opening this path is roadmap
+      Phase 0.2 — see `docs/audit-2026-09/04-roadmap.md`.)*
 - [ ] Waitlist CTA appears after the finished drill
 - [ ] Join the waitlist → success state with position; duplicate join says
       already-joined

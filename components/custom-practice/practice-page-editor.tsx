@@ -36,7 +36,7 @@ import {
   generateId,
 } from "@/lib/custom-practice-storage";
 
-const MARKETPLACE_HREF = "/tools/workshop/marketplace";
+const BLOCKS_HREF = "/tools/workshop/blocks";
 const STARTER_PICKER_KEY = "piano-suite:starter-picker-dismissed-v1";
 const STARTER_PICKER_EVENT = "piano-suite:starter-picker-change";
 
@@ -189,7 +189,7 @@ export function PracticePageEditor() {
       }
 
       event.preventDefault();
-      router.push(MARKETPLACE_HREF);
+      router.push(BLOCKS_HREF);
     }
 
     window.addEventListener("keydown", handleKeyDown);
@@ -197,7 +197,7 @@ export function PracticePageEditor() {
   }, [router]);
 
   return (
-    <DrillRuntimeProvider pageId={page.id}>
+    <DrillRuntimeProvider pageId={page.id} blocks={page.blocks}>
       <div className="flex min-h-full flex-1 flex-col gap-4">
         <div className="flex flex-wrap items-center gap-2">
           <PagesMenu
@@ -225,11 +225,11 @@ export function PracticePageEditor() {
           <WorkshopSyncBadge status={syncStatus} />
 
           <Link
-            href={MARKETPLACE_HREF}
-            aria-label="Open the marketplace"
+            href={BLOCKS_HREF}
+            aria-label="Open the block library"
             className={cn(buttonVariants({ size: "sm" }), "gap-2")}
           >
-            Marketplace
+            Add blocks
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -266,10 +266,10 @@ export function PracticePageEditor() {
               <p className="text-center text-sm text-muted-foreground">
                 Your workshop is empty. Browse the{" "}
                 <Link
-                  href={MARKETPLACE_HREF}
+                  href={BLOCKS_HREF}
                   className="font-medium text-primary underline-offset-4 hover:underline"
                 >
-                  marketplace
+                  block library
                 </Link>{" "}
                 to add features.
               </p>

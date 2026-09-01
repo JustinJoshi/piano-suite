@@ -14,11 +14,11 @@ import { createAudioEngine, type AudioEngine } from "@/lib/audio-engine";
  */
 export function AudioEngineHost() {
   const { settings, setEngineState } = useAudioSettings();
-  const { connected } = useMidi();
+  const { connected, virtualActive } = useMidi();
 
   const engineRef = useRef<AudioEngine | null>(null);
   const settingsRef = useRef(settings);
-  const connectedRef = useRef(connected);
+  const inputActiveRef = useRef(connected || virtualActive);
   const sustainedNotesRef = useRef<Set<number>>(new Set());
   const musicActiveNotesRef = useRef<Set<number>>(new Set());
 
@@ -26,9 +26,11 @@ export function AudioEngineHost() {
     settingsRef.current = settings;
   }, [settings]);
 
+  // Sound needs a live note source: a connected MIDI device or held
+  // on-screen keyboard notes.
   useEffect(() => {
-    connectedRef.current = connected;
-  }, [connected]);
+    inputActiveRef.current = connected || virtualActive;
+  }, [connected, virtualActive]);
 
   // Create a new engine whenever the instrument preset or custom kit changes.
   // Volume is applied separately so we don't reload samples on every slide.
@@ -115,7 +117,7 @@ export function AudioEngineHost() {
   // Subscribe to global MIDI note events.
   useEffect(() => {
     const onNoteOn = (event: Event) => {
-      if (!settingsRef.current.enabled || !connectedRef.current) return;
+      if (!settingsRef.current.enabled || !inputActiveRef.current) return;
       const detail = (event as CustomEvent<MidiNoteEventDetail>).detail;
       if (!detail) return;
       sustainedNotesRef.current.delete(detail.note);
@@ -123,7 +125,7 @@ export function AudioEngineHost() {
     };
 
     const onNoteOff = (event: Event) => {
-      if (!settingsRef.current.enabled || !connectedRef.current) return;
+      if (!settingsRef.current.enabled || !inputActiveRef.current) return;
       const detail = (event as CustomEvent<MidiNoteEventDetail>).detail;
       if (!detail) return;
 
