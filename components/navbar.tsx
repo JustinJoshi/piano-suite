@@ -17,7 +17,6 @@ const navLinks = [
   { label: "Community", href: "/workshop" },
   { label: "Pricing", href: "/pricing" },
   { label: "Articles", href: "/articles" },
-  { label: "Chat", href: "/chat" },
 ];
 
 export function Navbar() {
