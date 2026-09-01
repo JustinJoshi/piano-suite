@@ -99,7 +99,10 @@ describe("randomC", () => {
       const c = randomC(1.2);
       expect(Number.isFinite(c[0])).toBe(true);
       expect(Number.isFinite(c[1])).toBe(true);
-      expect(Math.hypot(c[0], c[1])).toBeLessThanOrEqual(1.2 + 1e-9);
+      // randomC rounds components to 3 decimals and intentionally biases
+      // slightly outward, so the magnitude can exceed the radius by up to
+      // ~7e-4. Allow that rounding slack, nothing more.
+      expect(Math.hypot(c[0], c[1])).toBeLessThanOrEqual(1.2 + 1e-3);
     }
   });
 });
