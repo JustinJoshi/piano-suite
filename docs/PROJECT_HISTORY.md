@@ -672,7 +672,9 @@ The load-bearing decision is **demote, don't delete**: every standalone tool pag
 becomes a Workshop feature block. That collapses the navigation and deepens the
 component shelf in one motion, which is the prerequisite for both the community
 marketplace and the AI page assembler. Current phase:
-`tasks/tasks-phase-1-front-door.md`.
+`tasks/tasks-phase-1-front-door.md`. The two highest-leverage items (public
+Workshop, Save a copy) have a code-grounded plan:
+[`docs/public-workshop-and-fork-plan.md`](public-workshop-and-fork-plan.md).
 
 ## License
 

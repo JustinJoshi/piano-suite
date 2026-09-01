@@ -53,7 +53,7 @@ command output named in the sub-task (test fail → pass, lint, build, e2e).
 
 ## Tasks
 
-- [ ] 1.1 Make the workshop public (highest impact, smallest diff)
+- [ ] 1.1 Make the workshop public — see `docs/public-workshop-and-fork-plan.md` Change A and `tasks/tasks-public-workshop.md`. A proxy-only edit is not enough (page-level `canAccess` card + onboarding overlay + `userReady` spinner trap). The stub below is superseded; do that list instead.
   - [ ] 1.1.1 Write `e2e/workshop-anonymous.spec.ts` FIRST: an unsigned visitor opens `/tools/workshop`, is **not** redirected to sign-in, adds a metronome block from the shelf, and starts it. Run — expect FAIL (redirect)
   - [ ] 1.1.2 Add `/tools/workshop` and `/tools/workshop/marketplace` to the public-route list in `proxy.ts`; update the doc comment explaining why (Free tier is localStorage-only, so the gate protected nothing)
   - [ ] 1.1.3 Update `e2e/auth-protection.spec.ts`'s public/protected matrix and the route table in `docs/PROJECT_HISTORY.md`

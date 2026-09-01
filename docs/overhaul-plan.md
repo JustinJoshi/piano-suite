@@ -275,11 +275,11 @@ doing something. This is the gate for "I'd be willing to show a friend."
 
 **What ships**
 
-**1.1 Make the workshop public.** Add `/tools/workshop` (and its marketplace)
-to the public list in `proxy.ts`. Free-tier persistence is already localStorage
-only, so nothing about the data model changes. Sign-in moves to where it earns
-its keep: syncing across devices and publishing. This is a small diff with the
-largest single effect in the plan.
+**1.1 Make the workshop public.** Not a one-line allowlist — three stacked
+gates (proxy, `canAccess` on the page, onboarding overlay) and a `userReady`
+spinner trap. Full code-grounded plan:
+[`docs/public-workshop-and-fork-plan.md`](public-workshop-and-fork-plan.md)
+Change A. Tasks: `tasks/tasks-public-workshop.md`.
 
 **1.2 The first screen: one sentence, one button.** Rewrite the hero in
 `lib/welcome-config.ts` down to an eyebrow, a headline, one sentence, and
@@ -459,9 +459,13 @@ instead of running out of road.
 
 **What ships**
 
-- **The fork button.** `forkCustomDrill` has existed in `convex/workshop.ts`
-  with tests since the workshop shipped and no UI has ever called it. Label it
-  "Save a copy" — nobody outside software says fork.
+- **The fork button.** Mutation and convex-tests already exist; no UI imports
+  them. Two paths (unsigned = localStorage only; signed-in = mutation + store
+  write using the returned `clientPageId` — Free sync never pulls, so a
+  mutation without a local write is a black hole). Full plan:
+  [`docs/public-workshop-and-fork-plan.md`](public-workshop-and-fork-plan.md)
+  Change B. Tasks: `tasks/tasks-save-a-copy.md`. Label it "Save a copy" —
+  nobody outside software says fork.
 - **A real community tab** next to the shelf, seeded with your 20 official
   pages so it is never empty.
 - **Attribution** — "based on a page by X." The `forkedFrom` field already
@@ -590,8 +594,9 @@ So nothing gets lost, and so the themes stay separated from the features.
 If you do nothing else this week, do these five, in this order. They are all
 small, and together they change the first-run experience completely.
 
-1. **Make `/tools/workshop` public** in `proxy.ts`. One line. Biggest effect of
-   anything in this document.
+1. **Make the Workshop public** — not a one-line proxy edit; see
+   [`docs/public-workshop-and-fork-plan.md`](public-workshop-and-fork-plan.md)
+   Change A. Biggest effect of anything in this document.
 2. **Cut the hero to one CTA** in `lib/welcome-config.ts` and delete the two
    duplicates.
 3. **Build the three-door chooser** and link guided routes from it.
