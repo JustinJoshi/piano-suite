@@ -19,6 +19,10 @@ describe("isPublicPath", () => {
     expect(isPublicPath("/dev/welcome-lab")).toBe(true);
   });
 
+  it("keeps the learning surfaces public", () => {
+    expect(isPublicPath("/learn/practice-pillars")).toBe(true);
+  });
+
   it("opens the workshop and its marketplace to anonymous visitors", () => {
     expect(isPublicPath("/tools/workshop")).toBe(true);
     expect(isPublicPath("/tools/workshop/marketplace")).toBe(true);

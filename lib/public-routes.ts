@@ -36,7 +36,7 @@ const PUBLIC_EXACT = [
 ] as const;
 
 // Guided routes are help content; activation starts before sign-up.
-const PUBLIC_UNDER = ["/routes", "/tools/workshop"] as const;
+const PUBLIC_UNDER = ["/routes", "/tools/workshop", "/learn"] as const;
 
 /** True when `pathname` is reachable without a Clerk session. */
 export function isPublicPath(pathname: string): boolean {

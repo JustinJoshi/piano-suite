@@ -1,6 +1,5 @@
 import { Page } from "@playwright/test";
 import { clerk, setupClerkTestingToken } from "@clerk/testing/playwright";
-import { ONBOARDING_STORAGE_KEY } from "@/lib/onboarding";
 import fs from "fs";
 import path from "path";
 
@@ -33,16 +32,16 @@ function ensureTestingToken() {
 /**
  * Prepare an already-authenticated Playwright page for an authenticated test.
  *
- * The E2E suite now signs in once during global setup and reuses the saved
+ * The E2E suite signs in once during global setup and reuses the saved
  * storage state for every test, so this helper only needs to:
- *   1. Install Clerk's testing-token bypass on the current context (in case the
- *      worker process did not inherit the token from the setup project).
- *   2. Mark the /tools onboarding flow as completed so existing specs are not
- *      blocked by the fullscreen overlay. Specs that explicitly test onboarding
- *      can still force it with `?onboarding=reset`.
+ *   1. Install Clerk's testing-token bypass on the current context (in case
+ *      the worker process did not inherit the token from the setup project).
  *
- * If you run a single spec locally without the global setup (not recommended),
- * the helper falls back to a one-off ticket sign-in.
+ * The /tools onboarding deck no longer gates the dashboard (Phase 1.7) —
+ * it lives at /learn/practice-pillars — so there is nothing to mark.
+ *
+ * If you run a single spec locally without the global setup (not
+ * recommended), the helper falls back to a one-off ticket sign-in.
  */
 export async function signInAsTestUser(page: Page) {
   ensureTestingToken();
@@ -66,8 +65,4 @@ export async function signInAsTestUser(page: Page) {
   await page.evaluate(async () => {
     await window.Clerk?.session?.getToken();
   });
-
-  await page.evaluate((key) => {
-    localStorage.setItem(key, "true");
-  }, ONBOARDING_STORAGE_KEY);
 }

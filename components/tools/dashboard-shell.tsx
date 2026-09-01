@@ -5,9 +5,12 @@ import {
   DashboardMobileTopBar,
   DashboardNavProvider,
 } from "@/components/tools/dashboard-nav";
-import { Onboarding } from "@/components/tools/onboarding";
-import { WelcomeConfigProvider } from "@/components/welcome/welcome-config-provider";
 
+/**
+ * Phase 1.7: the onboarding deck no longer gates the dashboard. It lives
+ * at /learn/practice-pillars (inline, reachable from the Learn door and
+ * /settings) and the pillars are also a plain article.
+ */
 export function DashboardShell({
   children,
   showMobileTopBar = false,
@@ -18,9 +21,6 @@ export function DashboardShell({
   return (
     <DashboardNavProvider>
       <div className="relative z-10 min-h-screen bg-transparent">
-        <WelcomeConfigProvider>
-          <Onboarding />
-        </WelcomeConfigProvider>
         <Sidebar />
         <div className="dashboard-main flex min-h-screen flex-col">
           {showMobileTopBar ? <DashboardMobileTopBar /> : null}

@@ -17,6 +17,7 @@ import { buildTemplatePage, starterTemplates, type StarterTemplate } from "@/lib
 import { ShareMenu } from "@/components/custom-practice/share-menu";
 import { PagesMenu } from "@/components/custom-practice/pages-menu";
 import { WorkshopSyncBadge } from "@/components/custom-practice/workshop-sync-badge";
+import { EditorHints } from "@/components/custom-practice/editor-hints";
 import { StarterPicker } from "@/components/custom-practice/starter-picker";
 import { WorkshopGrid } from "@/components/workshop-grid/workshop-grid";
 import { useWorkshopSync } from "@/hooks/useWorkshopSync";
@@ -150,8 +151,9 @@ export function PracticePageEditor() {
     );
 
     const template = starterTemplates.find((t) => t.id === templateId);
+    // Mount-once URL-param handler: the store write is not React state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (template) applyTemplate(template);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function duplicateBlock(id: string) {
@@ -260,6 +262,8 @@ export function PracticePageEditor() {
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
+
+        <EditorHints visible={showStarterPicker} />
 
         {shareOpen ? (
           <ShareMenu

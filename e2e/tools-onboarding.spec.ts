@@ -1,144 +1,65 @@
 import { test, expect } from "@playwright/test";
 import { signInAsTestUser } from "./auth-helper";
+import { ONBOARDING_STORAGE_KEY } from "@/lib/onboarding";
 
-const ONBOARDING_RESET_URL = "/tools?onboarding=reset";
-
-test.describe("/tools onboarding", () => {
-  test("shows the onboarding flow on first visit", async ({ page }) => {
-    await signInAsTestUser(page);
-    await page.goto(ONBOARDING_RESET_URL);
-
-    const shell = page.getByTestId("onboarding-shell");
-    await expect(shell.getByText("Hi", { exact: true })).toBeVisible();
-    await expect(shell.getByText("welcome to piano suite")).toBeVisible();
-  });
-
-  test("advances through all slides and releases the dashboard", async ({
+/**
+ * Phase 1.7: the six-slide learning-science deck no longer gates the
+ * Workshop. It lives at /learn/practice-pillars (inline, always reachable)
+ * and the pillars are also a plain article.
+ */
+test.describe("onboarding is out of the way", () => {
+  test("first visit shows the editor, not a fullscreen deck", async ({
     page,
   }) => {
     await signInAsTestUser(page);
-    await page.goto(ONBOARDING_RESET_URL);
+    // Simulate a true first session: the completed flag is not set.
+    await page.evaluate(
+      (key) => localStorage.removeItem(key),
+      ONBOARDING_STORAGE_KEY
+    );
+    await page.goto("/tools/workshop");
 
-    const shell = page.getByTestId("onboarding-shell");
-
-    await shell.getByRole("button", { name: /next/i }).first().click();
+    await expect(page.getByTestId("onboarding-shell")).toHaveCount(0);
+    // A fresh store greets with the starter picker (the grid renders once
+    // dismissed); either way the editor is in front, not the deck.
     await expect(
-      shell.getByText(/three most important pillars/i)
+      page.getByRole("heading", { name: "Workshop" })
     ).toBeVisible();
-
-    await shell.getByRole("button", { name: /next/i }).first().click();
     await expect(
-      shell.getByText("Active recall & spaced repetition")
+      page
+        .getByText("How do you want to start?")
+        .or(page.getByTestId("workshop-grid"))
+        .first()
     ).toBeVisible();
-    await expect(shell.getByRole("link", { name: /Anki/i }).first()).toBeVisible();
-
-    await shell.getByRole("button", { name: /next/i }).first().click();
-    await expect(shell.getByText("Take care of yourself")).toBeVisible();
-
-    await shell.getByRole("button", { name: /next/i }).first().click();
-    await expect(shell.getByText("Manage your frustrations")).toBeVisible();
-
-    await shell.getByRole("button", { name: /next/i }).first().click();
-    await expect(shell.getByText("Happy learning")).toBeVisible();
-
-    await shell.getByRole("button", { name: /let's practice/i }).click();
-    await expect(page.getByRole("heading", { name: "Workshop" })).toBeVisible();
   });
 
-  test("skipping the flow releases the dashboard and persists completion", async ({
+  test("the ?onboarding=reset param no longer mounts the deck on /tools", async ({
     page,
   }) => {
     await signInAsTestUser(page);
-    await page.goto(ONBOARDING_RESET_URL);
+    await page.goto("/tools?onboarding=reset");
 
-    const shell = page.getByTestId("onboarding-shell");
-    await shell.getByRole("button", { name: /skip/i }).click();
-    await expect(page.getByRole("heading", { name: "Workshop" })).toBeVisible();
-
-    // Revisit without reset: onboarding should not appear.
-    await page.goto("/tools");
-    await expect(page.getByTestId("onboarding-shell")).not.toBeVisible();
+    await expect(page).toHaveURL(/\/tools\/workshop/);
+    await expect(page.getByTestId("onboarding-shell")).toHaveCount(0);
   });
 
-  test("does not show onboarding after it has been completed", async ({
-    page,
-  }) => {
+  test("the pillars live at /learn/practice-pillars", async ({ page }) => {
     await signInAsTestUser(page);
-    await page.goto(ONBOARDING_RESET_URL);
+    await page.goto("/learn/practice-pillars");
 
-    const shell = page.getByTestId("onboarding-shell");
-
-    // Advance through all slides and complete the flow.
-    for (let i = 0; i < 5; i++) {
-      await shell.getByRole("button", { name: /next/i }).first().click();
-    }
-    await shell.getByRole("button", { name: /let's practice/i }).click();
-
-    await page.goto("/tools");
-    await expect(page.getByTestId("onboarding-shell")).not.toBeVisible();
-    await expect(page.getByRole("heading", { name: "Workshop" })).toBeVisible();
+    // Inline deck shell with the intro slide.
+    await expect(page.getByTestId("onboarding-shell")).toBeVisible();
+    await expect(page.getByText("welcome to piano suite")).toBeVisible();
   });
 
-  test("shows onboarding when deep-linking to a tool for the first time", async ({
-    page,
-  }) => {
+  test("reachable from the settings page", async ({ page }) => {
     await signInAsTestUser(page);
-    await page.goto("/tools/chord-drill?onboarding=reset");
+    await page.goto("/settings");
 
-    const shell = page.getByTestId("onboarding-shell");
-    await expect(shell.getByText("Hi", { exact: true })).toBeVisible();
-    await expect(shell.getByText("welcome to piano suite")).toBeVisible();
-
-    await shell.getByRole("button", { name: /skip/i }).click();
-
-    // After skipping, the underlying tool page should be visible.
-    await expect(page.getByRole("heading", { name: "Chord Drill" })).toBeVisible();
-
-    // Revisiting the same tool should not show onboarding again.
-    await page.goto("/tools/chord-drill");
-    await expect(page.getByTestId("onboarding-shell")).not.toBeVisible();
-  });
-
-  test("goes back to the previous slide", async ({ page }) => {
-    await signInAsTestUser(page);
-    await page.goto(ONBOARDING_RESET_URL);
-
-    const shell = page.getByTestId("onboarding-shell");
-
-    await shell.getByRole("button", { name: /next/i }).first().click();
-    await expect(
-      shell.getByText(/three most important pillars/i)
-    ).toBeVisible();
-
-    await shell.getByRole("button", { name: /back/i }).first().click();
-    await expect(shell.getByText("Hi", { exact: true })).toBeVisible();
-    await expect(shell.getByText("welcome to piano suite")).toBeVisible();
-  });
-
-  test("fits within a mobile viewport and advances through pillars", async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 375, height: 667 });
-    await signInAsTestUser(page);
-    await page.goto(ONBOARDING_RESET_URL);
-
-    const shell = page.getByTestId("onboarding-shell");
-
-    await expect(shell.getByText("Hi", { exact: true })).toBeVisible();
-    await shell.getByRole("button", { name: /next/i }).first().click();
-
-    await expect(
-      shell.getByText(/three most important pillars/i)
-    ).toBeVisible();
-    await shell.getByRole("button", { name: /next/i }).first().click();
-
-    await expect(
-      shell.getByText("Active recall & spaced repetition")
-    ).toBeVisible();
-
-    // Resource cards should be reachable without horizontal overflow.
-    const ankiLink = shell.getByRole("link", { name: /Anki/i }).first();
-    await expect(ankiLink).toBeVisible();
-    await expect(ankiLink).toBeInViewport();
+    await page
+      .getByRole("link", { name: /replay the practice pillars/i })
+      .click();
+    await expect(page).toHaveURL(/\/learn\/practice-pillars$/);
+    await expect(page.getByTestId("onboarding-shell")).toBeVisible();
   });
 });
