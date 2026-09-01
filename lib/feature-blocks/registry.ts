@@ -1,10 +1,11 @@
-import { Timer, Hourglass, Music, Type, Cable, Zap } from "lucide-react";
+import { Timer, Hourglass, Music, Type, Cable, Zap, Piano } from "lucide-react";
 import { MetronomeBlock } from "@/components/feature-blocks/metronome-block";
 import { DrillTimerBlock } from "@/components/feature-blocks/drill-timer-block";
 import { ChordSetBlock } from "@/components/feature-blocks/chord-set-block";
 import { TextBlock } from "@/components/feature-blocks/text-block";
 import { MidiConnectionBarBlock } from "@/components/feature-blocks/midi-connection-bar-block";
 import { DrillShortcutsBlock } from "@/components/feature-blocks/drill-shortcuts-block";
+import { KeyboardDisplayBlock } from "@/components/feature-blocks/keyboard-display-block";
 import {
   metronomeDefaultConfig,
   normalizeMetronomeConfig,
@@ -35,6 +36,11 @@ import {
   normalizeDrillShortcutsConfig,
   drillShortcutsFields,
 } from "@/lib/feature-blocks/drill-shortcuts/config";
+import {
+  keyboardDisplayDefaultConfig,
+  normalizeKeyboardDisplayConfig,
+  keyboardDisplayFields,
+} from "@/lib/feature-blocks/keyboard-display/config";
 import type { ComponentType } from "react";
 import type { FeatureDefinition } from "@/lib/feature-blocks/types";
 
@@ -104,6 +110,18 @@ export const featureRegistry = {
     defaultConfig: drillShortcutsDefaultConfig,
     normalizeConfig: normalizeDrillShortcutsConfig,
     component: DrillShortcutsBlock as ComponentType<Record<string, unknown>>,
+  } satisfies FeatureDefinition<Record<string, unknown>>,
+  keyboardDisplay: {
+    type: "keyboardDisplay",
+    category: "technique",
+    label: "On-screen keyboard",
+    description:
+      "Play with clicks, touches, or your computer keys — no MIDI controller needed.",
+    icon: Piano,
+    fields: keyboardDisplayFields,
+    defaultConfig: keyboardDisplayDefaultConfig,
+    normalizeConfig: normalizeKeyboardDisplayConfig,
+    component: KeyboardDisplayBlock as ComponentType<Record<string, unknown>>,
   } satisfies FeatureDefinition<Record<string, unknown>>,
 };
 

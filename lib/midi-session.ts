@@ -24,6 +24,8 @@ export type MidiSessionSnapshot = {
   inputs: MidiInputInfo[];
   selectedInputId: string | null;
   heldNotes: number[];
+  /** True while on-screen keyboard notes are held (no hardware involved). */
+  virtualActive: boolean;
 };
 
 const STORAGE_KEY = "piano-suite-midi-v1";
@@ -37,6 +39,8 @@ type Listener = () => void;
 
 const listeners = new Set<Listener>();
 const heldSet = new Set<number>();
+/** Notes currently held via the on-screen keyboard (no hardware). */
+const virtualSet = new Set<number>();
 
 let access: MIDIAccess | null = null;
 let connectPromise: Promise<void> | null = null;
@@ -50,6 +54,7 @@ let snapshot: MidiSessionSnapshot = {
   inputs: [],
   selectedInputId: null,
   heldNotes: [],
+  virtualActive: false,
 };
 
 function detectSupported(): boolean {
@@ -64,6 +69,7 @@ function emit(): void {
     inputs: snapshot.inputs,
     selectedInputId: snapshot.selectedInputId,
     heldNotes: [...heldSet].sort((a, b) => a - b),
+    virtualActive: virtualSet.size > 0,
   };
   for (const listener of listeners) {
     listener();
@@ -294,6 +300,75 @@ export function setMidiSelectedInputId(id: string): void {
   persistSession();
 }
 
+/**
+ * On-screen keyboard: press a note without MIDI hardware.
+ *
+ * Virtual notes flow through the same session store as hardware notes —
+ * held notes, `midi-note-on`/`midi-note-off` window events — so every drill,
+ * scorer, and the audio host treats them identically.
+ */
+export function pressVirtualNote(note: number, velocity = 80): void {
+  if (typeof window === "undefined") return;
+  if (!Number.isInteger(note) || note < 0 || note > 127) return;
+
+  if (!heldSet.has(note)) {
+    heldSet.add(note);
+    virtualSet.add(note);
+    window.dispatchEvent(
+      new CustomEvent<MidiNoteEventDetail>("midi-note-on", {
+        detail: {
+          note,
+          pc: ((note % 12) + 12) % 12,
+          velocity,
+        },
+      })
+    );
+  }
+
+  emit();
+}
+
+/** On-screen keyboard: release a note pressed via `pressVirtualNote`. */
+export function releaseVirtualNote(note: number): void {
+  if (typeof window === "undefined") return;
+
+  if (heldSet.delete(note)) {
+    virtualSet.delete(note);
+    window.dispatchEvent(
+      new CustomEvent<MidiNoteEventDetail>("midi-note-off", {
+        detail: {
+          note,
+          pc: ((note % 12) + 12) % 12,
+          velocity: 0,
+        },
+      })
+    );
+  }
+
+  emit();
+}
+
+/** Release every on-screen note at once (e.g. on unmount / lost focus). */
+export function releaseAllVirtualNotes(): void {
+  if (typeof window === "undefined") return;
+
+  for (const note of virtualSet) {
+    heldSet.delete(note);
+    window.dispatchEvent(
+      new CustomEvent<MidiNoteEventDetail>("midi-note-off", {
+        detail: {
+          note,
+          pc: ((note % 12) + 12) % 12,
+          velocity: 0,
+        },
+      })
+    );
+  }
+  virtualSet.clear();
+
+  emit();
+}
+
 export function getMidiSessionSnapshot(): MidiSessionSnapshot {
   return snapshot;
 }
@@ -305,6 +380,7 @@ const SERVER_MIDI_SESSION_SNAPSHOT: MidiSessionSnapshot = {
   inputs: [],
   selectedInputId: null,
   heldNotes: [],
+  virtualActive: false,
 };
 
 export function getServerMidiSessionSnapshot(): MidiSessionSnapshot {
@@ -370,6 +446,7 @@ export function __resetMidiSessionForTests(): void {
   restoreStarted = false;
   preferredInputId = null;
   heldSet.clear();
+  virtualSet.clear();
   listeners.clear();
   snapshot = {
     supported: detectSupported(),
@@ -378,6 +455,7 @@ export function __resetMidiSessionForTests(): void {
     inputs: [],
     selectedInputId: null,
     heldNotes: [],
+    virtualActive: false,
   };
   clearPersisted();
 }

@@ -46,6 +46,7 @@ export function useMidi() {
   return {
     supported: state.supported,
     connected: state.connected,
+    virtualActive: state.virtualActive,
     inputs: state.inputs,
     selectedInputId: state.selectedInputId,
     setSelectedInputId,

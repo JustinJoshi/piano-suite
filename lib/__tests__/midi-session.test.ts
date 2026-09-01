@@ -3,6 +3,9 @@ import {
   __resetMidiSessionForTests,
   connectMidiSession,
   getMidiSessionSnapshot,
+  pressVirtualNote,
+  releaseAllVirtualNotes,
+  releaseVirtualNote,
   setMidiSelectedInputId,
   subscribeMidiSession,
   ensureMidiSessionRestored,
@@ -225,5 +228,68 @@ describe("midi-session", () => {
     expect(snap.supported).toBe(false);
     expect(snap.connected).toBe(false);
     expect(snap.error).toBe("Web MIDI is not supported in this browser.");
+  });
+});
+
+describe("virtual (on-screen keyboard) notes", () => {
+  beforeEach(() => {
+    sessionStorage.clear();
+    vi.stubGlobal("navigator", {});
+    __resetMidiSessionForTests();
+  });
+
+  afterEach(() => {
+    __resetMidiSessionForTests();
+  });
+
+  it("pressing and releasing a virtual note updates held notes and events", () => {
+    const events: string[] = [];
+    const listener = (event: Event) => events.push(event.type);
+    window.addEventListener("midi-note-on", listener);
+    window.addEventListener("midi-note-off", listener);
+
+    pressVirtualNote(60, 88);
+
+    let snap = getMidiSessionSnapshot();
+    expect(snap.heldNotes).toEqual([60]);
+    expect(snap.virtualActive).toBe(true);
+
+    releaseVirtualNote(60);
+
+    snap = getMidiSessionSnapshot();
+    expect(snap.heldNotes).toEqual([]);
+    expect(snap.virtualActive).toBe(false);
+    expect(events).toEqual(["midi-note-on", "midi-note-off"]);
+
+    window.removeEventListener("midi-note-on", listener);
+    window.removeEventListener("midi-note-off", listener);
+  });
+
+  it("ignores out-of-range notes and duplicate presses", () => {
+    const noteOn = vi.fn();
+    window.addEventListener("midi-note-on", noteOn);
+
+    pressVirtualNote(-1);
+    pressVirtualNote(128);
+    expect(getMidiSessionSnapshot().heldNotes).toEqual([]);
+
+    pressVirtualNote(60);
+    pressVirtualNote(60);
+    expect(getMidiSessionSnapshot().heldNotes).toEqual([60]);
+    expect(noteOn).toHaveBeenCalledTimes(1);
+
+    window.removeEventListener("midi-note-on", noteOn);
+  });
+
+  it("releaseAllVirtualNotes drops every held note at once", () => {
+    pressVirtualNote(60);
+    pressVirtualNote(64);
+    pressVirtualNote(67);
+
+    releaseAllVirtualNotes();
+
+    const snap = getMidiSessionSnapshot();
+    expect(snap.heldNotes).toEqual([]);
+    expect(snap.virtualActive).toBe(false);
   });
 });

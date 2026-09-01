@@ -4,6 +4,7 @@ import { normalizeChordSetConfig } from "./chord-set/config";
 import { normalizeTextBlockConfig } from "./text-block/config";
 import { normalizeMidiConnectionBarConfig } from "./midi-connection-bar/config";
 import { normalizeDrillShortcutsConfig } from "./drill-shortcuts/config";
+import { normalizeKeyboardDisplayConfig } from "./keyboard-display/config";
 import { normalizeSize } from "../workshop-grid";
 
 /**
@@ -27,6 +28,7 @@ const blockNormalizers: Record<string, BlockNormalizer> = {
   textBlock: normalizeTextBlockConfig as BlockNormalizer,
   midiConnectionBar: normalizeMidiConnectionBarConfig as BlockNormalizer,
   drillShortcuts: normalizeDrillShortcutsConfig as BlockNormalizer,
+  keyboardDisplay: normalizeKeyboardDisplayConfig as BlockNormalizer,
 };
 
 export type ValidatedBlock = {
