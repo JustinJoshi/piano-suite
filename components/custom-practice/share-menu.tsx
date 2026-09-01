@@ -84,14 +84,14 @@ export function ShareMenu({
 
   const handleCopyLink = useCallback(() => {
     if (!drillId) return;
-    const url = `${window.location.origin}/workshop/${drillId}`;
+    const url = `${window.location.origin}/marketplace/${drillId}`;
     void navigator.clipboard.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }, [drillId]);
 
   const publicUrl = drillId
-    ? `${typeof window !== "undefined" ? window.location.origin : ""}/workshop/${drillId}`
+    ? `${typeof window !== "undefined" ? window.location.origin : ""}/marketplace/${drillId}`
     : null;
 
   return (

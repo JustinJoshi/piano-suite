@@ -44,8 +44,8 @@ export default function WorkshopMarketplacePage() {
 
   return (
     <DrillShell
-      title="Marketplace"
-      subtitle="Preview features and add them to your workshop."
+      title="Block library"
+      subtitle="Preview blocks and add them to your workshop."
       right={
         <Link
           href="/tools/workshop"

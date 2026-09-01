@@ -25,11 +25,30 @@ const nextConfig: NextConfig = {
   // drills remain direct routes and are linked from the Workshop page and
   // sidebar. Temporary (307) so the destination can evolve without cached
   // client redirects.
+  //
+  // Route renames (audit 2026-09, Phase 0.3): the community gallery lives at
+  // /marketplace and the Workshop component picker at /tools/workshop/blocks,
+  // so "marketplace" means exactly one thing. Old paths redirect.
   async redirects() {
     return [
       {
         source: "/tools",
         destination: "/tools/workshop",
+        permanent: false,
+      },
+      {
+        source: "/workshop",
+        destination: "/marketplace",
+        permanent: false,
+      },
+      {
+        source: "/workshop/:path*",
+        destination: "/marketplace/:path*",
+        permanent: false,
+      },
+      {
+        source: "/tools/workshop/marketplace",
+        destination: "/tools/workshop/blocks",
         permanent: false,
       },
     ];

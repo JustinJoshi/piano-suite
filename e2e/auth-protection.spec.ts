@@ -10,10 +10,6 @@ import {
 /** Routes that must redirect unsigned visitors to sign-in (not bare 404). */
 const PROTECTED_ROUTES = [
   "/tools",
-  "/tools/chord-drill",
-  "/tools/arpeggios",
-  "/tools/root-cycling",
-  "/tools/progression",
   "/tools/technique",
   "/tools/tracking",
   "/tools/chladni-ripple",
@@ -42,6 +38,50 @@ const PUBLIC_ROUTES = [
       await expect(
         page.getByRole("heading", { name: "Chladni Pattern Lab" })
       ).toBeVisible();
+    },
+  },
+  // Ready-made drills are public (audit 2026-09, Phase 0.2): "Play now"
+  // must work for a signed-out first-time visitor.
+  {
+    path: "/tools/chord-drill",
+    assert: async (page: import("@playwright/test").Page) => {
+      await expect(
+        page.getByRole("heading", { name: /Chord Drill/i }).first()
+      ).toBeVisible();
+    },
+  },
+  {
+    path: "/tools/arpeggios",
+    assert: async (page: import("@playwright/test").Page) => {
+      await expect(
+        page.getByRole("heading", { name: /Arpeggio/i }).first()
+      ).toBeVisible();
+    },
+  },
+  {
+    path: "/tools/root-cycling",
+    assert: async (page: import("@playwright/test").Page) => {
+      await expect(
+        page.getByRole("heading", { name: /Root Cycling/i }).first()
+      ).toBeVisible();
+    },
+  },
+  {
+    path: "/tools/progression",
+    assert: async (page: import("@playwright/test").Page) => {
+      await expect(
+        page.getByRole("heading", { name: /Progression/i }).first()
+      ).toBeVisible();
+    },
+  },
+  {
+    path: "/marketplace",
+    assert: async (page: import("@playwright/test").Page) => {
+      await expect(
+        page.getByRole("heading", { name: "Marketplace", exact: true })
+      ).toBeVisible();
+      // Featured seeds ship with the app so the gallery is never empty.
+      await expect(page.getByRole("heading", { name: "Featured" })).toBeVisible();
     },
   },
   {
