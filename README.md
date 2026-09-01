@@ -87,6 +87,14 @@ The core experience is free and runs in your browser. Sign in to sync progress a
 
 For full setup details, deployment notes, and the technical history of the project, see [`docs/PROJECT_HISTORY.md`](docs/PROJECT_HISTORY.md).
 
+## Where the project is heading
+
+[`docs/audit-2026-09/`](docs/audit-2026-09/) holds a full end-to-end audit and the
+phased roadmap for the shift from fixed drills to a workshop + marketplace: a
+tagged feature inventory, an architecture verdict on the marketplace and
+AI-composer direction, a three-path entry-flow spec, and a soft-launch plan.
+Start with [`00-executive-summary.md`](docs/audit-2026-09/00-executive-summary.md).
+
 ## Contributing
 
 The project is open source under the MIT license. If you are learning piano too, your perspective matters. Open an issue, suggest a feature, or submit a PR.

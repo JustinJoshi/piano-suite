@@ -8,6 +8,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 Piano Suite is repositioning as a **free learning community for self-taught pianists**. Docs, copy, and new features should reinforce welcome, inclusivity, and beginner success. The README and landing page speak to beginners first; deep technical history and architecture live in `docs/PROJECT_HISTORY.md`.
 
+**Current roadmap: `docs/audit-2026-09/`.** The September 2026 audit sets the direction — the Workshop becomes a host for user-built practice tools shared through a marketplace, entered through three doors (Play / Explore / Learn). Before adding a feature, check `04-roadmap.md` Part 5 ("What *not* to do") and the tagged inventory in `01-feature-inventory.md`. The standing constraint: **the block library is the bottleneck, not the infrastructure** — prefer building a feature block over building a new page or lab.
+
 # Primitive Layer Conventions
 
 This project extracts shared capabilities from the original Reflex Drill HTML apps into reusable primitives. When building or migrating practice tools, follow these rules.
