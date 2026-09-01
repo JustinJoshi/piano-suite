@@ -60,8 +60,22 @@ export interface WelcomeOnboardingPillarConfig {
   resources: WelcomeOnboardingResourceConfig[];
 }
 
+export interface WelcomeDoorItemConfig {
+  id: "play" | "build" | "learn";
+  label: string;
+  description: string;
+  href: string;
+}
+
+export interface WelcomeDoorsConfig {
+  eyebrow: string;
+  title: string;
+  items: WelcomeDoorItemConfig[];
+}
+
 export interface WelcomeConfig {
   hero: WelcomeHeroConfig;
+  doors: WelcomeDoorsConfig;
   features: {
     sections: WelcomeFeatureSectionConfig[];
     cardStyle: CardStyle;
@@ -119,9 +133,33 @@ export const defaultWelcomeConfig: WelcomeConfig = {
       "Build your own piano practice — or grab a drill and start playing.",
     subheadline:
       "Snap metronome, timer, and chord blocks together into your own drills, start instantly from a starter template, and share what you build with other self-taught pianists.",
-    ctaText: "Enter the Workshop",
-    ctaHref: "/tools/workshop",
-    align: "left",
+    ctaText: "Start free",
+    ctaHref: "/start",
+    align: "center",
+  },
+  doors: {
+    eyebrow: "pick a door",
+    title: "How do you want to begin?",
+    items: [
+      {
+        id: "play",
+        label: "Play",
+        description: "Just let me do something — pick a ready-made drill and start now.",
+        href: "/tools/workshop",
+      },
+      {
+        id: "build",
+        label: "Build",
+        description: "I want to make my own — build a practice page from the shelf of blocks.",
+        href: "/tools/workshop",
+      },
+      {
+        id: "learn",
+        label: "Learn",
+        description: "I want to read first — short articles on how practice actually works.",
+        href: "/articles",
+      },
+    ],
   },
   features: {
     sections: [
@@ -461,6 +499,17 @@ function isValidDeck(item: unknown): item is WelcomeDeckConfig {
   );
 }
 
+function isValidDoor(item: unknown): item is WelcomeDoorItemConfig {
+  if (!isObject(item)) return false;
+  const id = item.id;
+  return (
+    (id === "play" || id === "build" || id === "learn") &&
+    typeof item.label === "string" &&
+    typeof item.description === "string" &&
+    typeof item.href === "string"
+  );
+}
+
 /**
  * Validates a partial config object and returns a complete config, filling
  * missing or invalid fields from `defaultWelcomeConfig`.
@@ -480,6 +529,13 @@ export function validateWelcomeConfig(
     ctaText: clampString(heroInput.ctaText, base.hero.ctaText),
     ctaHref: clampString(heroInput.ctaHref, base.hero.ctaHref),
     align: clampEnum(heroInput.align, ["center", "left"], base.hero.align),
+  };
+
+  const doorsInput = isObject(input.doors) ? input.doors : {};
+  const doors: WelcomeDoorsConfig = {
+    eyebrow: clampString(doorsInput.eyebrow, base.doors.eyebrow),
+    title: clampString(doorsInput.title, base.doors.title),
+    items: clampArray(doorsInput.items, base.doors.items, isValidDoor),
   };
 
   const featuresInput = isObject(input.features) ? input.features : {};
@@ -616,6 +672,7 @@ export function validateWelcomeConfig(
 
   return {
     hero,
+    doors,
     features,
     flow,
     decks,

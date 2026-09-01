@@ -107,8 +107,8 @@ describe("welcome-config", () => {
       expect(headline.includes("tools built for")).toBe(false);
     });
 
-    it("TC1: hero CTA points to /tools/workshop, not /tools", () => {
-      expect(defaultWelcomeConfig.hero.ctaHref).toBe("/tools/workshop");
+    it("TC1: hero CTA points to /start (three-door chooser)", () => {
+      expect(defaultWelcomeConfig.hero.ctaHref).toBe("/start");
     });
 
     it("TC1: hero subheadline mentions blocks, templates, or building", () => {
