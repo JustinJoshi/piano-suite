@@ -29,6 +29,7 @@ const PUBLIC_BASES = [
 const PUBLIC_EXACT = [
   "/",
   "/pricing",
+  "/start",
   "/tools/chladni",
   "/terms",
   "/privacy",

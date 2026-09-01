@@ -87,9 +87,6 @@ export function HeroSection({
               <Play className="mr-2 h-4 w-4 fill-current" />
               {hero.ctaText}
             </Link>
-            <p className="max-w-[18rem] text-xs text-muted-foreground sm:max-w-none">
-              Explore the community gallery freely. Sign in when you are ready to save your own pages.
-            </p>
           </div>
         </div>
       </div>

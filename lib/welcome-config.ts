@@ -60,8 +60,22 @@ export interface WelcomeOnboardingPillarConfig {
   resources: WelcomeOnboardingResourceConfig[];
 }
 
+export interface WelcomeDoorItemConfig {
+  id: "play" | "build" | "learn";
+  label: string;
+  description: string;
+  href: string;
+}
+
+export interface WelcomeDoorsConfig {
+  eyebrow: string;
+  title: string;
+  items: WelcomeDoorItemConfig[];
+}
+
 export interface WelcomeConfig {
   hero: WelcomeHeroConfig;
+  doors: WelcomeDoorsConfig;
   features: {
     sections: WelcomeFeatureSectionConfig[];
     cardStyle: CardStyle;
@@ -115,39 +129,42 @@ export const defaultWelcomeConfig: WelcomeConfig = {
   hero: {
     eyebrow: "a free workshop for self-taught pianists",
     showEyebrow: true,
-    headline:
-      "Build your own piano practice — or grab a drill and start playing.",
+    headline: "Build your own piano practice.",
     subheadline:
-      "Snap metronome, timer, and chord blocks together into your own drills, start instantly from a starter template, and share what you build with other self-taught pianists.",
-    ctaText: "Enter the Workshop",
-    ctaHref: "/tools/workshop",
-    align: "left",
+      "Snap metronome, timer, and chord blocks together into the practice you need today — free, right in your browser.",
+    ctaText: "Start free",
+    ctaHref: "/start",
+    align: "center",
+  },
+  doors: {
+    eyebrow: "pick a door",
+    title: "How do you want to begin?",
+    items: [
+      {
+        id: "play",
+        label: "Play",
+        description: "Just let me do something — guided routes and ready-made drills.",
+        href: "/routes",
+      },
+      {
+        id: "build",
+        label: "Build",
+        description: "I want to make my own — build a practice page from the shelf of blocks.",
+        href: "/tools/workshop",
+      },
+      {
+        id: "learn",
+        label: "Learn",
+        description: "I want to read first — short articles on how practice actually works.",
+        href: "/articles",
+      },
+    ],
   },
   features: {
     sections: [
       {
-        id: "build-your-practice",
-        number: "01",
-        label: "build your practice",
-        title: "Your drill, your blocks, your tempo.",
-        body: [
-          "A metronome. A timer. A chord target. Snap them together and you have a practice page. Change the chords, adjust the tempo, add instructions — the Workshop lets you build exactly the drill you need, then practice it right there.",
-          "No code, no setup. Press the slash key, pick a block, and start playing. Every page saves automatically and runs live on your keyboard.",
-        ],
-      },
-      {
-        id: "start-from-something-that-works",
-        number: "02",
-        label: "start from something that works",
-        title: "Not sure where to begin? Grab a starter template.",
-        body: [
-          "First chords. ii-V-I warmup. Five-minute metronome sprint. Starter templates give you a runnable drill in one click — then you can change anything once you're inside.",
-          "Browse community drills shared by other self-taught pianists, fork a copy into your own Workshop, and make it yours.",
-        ],
-      },
-      {
         id: "why-these-drills-work",
-        number: "03",
+        number: "01",
         label: "why these drills work",
         title: "Built on the science of remembering.",
         body: [
@@ -163,12 +180,12 @@ export const defaultWelcomeConfig: WelcomeConfig = {
       },
       {
         id: "who-made-this",
-        number: "04",
+        number: "02",
         label: "who made this",
-        title: "A community, not just a toolkit.",
+        title: "Built by one self-taught pianist, in the open.",
         body: [
-          "Lessons run $60 an hour and up, so a lot of us teach ourselves. Piano Suite started as the toolkit I wanted for that path, but it is becoming something bigger: a free community where self-taught pianists learn together, share what works, and build tools that actually help beginners.",
-          "The project is open source. If you're teaching yourself too, questions and ideas are always welcome.",
+          "Lessons run $60 an hour and up, so a lot of us teach ourselves. I'm one of them. Piano Suite started as the practice tool I wanted on that path — a chord drill wired to my own Anki decks and my MIDI keyboard. I built it over about a month with heavy AI assistance, and tuned it against my own practice data until it actually stuck.",
+          "It worked well enough that I wanted to hand it to people on the same road. It's free, it's open source, and your practice pages live in your own browser — no account required. If you're teaching yourself too, questions and ideas are always welcome.",
         ],
       },
     ],
@@ -453,6 +470,16 @@ function isValidFlowStep(item: unknown): item is WelcomeFlowStepConfig {
   );
 }
 
+function isValidDoor(item: unknown): item is WelcomeDoorItemConfig {
+  return (
+    isObject(item) &&
+    (item.id === "play" || item.id === "build" || item.id === "learn") &&
+    typeof item.label === "string" &&
+    typeof item.description === "string" &&
+    typeof item.href === "string"
+  );
+}
+
 function isValidDeck(item: unknown): item is WelcomeDeckConfig {
   return (
     isObject(item) &&
@@ -480,6 +507,13 @@ export function validateWelcomeConfig(
     ctaText: clampString(heroInput.ctaText, base.hero.ctaText),
     ctaHref: clampString(heroInput.ctaHref, base.hero.ctaHref),
     align: clampEnum(heroInput.align, ["center", "left"], base.hero.align),
+  };
+
+  const doorsInput = isObject(input.doors) ? input.doors : {};
+  const doors: WelcomeConfig["doors"] = {
+    eyebrow: clampString(doorsInput.eyebrow, base.doors.eyebrow),
+    title: clampString(doorsInput.title, base.doors.title),
+    items: clampArray(doorsInput.items, base.doors.items, isValidDoor),
   };
 
   const featuresInput = isObject(input.features) ? input.features : {};
@@ -616,6 +650,7 @@ export function validateWelcomeConfig(
 
   return {
     hero,
+    doors,
     features,
     flow,
     decks,

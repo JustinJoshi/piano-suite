@@ -47,11 +47,12 @@ test.describe("/tools/workshop anonymous", () => {
     await page.goto("/");
     await expectNoApplicationError(page);
 
-    await page
-      .getByRole("link", { name: /enter the workshop/i })
-      .first()
-      .click();
+    // The hero CTA leads to the three-door chooser; the Build door is the
+    // workshop (full funnel covered in e2e/home.spec.ts).
+    await page.getByRole("link", { name: "Start free" }).click();
+    await expect(page).toHaveURL(/\/start$/);
 
+    await page.getByRole("link", { name: /^build/i }).click();
     await expect(page).toHaveURL(/\/tools\/workshop$/);
     await expect(page.getByTestId("onboarding-shell")).toHaveCount(0);
     await expect(page.getByText("How do you want to start?")).toBeVisible();

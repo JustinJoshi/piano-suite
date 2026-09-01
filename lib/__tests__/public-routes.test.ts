@@ -5,6 +5,7 @@ describe("isPublicPath", () => {
   it("keeps the marketing front door public", () => {
     expect(isPublicPath("/")).toBe(true);
     expect(isPublicPath("/pricing")).toBe(true);
+    expect(isPublicPath("/start")).toBe(true);
     expect(isPublicPath("/articles")).toBe(true);
     expect(isPublicPath("/articles/some-slug")).toBe(true);
     expect(isPublicPath("/routes")).toBe(true);

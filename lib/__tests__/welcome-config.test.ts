@@ -107,8 +107,8 @@ describe("welcome-config", () => {
       expect(headline.includes("tools built for")).toBe(false);
     });
 
-    it("TC1: hero CTA points to /tools/workshop, not /tools", () => {
-      expect(defaultWelcomeConfig.hero.ctaHref).toBe("/tools/workshop");
+    it("TC1: hero CTA points to the three-door chooser, not a tool page", () => {
+      expect(defaultWelcomeConfig.hero.ctaHref).toBe("/start");
     });
 
     it("TC1: hero subheadline mentions blocks, templates, or building", () => {
@@ -118,18 +118,18 @@ describe("welcome-config", () => {
       ).toBe(true);
     });
 
-    it("TC2: feature sections reduced from 6 to 4", () => {
-      expect(defaultWelcomeConfig.features.sections.length).toBe(4);
+    it("TC2: landing copy halved — two sections: evidence + story", () => {
+      expect(defaultWelcomeConfig.features.sections.length).toBe(2);
     });
 
     it("TC2: first section is not why-it-works (the chord-drill essay opener)", () => {
       expect(defaultWelcomeConfig.features.sections[0].id).not.toBe("why-it-works");
     });
 
-    it("TC2: sections include Workshop-first ids", () => {
+    it("TC2: sections are the evidence and the first-person story", () => {
       const ids = defaultWelcomeConfig.features.sections.map((s) => s.id);
-      expect(ids).toContain("build-your-practice");
-      expect(ids).toContain("start-from-something-that-works");
+      expect(ids).toContain("why-these-drills-work");
+      expect(ids).toContain("who-made-this");
     });
 
     it("TC3: flow steps do not contain anki as a label", () => {

@@ -5,16 +5,11 @@ test.describe("home page mobile", () => {
     await page.setViewportSize({ width: 375, height: 667 });
   });
 
-  test("renders hero CTA and supporting text without overflow", async ({
-    page,
-  }) => {
+  test("renders hero CTA without overflow", async ({ page }) => {
     await page.goto("/");
-    const cta = page.getByRole("link", { name: /enter the workshop/i }).first();
+    const cta = page.getByRole("link", { name: "Start free" });
     await expect(cta).toBeVisible();
     await expect(cta).toBeInViewport();
-
-    const supporting = page.getByText(/explore the community gallery freely/i);
-    await expect(supporting).toBeVisible();
   });
 
   test("shows Workshop how-it-works steps on mobile", async ({ page }) => {
@@ -29,28 +24,18 @@ test.describe("home page mobile", () => {
     }
   });
 
-  test("shows Workshop flow steps in a vertical layout on mobile", async ({
+  test("three doors stack without horizontal overflow on mobile", async ({
     page,
   }) => {
     await page.goto("/");
-    const steps = [
-      "Choose a starter template or start from scratch",
-      "Snap metronome, timer, and chord blocks together",
-      "Press Start and practice on real keys",
-      "Publish to the community or fork someone else's drill",
-    ];
-    for (const text of steps) {
-      await expect(page.getByText(text, { exact: true })).toBeVisible();
-    }
-  });
-
-  test("deck download buttons stack without overflowing", async ({ page }) => {
-    await page.goto("/");
-    const buttons = page.getByRole("link", { name: /chord symbols/i });
-    const count = await buttons.count();
-    expect(count).toBe(2);
-    for (let i = 0; i < count; i++) {
-      await expect(buttons.nth(i)).toBeVisible();
+    for (const id of ["door-play", "door-build", "door-learn"]) {
+      const door = page.getByTestId(id);
+      await expect(door).toBeVisible();
+      // Doors are below the hero fold on phones; they must not overflow.
+      const box = await door.boundingBox();
+      expect(box).not.toBeNull();
+      expect(box!.x).toBeGreaterThanOrEqual(0);
+      expect(box!.x + box!.width).toBeLessThanOrEqual(375);
     }
   });
 
