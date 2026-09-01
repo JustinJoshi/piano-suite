@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { PricingTable, useUser } from "@clerk/nextjs";
-import { PRO_PLAN_SLUG } from "@/lib/billing";
+import { BILLING_ENABLED, PRO_PLAN_SLUG } from "@/lib/billing";
 import {
   Card,
   CardContent,
@@ -46,6 +46,29 @@ export function BillingSettingsSection() {
                 className="text-sm font-medium text-primary underline-offset-2 hover:underline"
               >
                 See plans
+              </Link>
+            </CardContent>
+          </Card>
+        ) : !BILLING_ENABLED ? (
+          // Pre-launch: Clerk billing is off, and mounting <PricingTable>
+          // while it is off makes Clerk throw ("cannot_render_billing_
+          // disabled"). Show the waitlist path instead.
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-heading text-base">
+                Pro is on the way
+              </CardTitle>
+              <CardDescription>
+                Cloud sync, personal bests, and the float panel ship with the
+                Pro plan. Join the Founding Pro waitlist meanwhile.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link
+                href="/pricing"
+                className="text-sm font-medium text-primary underline-offset-2 hover:underline"
+              >
+                See Pro plans and join the waitlist
               </Link>
             </CardContent>
           </Card>
