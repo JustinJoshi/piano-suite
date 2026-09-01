@@ -14,6 +14,7 @@ import {
   isStarterPage,
   appendBlockToPage,
   removeFirstBlockOfType,
+  forkPageIntoStore,
   STORAGE_KEY,
   LEGACY_STORAGE_KEY,
 } from "@/lib/custom-practice-storage";
@@ -253,5 +254,85 @@ describe("marketplace block helpers", () => {
       blocks: [{ id: "b", type: "textBlock", version: 1, config: {} }],
     };
     expect(removeFirstBlockOfType(page, "metronome")).toBe(page);
+  });
+});
+
+describe("forkPageIntoStore", () => {
+  it("copies a page with fresh ids, a fork suffix, and makes it active", () => {
+    const store = createEmptyPracticePageStore();
+    const before = store.pages.map((p) => p.id);
+
+    const next = forkPageIntoStore(store, {
+      title: "Five-minute warm-up",
+      blocks: [
+        { id: "source-1", type: "metronome", version: 1, config: { bpm: 60 } },
+      ],
+    });
+
+    expect(next.pages).toHaveLength(2);
+    const forked = next.pages[1];
+    expect(forked.title).toBe("Five-minute warm-up (fork)");
+    expect(forked.blocks[0].type).toBe("metronome");
+    expect(forked.blocks[0].id).not.toBe("source-1");
+    expect(next.activePageId).toBe(forked.id);
+    expect(before).toContain(store.pages[0].id);
+  });
+
+  it("can link the fork to a Convex row id for later sync", () => {
+    const store = createEmptyPracticePageStore();
+
+    const next = forkPageIntoStore(
+      store,
+      { title: "P", blocks: [{ id: "s", type: "textBlock", version: 1, config: { text: "hi" } }] },
+      "convex-client-page-id"
+    );
+
+    expect(next.pages[1].id).toBe("convex-client-page-id");
+  });
+
+  it("sanitizes untrusted blocks: unknown types dropped, configs clamped", () => {
+    const store = createEmptyPracticePageStore();
+
+    const next = forkPageIntoStore(store, {
+      title: "Malicious page",
+      blocks: [
+        { id: "ok", type: "drillTimer", version: 1, config: { countdownSeconds: 999 } },
+        { id: "bad", type: "evilBlock", version: 1, config: { anything: true } },
+        { id: "worse", type: "metronome", version: 1, config: "<script>" },
+        "not even a block",
+      ],
+    });
+
+    const forked = next.pages[1];
+    expect(forked.blocks.map((b) => b.type)).toEqual(["drillTimer", "metronome"]);
+    expect(forked.blocks[0].config.countdownSeconds).toBe(30);
+  });
+
+  it("returns the store unchanged when no block survives sanitization", () => {
+    const store = createEmptyPracticePageStore();
+
+    const next = forkPageIntoStore(store, {
+      title: "Empty",
+      blocks: [{ id: "x", type: "nope", version: 1, config: {} }],
+    });
+
+    expect(next).toBe(store);
+  });
+
+  it("de-duplicates fork titles when forking the same page twice", () => {
+    const store = createEmptyPracticePageStore();
+    const source = {
+      title: "Warm-up",
+      blocks: [{ id: "s", type: "textBlock", version: 1, config: { text: "hi" } }] as unknown[],
+    };
+
+    const once = forkPageIntoStore(store, source);
+    const twice = forkPageIntoStore(once, source);
+
+    expect(twice.pages.map((p) => p.title)).toEqual([
+      "My Practice Page",
+      "Warm-up (fork)",
+      "Warm-up (fork) 2",
+    ]);
   });
 });

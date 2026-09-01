@@ -1,5 +1,10 @@
 import type { PracticePage, FeatureBlock } from "@/lib/feature-blocks/types";
 import { getFeatureDefinition } from "@/lib/feature-blocks/registry";
+import {
+  normalizePageTitle,
+  normalizeStoredBlock,
+  type ValidatedBlock,
+} from "@/lib/feature-blocks/schemas";
 
 const STORAGE_KEY = "custom-practice-pages-v2";
 const LEGACY_STORAGE_KEY = "custom-practice-pages-v1";
@@ -293,6 +298,36 @@ export function removeFirstBlockOfType(
     ...page,
     blocks: page.blocks.filter((_, i) => i !== index),
   };
+}
+
+/**
+ * Forks someone else's page into the local store: fresh page + block ids,
+ * "(fork)" title suffix. Blocks pass through the same server-side
+ * normalizer, so untrusted content is sanitized before it lands.
+ *
+ * `id` links the local page to a Convex row (the clientPageId returned by
+ * the fork mutation for signed-in users) so later edits sync.
+ */
+export function forkPageIntoStore(
+  store: PracticePageStore,
+  source: { title: string; blocks: unknown[] },
+  id?: string
+): PracticePageStore {
+  const blocks: FeatureBlock[] = source.blocks
+    .map((raw) => normalizeStoredBlock(raw))
+    .filter((block): block is ValidatedBlock => block !== null)
+    .map((block) => ({ ...block, id: generateId() }));
+
+  if (blocks.length === 0) return store;
+
+  const page: PracticePage = {
+    id: id ?? generateId(),
+    title: uniqueTitle(store, `${normalizePageTitle(source.title)} (fork)`),
+    blocks,
+    updatedAt: Date.now(),
+  };
+
+  return { ...store, pages: [...store.pages, page], activePageId: page.id };
 }
 
 export { generateId, DEFAULT_PAGE_ID };
