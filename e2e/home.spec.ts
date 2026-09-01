@@ -33,6 +33,22 @@ test.describe("home page", () => {
     expect(count).toBeLessThanOrEqual(6);
   });
 
+  // Phase 1.6: the click must reward — the card applies its template.
+  test("starter template card applies its template", async ({ page }) => {
+    await page.goto("/");
+
+    await page.getByRole("link", { name: /first chords/i }).click();
+    await expect(page).toHaveURL(/\/tools\/workshop/);
+
+    // The template page is applied and active — not a generic workshop.
+    await expect(
+      page.getByRole("button", { name: /first chords/i })
+    ).toBeVisible();
+    // The starter picker is gone; the template's blocks are on the grid.
+    await expect(page.getByText("How do you want to start?")).toHaveCount(0);
+    await expect(page.getByText(/play each chord slowly/i)).toBeVisible();
+  });
+
   // Phase 1.3: the CTA leads to a three-door chooser, not a dense page.
   test("anonymous visitor: CTA → /start → Build door → workshop", async ({
     page,
@@ -56,7 +72,7 @@ test.describe("home page", () => {
 
     // Keep going to a running metronome, all anonymous.
     await page.getByRole("button", { name: /start from scratch/i }).click();
-    await page.getByRole("link", { name: /open the marketplace/i }).click();
+    await page.getByRole("link", { name: /open the shelf/i }).click();
     await page.getByRole("button", { name: /add metronome/i }).click();
     await page.getByRole("link", { name: /back to workshop/i }).click();
     await expect(page.getByTestId("bpm-display")).toHaveText("120 BPM");

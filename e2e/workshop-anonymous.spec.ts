@@ -69,10 +69,10 @@ test.describe("/tools/workshop anonymous", () => {
     // First-run grid keeps the ready-made drill shortcuts tile.
     await expect(page.getByText(/in a hurry\?/i)).toBeVisible();
 
-    await page.getByRole("link", { name: /open the marketplace/i }).click();
+    await page.getByRole("link", { name: /open the shelf/i }).click();
     await expect(page).toHaveURL(/\/tools\/workshop\/marketplace$/);
     await expect(
-      page.getByRole("heading", { name: "Marketplace" })
+      page.getByRole("heading", { name: "Shelf" })
     ).toBeVisible();
 
     await page.getByRole("button", { name: /add metronome/i }).click();

@@ -38,7 +38,7 @@ export default function PublicDrillView() {
             href="/workshop"
             className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-primary underline-offset-4 hover:underline"
           >
-            Back to gallery
+            Back to community
           </Link>
         </div>
       </div>
@@ -53,7 +53,7 @@ export default function PublicDrillView() {
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
-          Gallery
+          Community
         </Link>
         <div className="flex items-center gap-2">
           {/* A URL is not a secret — copy works signed out. */}

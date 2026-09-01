@@ -230,14 +230,14 @@ describe("PracticePageEditor", () => {
     expect(grid.getAttribute("data-grid-empty")).toBe("true");
     expect(screen.getAllByTestId("grid-guide")).toHaveLength(4);
     expect(
-      screen.getByRole("link", { name: /open the marketplace/i })
+      screen.getByRole("link", { name: /open the shelf/i })
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: /add feature/i })
     ).not.toBeInTheDocument();
   });
 
-  it("links the header marketplace button to the marketplace route", () => {
+  it("links the header shelf button to the marketplace route", () => {
     seedWithPage();
     render(
       <AudioSettingsProvider>
@@ -246,7 +246,7 @@ describe("PracticePageEditor", () => {
     );
 
     expect(
-      screen.getByRole("link", { name: /open the marketplace/i })
+      screen.getByRole("link", { name: /open the shelf/i })
     ).toHaveAttribute("href", "/tools/workshop/marketplace");
   });
 
@@ -262,7 +262,7 @@ describe("PracticePageEditor", () => {
     expect(pushMock).toHaveBeenCalledWith("/tools/workshop/marketplace");
   });
 
-  it("does not open the marketplace with / when an input is focused", () => {
+  it("does not open the shelf with / when an input is focused", () => {
     seedWithPage();
     render(
       <AudioSettingsProvider>

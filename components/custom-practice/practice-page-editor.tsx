@@ -13,7 +13,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { PracticePage, FeatureBlock } from "@/lib/feature-blocks/types";
 import { resizeBlocks } from "@/lib/workshop-grid";
-import { buildTemplatePage, type StarterTemplate } from "@/lib/starter-templates";
+import { buildTemplatePage, starterTemplates, type StarterTemplate } from "@/lib/starter-templates";
 import { ShareMenu } from "@/components/custom-practice/share-menu";
 import { PagesMenu } from "@/components/custom-practice/pages-menu";
 import { WorkshopSyncBadge } from "@/components/custom-practice/workshop-sync-badge";
@@ -117,15 +117,42 @@ export function PracticePageEditor() {
     setShowTemplateLibrary(false);
   }
 
-  function selectStarterTemplate(template: StarterTemplate) {
+  function applyTemplate(template: StarterTemplate) {
     const templatePage = buildTemplatePage(template);
+    const current = getPracticePageStore();
+    const currentPage = getActivePage(current);
     const pageToStore =
-      isStarterPage(page) && store.pages.length === 1
-        ? { ...templatePage, id: page.id }
+      isStarterPage(currentPage) && current.pages.length === 1
+        ? { ...templatePage, id: currentPage.id }
         : templatePage;
-    setPracticePageStore(upsertPracticePage(store, pageToStore));
+    setPracticePageStore(upsertPracticePage(current, pageToStore));
     setShowTemplateLibrary(false);
   }
+
+  function selectStarterTemplate(template: StarterTemplate) {
+    applyTemplate(template);
+  }
+
+  // Landing starter cards deep-link with ?template=<id> — apply it once on
+  // mount (Phase 1.6: the click must land on that template, not a generic
+  // page), then clean the URL so a reload does not re-apply it.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const templateId = params.get("template");
+    if (!templateId) return;
+
+    params.delete("template");
+    const qs = params.toString();
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}${qs ? `?${qs}` : ""}`
+    );
+
+    const template = starterTemplates.find((t) => t.id === templateId);
+    if (template) applyTemplate(template);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function duplicateBlock(id: string) {
     const block = page.blocks.find((b) => b.id === id);
@@ -226,10 +253,10 @@ export function PracticePageEditor() {
 
           <Link
             href={MARKETPLACE_HREF}
-            aria-label="Open the marketplace"
+            aria-label="Open the shelf"
             className={cn(buttonVariants({ size: "sm" }), "gap-2")}
           >
-            Marketplace
+            Shelf
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -269,7 +296,7 @@ export function PracticePageEditor() {
                   href={MARKETPLACE_HREF}
                   className="font-medium text-primary underline-offset-4 hover:underline"
                 >
-                  marketplace
+                  shelf
                 </Link>{" "}
                 to add features.
               </p>

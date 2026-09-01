@@ -212,7 +212,7 @@ export const defaultWelcomeConfig: WelcomeConfig = {
       {
         id: "share",
         label: "share",
-        text: "Publish to the community or fork someone else's drill",
+        text: "Publish to the community or save a copy of someone else's drill",
       },
     ],
     layout: "auto",

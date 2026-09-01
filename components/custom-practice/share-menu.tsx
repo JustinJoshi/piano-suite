@@ -105,7 +105,7 @@ export function ShareMenu({
       <CardContent className="space-y-4">
         {!canPersist ? (
           <p className="text-sm text-muted-foreground">
-            Upgrade to Pro to publish practice pages to the community gallery.
+            Upgrade to Pro to publish practice pages to the community.
           </p>
         ) : isPublic ? (
           <>
@@ -151,7 +151,7 @@ export function ShareMenu({
             className="w-full"
           >
             <Globe className="mr-2 h-3.5 w-3.5" />
-            {publishing ? "Publishing…" : "Publish to gallery"}
+            {publishing ? "Publishing…" : "Publish to community"}
           </Button>
         )}
         {publishError && (

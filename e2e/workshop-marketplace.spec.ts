@@ -29,7 +29,7 @@ test.describe("/tools/workshop marketplace", () => {
       "true"
     );
     await page
-      .getByRole("link", { name: /open the marketplace/i })
+      .getByRole("link", { name: /open the shelf/i })
       .click();
     await expect(page).toHaveURL(/\/tools\/workshop\/marketplace$/);
 

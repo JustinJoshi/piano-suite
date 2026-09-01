@@ -22,7 +22,11 @@ export function StarterTemplatesSection() {
           {starterTemplates.slice(0, 4).map((template) => {
             const Icon = template.icon;
             return (
-              <Link key={template.id} href="/tools/workshop" className="rounded-2xl border border-border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-primary/5">
+              <Link
+              key={template.id}
+              href={`/tools/workshop?template=${template.id}`}
+              className="rounded-2xl border border-border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-primary/5"
+            >
                 <Icon className="h-5 w-5 text-primary" />
                 <h3 className="mt-4 text-sm font-semibold text-foreground">{template.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{template.description}</p>

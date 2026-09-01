@@ -13,18 +13,18 @@ function relativeTime(updatedAt: number): string {
   return `${Math.floor(diff / 86_400_000)}d ago`;
 }
 
-export default function WorkshopGalleryPage() {
+export default function CommunityPage() {
   const drills = useQuery(api.workshop.listPublicDrills, {});
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="mb-8">
         <h1 className="font-heading text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-          Workshop Gallery
+          Community
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Community-built practice pages you can try and duplicate into your own
-          workshop.
+          Practice pages published by self-taught pianists — run them without
+          an account, then save a copy and make it yours.
         </p>
       </div>
 

@@ -61,7 +61,7 @@ const PUBLIC_ROUTES = [
     path: "/tools/workshop/marketplace",
     assert: async (page: import("@playwright/test").Page) => {
       await expect(
-        page.getByRole("heading", { name: "Marketplace" })
+        page.getByRole("heading", { name: "Shelf" })
       ).toBeVisible();
     },
   },
