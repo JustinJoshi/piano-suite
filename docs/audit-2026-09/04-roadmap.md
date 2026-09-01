@@ -140,6 +140,13 @@ Grouped by theme, unordered within group. Sequencing is Part 3.
 
 ### Phase 0 — Tell the truth
 
+> **Status: executed 2026-09-01.** 0.1–0.5 are done — see
+> `docs/PROJECT_HISTORY.md` → "Audit Phase 0 execution". 0.6 was fixed in
+> this PR's doc-correction commits. Part 4's five first actions are done
+> except 3.3's "publish 10–15 of your own pages", which is authorship, not
+> code: featured starter pages ship in `lib/marketplace-seeds.ts` until the
+> real ones are published.
+
 *Nothing here is glamorous. All of it is measured through by everything after it.*
 
 The theme is honesty: the product currently claims things that are not true.
