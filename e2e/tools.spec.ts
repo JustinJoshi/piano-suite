@@ -52,22 +52,37 @@ test.describe("/tools dashboard", () => {
     }
   });
 
-  test("sidebar groups tools into sections", async ({ page }) => {
+  test("sidebar collapses to four sections; labs live on the shelf", async ({
+    page,
+  }) => {
     await signInAsTestUser(page);
     await page.goto("/tools/workshop");
 
     const nav = page.locator("aside nav");
-    await expect(nav.getByText("Ready-made drills")).toBeVisible();
-    await expect(nav.getByText("Progress", { exact: true })).toBeVisible();
-    await expect(nav.getByRole("button", { name: "Labs" })).toBeVisible();
-
-    // Labs are tucked away but stay one click away.
-    const labsToggle = nav.getByRole("button", { name: "Labs" });
-    await expect(labsToggle).toHaveAttribute("aria-expanded", "false");
-    await labsToggle.click();
-    await expect(labsToggle).toHaveAttribute("aria-expanded", "true");
+    // The four sections: Workshop, Shelf, Progress, Settings.
     await expect(
-      nav.getByRole("link", { name: "Chladni Lab" })
+      nav.getByRole("link", { name: "Workshop", exact: true })
+    ).toBeVisible();
+    await expect(nav.getByRole("link", { name: "Shelf" })).toBeVisible();
+    await expect(nav.getByText("Progress", { exact: true })).toBeVisible();
+    await expect(nav.getByRole("link", { name: "Settings" })).toBeVisible();
+    // Ready-made drills nest under the Workshop as starting points.
+    await expect(
+      nav.getByRole("link", { name: "Chord Drill" })
+    ).toBeVisible();
+    // No labs section anymore — they are reachable from the shelf.
+    await expect(
+      nav.getByRole("button", { name: "Labs" })
+    ).toHaveCount(0);
+
+    await nav.getByRole("link", { name: "Shelf" }).click();
+    await expect(page).toHaveURL(/\/tools\/workshop\/marketplace$/);
+    await expect(
+      page.getByRole("heading", { name: "Shelf" })
+    ).toBeVisible();
+    // Labs stay one click away from the shelf.
+    await expect(
+      page.getByRole("link", { name: "Chladni Lab" })
     ).toBeVisible();
   });
 

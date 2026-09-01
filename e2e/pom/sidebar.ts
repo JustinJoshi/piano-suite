@@ -2,38 +2,20 @@ import { Page, expect } from "@playwright/test";
 
 const LINK_NAME_TO_TEST_ID: Record<string, string> = {
   Workshop: "sidebar-link-workshop",
+  "Guided routes": "sidebar-link-routes",
   "Chord Drill": "sidebar-link-chord-drill",
   Arpeggios: "sidebar-link-arpeggios",
   "Root Cycling": "sidebar-link-root-cycling",
   Progression: "sidebar-link-progression",
+  Shelf: "sidebar-link-shelf",
   Technique: "sidebar-link-technique",
   Tracking: "sidebar-link-tracking",
-  "Chladni Lab": "sidebar-link-chladni-lab",
-  "Chladni Ripple": "sidebar-link-chladni-ripple",
-  "Julia Lab": "sidebar-link-julia-lab",
-  "Lissajous Lab": "sidebar-link-lissajous-lab",
-  "Quasiperiodic Lab": "sidebar-link-quasiperiodic-lab",
-  "Multigrid Lab": "sidebar-link-multigrid-lab",
-  "Logo Lab": "sidebar-link-logo-lab",
-  Theme: "sidebar-link-theme",
-  Atmosphere: "sidebar-link-atmosphere",
-  Audio: "sidebar-link-audio",
-  Billing: "sidebar-link-billing",
+  Settings: "sidebar-link-settings",
 };
 
-// Lab links live inside the collapsible Labs section of the sidebar.
-const LAB_LINKS = new Set([
-  "Chladni Lab",
-  "Chladni Ripple",
-  "Julia Lab",
-  "Lissajous Lab",
-  "Quasiperiodic Lab",
-  "Multigrid Lab",
-  "Logo Lab",
-]);
-
 /**
- * Page object for the dashboard sidebar.
+ * Page object for the dashboard sidebar (Phase 1.5: four sections —
+ * Workshop, Shelf, Progress, Settings; drills nest under the Workshop).
  */
 export class Sidebar {
   constructor(public readonly page: Page) {}
@@ -48,12 +30,6 @@ export class Sidebar {
 
   async navigateTo(name: keyof typeof LINK_NAME_TO_TEST_ID) {
     await this.openMobileIfNeeded();
-    if (LAB_LINKS.has(name)) {
-      const labLink = this.page.getByTestId(LINK_NAME_TO_TEST_ID[name]);
-      if (!(await labLink.isVisible().catch(() => false))) {
-        await this.page.getByRole("button", { name: "Labs" }).click();
-      }
-    }
     await this.page.getByTestId(LINK_NAME_TO_TEST_ID[name]).click();
   }
 

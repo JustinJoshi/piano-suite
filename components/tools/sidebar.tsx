@@ -1,69 +1,21 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
-
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Aperture,
-  ChevronDown,
-  CreditCard,
-  Fingerprint,
-  Palette,
-  Volume2,
-  X,
-} from "lucide-react";
+import { Settings as SettingsIcon, X } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { AppUserButton } from "@/components/app-user-button";
 import { AppliedLogoMark } from "@/components/brand/applied-logo-mark";
 import { Button } from "@/components/ui/button";
 import { useDashboardNav } from "@/components/tools/dashboard-nav";
-import { useExperimentalFeatures } from "@/hooks/useExperimentalFeatures";
-import { isExperimentalToolHref } from "@/lib/experimental-features";
 import {
   drillTools,
   insightTools,
-  labTools,
+  shelfTool,
   workshopTool,
   type ToolDef,
 } from "@/lib/tools";
 import { cn } from "@/lib/utils";
-
-const LABS_NAV_STORAGE_KEY = "piano-suite-labs-nav-open-v1";
-const LABS_NAV_CHANGE_EVENT = "piano-suite:labs-nav-change";
-
-function readLabsNavOpen(): boolean {
-  try {
-    return window.localStorage.getItem(LABS_NAV_STORAGE_KEY) === "true";
-  } catch {
-    return false;
-  }
-}
-
-function writeLabsNavOpen(open: boolean) {
-  try {
-    window.localStorage.setItem(LABS_NAV_STORAGE_KEY, String(open));
-  } catch {
-    // Private mode / quota — ignore.
-  }
-  window.dispatchEvent(new Event(LABS_NAV_CHANGE_EVENT));
-}
-
-function subscribeToLabsNav(callback: () => void) {
-  window.addEventListener("storage", callback);
-  window.addEventListener(LABS_NAV_CHANGE_EVENT, callback);
-  return () => {
-    window.removeEventListener("storage", callback);
-    window.removeEventListener(LABS_NAV_CHANGE_EVENT, callback);
-  };
-}
-
-/** Logo Lab is a branding utility, not a practice tool — sidebar only. */
-const logoLabLink = {
-  title: "Logo Lab",
-  href: "/tools/logo-lab",
-  icon: Fingerprint,
-};
 
 function NavLinks({
   links,
@@ -110,64 +62,41 @@ function NavLinks({
   );
 }
 
+function NavSubLink({
+  href,
+  title,
+  onNavigate,
+}: {
+  href: string;
+  title: string;
+  onNavigate: () => void;
+}) {
+  const pathname = usePathname();
+  const isActive = pathname === href;
+
+  return (
+    <li>
+      <Link
+        href={href}
+        onClick={onNavigate}
+        data-testid={`sidebar-link-${title.toLowerCase().replace(/\s+/g, "-")}`}
+        className={cn(
+          "flex items-center gap-3 rounded-lg px-3 py-1.5 pl-11 text-sm transition-colors",
+          isActive
+            ? "text-primary"
+            : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+        )}
+      >
+        {title}
+      </Link>
+    </li>
+  );
+}
+
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <div className="mb-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
       {children}
-    </div>
-  );
-}
-
-function LabsSection({ onNavigate }: { onNavigate: () => void }) {
-  const pathname = usePathname();
-  const { enabled: experimentalEnabled } = useExperimentalFeatures();
-  const open = useSyncExternalStore(
-    subscribeToLabsNav,
-    readLabsNavOpen,
-    () => false
-  );
-
-  function toggleOpen() {
-    writeLabsNavOpen(!open);
-  }
-
-  const labs = [
-    ...labTools,
-    {
-      title: logoLabLink.title,
-      description: "",
-      icon: logoLabLink.icon,
-      href: logoLabLink.href,
-      category: "lab" as const,
-    },
-  ].filter((lab) => experimentalEnabled || !isExperimentalToolHref(lab.href));
-  const activeLab = labs.some((lab) => lab.href === pathname);
-
-  return (
-    <div>
-      <button
-        type="button"
-        onClick={toggleOpen}
-        aria-expanded={open}
-        aria-controls="dashboard-sidebar-labs"
-        className="mb-2 flex w-full items-center gap-2 rounded-lg px-3 py-1 text-xs font-medium uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground"
-      >
-        Labs
-        <ChevronDown
-          className={cn(
-            "h-3.5 w-3.5 transition-transform",
-            open ? "rotate-180" : "rotate-0"
-          )}
-        />
-        {activeLab ? (
-          <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary" />
-        ) : null}
-      </button>
-      {open ? (
-        <ul id="dashboard-sidebar-labs" className="space-y-0.5">
-          <NavLinks links={labs} onNavigate={onNavigate} />
-        </ul>
-      ) : null}
     </div>
   );
 }
@@ -231,48 +160,79 @@ export function Sidebar() {
           </Button>
         </div>
 
-        {/* Nav */}
+        {/* Nav — four sections: Workshop, Shelf, Progress, Settings */}
         <nav className="flex-1 overflow-y-auto px-3 py-4">
-          <ul className="space-y-0.5">
-            <li>
-              <Link
-                href={workshopTool.href}
-                onClick={closeDrawer}
-                data-testid="sidebar-link-workshop"
-                className={cn(
-                  "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold transition-colors",
-                  workshopActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-foreground hover:bg-muted/50"
-                )}
-              >
-                <workshopTool.icon
+          <div className="mb-2">
+            <ul className="space-y-0.5">
+              <li>
+                <Link
+                  href={workshopTool.href}
+                  onClick={closeDrawer}
+                  data-testid="sidebar-link-workshop"
                   className={cn(
-                    "h-4 w-4 transition-colors",
+                    "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold transition-colors",
                     workshopActive
-                      ? "text-primary"
-                      : "text-foreground group-hover:text-foreground"
+                      ? "bg-primary/10 text-primary"
+                      : "text-foreground hover:bg-muted/50"
                   )}
+                >
+                  <workshopTool.icon
+                    className={cn(
+                      "h-4 w-4 transition-colors",
+                      workshopActive
+                        ? "text-primary"
+                        : "text-foreground group-hover:text-foreground"
+                    )}
+                  />
+                  {workshopTool.title}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/routes"
+                  onClick={closeDrawer}
+                  data-testid="sidebar-link-routes"
+                  className="flex items-center gap-3 rounded-lg px-3 py-1.5 pl-11 text-sm text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+                >
+                  Guided routes
+                </Link>
+              </li>
+              {drillTools.map((drill) => (
+                <NavSubLink
+                  key={drill.href}
+                  href={drill.href}
+                  title={drill.title}
+                  onNavigate={closeDrawer}
                 />
-                {workshopTool.title}
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/routes"
-                onClick={closeDrawer}
-                data-testid="sidebar-link-routes"
-                className="flex items-center gap-3 rounded-lg px-3 py-1.5 pl-11 text-sm text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
-              >
-                Guided routes
-              </Link>
-            </li>
-          </ul>
+              ))}
+            </ul>
+          </div>
 
           <div className="mb-2 mt-6">
-            <SectionLabel>Ready-made drills</SectionLabel>
             <ul className="space-y-0.5">
-              <NavLinks links={drillTools} onNavigate={closeDrawer} />
+              <li>
+                <Link
+                  href={shelfTool.href}
+                  onClick={closeDrawer}
+                  data-testid="sidebar-link-shelf"
+                  className={cn(
+                    "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold transition-colors",
+                    pathname === shelfTool.href
+                      ? "bg-primary/10 text-primary"
+                      : "text-foreground hover:bg-muted/50"
+                  )}
+                >
+                  <shelfTool.icon
+                    className={cn(
+                      "h-4 w-4 transition-colors",
+                      pathname === shelfTool.href
+                        ? "text-primary"
+                        : "text-foreground group-hover:text-foreground"
+                    )}
+                  />
+                  {shelfTool.title}
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -283,103 +243,31 @@ export function Sidebar() {
             </ul>
           </div>
 
-          <div className="mt-6">
-            <LabsSection onNavigate={closeDrawer} />
-          </div>
-
           <div className="mb-2 mt-6">
-            <SectionLabel>Settings</SectionLabel>
             <ul className="space-y-0.5">
               <li>
                 <Link
-                  href="/settings/theme"
+                  href="/settings"
                   onClick={closeDrawer}
-                  data-testid="sidebar-link-theme"
+                  data-testid="sidebar-link-settings"
                   className={cn(
-                    "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                    pathname === "/settings/theme"
+                    "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold transition-colors",
+                    pathname === "/settings" ||
+                      pathname.startsWith("/settings/")
                       ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                      : "text-foreground hover:bg-muted/50"
                   )}
                 >
-                  <Palette
+                  <SettingsIcon
                     className={cn(
                       "h-4 w-4 transition-colors",
-                      pathname === "/settings/theme"
+                      pathname === "/settings" ||
+                        pathname.startsWith("/settings/")
                         ? "text-primary"
-                        : "text-muted-foreground group-hover:text-foreground"
+                        : "text-foreground group-hover:text-foreground"
                     )}
                   />
-                  Theme
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/settings/atmosphere"
-                  onClick={closeDrawer}
-                  data-testid="sidebar-link-atmosphere"
-                  className={cn(
-                    "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                    pathname === "/settings/atmosphere"
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                  )}
-                >
-                  <Aperture
-                    className={cn(
-                      "h-4 w-4 transition-colors",
-                      pathname === "/settings/atmosphere"
-                        ? "text-primary"
-                        : "text-muted-foreground group-hover:text-foreground"
-                    )}
-                  />
-                  Atmosphere
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/settings/audio"
-                  onClick={closeDrawer}
-                  data-testid="sidebar-link-audio"
-                  className={cn(
-                    "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                    pathname === "/settings/audio"
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                  )}
-                >
-                  <Volume2
-                    className={cn(
-                      "h-4 w-4 transition-colors",
-                      pathname === "/settings/audio"
-                        ? "text-primary"
-                        : "text-muted-foreground group-hover:text-foreground"
-                    )}
-                  />
-                  Audio
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/settings/billing"
-                  onClick={closeDrawer}
-                  data-testid="sidebar-link-billing"
-                  className={cn(
-                    "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                    pathname === "/settings/billing"
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                  )}
-                >
-                  <CreditCard
-                    className={cn(
-                      "h-4 w-4 transition-colors",
-                      pathname === "/settings/billing"
-                        ? "text-primary"
-                        : "text-muted-foreground group-hover:text-foreground"
-                    )}
-                  />
-                  Billing
+                  Settings
                 </Link>
               </li>
             </ul>

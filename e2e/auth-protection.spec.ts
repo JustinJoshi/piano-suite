@@ -27,6 +27,7 @@ const PROTECTED_ROUTES = [
   "/chat",
   "/settings/theme",
   "/settings/atmosphere",
+  "/settings/audio",
   "/settings/billing",
 ] as const;
 
@@ -122,9 +123,9 @@ const SIGNED_IN_ROUTE_SMOKE: Array<{
   { path: "/tools/midi-test", heading: /MIDI/i },
   { path: "/articles", heading: "Articles" },
   { path: "/chat", heading: "Practice Assistant" },
-  { path: "/settings/theme", heading: "Theme" },
-  { path: "/settings/atmosphere", heading: "Atmosphere" },
-  { path: "/settings/billing", heading: "Billing" },
+  { path: "/settings/theme", finalPath: "/settings", heading: "Theme" },
+  { path: "/settings/atmosphere", finalPath: "/settings", heading: "Atmosphere" },
+  { path: "/settings/billing", finalPath: "/settings", heading: "Billing" },
 ];
 
 test.describe("auth protection (bypass off)", () => {

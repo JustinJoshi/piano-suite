@@ -23,6 +23,10 @@ vi.mock("@/hooks/useToolUserReady", () => ({
   }),
 }));
 
+vi.mock("@/hooks/useExperimentalFeatures", () => ({
+  useExperimentalFeatures: () => ({ enabled: false, setEnabled: vi.fn() }),
+}));
+
 describe("WorkshopMarketplacePage (anonymous access)", () => {
   beforeEach(() => {
     resetPracticePageStore();

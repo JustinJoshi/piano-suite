@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
-import { render, screen, cleanup, fireEvent } from "@testing-library/react";
+import { render, screen, cleanup } from "@testing-library/react";
 
 
 const useUserMock = vi.fn();
@@ -75,51 +75,75 @@ describe("Sidebar navigation sections", () => {
     window.localStorage.clear();
   });
 
-  it("leads with the Workshop, not a Welcome item", () => {
+  it("collapses to exactly four top-level sections", () => {
     render(<Sidebar />);
 
+    // The four sections: Workshop, Shelf, Progress, Settings.
     expect(screen.getByRole("link", { name: "Workshop" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Shelf" })).toBeInTheDocument();
+    expect(screen.getByText("Progress")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Settings" })).toBeInTheDocument();
+
+    // Retired groupings are gone.
     expect(
-      screen.queryByRole("link", { name: "Welcome" })
+      screen.queryByText("Ready-made drills")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Labs" })
     ).not.toBeInTheDocument();
   });
 
-  it("shows ready-made drills and progress sections", () => {
+  it("nests guided routes and ready-made drills under the Workshop", () => {
     render(<Sidebar />);
 
-    expect(screen.getByText("Ready-made drills")).toBeInTheDocument();
-    expect(screen.getByText("Progress")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Guided routes" })
+    ).toBeInTheDocument();
     for (const name of [
       "Chord Drill",
       "Arpeggios",
       "Root Cycling",
       "Progression",
-      "Technique",
-      "Tracking",
     ]) {
       expect(screen.getByRole("link", { name })).toBeInTheDocument();
     }
   });
 
-  it("collapses labs until toggled open", async () => {
+  it("keeps the progress tools", () => {
     render(<Sidebar />);
 
-    const toggle = screen.getByRole("button", { name: "Labs" });
-    expect(toggle).toHaveAttribute("aria-expanded", "false");
-    expect(
-      screen.queryByRole("link", { name: "Chladni Lab" })
-    ).not.toBeInTheDocument();
+    for (const name of ["Technique", "Tracking"]) {
+      expect(screen.getByRole("link", { name })).toBeInTheDocument();
+    }
+  });
 
-    fireEvent.click(toggle);
+  it("drops the labs section and Logo Lab", () => {
+    render(<Sidebar />);
 
-    expect(toggle).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByRole("link", { name: "Chladni Lab" })).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Logo Lab" })
-    ).toBeInTheDocument();
-    // Experimental labs stay hidden unless the flag is on.
-    expect(
-      screen.queryByRole("link", { name: "Multigrid Lab" })
+      screen.queryByRole("button", { name: "Labs" })
     ).not.toBeInTheDocument();
+    for (const name of [
+      "Chladni Lab",
+      "Chladni Ripple",
+      "Julia Lab",
+      "Lissajous Lab",
+      "Quasiperiodic Lab",
+      "Multigrid Lab",
+      "Logo Lab",
+    ]) {
+      expect(screen.queryByRole("link", { name })).not.toBeInTheDocument();
+    }
+  });
+
+  it("links the single settings page", () => {
+    render(<Sidebar />);
+
+    expect(
+      screen.getByRole("link", { name: "Settings" })
+    ).toHaveAttribute("href", "/settings");
+    for (const name of ["Theme", "Atmosphere", "Billing"]) {
+      expect(screen.queryByRole("link", { name })).not.toBeInTheDocument();
+    }
   });
 });

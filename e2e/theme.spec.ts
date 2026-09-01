@@ -55,12 +55,18 @@ test.describe("/settings/theme", () => {
     await expectExclusiveTheme(page, "amber");
   });
 
-  test("sidebar links to the theme settings page", async ({ page }) => {
+  test("sidebar links to the settings page with the theme section", async ({
+    page,
+  }) => {
     await signInAsTestUser(page);
     await page.goto("/tools");
 
-    await page.locator("aside nav").getByRole("link", { name: "Theme" }).click();
-    await expect(page).toHaveURL("/settings/theme");
+    // Phase 1.5: one settings page with sections.
+    await page
+      .locator("aside nav")
+      .getByRole("link", { name: "Settings" })
+      .click();
+    await expect(page).toHaveURL(/\/settings$/);
     await expect(page.getByRole("heading", { name: "Theme" })).toBeVisible();
   });
 });

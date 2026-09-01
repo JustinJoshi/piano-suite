@@ -10,6 +10,7 @@ import {
   Infinity,
   Hexagon,
   LayoutGrid,
+  Layers,
   Activity,
   Wrench,
   LucideIcon,
@@ -36,6 +37,15 @@ export const workshopTool: ToolDef = {
   description: "Build your own practice page from reusable features.",
   icon: Wrench,
   href: "/tools/workshop",
+  category: "workshop",
+};
+
+/** The official block library (route kept as /tools/workshop/marketplace). */
+export const shelfTool: ToolDef = {
+  title: "Shelf",
+  description: "Browse the official block library and add features.",
+  icon: Layers,
+  href: "/tools/workshop/marketplace",
   category: "workshop",
 };
 
