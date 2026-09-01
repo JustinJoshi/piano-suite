@@ -64,7 +64,7 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `lib/logo-mark.ts` | Chladni grid → SVG brand-mark geometry, data URLs, favicon export |
 | `lib/logo-mark-settings.ts` | Serializable applied logo mark + presets / normalize / localStorage |
 | `hooks/useLogoMarkSettings.ts` | Applied logo mark; localStorage always; Convex when `canPersist` |
-| `components/brand/*` | `PianoSuiteMark`, `AppliedLogoMark`, `FaviconHost`; the musical-note mark (`app/icon.svg`, lucide `Music`) is the shipping default — custom Chladni marks apply only after Logo Lab's Apply (`isShippingLogoMark` decides) |
+| `components/brand/*` | `PianoSuiteMark`, `AppliedLogoMark`, `FaviconHost`; the musical-note mark (`app/icon.svg`, lucide `Music`) is the shipping default — custom Chladni marks apply only after a Logo Lab apply (page archived in Phase 0; `isShippingLogoMark` decides; `lib/logo-mark.ts` stays) |
 | `lib/ambient-effects.ts` | Per-route ambient backgrounds + float panel settings, soft viz defaults |
 | `hooks/useAmbientEffects.ts` | `AmbientEffectsProvider` + hook; localStorage always; Convex when `canPersist` |
 | `components/ambient/*` | Root ambient host, renderer, background, float panel |
@@ -86,10 +86,14 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `app/terms`, `app/privacy` | Public legal pages (proxy.ts allowlist); Privacy must disclose every analytics/error processor actually wired |
 | `lib/chat-auth.ts` | Chat API allowlist decisions (`authorizeChatAccess`); always session + `ALLOWED_CLERK_USER_ID` — the `AUTH_DISABLED` bypass never opens the paid endpoint |
 | `convex/lib/auth.ts` | `optionalUserId` (queries), `ensureUserId` (mutations, upserts the row), `requireUserId` (throws) |
-| `proxy.ts` | Clerk route gate (Next 16 proxy convention); public-route list + `unauthenticatedUrl` redirect. `/api` is public by design — **every `app/api/**/route.ts` handler must authorize itself via `auth()`** (e.g. `/api/chat`) |
+| `proxy.ts` | Clerk route gate (Next 16 proxy convention); imports `isPublicPath` + `unauthenticatedUrl` redirect. `/api` is public by design — **every `app/api/**/route.ts` handler must authorize itself via `auth()`** (e.g. `/api/chat`) |
+| `lib/public-routes.ts` | The unit-tested anonymous-access matrix (`isPublicPath`); workshop + marketplace + `/start` + `/learn` are public — sign-in buys sync and publishing, never access |
+| `components/workshop/save-copy-button.tsx` | "Save a copy to my Workshop" on public drill pages: unsigned = localStorage only; signed-in = `forkCustomDrill` + store write with the returned `clientPageId` |
+| `app/start/page.tsx` + `components/welcome/door-chooser.tsx` | The three-door chooser (Play / Build / Learn); the hero CTA lands here; copy lives in `welcome-config.doors` |
+| `app/settings/page.tsx` + `components/settings/*` | One settings page with theme / atmosphere / audio / billing sections; the old per-topic paths redirect |
 | `app/error.tsx`, `app/global-error.tsx` | Error boundaries so a thrown query cannot blank the app |
 | `components/drills/drill-shell.tsx` | Shared layout wrapper for every tool page |
-| `lib/tools.ts` | Grouped tool registry (`workshopTool`, `drillTools`, `insightTools`, `labTools`) driving sidebar sections and the landing grid |
+| `lib/tools.ts` | Grouped tool registry (`workshopTool`, `shelfTool`, `drillTools`, `insightTools`, `labTools`) feeding the sidebar; Phase 1.5 collapsed the sidebar to Workshop / Shelf / Progress / Settings |
 | `lib/routes.ts` | Guided-route registry + progress math (steps: read / external / anki-setup / tool / seed-workshop); progress is a cached `useSyncExternalStore` snapshot over localStorage |
 | `lib/anki-setup-prompt.ts` | Builds the self-contained Anki setup prompt (deck contents embedded by the route page from `public/*.txt`) |
 | `components/routes/*` | `RouteGuide` step checklist + `RouteCards` compact cards (embedded in the Workshop starter picker); server pages pass `routeId` + deck files, never the icon-bearing route object (RSC boundary) |
@@ -110,7 +114,7 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `components/workshop-grid/*` | Draggable/resizable grid for the Workshop editor; fills the page via `fill` (`data-grid-full`); grid chrome (guides) visible only while dragging (or when empty via `showGuides`); tiles persist `size` spans and open settings behind a per-tile gear |
 | `components/workshop-marketplace/*` | Marketplace view for the Workshop: live interactive previews of every registry block with plus/check add-remove buttons; route at `/tools/workshop/marketplace` |
 | `components/custom-practice/*` | Workshop practice-page editor: full-width grid page, pages dropdown menu (`PagesMenu`, incl. share), `DrillRuntimeProvider`, shared `FieldInput` settings renderer |
-| `lib/custom-practice-storage.ts` | `localStorage` persistence for custom practice pages (Free tier); fresh stores seed a `drillShortcuts` starter tile; `isStarterPage` gates onboarding |
+| `lib/custom-practice-storage.ts` | `localStorage` persistence for custom practice pages (Free tier); fresh stores seed a `drillShortcuts` starter tile; `importPublicPage` saves a copy of a community page (remints block ids, unique-titles) |
 | `lib/drill-runtime.ts` / `hooks/useDrillRuntime.ts` | Shared drill runtime context (countdown → armed → timing → success → break → finished) driving workshop blocks; logs events to Convex (Pro) or local history (Free) |
 | `hooks/useChordTargets.ts` | Sequential / random chord-target generation from selected roots and quality groups |
 
@@ -118,8 +122,8 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 
 1. **Keep welcome copy and style tokens in `lib/welcome-config.ts`.** Landing-page and onboarding components should read from `useWelcomeConfig()` instead of hard-coding marketing copy or style values. This makes the section easy to iterate on from `/dev/welcome-lab`.
 2. **Mobile-first layout.** Hero feature cards, pillar slides, and tool grids must reflow for narrow viewports. Avoid fixed-height containers that clip content on small screens.
-3. **Wrap onboarding in `WelcomeConfigProvider`.** `DashboardShell` already wraps `<Onboarding />` with the provider; new onboarding entry points should do the same.
-4. **Dev lab is always enabled.** `/dev/welcome-lab` is public and reachable from any deployment so styling can be iterated without environment gating. Use `lib/dev-tools.ts` helpers rather than inlining `NODE_ENV` checks.
+3. **Wrap pillar content in `WelcomeConfigProvider`.** The deck no longer gates the dashboard (Phase 1.7): `/learn/practice-pillars` renders it inline and wraps itself in the provider; new onboarding surfaces should do the same. `/settings` links to it.
+4. **Dev lab is enabled but unlinked.** `/dev/welcome-lab` is public and reachable from any deployment so styling can be iterated without environment gating, but it is no longer linked from the live site (Phase 0 hid `DevToolsLink`). Use `lib/dev-tools.ts` helpers rather than inlining `NODE_ENV` checks.
 
 ## Rules for tool pages
 
@@ -134,8 +138,8 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 The Workshop is the core of the app, not one tool among many.
 
 1. **`/tools` redirects to `/tools/workshop`** via `next.config.ts` (307, query params preserved). Do not re-add a `/tools` hub page — the sidebar is the navigation.
-2. **Register new tools in `lib/tools.ts`** under the right group: `drillTools` (ready-made drills), `insightTools` (progress), or `labTools` (visual/brand explorers). The sidebar derives its sections from these registries; Logo Lab is the one sidebar-only lab entry.
-3. **Labs stay tucked away.** The Labs sidebar section is collapsible and collapsed by default. Experimental labs must be listed in `EXPERIMENTAL_TOOL_HREFS`.
+2. **Do not add to the sidebar.** Phase 1.5 collapsed it to four sections (Workshop, Shelf, Progress, Settings); ready-made drills nest under the Workshop. New capability ships as a feature block on the shelf, not a nav row.
+3. **Labs stay tucked away.** There is no Labs sidebar section; labs are reachable from the shelf strip (`/tools/workshop/marketplace`). Experimental labs must be listed in `EXPERIMENTAL_TOOL_HREFS`.
 4. **Sidebar is a single-writer hotspot file.** See the hotspot list below before editing it in parallel with other agents.
 
 ## Convex auth conventions
@@ -427,7 +431,7 @@ npx convex dev
 
 ### Auth / MIDI / chat caveats
 
-- **Manual Clerk sign-in does not work in an automation/headless browser** — it hits a Cloudflare bot CAPTCHA that never resolves. Exercise authenticated flows through the Playwright E2E suite instead (it uses `setupClerkTestingToken` + a backend sign-in token). `/`, `/tools/chladni` (Pattern Lab), and `/tools/logo-lab` (Logo Lab) are public and need no sign-in — use them for quick manual/UI checks.
+- **Manual Clerk sign-in does not work in an automation/headless browser** — it hits a Cloudflare bot CAPTCHA that never resolves. Exercise authenticated flows through the Playwright E2E suite instead (it uses `setupClerkTestingToken` + a backend sign-in token). `/`, `/tools/chladni` (Pattern Lab), `/tools/workshop` (the public Workshop), `/start`, and `/learn/practice-pillars` are public and need no sign-in — use them for quick manual/UI checks.
 - **MIDI drills** (`chord-drill`, `arpeggios`, `progression`, `root-cycling`, `chladni-ripple`) need Web MIDI hardware, which the VM lacks. For hardware-free verification use the Technique tracker (`/tools/technique`) or the visualization labs (`/tools/chladni`, `/tools/julia`, `/tools/lissajous`, `/tools/quasiperiodic`, `/tools/multigrid`); the E2E specs cover the drills without hardware.
 - **AI chat is not configured.** No `KIMI_CODE_API_KEY` / `KIMI_CODE_BASE_URL` / `KIMI_CODE_MODEL` / `ALLOWED_CLERK_USER_ID` secrets are provided, so `/chat` and `POST /api/chat` will not function until those are added. Everything else runs normally.
 

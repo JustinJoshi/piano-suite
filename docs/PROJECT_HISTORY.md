@@ -21,8 +21,8 @@ This repository now contains:
 - A **Next.js 16+ App Router** application with TypeScript.
 - A **Lunar.dev-inspired landing page** that ports the original Reflex Drill EXT welcome content into a polished, modern marketing layout, with a fixed full-viewport soft Three.js atmosphere (Chladni by default) behind sparse hero copy and floating feature cards, theme-aware scrims, and resonant modes that morph slowly with the active theme. Pattern Lab can **Apply to home** / **Reset home** to customize that atmosphere (localStorage always; Convex when Pro). Atmosphere settings at `/settings/atmosphere` can also switch the Welcome background to MIDI Ripple, Julia, or Lissajous.
 - An **Articles section** (`/articles`) with a listing page and statically generated article pages (`/articles/[slug]`). Articles are authored in Markdown with YAML frontmatter, rendered with `react-markdown`, and styled with reusable Tailwind utility classes. The shared site navbar is included on article pages so readers can navigate back to the home page and other sections at any time. A floating chat bubble on article pages links directly to the Practice Assistant so readers can ask questions about the content. A setup guide at `/articles/anki-ankiconnect-setup` walks new users through installing Anki and AnkiConnect.
-- A **Vercel-dashboard-inspired Tools hub** (`/tools`) with a sidebar navigation drawn from the original Reflex Drill EXT tabs (fixed on desktop; off-canvas drawer with menu control on mobile).
-- A **first-time onboarding flow** on `/tools` that introduces the three pillars of healthy piano practice — active recall & spaced repetition, hand/body care, and managing frustration through focused/diffuse practice — then releases the user into the dashboard. State is stored in `localStorage`; the flow is skippable and replayable from `/settings/theme`.
+- A **Vercel-dashboard-inspired tools workspace** — `/tools` 307s to the Workshop; the sidebar collapsed to four sections in Phase 1.5: **Workshop** (guided routes + ready-made drills nested as starting points), **Shelf**, **Progress**, **Settings**. Labs left the sidebar and are reachable from the shelf; Logo Lab's page was archived in Phase 0 (the note-mark lib stays). Fixed on desktop; off-canvas drawer on mobile.
+- A first run in the Workshop greets starter templates plus three dismissible hints; nothing gates the editor (Phase 1.7). The pillars deck lives inline at `/learn/practice-pillars`, linked from `/settings`, and is also a plain article (`articles/three-pillars-of-practice.md`). The old fullscreen `/tools` gate and `?onboarding=reset` behavior are gone.
 - A migrated **Chord Drill** (`/tools/chord-drill`) ported from Reflex Drill EXT, including Single Shape / Family Cycle / Extended Family modes, root/quality selection, reps, per-chord rep overrides, Anki Sync with auto-timer and auto-grade, break-before-grading, and personal-best stats persisted via Convex.
 - A migrated **Arpeggios** (`/tools/arpeggios`) ported from Reflex Drill EXT, including the 12 minor-11th cells with left-hand pedal and right-hand sequence drilling, per-transition timing, miss logging, sequence customization, lap chimes, and Anki Sync that maps any card root to the matching minor-11th arpeggio and auto-grades by misses.
 - A migrated **Progression** (`/tools/progression`) ported from Reflex Drill EXT, including ii-V-I and 12-bar blues drills in C/G/D/A/E, per-chord transition timing, auto-looping, step and loop chimes, optional Anki card flip on loop completion, and personal-best stats persisted via Convex.
@@ -141,6 +141,8 @@ Clerk owns identity, Convex owns per-user data, and the two are joined by a Cler
 | `/pricing` | Yes — Free vs Pro + Clerk checkout |
 | `/tools/chladni` (Pattern Lab) | Yes — edits the public welcome hero |
 | `/tools/workshop`, `/tools/workshop/marketplace` | Yes — the Workshop editor is public (Change A: Free persistence is localStorage, so a gate protected nothing; sign-in buys sync + publishing, never access) |
+| `/start` | Yes — the three-door chooser (Play / Build / Learn) the hero CTA lands on (Phase 1.3) |
+| `/learn`, `/learn/*` | Yes — the practice-pillars deck page (Phase 1.7) |
 | `/tools` | 307s to `/tools/workshop` (next.config redirect runs before the proxy) — effectively public |
 | `/workshop`, `/workshop/*` | Yes — community gallery + public drill views |
 | `/routes`, `/routes/*` | Yes — guided routes are help content |
@@ -149,7 +151,7 @@ Clerk owns identity, Convex owns per-user data, and the two are joined by a Cler
 | `/__clerk/*` | Yes — Clerk frontend API |
 | `/articles`, `/articles/*` | Yes — public learning library (SEO/marketing for the free community) |
 | All other `/tools/*` | No |
-| `/chat`, `/settings/*` | No |
+| `/chat`, `/settings/*` | No — `/settings/{theme,atmosphere,audio,billing}` redirect to `/settings` (Phase 1.5) |
 
 ### The `NEXT_PUBLIC_AUTH_DISABLED` bypass
 
@@ -368,7 +370,7 @@ Make sure the **Convex dev server is running** before starting tests, because th
 | Spec | Asserts |
 |------|---------|
 | `e2e/auth-protection.spec.ts` | Protected routes redirect to `/sign-in`; `/`, `/tools/chladni`, and the Workshop stay public; signed-in smoke across all app pages |
-| `e2e/workshop-anonymous.spec.ts` | Unsigned visitor reaches the starter picker, no onboarding overlay, marketplace round-trip adds a block; drills still redirect |
+| `e2e/workshop-anonymous.spec.ts` | Unsigned visitor reaches the starter picker, no onboarding overlay, shelf round-trip adds a block; drills still redirect |
 | `e2e/chat-auth.spec.ts` | `POST /api/chat` without a session returns 401 |
 | `e2e/auth-assertions.ts` | Shared helpers — `expectRedirectedToSignIn`, `expectNotBare404`, `expectNoApplicationError`, and the bypass guard |
 
