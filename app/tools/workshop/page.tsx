@@ -2,28 +2,21 @@
 
 import { DrillShell } from "@/components/drills/drill-shell";
 import { PracticePageEditor } from "@/components/custom-practice/practice-page-editor";
-import { useToolUserReady } from "@/hooks/useToolUserReady";
 
+/**
+ * Public on purpose: Free persistence is localStorage, so the editor works
+ * without an account (`proxy.ts` allows this route; `useWorkshopSync` is a
+ * no-op until the user can sync). Sign-in is offered by the sync badge,
+ * not enforced here.
+ */
 export default function WorkshopPage() {
-  const { canAccess, userReady } = useToolUserReady();
-
   return (
     <DrillShell
       wide
       title="Workshop"
       subtitle="Your practice page is a grid — drag, resize, and make it yours."
     >
-      {!canAccess ? (
-        <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-          Sign in to create custom practice pages.
-        </div>
-      ) : !userReady ? (
-        <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-          Loading your account…
-        </div>
-      ) : (
-        <PracticePageEditor />
-      )}
+      <PracticePageEditor />
     </DrillShell>
   );
 }

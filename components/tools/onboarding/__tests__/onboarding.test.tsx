@@ -1,8 +1,23 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import { Onboarding } from "@/components/tools/onboarding";
 import { WelcomeConfigProvider } from "@/components/welcome/welcome-config-provider";
 import { ONBOARDING_STORAGE_KEY } from "@/lib/onboarding";
+
+// Mutable auth state so individual tests can flip signed-in / auth bypass.
+const { mockAuth } = vi.hoisted(() => ({
+  mockAuth: {
+    isSignedIn: true,
+    authDisabled: false,
+    canAccess: true,
+    canPersist: false,
+    canUseFloatPanel: false,
+  },
+}));
+
+vi.mock("@/hooks/useAuthAccess", () => ({
+  useAuthAccess: () => mockAuth,
+}));
 
 function renderWithInstantSearch() {
   window.history.replaceState({}, "", "?onboarding=instant");
@@ -17,6 +32,8 @@ describe("Onboarding", () => {
   beforeEach(() => {
     localStorage.clear();
     window.history.replaceState({}, "", "?onboarding=instant");
+    mockAuth.isSignedIn = true;
+    mockAuth.authDisabled = false;
   });
 
   afterEach(() => {
@@ -107,5 +124,31 @@ describe("Onboarding", () => {
     fireEvent.click(screen.getByRole("button", { name: /back/i }));
     expect(screen.getByText("Hi")).toBeInTheDocument();
     expect(screen.getByText("welcome to piano suite")).toBeInTheDocument();
+  });
+
+  describe("anonymous visitors (public workshop)", () => {
+    it("does not mount the shell when unsigned and auth is on", () => {
+      mockAuth.isSignedIn = false;
+      mockAuth.authDisabled = false;
+      const { container } = renderWithInstantSearch();
+      expect(
+        screen.queryByTestId("onboarding-shell")
+      ).not.toBeInTheDocument();
+      expect(container).toBeEmptyDOMElement();
+    });
+
+    it("mounts the shell for a signed-in first-time visitor", () => {
+      mockAuth.isSignedIn = true;
+      mockAuth.authDisabled = false;
+      renderWithInstantSearch();
+      expect(screen.getByTestId("onboarding-shell")).toBeInTheDocument();
+    });
+
+    it("mounts the shell when auth is disabled (local-only mode)", () => {
+      mockAuth.isSignedIn = false;
+      mockAuth.authDisabled = true;
+      renderWithInstantSearch();
+      expect(screen.getByTestId("onboarding-shell")).toBeInTheDocument();
+    });
   });
 });

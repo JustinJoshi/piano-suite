@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useOnboarding } from "@/hooks/useOnboarding";
+import { useAuthAccess } from "@/hooks/useAuthAccess";
 import { useWelcomeConfig } from "@/hooks/useWelcomeConfig";
 import { OnboardingShell } from "./onboarding-shell";
 import { OnboardingContent } from "./onboarding-content";
@@ -11,6 +12,7 @@ import { OnboardingContent } from "./onboarding-content";
 export function Onboarding() {
   const { config } = useWelcomeConfig();
   const { isCompleted, markComplete, isInstant, mounted } = useOnboarding();
+  const { isSignedIn, authDisabled } = useAuthAccess();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [exiting, setExiting] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -43,7 +45,10 @@ export function Onboarding() {
     scrollRef.current?.scrollTo?.({ top: 0, behavior: "smooth" });
   }, [currentSlide]);
 
-  if (!mounted || isCompleted) {
+  // Anonymous visitors are not in the product yet; the deck stays for the
+  // first signed-in session. Keeps public pages (workshop, Pattern Lab)
+  // free of the fullscreen overlay.
+  if (!mounted || isCompleted || (!isSignedIn && !authDisabled)) {
     return null;
   }
 

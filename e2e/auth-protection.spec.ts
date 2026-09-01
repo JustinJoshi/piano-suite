@@ -7,9 +7,11 @@ import {
   expectRedirectedToSignIn,
 } from "./auth-assertions";
 
-/** Routes that must redirect unsigned visitors to sign-in (not bare 404). */
+/** Routes that must redirect unsigned visitors to sign-in (not bare 404).
+ *
+ * `/tools` is NOT here: next.config.ts 307s it to /tools/workshop before
+ * the proxy runs, and the workshop is public (Change A). */
 const PROTECTED_ROUTES = [
-  "/tools",
   "/tools/chord-drill",
   "/tools/arpeggios",
   "/tools/root-cycling",
@@ -41,6 +43,25 @@ const PUBLIC_ROUTES = [
     assert: async (page: import("@playwright/test").Page) => {
       await expect(
         page.getByRole("heading", { name: "Chladni Pattern Lab" })
+      ).toBeVisible();
+      // Public since Change A: no fullscreen onboarding overlay unsigned.
+      await expect(page.getByTestId("onboarding-shell")).toHaveCount(0);
+    },
+  },
+  {
+    path: "/tools/workshop",
+    assert: async (page: import("@playwright/test").Page) => {
+      await expect(
+        page.getByRole("heading", { name: "Workshop" })
+      ).toBeVisible();
+      await expect(page.getByTestId("onboarding-shell")).toHaveCount(0);
+    },
+  },
+  {
+    path: "/tools/workshop/marketplace",
+    assert: async (page: import("@playwright/test").Page) => {
+      await expect(
+        page.getByRole("heading", { name: "Marketplace" })
       ).toBeVisible();
     },
   },

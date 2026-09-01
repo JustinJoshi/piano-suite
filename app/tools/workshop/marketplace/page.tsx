@@ -7,7 +7,6 @@ import { DrillShell } from "@/components/drills/drill-shell";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Marketplace } from "@/components/workshop-marketplace/marketplace";
-import { useToolUserReady } from "@/hooks/useToolUserReady";
 import {
   getPracticePageStore,
   setPracticePageStore,
@@ -19,9 +18,8 @@ import {
   removeFirstBlockOfType,
 } from "@/lib/custom-practice-storage";
 
+/** Public like the workshop itself: add/remove writes localStorage. */
 export default function WorkshopMarketplacePage() {
-  const { canAccess, userReady } = useToolUserReady();
-
   const store = useSyncExternalStore(
     subscribePracticePageStore,
     getPracticePageStore,
@@ -56,21 +54,11 @@ export default function WorkshopMarketplacePage() {
         </Link>
       }
     >
-      {!canAccess ? (
-        <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-          Sign in to build your workshop.
-        </div>
-      ) : !userReady ? (
-        <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-          Loading your account…
-        </div>
-      ) : (
-        <Marketplace
-          pageBlocks={page.blocks}
-          onAddBlock={addBlock}
-          onRemoveBlockType={removeBlockType}
-        />
-      )}
+      <Marketplace
+        pageBlocks={page.blocks}
+        onAddBlock={addBlock}
+        onRemoveBlockType={removeBlockType}
+      />
     </DrillShell>
   );
 }

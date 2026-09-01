@@ -140,11 +140,15 @@ Clerk owns identity, Convex owns per-user data, and the two are joined by a Cler
 | `/` | Yes |
 | `/pricing` | Yes — Free vs Pro + Clerk checkout |
 | `/tools/chladni` (Pattern Lab) | Yes — edits the public welcome hero |
+| `/tools/workshop`, `/tools/workshop/marketplace` | Yes — the Workshop editor is public (Change A: Free persistence is localStorage, so a gate protected nothing; sign-in buys sync + publishing, never access) |
+| `/tools` | 307s to `/tools/workshop` (next.config redirect runs before the proxy) — effectively public |
+| `/workshop`, `/workshop/*` | Yes — community gallery + public drill views |
+| `/routes`, `/routes/*` | Yes — guided routes are help content |
 | `/sign-in/*`, `/sign-up/*` | Yes |
 | `/api/*` | Yes at the proxy; each handler authenticates itself |
 | `/__clerk/*` | Yes — Clerk frontend API |
 | `/articles`, `/articles/*` | Yes — public learning library (SEO/marketing for the free community) |
-| `/tools`, all other `/tools/*` | No |
+| All other `/tools/*` | No |
 | `/chat`, `/settings/*` | No |
 
 ### The `NEXT_PUBLIC_AUTH_DISABLED` bypass
@@ -363,7 +367,8 @@ Make sure the **Convex dev server is running** before starting tests, because th
 
 | Spec | Asserts |
 |------|---------|
-| `e2e/auth-protection.spec.ts` | Every protected route redirects to `/sign-in`; `/` and `/tools/chladni` stay public; signed-in `/tools`, homepage, and a tracking deep link render without a crash |
+| `e2e/auth-protection.spec.ts` | Protected routes redirect to `/sign-in`; `/`, `/tools/chladni`, and the Workshop stay public; signed-in smoke across all app pages |
+| `e2e/workshop-anonymous.spec.ts` | Unsigned visitor reaches the starter picker, no onboarding overlay, marketplace round-trip adds a block; drills still redirect |
 | `e2e/chat-auth.spec.ts` | `POST /api/chat` without a session returns 401 |
 | `e2e/auth-assertions.ts` | Shared helpers — `expectRedirectedToSignIn`, `expectNotBare404`, `expectNoApplicationError`, and the bypass guard |
 
@@ -385,11 +390,12 @@ npx playwright test --workers=1
 
 On the **custom domain** (not only `*.vercel.app`):
 
-1. Incognito: `/tools` → redirect to sign-in (not a bare 404).
+1. Incognito: `/tools` lands on the public workshop (307 → `/tools/workshop`).
 2. Sign in → `/tools` and a drill page load.
 3. Firefox (default ETP): same as (1)–(2).
 4. Unsigned `/` and `/tools/chladni` still work.
-5. Confirm Vercel Production does **not** have `NEXT_PUBLIC_AUTH_DISABLED=true`.
+5. Unsigned `/tools/workshop` reaches the starter picker (Change A).
+6. Confirm Vercel Production does **not** have `NEXT_PUBLIC_AUTH_DISABLED=true`.
 
 Test credentials are stored in `.env.local` as `E2E_CLERK_USER_EMAIL` and `E2E_CLERK_USER_PASSWORD`.
 

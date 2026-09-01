@@ -1,26 +1,27 @@
 import { clerkMiddleware } from "@clerk/nextjs/server";
 import { isAuthBypassEffective } from "@/lib/auth-disabled";
 import { getAuthorizedPartiesFromEnv } from "@/lib/clerk-authorized-parties";
+import { isPublicPath } from "@/lib/public-routes";
 
 /**
  * Clerk proxy middleware for Next.js 16+.
  *
- * Public routes: home, Pricing, Articles, Pattern Lab (homepage hero
- * editor), dev lab, sign-in/up, API, and Clerk's frontend API. Other
- * /tools/* routes require authentication, unless
+ * The public-route matrix lives in `lib/public-routes.ts` (unit-tested
+ * there). In short: home, Pricing, Articles, guided routes, legal, the
+ * community gallery (`/workshop`), Pattern Lab, the dev lab, the Workshop
+ * editor + marketplace, sign-in/up, API, and Clerk's frontend API are
+ * anonymous-access. Other `/tools/*` routes require authentication, unless
  * `NEXT_PUBLIC_AUTH_DISABLED=true`. The bypass is never honored on Vercel
  * Production (see `isAuthBypassEffective`), so a stray env assignment there
  * cannot open the site.
  *
+ * The Workshop is public because the Free tier persists pages to
+ * localStorage (`lib/custom-practice-storage.ts`) — the gate protected
+ * nothing. Sign-in buys sync and publishing, not access.
+ *
  * Every `app/api/**` route handler must authorize itself via `auth()` —
  * `/api` is public here by design (handlers are the enforcement point,
  * e.g. `/api/chat` checks the session + allowlist).
- *
- * Pricing is public so visitors can evaluate Free vs Pro before signing up.
- * Pattern Lab is public so visitors can customize the welcome hero without
- * signing in (prefs still sync to Convex when authenticated).
- * The dev lab is public so styling can be iterated from any deployment
- * without requiring authentication.
  *
  * Always pass `unauthenticatedUrl` so document requests redirect to
  * `/sign-in` instead of collapsing into a bare Next.js 404 (Clerk-dev + // pragma: allowlist secret
@@ -35,34 +36,13 @@ import { getAuthorizedPartiesFromEnv } from "@/lib/clerk-authorized-parties";
  */
 const authorizedParties = getAuthorizedPartiesFromEnv();
 
-/** Exact match or descendant — `startsWith("/dev")` alone would also open
- * `/devtools`, `startsWith("/sign-in")` would open `/sign-in-anything`. */
-const isExactOrUnder = (pathname: string, base: string): boolean =>
-  pathname === base || pathname.startsWith(base + "/");
-
 export default clerkMiddleware(
   async (auth, request) => {
     if (isAuthBypassEffective()) {
       return;
     }
 
-    const pathname = request.nextUrl.pathname;
-
-    const isPublicRoute =
-      pathname === "/" ||
-      pathname === "/pricing" ||
-      pathname === "/tools/chladni" ||
-      // Guided routes are help content; activation starts before sign-up.
-      isExactOrUnder(pathname, "/routes") ||
-      // Legal pages must be readable by anonymous visitors.
-      pathname === "/terms" ||
-      pathname === "/privacy" ||
-      // Workshop gallery + public drill pages are public for community sharing.
-      ["/articles", "/dev", "/sign-in", "/sign-up", "/api", "/__clerk", "/workshop"].some(
-        (base) => isExactOrUnder(pathname, base)
-      );
-
-    if (!isPublicRoute) {
+    if (!isPublicPath(request.nextUrl.pathname)) {
       const signInUrl = new URL("/sign-in", request.url).href; // pragma: allowlist secret
       await auth.protect({ unauthenticatedUrl: signInUrl });
     }

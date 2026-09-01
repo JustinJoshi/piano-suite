@@ -11,6 +11,7 @@ export default defineProject({
     setupFiles: ["./vitest.setup.ts"],
     include: [
       "app/**/*.test.ts",
+      "app/**/*.test.tsx",
       "lib/**/*.test.ts",
       "hooks/**/*.test.ts",
       "hooks/**/*.test.tsx",
