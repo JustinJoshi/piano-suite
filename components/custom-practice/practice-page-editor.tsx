@@ -13,6 +13,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { PracticePage, FeatureBlock } from "@/lib/feature-blocks/types";
 import { resizeBlocks } from "@/lib/workshop-grid";
+import { isAtBlockLimit } from "@/lib/feature-blocks/registry";
 import { buildTemplatePage, type StarterTemplate } from "@/lib/starter-templates";
 import { ShareMenu } from "@/components/custom-practice/share-menu";
 import { PagesMenu } from "@/components/custom-practice/pages-menu";
@@ -130,6 +131,9 @@ export function PracticePageEditor() {
   function duplicateBlock(id: string) {
     const block = page.blocks.find((b) => b.id === id);
     if (!block) return;
+    // Some blocks only make sense once per page — a second chord set or scale
+    // run would sit inert behind the first (see `target-blocks.ts`).
+    if (isAtBlockLimit(page.blocks, block.type)) return;
 
     const index = page.blocks.indexOf(block);
     const newBlock: FeatureBlock = {

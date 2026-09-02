@@ -4,10 +4,14 @@ import {
   normalizeStarterTemplate,
   starterTemplates,
 } from "@/lib/starter-templates";
+import { isTargetBlockType } from "@/lib/feature-blocks/target-blocks";
 
 describe("starter templates", () => {
   it("ships a valid set of starter practice pages", () => {
-    expect(starterTemplates).toHaveLength(10);
+    expect(starterTemplates.length).toBeGreaterThanOrEqual(10);
+
+    const ids = starterTemplates.map((template) => template.id);
+    expect(new Set(ids).size).toBe(ids.length);
 
     for (const template of starterTemplates) {
       const normalized = normalizeStarterTemplate(template);
@@ -20,6 +24,15 @@ describe("starter templates", () => {
     const ids = starterTemplates.map((template) => template.id);
     expect(ids).toContain("music-theory-starter");
     expect(ids).toContain("finger-flexibility-starter");
+  });
+
+  it("keeps every template to one target block", () => {
+    for (const template of starterTemplates) {
+      const targets = template.blocks.filter((b) =>
+        isTargetBlockType(b.type)
+      );
+      expect(targets.length).toBeLessThanOrEqual(1);
+    }
   });
 
   it("creates a page with fresh ids without changing the template", () => {

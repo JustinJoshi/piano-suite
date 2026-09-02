@@ -10,6 +10,7 @@ vi.mock("convex/react", () => ({
 
 function runtimeStub(phase: DrillRuntime["phase"]): DrillRuntime {
   return {
+    pageId: "page-1",
     phase,
     liveMs: 0,
     countdownValue: 0,
@@ -22,6 +23,8 @@ function runtimeStub(phase: DrillRuntime["phase"]): DrillRuntime {
     reset: vi.fn(),
     setTargets: vi.fn(),
     skipTarget: vi.fn(),
+    registerTargetSource: vi.fn(() => vi.fn()),
+    activeTargetSource: null,
   };
 }
 

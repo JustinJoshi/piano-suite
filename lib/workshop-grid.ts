@@ -60,6 +60,11 @@ const TYPE_DEFAULT_SIZES: Record<string, BlockSize> = {
   midiConnectionBar: { w: 4, h: 1 },
   drillShortcuts: { w: 4, h: 1 },
   keyboardDisplay: { w: 4, h: 1 },
+  scaleRunner: { w: 2, h: 2 },
+  rootCycle: { w: 2, h: 2 },
+  progression: { w: 2, h: 2 },
+  sessionStats: { w: 2, h: 1 },
+  restTimer: { w: 2, h: 1 },
 };
 
 function clamp(n: number, min: number, max: number): number {

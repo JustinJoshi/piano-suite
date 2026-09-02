@@ -5,6 +5,11 @@ import { normalizeTextBlockConfig } from "./text-block/config";
 import { normalizeMidiConnectionBarConfig } from "./midi-connection-bar/config";
 import { normalizeDrillShortcutsConfig } from "./drill-shortcuts/config";
 import { normalizeKeyboardDisplayConfig } from "./keyboard-display/config";
+import { normalizeScaleRunnerConfig } from "./scale-runner/config";
+import { normalizeRootCycleConfig } from "./root-cycle/config";
+import { normalizeProgressionBlockConfig } from "./progression/config";
+import { normalizeSessionStatsConfig } from "./session-stats/config";
+import { normalizeRestTimerConfig } from "./rest-timer/config";
 import { normalizeSize } from "../workshop-grid";
 
 /**
@@ -29,7 +34,15 @@ const blockNormalizers: Record<string, BlockNormalizer> = {
   midiConnectionBar: normalizeMidiConnectionBarConfig as BlockNormalizer,
   drillShortcuts: normalizeDrillShortcutsConfig as BlockNormalizer,
   keyboardDisplay: normalizeKeyboardDisplayConfig as BlockNormalizer,
+  scaleRunner: normalizeScaleRunnerConfig as BlockNormalizer,
+  rootCycle: normalizeRootCycleConfig as BlockNormalizer,
+  progression: normalizeProgressionBlockConfig as BlockNormalizer,
+  sessionStats: normalizeSessionStatsConfig as BlockNormalizer,
+  restTimer: normalizeRestTimerConfig as BlockNormalizer,
 };
+
+/** The block types `normalizeStoredBlock` will accept. */
+export const KNOWN_BLOCK_TYPES = Object.keys(blockNormalizers);
 
 export type ValidatedBlock = {
   id: string;

@@ -37,6 +37,9 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
   } = options;
 
   const [targets, setTargetsState] = useState<ChordTarget[]>([]);
+  // Ordered list of mounted target blocks. The head owns `setTargets`; see
+  // `lib/feature-blocks/target-blocks.ts` for why a page has only one owner.
+  const [targetSources, setTargetSources] = useState<string[]>([]);
   const [targetIndex, setTargetIndex] = useState(0);
   const [misses, setMisses] = useState(0);
   const missReportedRef = useRef(false);
@@ -163,6 +166,21 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
     missReportedRef.current = false;
   }, []);
 
+  const registerTargetSource = useCallback((ownerKey: string) => {
+    setTargetSources((prev) => [...prev, ownerKey]);
+    return () => {
+      setTargetSources((prev) => {
+        // Remove one occurrence, not every match: two blocks of the same type
+        // register the same key.
+        const index = prev.indexOf(ownerKey);
+        if (index === -1) return prev;
+        return [...prev.slice(0, index), ...prev.slice(index + 1)];
+      });
+    };
+  }, []);
+
+  const activeTargetSource = targetSources[0] ?? null;
+
   const start = useCallback(() => {
     setTargetIndex(0);
     setMisses(0);
@@ -228,6 +246,7 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
 
   return useMemo(
     () => ({
+      pageId,
       phase: timer.phase,
       liveMs: timer.liveMs,
       countdownValue: timer.countdownValue,
@@ -240,6 +259,8 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
       reset,
       setTargets,
       skipTarget,
+      registerTargetSource,
+      activeTargetSource,
     }),
     [
       timer.phase,
@@ -254,6 +275,9 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
       reset,
       setTargets,
       skipTarget,
+      pageId,
+      registerTargetSource,
+      activeTargetSource,
     ]
   );
 }

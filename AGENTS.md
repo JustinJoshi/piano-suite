@@ -106,7 +106,16 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `components/workshop-marketplace/*` | Block library view for the Workshop: live interactive previews of every registry block with plus/check add-remove buttons; route at `/tools/workshop/blocks` (renamed from `/tools/workshop/marketplace` — see audit Phase 0.3) |
 | `components/custom-practice/*` | Workshop practice-page editor: full-width grid page, pages dropdown menu (`PagesMenu`, incl. share), `DrillRuntimeProvider`, shared `FieldInput` settings renderer |
 | `lib/custom-practice-storage.ts` | `localStorage` persistence for custom practice pages (Free tier); fresh stores seed a `drillShortcuts` starter tile; `isStarterPage` gates onboarding; `forkPageIntoStore` sanitizes and copies a public/featured page into the store (used by the marketplace fork button) |
-| `lib/drill-runtime.ts` / `hooks/useDrillRuntime.ts` | Shared drill runtime context (countdown → armed → timing → success → break → finished) driving workshop blocks; logs events to Convex (Pro) or local history (Free), graded by miss count via the chord-set thresholds. `runtimeOptionsFromBlocks` resolves the page's `drillTimer`/`chordSet` config into runtime options — `DrillRuntimeProvider` must receive `blocks` or the settings are inert |
+| `lib/drill-runtime.ts` / `hooks/useDrillRuntime.ts` | Shared drill runtime context (countdown → armed → timing → success → break → finished) driving workshop blocks; logs events to Convex (Pro) or local history (Free), graded by miss count via the active target block's thresholds. `runtimeOptionsFromBlocks` resolves the page's `drillTimer` config plus the **first target block's** scoring into runtime options — `DrillRuntimeProvider` must receive `blocks` or the settings are inert. Exposes `pageId` so blocks like `sessionStats` can read their own page's history |
+| `lib/feature-blocks/target-blocks.ts` | Target-block arbitration: which block types `provide: "targets"`, which one owns the page (`activeTargetBlock` — first in page order), and each one's scoring resolver. React-free; read by both `drill-runtime` and the Convex-bundled `schemas.ts` |
+| `hooks/useTargetSource.ts` | The hook every target block calls: registers with the runtime, reports `isActive` / `isSuperseded`, and pushes targets only when it owns them. Never call `runtime.setTargets` directly from a block |
+| `components/feature-blocks/target-block-shell.tsx` | Shared chrome for target blocks (current target, position, misses, skip) plus the no-runtime and superseded states |
+| `lib/drill-targets.ts` | Pure `config → ChordTarget[]` builders for scale runs, key cycles, and progressions. New drill blocks should add a builder here rather than a new engine |
+| `lib/scales.ts` | Scale/mode table (modes, altered minors, pentatonics, blues, chromatic) plus span / pattern / direction math for scale runs |
+| `lib/key-cycles.ts` | Circle-of-fourths / fifths / chromatic / random key orders, shared by the key-cycle and progression blocks |
+| `lib/roman-numerals.ts` | Roman-numeral parsing (`I V vi IV`, `ii7 V7 Imaj7`) and the triad qualities `music-theory.ts` deliberately omits |
+| `lib/session-stats.ts` | Reps / best / average / grade-split summary over practice events, for the `sessionStats` block |
+| `lib/feature-blocks/coerce.ts` | Shared config-normalizer helpers (`toInt`, `toBool`, `toEnum`, `normalizeScoring`) and the `scoringFields` settings rows every target block reuses |
 | `hooks/useChordTargets.ts` | Sequential / random chord-target generation from selected roots and quality groups |
 | `lib/feature-blocks/keyboard-display/*` | On-screen keyboard block: config (low note, octaves, note names, computer keys) + pure key geometry (`buildKeyboardLayout`, home-row A W S E D… mapping) |
 | `components/feature-blocks/keyboard-display-block.tsx` | Click/touch/QWERTY piano that injects notes via `pressVirtualNote`; `MidiConnectionBar` embeds it whenever no hardware is connected so every drill works without a controller |
@@ -126,6 +135,17 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 3. **Log practice events to Convex.** The `practiceEvents` and `missEvents` tables are the source of truth for tracking. Do not store drill history only in component state or localStorage.
 4. **Keep Anki integration optional.** All Anki features must degrade gracefully when AnkiConnect is not running.
 5. **Add unit tests for pure logic.** Chord parsing, scoring, and Anki client behavior must be tested with Vitest. Hook behavior should be tested with React Testing Library.
+
+## Rules for feature blocks
+
+The block library is the bottleneck (audit `04-roadmap.md`), so adding a block should be cheap and adding a *page* or a *lab* should not. A new block is a config file, a render component, and three registrations.
+
+1. **Register in three places, and CI checks two of them.** `lib/feature-blocks/registry.ts` (client), `lib/feature-blocks/schemas.ts` `blockNormalizers` (Convex-bundled validation), and a default size in `lib/workshop-grid.ts`. `lib/feature-blocks/__tests__/registry-parity.test.ts` fails if the registry and the normalizer map disagree.
+2. **Never name a config field `key`, `ref`, or `children`.** `FeatureRenderer` spreads config straight onto the component, so React swallows those names and the block silently renders `undefined`. Use `keyRoot` (see the progression block). The parity test guards this.
+3. **A block that produces drill targets must declare `provides: "targets"` and `maxPerPage: 1`,** add itself to `TARGET_BLOCK_TYPES` in `target-blocks.ts` with a scoring resolver, drive its targets through `useTargetSource`, and render through `TargetBlockShell`. Only the first target block on a page is live.
+4. **Put the `config → targets` math in `lib/drill-targets.ts`** (pure, unit-tested) and keep the component to rendering. `ChordTarget` is a pitch-class set, so a single note is a one-element target — scales, intervals, and arpeggios all fit without touching the runtime.
+5. **Scoring is per target block.** `requireExact` defaults to `true` for single-note targets (a scale step) and `false` for chords; reuse `scoringFields` from `lib/feature-blocks/coerce.ts` so the settings read the same everywhere.
+6. **Known limitation:** the runtime scores pitch classes, so octave, voicing, fingering, and hand separation are *not* verified. Chord inversions can be prompted but not graded until `ChordTarget` grows an optional voicing-aware field.
 
 ## Navigation conventions (Workshop-first)
 
