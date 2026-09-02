@@ -2,11 +2,44 @@ import type { FeatureBlock } from "./types";
 import type {
   ComponentManifest,
   ComponentKind,
+  ConfigFieldSpec,
   RequirementId,
   StreamShape,
   WiringIssue,
   ResolvedChain,
 } from "./manifest-types";
+
+/**
+ * Every target block (chordSet, scaleRunner, rootCycle, progression) spreads
+ * `scoringFields` from `lib/feature-blocks/coerce.ts` onto its own fields.
+ * Mirrored here so manifest configSpecs stay in parity with the registry.
+ */
+const TARGET_SCORING_FIELDS: ConfigFieldSpec[] = [
+  {
+    kind: "toggle",
+    key: "requireExact",
+    label: "Require exact notes",
+    helperText: "Extra notes count as wrong",
+  },
+  {
+    kind: "range",
+    key: "goodThreshold",
+    label: "Good threshold",
+    min: 0,
+    max: 20,
+    step: 1,
+    helperText: "Max misses for a Good grade",
+  },
+  {
+    kind: "range",
+    key: "hardThreshold",
+    label: "Hard threshold",
+    min: 0,
+    max: 20,
+    step: 1,
+    helperText: "Max misses for a Hard grade",
+  },
+];
 
 // Component manifests are loaded at build time from the per-component manifest.ts files.
 // For now, we have the existing 12 blocks from PR #77, all of which are interactive.
@@ -230,7 +263,6 @@ const EXISTING_BLOCK_MANIFESTS: Record<string, ComponentManifest> = {
     configSpec: [],
     defaultSize: { w: 2, h: 2 },
     minSize: { w: 1, h: 1 },
-    maxPerPage: 1,
     docsPath: "docs/components/drill-shortcuts.md",
     status: "stable",
   },
@@ -296,13 +328,54 @@ const EXISTING_BLOCK_MANIFESTS: Record<string, ComponentManifest> = {
     configSpec: [
       {
         kind: "select",
-        key: "scale",
+        key: "root",
+        label: "Root",
+        options: [
+          { label: "C", value: "C" },
+          { label: "F", value: "F" },
+          { label: "G", value: "G" },
+        ],
+      },
+      {
+        kind: "select",
+        key: "scaleId",
         label: "Scale",
         options: [
           { label: "Major", value: "major" },
           { label: "Natural minor", value: "naturalMinor" },
         ],
       },
+      {
+        kind: "select",
+        key: "span",
+        label: "Range",
+        options: [
+          { label: "Five-finger (degrees 1-5)", value: "pentascale" },
+          { label: "One octave", value: "octave" },
+          { label: "Two octaves", value: "twoOctaves" },
+        ],
+      },
+      {
+        kind: "select",
+        key: "pattern",
+        label: "Pattern",
+        options: [
+          { label: "Straight", value: "straight" },
+          { label: "Broken thirds", value: "thirds" },
+          { label: "Broken triads", value: "triads" },
+        ],
+      },
+      {
+        kind: "select",
+        key: "direction",
+        label: "Direction",
+        options: [
+          { label: "Up", value: "up" },
+          { label: "Down", value: "down" },
+          { label: "Up and down", value: "upDown" },
+        ],
+      },
+      ...TARGET_SCORING_FIELDS,
     ],
     defaultSize: { w: 2, h: 2 },
     minSize: { w: 1, h: 1 },
@@ -324,13 +397,43 @@ const EXISTING_BLOCK_MANIFESTS: Record<string, ComponentManifest> = {
     configSpec: [
       {
         kind: "select",
-        key: "shape",
-        label: "Shape",
+        key: "qualityId",
+        label: "Chord shape",
         options: [
           { label: "Major triad", value: "major" },
           { label: "Minor triad", value: "minor" },
         ],
       },
+      {
+        kind: "select",
+        key: "startRoot",
+        label: "Start on",
+        options: [
+          { label: "C", value: "C" },
+          { label: "F", value: "F" },
+          { label: "G", value: "G" },
+        ],
+      },
+      {
+        kind: "select",
+        key: "order",
+        label: "Cycle order",
+        options: [
+          { label: "Fourths", value: "fourths" },
+          { label: "Fifths", value: "fifths" },
+          { label: "Chromatic", value: "chromatic" },
+          { label: "Random", value: "random" },
+        ],
+      },
+      {
+        kind: "range",
+        key: "keyCount",
+        label: "Keys per round",
+        min: 1,
+        max: 12,
+        step: 1,
+      },
+      ...TARGET_SCORING_FIELDS,
     ],
     defaultSize: { w: 2, h: 2 },
     minSize: { w: 1, h: 1 },
@@ -351,11 +454,57 @@ const EXISTING_BLOCK_MANIFESTS: Record<string, ComponentManifest> = {
     requires: [],
     configSpec: [
       {
-        kind: "text",
-        key: "numerals",
+        kind: "select",
+        key: "source",
         label: "Progression",
-        placeholder: "ii V I",
+        options: [
+          { label: "ii-V-I", value: "ii-V-I" },
+          { label: "12-bar blues", value: "blues12" },
+          { label: "Pop loop (I-V-vi-IV)", value: "pop" },
+          { label: "Custom", value: "custom" },
+        ],
       },
+      {
+        kind: "select",
+        key: "keyRoot",
+        label: "Key",
+        options: [
+          { label: "C", value: "C" },
+          { label: "F", value: "F" },
+          { label: "G", value: "G" },
+        ],
+      },
+      {
+        kind: "text",
+        key: "customText",
+        label: "Custom roman numerals",
+        placeholder: "I V vi IV",
+      },
+      {
+        kind: "toggle",
+        key: "cycleKeys",
+        label: "Run through every key",
+      },
+      {
+        kind: "select",
+        key: "cycleOrder",
+        label: "Cycle order",
+        options: [
+          { label: "Fourths", value: "fourths" },
+          { label: "Fifths", value: "fifths" },
+          { label: "Chromatic", value: "chromatic" },
+          { label: "Random", value: "random" },
+        ],
+      },
+      {
+        kind: "range",
+        key: "keyCount",
+        label: "Keys per round",
+        min: 1,
+        max: 12,
+        step: 1,
+      },
+      ...TARGET_SCORING_FIELDS,
     ],
     defaultSize: { w: 2, h: 2 },
     minSize: { w: 1, h: 1 },
@@ -374,7 +523,26 @@ const EXISTING_BLOCK_MANIFESTS: Record<string, ComponentManifest> = {
     accepts: [],
     outputs: [],
     requires: [],
-    configSpec: [],
+    configSpec: [
+      {
+        kind: "range",
+        key: "windowDays",
+        label: "Window",
+        min: 1,
+        max: 90,
+        step: 1,
+      },
+      {
+        kind: "toggle",
+        key: "showGrades",
+        label: "Show grade split",
+      },
+      {
+        kind: "toggle",
+        key: "showBest",
+        label: "Show best time",
+      },
+    ],
     defaultSize: { w: 2, h: 2 },
     minSize: { w: 1, h: 1 },
     maxPerPage: 1,
@@ -457,7 +625,6 @@ export function manifestsByKind(): Record<ComponentKind, ComponentManifest[]> {
  */
 export function validatePageWiring(blocks: FeatureBlock[]): WiringIssue[] {
   const issues: WiringIssue[] = [];
-  const typesByBlock = new Map(blocks.map((b) => [b.id, b.type]));
   const manifests = new Map(
     Object.values(EXISTING_BLOCK_MANIFESTS).map((m) => [m.type, m])
   );
