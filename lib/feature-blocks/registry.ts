@@ -1,4 +1,17 @@
-import { Timer, Hourglass, Music, Type, Cable, Zap, Piano } from "lucide-react";
+import {
+  Timer,
+  Hourglass,
+  Music,
+  Type,
+  Cable,
+  Zap,
+  Piano,
+  AudioWaveform,
+  RefreshCw,
+  ListMusic,
+  BarChart3,
+  Coffee,
+} from "lucide-react";
 import { MetronomeBlock } from "@/components/feature-blocks/metronome-block";
 import { DrillTimerBlock } from "@/components/feature-blocks/drill-timer-block";
 import { ChordSetBlock } from "@/components/feature-blocks/chord-set-block";
@@ -6,6 +19,11 @@ import { TextBlock } from "@/components/feature-blocks/text-block";
 import { MidiConnectionBarBlock } from "@/components/feature-blocks/midi-connection-bar-block";
 import { DrillShortcutsBlock } from "@/components/feature-blocks/drill-shortcuts-block";
 import { KeyboardDisplayBlock } from "@/components/feature-blocks/keyboard-display-block";
+import { ScaleRunnerBlock } from "@/components/feature-blocks/scale-runner-block";
+import { RootCycleBlock } from "@/components/feature-blocks/root-cycle-block";
+import { ProgressionBlock } from "@/components/feature-blocks/progression-block";
+import { SessionStatsBlock } from "@/components/feature-blocks/session-stats-block";
+import { RestTimerBlock } from "@/components/feature-blocks/rest-timer-block";
 import {
   metronomeDefaultConfig,
   normalizeMetronomeConfig,
@@ -41,6 +59,31 @@ import {
   normalizeKeyboardDisplayConfig,
   keyboardDisplayFields,
 } from "@/lib/feature-blocks/keyboard-display/config";
+import {
+  scaleRunnerDefaultConfig,
+  normalizeScaleRunnerConfig,
+  scaleRunnerFields,
+} from "@/lib/feature-blocks/scale-runner/config";
+import {
+  rootCycleDefaultConfig,
+  normalizeRootCycleConfig,
+  rootCycleFields,
+} from "@/lib/feature-blocks/root-cycle/config";
+import {
+  progressionDefaultConfig,
+  normalizeProgressionBlockConfig,
+  progressionFields,
+} from "@/lib/feature-blocks/progression/config";
+import {
+  sessionStatsDefaultConfig,
+  normalizeSessionStatsConfig,
+  sessionStatsFields,
+} from "@/lib/feature-blocks/session-stats/config";
+import {
+  restTimerDefaultConfig,
+  normalizeRestTimerConfig,
+  restTimerFields,
+} from "@/lib/feature-blocks/rest-timer/config";
 import type { ComponentType } from "react";
 import type { FeatureDefinition } from "@/lib/feature-blocks/types";
 
@@ -77,6 +120,8 @@ export const featureRegistry = {
     defaultConfig: chordSetDefaultConfig,
     normalizeConfig: normalizeChordSetConfig,
     component: ChordSetBlock as ComponentType<Record<string, unknown>>,
+    provides: "targets",
+    maxPerPage: 1,
   } satisfies FeatureDefinition<Record<string, unknown>>,
   textBlock: {
     type: "textBlock",
@@ -123,6 +168,71 @@ export const featureRegistry = {
     normalizeConfig: normalizeKeyboardDisplayConfig,
     component: KeyboardDisplayBlock as ComponentType<Record<string, unknown>>,
   } satisfies FeatureDefinition<Record<string, unknown>>,
+  scaleRunner: {
+    type: "scaleRunner",
+    category: "technique",
+    label: "Scale run",
+    description:
+      "Scales, modes, and five-finger patterns as a timed run of single notes.",
+    icon: AudioWaveform,
+    fields: scaleRunnerFields,
+    defaultConfig: scaleRunnerDefaultConfig,
+    normalizeConfig: normalizeScaleRunnerConfig,
+    component: ScaleRunnerBlock as ComponentType<Record<string, unknown>>,
+    provides: "targets",
+    maxPerPage: 1,
+  } satisfies FeatureDefinition<Record<string, unknown>>,
+  rootCycle: {
+    type: "rootCycle",
+    category: "theory",
+    label: "Key cycle",
+    description:
+      "Take one chord shape around the circle of fourths, fifths, or all twelve keys.",
+    icon: RefreshCw,
+    fields: rootCycleFields,
+    defaultConfig: rootCycleDefaultConfig,
+    normalizeConfig: normalizeRootCycleConfig,
+    component: RootCycleBlock as ComponentType<Record<string, unknown>>,
+    provides: "targets",
+    maxPerPage: 1,
+  } satisfies FeatureDefinition<Record<string, unknown>>,
+  progression: {
+    type: "progression",
+    category: "theory",
+    label: "Progression",
+    description:
+      "ii-V-I, 12-bar blues, a pop loop, or your own roman numerals — in one key or every key.",
+    icon: ListMusic,
+    fields: progressionFields,
+    defaultConfig: progressionDefaultConfig,
+    normalizeConfig: normalizeProgressionBlockConfig,
+    component: ProgressionBlock as ComponentType<Record<string, unknown>>,
+    provides: "targets",
+    maxPerPage: 1,
+  } satisfies FeatureDefinition<Record<string, unknown>>,
+  sessionStats: {
+    type: "sessionStats",
+    category: "progress",
+    label: "Session stats",
+    description: "Reps, speed, and grades for this practice page.",
+    icon: BarChart3,
+    fields: sessionStatsFields,
+    defaultConfig: sessionStatsDefaultConfig,
+    normalizeConfig: normalizeSessionStatsConfig,
+    component: SessionStatsBlock as ComponentType<Record<string, unknown>>,
+    maxPerPage: 1,
+  } satisfies FeatureDefinition<Record<string, unknown>>,
+  restTimer: {
+    type: "restTimer",
+    category: "rhythm",
+    label: "Rest timer",
+    description: "Count down a rest between sets so a session stays time-boxed.",
+    icon: Coffee,
+    fields: restTimerFields,
+    defaultConfig: restTimerDefaultConfig,
+    normalizeConfig: normalizeRestTimerConfig,
+    component: RestTimerBlock as ComponentType<Record<string, unknown>>,
+  } satisfies FeatureDefinition<Record<string, unknown>>,
 };
 
 export type FeatureType = keyof typeof featureRegistry;
@@ -139,5 +249,26 @@ export const featureCategories = [
   { id: "rhythm", label: "Rhythm" },
   { id: "technique", label: "Technique" },
   { id: "theory", label: "Theory" },
+  { id: "progress", label: "Progress" },
   { id: "visualization", label: "Visualization" },
 ] as const;
+
+/**
+ * How many copies of a block a page may hold. `Infinity` when unconstrained.
+ */
+export function maxPerPage(type: string): number {
+  // `satisfies` narrows each entry to its own literal type, so the registry
+  // union does not carry the optional fields — widen before reading them.
+  const def = getFeatureDefinition(type) as FeatureDefinition<
+    Record<string, unknown>
+  > | null;
+  return def?.maxPerPage ?? Infinity;
+}
+
+/** True when the page already holds as many of `type` as it may. */
+export function isAtBlockLimit(
+  blocks: readonly { type: string }[],
+  type: string
+): boolean {
+  return blocks.filter((b) => b.type === type).length >= maxPerPage(type);
+}
