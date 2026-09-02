@@ -3,6 +3,7 @@ import type {
   ComponentManifest,
   ComponentKind,
   RequirementId,
+  StreamShape,
   WiringIssue,
   ResolvedChain,
 } from "./manifest-types";
@@ -585,12 +586,12 @@ export function resolveChain(blocks: FeatureBlock[]): ResolvedChain {
 /**
  * Convert a RequirementId to its corresponding StreamShape.
  */
-function requirementToStream(req: RequirementId): string {
+function requirementToStream(req: RequirementId): StreamShape {
   switch (req) {
     case "practiceNotes":
       return "practiceNotes";
-    case "audioLoop":
-      return "audioLoop";
+    case "transport":
+      return "none";
     default:
       return "none";
   }
