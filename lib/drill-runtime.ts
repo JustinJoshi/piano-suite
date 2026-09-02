@@ -2,7 +2,11 @@
 
 import { createContext, useContext } from "react";
 import { normalizeDrillTimerConfig } from "@/lib/feature-blocks/drill-timer/config";
-import { normalizeChordSetConfig } from "@/lib/feature-blocks/chord-set/config";
+import {
+  activeTargetBlock,
+  resolveTargetScoring,
+  DEFAULT_TARGET_SCORING,
+} from "@/lib/feature-blocks/target-blocks";
 
 export type DrillPhase =
   | "idle"
@@ -21,6 +25,9 @@ export type ChordTarget = {
 };
 
 export type DrillRuntime = {
+  /** Practice page this runtime belongs to; "" in preview contexts. */
+  pageId: string;
+
   phase: DrillPhase;
   liveMs: number;
   countdownValue: number;
@@ -35,6 +42,15 @@ export type DrillRuntime = {
   reset: () => void;
   setTargets: (targets: ChordTarget[]) => void;
   skipTarget: () => void;
+
+  /**
+   * Claim the runtime's target list for a block type. Returns an unregister
+   * function. The first claimant still mounted owns the targets; every target
+   * block goes through `hooks/useTargetSource.ts` rather than calling this.
+   */
+  registerTargetSource: (ownerKey: string) => () => void;
+  /** Owner key currently allowed to call `setTargets`, or null. */
+  activeTargetSource: string | null;
 };
 
 const DrillRuntimeContext = createContext<DrillRuntime | null>(null);
@@ -48,8 +64,8 @@ export function useDrillRuntime(): DrillRuntime | null {
 /**
  * Page-level drill configuration resolved from feature blocks.
  *
- * `goodThreshold` / `hardThreshold` are miss-count thresholds (the chord-set
- * settings editor labels them "max misses for a Good/Hard grade"), matching
+ * `goodThreshold` / `hardThreshold` are miss-count thresholds (target-block
+ * settings editors label them "max misses for a Good/Hard grade"), matching
  * `gradeForMisses` in `lib/sequence-drill.ts`.
  */
 export type DrillRuntimeConfig = {
@@ -69,30 +85,32 @@ const NO_TIMER_BLOCK_DEFAULTS = {
 /**
  * Derive the drill runtime config from a page's blocks: the first
  * `drillTimer` block owns the round shape (countdown / break / multi-rep),
- * the first `chordSet` block owns scoring (require-exact, grade thresholds).
+ * and the first *target* block owns scoring (require-exact, grade
+ * thresholds) — a chord set, scale run, key cycle, or progression.
  *
- * Without a `drillTimer` block, `multiRep` stays true so multi-target chord
- * sets keep their legacy behavior of running every target in one round.
+ * Without a `drillTimer` block, `multiRep` stays true so multi-target pages
+ * keep their legacy behavior of running every target in one round.
  */
 export function runtimeOptionsFromBlocks(
   blocks: Array<{ type: string; config: unknown }>
 ): DrillRuntimeConfig {
   const timerBlock = blocks.find((b) => b.type === "drillTimer");
-  const chordBlock = blocks.find((b) => b.type === "chordSet");
+  const targetBlock = activeTargetBlock(blocks);
 
   const timer = timerBlock
     ? normalizeDrillTimerConfig(timerBlock.config)
     : null;
-  const chords = chordBlock
-    ? normalizeChordSetConfig(chordBlock.config)
-    : null;
+  const scoring =
+    (targetBlock
+      ? resolveTargetScoring(targetBlock.type, targetBlock.config)
+      : null) ?? DEFAULT_TARGET_SCORING;
 
   return {
     countdownSeconds: timer?.countdownSeconds ?? 3,
     breakSeconds: timer?.breakSeconds ?? 5,
     multiRep: timer ? timer.multiRep : NO_TIMER_BLOCK_DEFAULTS.multiRep,
-    requireExact: chords?.requireExact ?? false,
-    goodThreshold: chords?.goodThreshold ?? 0,
-    hardThreshold: chords?.hardThreshold ?? 2,
+    requireExact: scoring.requireExact,
+    goodThreshold: scoring.goodThreshold,
+    hardThreshold: scoring.hardThreshold,
   };
 }

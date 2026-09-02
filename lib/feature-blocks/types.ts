@@ -51,6 +51,7 @@ export type FeatureCategory =
   | "rhythm"
   | "technique"
   | "theory"
+  | "progress"
   | "visualization";
 
 /**
@@ -68,6 +69,17 @@ export type FeatureDefinition<C extends Record<string, unknown>> = {
   defaultConfig: C;
   normalizeConfig: (raw: unknown) => C;
   component: ComponentType<C>;
+  /**
+   * What this block contributes to the page runtime. `"targets"` blocks feed
+   * the drill runtime, and only the first one on a page is live — see
+   * `lib/feature-blocks/target-blocks.ts`.
+   */
+  provides?: "targets";
+  /**
+   * How many copies of this block make sense on one page. The editor refuses
+   * to add past the limit; `undefined` means unlimited.
+   */
+  maxPerPage?: number;
 };
 
 /**

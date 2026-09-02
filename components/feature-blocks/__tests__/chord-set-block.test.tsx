@@ -13,6 +13,7 @@ const cMajor7: ChordTarget = {
 
 function createRuntime(overrides: Partial<DrillRuntime> = {}): DrillRuntime {
   return {
+    pageId: "page-1",
     phase: "idle",
     liveMs: 0,
     countdownValue: 0,
@@ -25,6 +26,8 @@ function createRuntime(overrides: Partial<DrillRuntime> = {}): DrillRuntime {
     reset: vi.fn(),
     setTargets: vi.fn(),
     skipTarget: vi.fn(),
+    registerTargetSource: vi.fn(() => vi.fn()),
+    activeTargetSource: "chordSet",
     ...overrides,
   };
 }

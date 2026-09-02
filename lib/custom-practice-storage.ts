@@ -1,5 +1,5 @@
 import type { PracticePage, FeatureBlock } from "@/lib/feature-blocks/types";
-import { getFeatureDefinition } from "@/lib/feature-blocks/registry";
+import { getFeatureDefinition, isAtBlockLimit } from "@/lib/feature-blocks/registry";
 import {
   normalizePageTitle,
   normalizeStoredBlock,
@@ -271,9 +271,15 @@ function uniqueTitle(store: PracticePageStore, base: string): string {
  * Marketplace helper: appends a block of `type` (with default config) to
  * `page`. Returns the page unchanged for unknown types.
  */
+/**
+ * Marketplace helper: appends one block of `type`. A no-op for unknown types
+ * and for types already at their `maxPerPage` limit (two metronomes are fine,
+ * two chord sets are not — see `lib/feature-blocks/target-blocks.ts`).
+ */
 export function appendBlockToPage(page: PracticePage, type: string): PracticePage {
   const def = getFeatureDefinition(type);
   if (!def) return page;
+  if (isAtBlockLimit(page.blocks, type)) return page;
 
   const block: FeatureBlock = {
     id: generateId(),
