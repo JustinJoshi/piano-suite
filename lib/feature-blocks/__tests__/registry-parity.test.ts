@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { featureRegistry, featureCategories } from "@/lib/feature-blocks/registry";
 import { KNOWN_BLOCK_TYPES, normalizeStoredBlock } from "@/lib/feature-blocks/schemas";
 import { blockSize } from "@/lib/workshop-grid";
+import { getManifest, listManifests } from "@/lib/feature-blocks/manifest";
 
 /**
  * The registry (client) and `schemas.ts` (Convex-bundled) keep two hand-written
@@ -83,6 +84,68 @@ describe("block registry / schema parity", () => {
       expect(size.w).toBeGreaterThanOrEqual(1);
       expect(size.w).toBeLessThanOrEqual(4);
       expect(size.h).toBeGreaterThanOrEqual(1);
+    }
+  });
+});
+
+describe("manifest parity", () => {
+  it("has a manifest entry for every registry block", () => {
+    for (const def of Object.values(featureRegistry)) {
+      const manifest = getManifest(def.type);
+      expect(manifest).not.toBeNull();
+      expect(manifest?.type).toBe(def.type);
+    }
+  });
+
+  it("every manifest has a non-empty justification", () => {
+    for (const manifest of listManifests()) {
+      expect(manifest.justification.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("every manifest has a valid docsPath", () => {
+    // We can't easily check file existence in a test, but we can check the path
+    // follows the convention docs/components/<something>.md
+    for (const manifest of listManifests()) {
+      expect(manifest.docsPath).toMatch(/^docs\/components\/.+\.md$/);
+    }
+  });
+
+  it("manifest configSpec and registry fields describe the same keys", () => {
+    for (const def of Object.values(featureRegistry)) {
+      const manifest = getManifest(def.type);
+      if (!manifest) continue;
+
+      const registryKeys = new Set(def.fields.map((f) => f.key));
+      const manifestKeys = new Set(manifest.configSpec.map((f) => f.key));
+
+      expect(registryKeys).toEqual(manifestKeys);
+    }
+  });
+
+  it("manifest outputs match registry provides", () => {
+    for (const def of Object.values(featureRegistry)) {
+      const manifest = getManifest(def.type);
+      if (!manifest) continue;
+
+      if (def.provides === "targets") {
+        expect(manifest.outputs).toContain("practiceNotes");
+      } else if (manifest.outputs.length === 0) {
+        expect(def.provides).toBeUndefined();
+      }
+    }
+  });
+
+  it("manifest maxPerPage matches registry maxPerPage", () => {
+    for (const def of Object.values(featureRegistry)) {
+      const manifest = getManifest(def.type);
+      if (!manifest) continue;
+
+      if (def.maxPerPage === undefined) {
+        expect(manifest.maxPerPage).toBeUndefined();
+      } else {
+        expect(manifest.maxPerPage).toEqual(def.maxPerPage);
+      }
     }
   });
 });
