@@ -10,6 +10,8 @@ import {
   type RollNote,
 } from "@/lib/feature-blocks/note-roll/geometry";
 import { useNoteStream } from "@/hooks/useNoteStream";
+import { useDrillRuntime } from "@/lib/drill-runtime";
+import { previewNotes } from "@/lib/feature-blocks/preview-fixtures";
 import { cn } from "@/lib/utils";
 
 const ROLL_HEIGHT_PX = 260;
@@ -23,14 +25,22 @@ function nameOf(midi: number): string {
 
 /**
  * Note roll block: a falling-notes view over a hit line. Renders the page's
- * source stream; empty until a source block feeds the runtime.
+ * source stream. The block library (pageId "") has no page context, so it
+ * demos the fixture; a real page with no source says so instead of showing
+ * fixture data that would look like targets.
  */
 export function NoteRollBlock(raw: Record<string, unknown>) {
   const config = normalizeNoteRollConfig(raw);
+  const runtime = useDrillRuntime();
   const stream = useNoteStream();
+
+  // `pageId: ""` is the marketplace/library preview signal (the same
+  // convention session-stats uses).
+  const isPreview = (runtime?.pageId ?? "") === "";
+  const source = isPreview ? previewNotes("noteRoll") : stream;
   const notes = useMemo(
-    () => filterByHand(stream as RollNote[], config.handFilter),
-    [stream, config.handFilter]
+    () => filterByHand(source as RollNote[], config.handFilter),
+    [source, config.handFilter]
   );
 
   const [nowMs, setNowMs] = useState(0);
@@ -58,6 +68,21 @@ export function NoteRollBlock(raw: Record<string, unknown>) {
   const columns = span.high - span.low + 1;
   const visible = visibleNotes(notes, nowMs, config);
 
+  if (!isPreview && notes.length === 0) {
+    return (
+      <div className="space-y-2 p-2">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Note roll
+          </span>
+        </div>
+        <div className="rounded-lg border border-dashed border-border bg-muted/30 p-6 text-center text-sm text-muted-foreground">
+          Note roll (connect a source)
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-2 p-2">
       <div className="flex items-center justify-between">
@@ -82,6 +107,7 @@ export function NoteRollBlock(raw: Record<string, unknown>) {
           return (
             <div
               key={`${note.symbol}-${note.onsetMs}-${i}`}
+              data-testid="note-roll-note"
               className={cn(
                 "absolute flex items-end justify-center rounded-sm border text-[10px] font-semibold",
                 note.hand === "left"
