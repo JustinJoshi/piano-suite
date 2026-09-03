@@ -688,12 +688,19 @@ export function validatePageWiring(blocks: FeatureBlock[]): WiringIssue[] {
       continue;
     }
 
-    // Check requirements
+    // Check requirements. midiInput is a capability, not a stream: a page
+    // can play notes when it has a keyboard display, or a MIDI bar (which
+    // embeds the on-screen keyboard when no hardware is connected).
     for (const req of manifest.requires) {
-      const isMet = blocks.some((b) => {
-        const m = manifests.get(b.type);
-        return m && m.outputs.includes(requirementToStream(req));
-      });
+      const isMet =
+        req === "midiInput"
+          ? blocks.some((b) => NOTE_INPUT_TYPES.has(b.type))
+          : blocks.some((b) => {
+              const m = manifests.get(b.type);
+              return Boolean(
+                m && m.outputs.includes(requirementToStream(req))
+              );
+            });
       if (!isMet) {
         issues.push({
           blockId: block.id,
@@ -798,15 +805,25 @@ export function resolveChain(blocks: FeatureBlock[]): ResolvedChain {
 }
 
 /**
- * Convert a RequirementId to its corresponding StreamShape.
+ * Blocks whose presence gives a page note input. Used for the midiInput
+ * capability check, which never goes through the stream matching below.
+ */
+const NOTE_INPUT_TYPES = new Set(["keyboardDisplay", "midiConnectionBar"]);
+
+/**
+ * Convert a RequirementId to its corresponding StreamShape. Only reached
+ * for stream-backed requirements; midiInput resolves through
+ * NOTE_INPUT_TYPES instead.
  */
 function requirementToStream(req: RequirementId): StreamShape {
   switch (req) {
     case "practiceNotes":
       return "practiceNotes";
+    // The transport's clock advertises itself as the audioLoop stream so a
+    // `requires: ["transport"]` matches something a block actually declares.
     case "transport":
-      return "none";
-    default:
+      return "audioLoop";
+    case "midiInput":
       return "none";
   }
 }
