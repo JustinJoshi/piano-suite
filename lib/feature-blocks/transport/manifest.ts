@@ -1,0 +1,21 @@
+import type { ComponentManifest } from "../manifest-types";
+import { transportFields } from "./config";
+
+export const transportManifest: ComponentManifest = {
+  type: "transport",
+  kind: "interactive",
+  label: "Transport",
+  summary: "Page clock: tempo, meter, count-in, play/pause, loop, and tempo ramp controls.",
+  justification:
+    "The Transport is the foundation of time-based page behavior. Every page with timed practice needs a single Transport to provide the master clock. The presence of a Transport determines whether a page is clock-advanced.",
+  category: "rhythm",
+  accepts: [],
+  outputs: [],
+  requires: [],
+  configSpec: transportFields,
+  defaultSize: { w: 4, h: 2 },
+  minSize: { w: 2, h: 1 },
+  maxPerPage: 1,
+  docsPath: "docs/components/transport.md",
+  status: "stable",
+};

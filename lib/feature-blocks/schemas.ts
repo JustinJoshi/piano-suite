@@ -10,6 +10,8 @@ import { normalizeRootCycleConfig } from "./root-cycle/config";
 import { normalizeProgressionBlockConfig } from "./progression/config";
 import { normalizeSessionStatsConfig } from "./session-stats/config";
 import { normalizeRestTimerConfig } from "./rest-timer/config";
+import { normalizeTransportConfig } from "./transport/config";
+import { normalizeRhythmPatternConfig } from "./rhythm-pattern/config";
 import { normalizeSize } from "../workshop-grid";
 
 /**
@@ -39,6 +41,8 @@ const blockNormalizers: Record<string, BlockNormalizer> = {
   progression: normalizeProgressionBlockConfig as BlockNormalizer,
   sessionStats: normalizeSessionStatsConfig as BlockNormalizer,
   restTimer: normalizeRestTimerConfig as BlockNormalizer,
+  transport: normalizeTransportConfig as BlockNormalizer,
+  rhythmPattern: normalizeRhythmPatternConfig as BlockNormalizer,
 };
 
 /** The block types `normalizeStoredBlock` will accept. */

@@ -65,6 +65,8 @@ const TYPE_DEFAULT_SIZES: Record<string, BlockSize> = {
   progression: { w: 2, h: 2 },
   sessionStats: { w: 2, h: 1 },
   restTimer: { w: 2, h: 1 },
+  transport: { w: 4, h: 2 },
+  rhythmPattern: { w: 2, h: 2 },
 };
 
 function clamp(n: number, min: number, max: number): number {

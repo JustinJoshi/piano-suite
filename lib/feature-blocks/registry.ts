@@ -11,6 +11,8 @@ import {
   ListMusic,
   BarChart3,
   Coffee,
+  Gauge,
+  Music4,
 } from "lucide-react";
 import { MetronomeBlock } from "@/components/feature-blocks/metronome-block";
 import { DrillTimerBlock } from "@/components/feature-blocks/drill-timer-block";
@@ -84,6 +86,18 @@ import {
   normalizeRestTimerConfig,
   restTimerFields,
 } from "@/lib/feature-blocks/rest-timer/config";
+import {
+  transportDefaultConfig,
+  normalizeTransportConfig,
+  transportFields,
+} from "@/lib/feature-blocks/transport/config";
+import {
+  rhythmPatternDefaultConfig,
+  normalizeRhythmPatternConfig,
+  rhythmPatternFields,
+} from "@/lib/feature-blocks/rhythm-pattern/config";
+import { TransportBlock } from "@/components/feature-blocks/transport-block";
+import { RhythmPatternBlock } from "@/components/feature-blocks/rhythm-pattern-block";
 import type { ComponentType } from "react";
 import type { FeatureDefinition } from "@/lib/feature-blocks/types";
 
@@ -232,6 +246,31 @@ export const featureRegistry = {
     defaultConfig: restTimerDefaultConfig,
     normalizeConfig: normalizeRestTimerConfig,
     component: RestTimerBlock as ComponentType<Record<string, unknown>>,
+  } satisfies FeatureDefinition<Record<string, unknown>>,
+  transport: {
+    type: "transport",
+    category: "rhythm",
+    label: "Transport",
+    description:
+      "The page clock: tempo, meter, count-in, loop, and a tempo ramp with an audible tick.",
+    icon: Gauge,
+    fields: transportFields,
+    defaultConfig: transportDefaultConfig,
+    normalizeConfig: normalizeTransportConfig,
+    component: TransportBlock as ComponentType<Record<string, unknown>>,
+    maxPerPage: 1,
+  } satisfies FeatureDefinition<Record<string, unknown>>,
+  rhythmPattern: {
+    type: "rhythmPattern",
+    category: "rhythm",
+    label: "Rhythm pattern",
+    description:
+      "Place incoming notes on a per-hand onset grid and shape articulation.",
+    icon: Music4,
+    fields: rhythmPatternFields,
+    defaultConfig: rhythmPatternDefaultConfig,
+    normalizeConfig: normalizeRhythmPatternConfig,
+    component: RhythmPatternBlock as ComponentType<Record<string, unknown>>,
   } satisfies FeatureDefinition<Record<string, unknown>>,
 };
 

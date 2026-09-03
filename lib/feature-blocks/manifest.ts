@@ -8,6 +8,8 @@ import type {
   WiringIssue,
   ResolvedChain,
 } from "./manifest-types";
+import { transportManifest } from "./transport/manifest";
+import { rhythmPatternManifest } from "./rhythm-pattern/manifest";
 
 /**
  * Every target block (chordSet, scaleRunner, rootCycle, progression) spreads
@@ -588,17 +590,28 @@ const EXISTING_BLOCK_MANIFESTS: Record<string, ComponentManifest> = {
 };
 
 /**
+ * Inline manifests for the pre-existing registry blocks plus the per-component
+ * manifest files newer components ship. Every new component adds one import
+ * and one line here.
+ */
+const ALL_MANIFESTS: Record<string, ComponentManifest> = {
+  ...EXISTING_BLOCK_MANIFESTS,
+  transport: transportManifest,
+  rhythmPattern: rhythmPatternManifest,
+};
+
+/**
  * Look up the manifest for a single component by type.
  */
 export function getManifest(type: string): ComponentManifest | null {
-  return EXISTING_BLOCK_MANIFESTS[type] ?? null;
+  return ALL_MANIFESTS[type] ?? null;
 }
 
 /**
  * List all manifests, optionally filtered by kind.
  */
 export function listManifests(kind?: ComponentKind): ComponentManifest[] {
-  const all = Object.values(EXISTING_BLOCK_MANIFESTS);
+  const all = Object.values(ALL_MANIFESTS);
   if (!kind) return all;
   return all.filter((m) => m.kind === kind);
 }
@@ -613,7 +626,7 @@ export function manifestsByKind(): Record<ComponentKind, ComponentManifest[]> {
     source: [],
     transform: [],
   };
-  for (const manifest of Object.values(EXISTING_BLOCK_MANIFESTS)) {
+  for (const manifest of Object.values(ALL_MANIFESTS)) {
     result[manifest.kind].push(manifest);
   }
   return result;
@@ -626,7 +639,7 @@ export function manifestsByKind(): Record<ComponentKind, ComponentManifest[]> {
 export function validatePageWiring(blocks: FeatureBlock[]): WiringIssue[] {
   const issues: WiringIssue[] = [];
   const manifests = new Map(
-    Object.values(EXISTING_BLOCK_MANIFESTS).map((m) => [m.type, m])
+    Object.values(ALL_MANIFESTS).map((m) => [m.type, m])
   );
 
   for (const block of blocks) {
@@ -685,7 +698,7 @@ export function validatePageWiring(blocks: FeatureBlock[]): WiringIssue[] {
  * Serialize the registry to a compact JSON description for assembling agents.
  */
 export function describeRegistryForAgent(): string {
-  const manifests = Object.values(EXISTING_BLOCK_MANIFESTS).map((m) => ({
+  const manifests = Object.values(ALL_MANIFESTS).map((m) => ({
     type: m.type,
     kind: m.kind,
     label: m.label,
@@ -726,7 +739,7 @@ export function describeRegistryForAgent(): string {
  */
 export function resolveChain(blocks: FeatureBlock[]): ResolvedChain {
   const manifests = new Map(
-    Object.values(EXISTING_BLOCK_MANIFESTS).map((m) => [m.type, m])
+    Object.values(ALL_MANIFESTS).map((m) => [m.type, m])
   );
 
   const sources: { id: string; type: string }[] = [];
