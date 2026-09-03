@@ -6,12 +6,14 @@ export type SessionStatsConfig = {
   windowDays: number;
   showGrades: boolean;
   showBest: boolean;
+  showDays: boolean;
 };
 
 export const sessionStatsDefaultConfig: SessionStatsConfig = {
   windowDays: 7,
   showGrades: true,
   showBest: true,
+  showDays: false,
 };
 
 export function normalizeSessionStatsConfig(raw: unknown): SessionStatsConfig {
@@ -24,6 +26,7 @@ export function normalizeSessionStatsConfig(raw: unknown): SessionStatsConfig {
     windowDays: clamp(toInt(r.windowDays, sessionStatsDefaultConfig.windowDays), 1, 365),
     showGrades: toBool(r.showGrades, sessionStatsDefaultConfig.showGrades),
     showBest: toBool(r.showBest, sessionStatsDefaultConfig.showBest),
+    showDays: toBool(r.showDays, sessionStatsDefaultConfig.showDays),
   };
 }
 
@@ -39,4 +42,5 @@ export const sessionStatsFields: FieldDescriptor[] = [
   },
   { kind: "toggle", key: "showGrades", label: "Show grade split" },
   { kind: "toggle", key: "showBest", label: "Show best time" },
+  { kind: "toggle", key: "showDays", label: "Show days practiced" },
 ];

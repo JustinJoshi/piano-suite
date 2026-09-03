@@ -72,6 +72,7 @@ const TYPE_DEFAULT_SIZES: Record<string, BlockSize> = {
   scaleLibrary: { w: 2, h: 2 },
   noteRoll: { w: 4, h: 3 },
   pieceLibrary: { w: 2, h: 2 },
+  freePlay: { w: 2, h: 2 },
 };
 
 function clamp(n: number, min: number, max: number): number {

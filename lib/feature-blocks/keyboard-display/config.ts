@@ -1,4 +1,7 @@
 import type { FieldDescriptor } from "../types";
+import { toEnum } from "../coerce";
+import { SCALE_IDS } from "../../scales";
+import { ROOTS } from "../../music-theory";
 
 export type KeyboardDisplayConfig = {
   /** MIDI note number of the lowest key (always a C). */
@@ -6,6 +9,9 @@ export type KeyboardDisplayConfig = {
   octaves: number;
   showNoteNames: boolean;
   computerKeys: boolean;
+  /** Scale to highlight across the keyboard; "none" disables. */
+  highlightScale: string;
+  highlightRoot: string;
 };
 
 const MIN_LOW_NOTE = 24; // C1
@@ -33,6 +39,8 @@ export const keyboardDisplayDefaultConfig: KeyboardDisplayConfig = {
   octaves: 2,
   showNoteNames: true,
   computerKeys: true,
+  highlightScale: "none",
+  highlightRoot: "C",
 };
 
 export function keyboardLowNoteChoices(): number[] {
@@ -67,6 +75,11 @@ export function normalizeKeyboardDisplayConfig(
   const r = partial as Record<string, unknown>;
 
   const lowNote = normalizeLowNote(r.lowNote);
+  const highlightRoot =
+    typeof r.highlightRoot === "string" &&
+    ROOTS.some((cand) => cand.name === r.highlightRoot)
+      ? r.highlightRoot
+      : keyboardDisplayDefaultConfig.highlightRoot;
 
   return {
     lowNote,
@@ -79,6 +92,12 @@ export function normalizeKeyboardDisplayConfig(
       r.computerKeys,
       keyboardDisplayDefaultConfig.computerKeys
     ),
+    highlightScale: toEnum(
+      r.highlightScale,
+      ["none", ...SCALE_IDS] as const,
+      keyboardDisplayDefaultConfig.highlightScale
+    ),
+    highlightRoot,
   };
 }
 
@@ -112,5 +131,21 @@ export const keyboardDisplayFields: FieldDescriptor[] = [
     key: "computerKeys",
     label: "Computer keys",
     helperText: "Play with A W S E D F T G Y H U J K…",
+  },
+  {
+    kind: "select",
+    key: "highlightScale",
+    label: "Highlight scale",
+    options: [
+      { label: "None", value: "none" },
+      ...SCALE_IDS.map((id) => ({ label: id, value: id })),
+    ],
+    helperText: "Ring the keys that belong to the scale",
+  },
+  {
+    kind: "select",
+    key: "highlightRoot",
+    label: "Highlight root",
+    options: ROOTS.map((r) => ({ label: r.name, value: r.name })),
   },
 ];
