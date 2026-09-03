@@ -11,6 +11,8 @@ const defaultConfig = {
   octaves: 2,
   showNoteNames: true,
   computerKeys: true,
+  highlightScale: "none",
+  highlightRoot: "C",
 };
 
 describe("KeyboardDisplayBlock", () => {

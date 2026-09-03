@@ -5,6 +5,7 @@ import { Loader2, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAudioSettings } from "@/hooks/useAudioSettings";
 import { KeyboardDisplayBlock } from "@/components/feature-blocks/keyboard-display-block";
+import { keyboardDisplayDefaultConfig } from "@/lib/feature-blocks/keyboard-display/config";
 
 export type MidiConnectionBarProps = {
   supported: boolean;
@@ -18,7 +19,7 @@ export type MidiConnectionBarProps = {
 
 /** On-screen keyboard shown whenever no MIDI hardware is playing. */
 const fallbackKeyboard = (
-  <KeyboardDisplayBlock lowNote={48} octaves={2} showNoteNames computerKeys />
+  <KeyboardDisplayBlock {...keyboardDisplayDefaultConfig} />
 );
 
 /**

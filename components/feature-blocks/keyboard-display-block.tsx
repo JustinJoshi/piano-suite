@@ -12,6 +12,8 @@ import {
   buildKeyboardLayout,
   computerKeyForOffset,
 } from "@/lib/feature-blocks/keyboard-display/keys";
+import { scaleDefinition } from "@/lib/scales";
+import { parseRoot } from "@/lib/music-theory";
 import type { KeyboardDisplayConfig } from "@/lib/feature-blocks/keyboard-display/config";
 
 const KEY_COUNT_PER_OCTAVE = 12;
@@ -59,6 +61,19 @@ export function KeyboardDisplayBlock(config: KeyboardDisplayConfig) {
   );
 
   const heldSet = useMemo(() => new Set(heldNotes), [heldNotes]);
+
+  // Pitch classes to ring when a highlight scale is configured. Partial
+  // configs (older saved pages, direct test mounts) may omit the new keys.
+  const highlightPcs = useMemo(() => {
+    const scaleId = config.highlightScale ?? "none";
+    if (scaleId === "none") return null;
+    const def = scaleDefinition(scaleId);
+    const root = parseRoot(config.highlightRoot ?? "C");
+    if (!def || !root) return null;
+    return new Set(
+      def.intervals.map((iv) => ((root.pc + iv) % 12 + 12) % 12)
+    );
+  }, [config.highlightScale, config.highlightRoot]);
 
   // Computer-keyboard playing: chromatic mapping from the lowest key.
   const { lowNote, computerKeys } = config;
@@ -123,7 +138,8 @@ export function KeyboardDisplayBlock(config: KeyboardDisplayConfig) {
             className={cn(
               "relative z-0 min-w-0 flex-1 rounded-b-md border border-border bg-card transition-colors",
               "hover:bg-muted/60",
-              heldSet.has(key.note) && "border-primary/50 bg-primary/20"
+              heldSet.has(key.note) && "border-primary/50 bg-primary/20",
+              highlightPcs?.has(key.note % 12) && "ring-1 ring-accent/70"
             )}
           >
             {config.showNoteNames && (
@@ -159,7 +175,8 @@ export function KeyboardDisplayBlock(config: KeyboardDisplayConfig) {
               className={cn(
                 "absolute top-0 z-10 h-3/5 -translate-x-1/2 rounded-b-md border border-border bg-foreground/90 transition-colors",
                 "hover:bg-foreground/70",
-                heldSet.has(key.note) && "border-primary bg-primary"
+                heldSet.has(key.note) && "border-primary bg-primary",
+                highlightPcs?.has(key.note % 12) && "ring-1 ring-accent/80"
               )}
             >
               {computerKeys && key.keyCap && (

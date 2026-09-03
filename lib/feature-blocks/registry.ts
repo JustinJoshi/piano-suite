@@ -18,6 +18,7 @@ import {
   Activity,
   Disc3,
   Film,
+  Waves,
 } from "lucide-react";
 import { MetronomeBlock } from "@/components/feature-blocks/metronome-block";
 import { DrillTimerBlock } from "@/components/feature-blocks/drill-timer-block";
@@ -133,6 +134,12 @@ import {
 } from "@/lib/feature-blocks/piece-library/config";
 import { NoteRollBlock } from "@/components/feature-blocks/note-roll-block";
 import { PieceLibraryBlock } from "@/components/feature-blocks/piece-library-block";
+import {
+  freePlayDefaultConfig,
+  normalizeFreePlayConfig,
+  freePlayFields,
+} from "@/lib/feature-blocks/free-play/config";
+import { FreePlayBlock } from "@/components/feature-blocks/free-play-block";
 import type { ComponentType } from "react";
 import type { FeatureDefinition } from "@/lib/feature-blocks/types";
 
@@ -262,8 +269,8 @@ export const featureRegistry = {
   sessionStats: {
     type: "sessionStats",
     category: "progress",
-    label: "Session stats",
-    description: "Reps, speed, and grades for this practice page.",
+    label: "Practice report",
+    description: "Reps, speed, grade split, and days practiced for this page.",
     icon: BarChart3,
     fields: sessionStatsFields,
     defaultConfig: sessionStatsDefaultConfig,
@@ -365,6 +372,18 @@ export const featureRegistry = {
     defaultConfig: pieceLibraryDefaultConfig,
     normalizeConfig: normalizePieceLibraryConfig,
     component: PieceLibraryBlock as ComponentType<Record<string, unknown>>,
+  } satisfies FeatureDefinition<Record<string, unknown>>,
+  freePlay: {
+    type: "freePlay",
+    category: "visualization",
+    label: "Free play scope",
+    description:
+      "No targets, no grading — a live readout of what you play against a scale.",
+    icon: Waves,
+    fields: freePlayFields,
+    defaultConfig: freePlayDefaultConfig,
+    normalizeConfig: normalizeFreePlayConfig,
+    component: FreePlayBlock as ComponentType<Record<string, unknown>>,
   } satisfies FeatureDefinition<Record<string, unknown>>,
 };
 

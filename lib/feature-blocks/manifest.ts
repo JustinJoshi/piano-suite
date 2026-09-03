@@ -15,6 +15,9 @@ import type {
 } from "./manifest-types";
 import { transportManifest } from "./transport/manifest";
 import { rhythmPatternManifest } from "./rhythm-pattern/manifest";
+import { SCALE_IDS } from "../scales";
+import { freePlayManifest } from "./free-play/manifest";
+import { ROOTS } from "../music-theory";
 
 /**
  * Every target block (chordSet, scaleRunner, rootCycle, progression) spreads
@@ -316,6 +319,21 @@ const EXISTING_BLOCK_MANIFESTS: Record<string, ComponentManifest> = {
         key: "computerKeys",
         label: "Computer keys",
       },
+      {
+        kind: "select",
+        key: "highlightScale",
+        label: "Highlight scale",
+        options: [
+          { label: "None", value: "none" },
+          ...SCALE_IDS.map((id) => ({ label: id, value: id })),
+        ],
+      },
+      {
+        kind: "select",
+        key: "highlightRoot",
+        label: "Highlight root",
+        options: ROOTS.map((root) => ({ label: root.name, value: root.name })),
+      },
     ],
     defaultSize: { w: 4, h: 2 },
     minSize: { w: 1, h: 1 },
@@ -522,10 +540,10 @@ const EXISTING_BLOCK_MANIFESTS: Record<string, ComponentManifest> = {
   sessionStats: {
     type: "sessionStats",
     kind: "interactive",
-    label: "Session stats",
-    summary: "Reps, speed, and grades for this page.",
+    label: "Practice report",
+    summary: "Reps, speed, grade split, and days practiced for this page.",
     justification:
-      "Page chrome: users track their progress session-to-session. Later expanded to Practice report.",
+      "Page chrome: users track their progress session-to-session. Metrics belong in the report rather than scattered across the palette.",
     category: "progress",
     accepts: [],
     outputs: [],
@@ -548,6 +566,11 @@ const EXISTING_BLOCK_MANIFESTS: Record<string, ComponentManifest> = {
         kind: "toggle",
         key: "showBest",
         label: "Show best time",
+      },
+      {
+        kind: "toggle",
+        key: "showDays",
+        label: "Show days practiced",
       },
     ],
     defaultSize: { w: 2, h: 2 },
@@ -608,6 +631,7 @@ const ALL_MANIFESTS: Record<string, ComponentManifest> = {
   scaleLibrary: scaleLibraryManifest,
   noteRoll: noteRollManifest,
   pieceLibrary: pieceLibraryManifest,
+  freePlay: freePlayManifest,
 };
 
 /**

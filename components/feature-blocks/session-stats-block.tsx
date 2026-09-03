@@ -46,6 +46,7 @@ export function SessionStatsBlock({
   windowDays,
   showGrades,
   showBest,
+  showDays,
 }: SessionStatsConfig) {
   const runtime = useDrillRuntime();
   const pageId = runtime?.pageId ?? "";
@@ -125,6 +126,13 @@ export function SessionStatsBlock({
                 </div>
               ))}
             </div>
+          ) : null}
+
+          {showDays && summary.daysPracticed > 0 ? (
+            <p className="text-xs text-muted-foreground" data-testid="days-practiced">
+              Practiced on {summary.daysPracticed}{" "}
+              {summary.daysPracticed === 1 ? "day" : "days"} in this window.
+            </p>
           ) : null}
 
           {!loading && summary.reps === 0 ? (
