@@ -16,6 +16,8 @@ import {
   Crosshair,
   Layers,
   Activity,
+  Disc3,
+  Film,
 } from "lucide-react";
 import { MetronomeBlock } from "@/components/feature-blocks/metronome-block";
 import { DrillTimerBlock } from "@/components/feature-blocks/drill-timer-block";
@@ -119,6 +121,18 @@ import {
 import { TargetDisplayBlock } from "@/components/feature-blocks/target-display-block";
 import { ChordLibraryBlock } from "@/components/feature-blocks/chord-library-block";
 import { ScaleLibraryBlock } from "@/components/feature-blocks/scale-library-block";
+import {
+  noteRollDefaultConfig,
+  normalizeNoteRollConfig,
+  noteRollFields,
+} from "@/lib/feature-blocks/note-roll/config";
+import {
+  pieceLibraryDefaultConfig,
+  normalizePieceLibraryConfig,
+  pieceLibraryFields,
+} from "@/lib/feature-blocks/piece-library/config";
+import { NoteRollBlock } from "@/components/feature-blocks/note-roll-block";
+import { PieceLibraryBlock } from "@/components/feature-blocks/piece-library-block";
 import type { ComponentType } from "react";
 import type { FeatureDefinition } from "@/lib/feature-blocks/types";
 
@@ -327,6 +341,30 @@ export const featureRegistry = {
     defaultConfig: scaleLibraryDefaultConfig,
     normalizeConfig: normalizeScaleLibraryConfig,
     component: ScaleLibraryBlock as ComponentType<Record<string, unknown>>,
+  } satisfies FeatureDefinition<Record<string, unknown>>,
+  noteRoll: {
+    type: "noteRoll",
+    category: "visualization",
+    label: "Note roll",
+    description:
+      "Falling notes over a hit line — practice a piece or rhythm in time.",
+    icon: Disc3,
+    fields: noteRollFields,
+    defaultConfig: noteRollDefaultConfig,
+    normalizeConfig: normalizeNoteRollConfig,
+    component: NoteRollBlock as ComponentType<Record<string, unknown>>,
+  } satisfies FeatureDefinition<Record<string, unknown>>,
+  pieceLibrary: {
+    type: "pieceLibrary",
+    category: "technique",
+    label: "Piece library",
+    description:
+      "Upload a MIDI file and practice it with hand filters and transpose.",
+    icon: Film,
+    fields: pieceLibraryFields,
+    defaultConfig: pieceLibraryDefaultConfig,
+    normalizeConfig: normalizePieceLibraryConfig,
+    component: PieceLibraryBlock as ComponentType<Record<string, unknown>>,
   } satisfies FeatureDefinition<Record<string, unknown>>,
 };
 
