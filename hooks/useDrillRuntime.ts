@@ -14,6 +14,7 @@ import {
 } from "@/lib/local-practice-history";
 import { captureEvent } from "@/lib/analytics";
 import { buildStream } from "@/lib/feature-blocks/build-stream";
+import { beatsToMs } from "@/lib/feature-blocks/transport/clock";
 import type { ChordTarget, DrillPhase, DrillRuntimeConfig } from "@/lib/drill-runtime";
 
 function emitAnalytics(name: "drill_started" | "drill_completed", pageId: string) {
@@ -32,6 +33,7 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
   const {
     pageId = "",
     blocks,
+    clock = null,
     countdownSeconds = 3,
     breakSeconds = 5,
     multiRep = true,
@@ -251,6 +253,32 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
       }
     }
   }, [heldPcs, currentTarget, timer, requireExact, logMiss]);
+
+  // Clock-advanced pages: the transport owns progression. Each target gets
+  // one bar; when the bar closes on an unmet target, the late (or absent)
+  // note counts as a miss and the clock moves on. Pages without a transport
+  // never enter this effect — their path is unchanged.
+  useEffect(() => {
+    if (!clock || timer.phase !== "timing") return;
+
+    const windowMs = beatsToMs(clock.beatsPerBar, clock.bpm);
+    const interval = setInterval(() => {
+      const target = currentTargetRef.current;
+
+      if (target) {
+        logMiss(target, new Set());
+        setMisses((prev) => prev + 1);
+      }
+
+      if (targetIndexRef.current + 1 >= targetsLengthRef.current) {
+        timerRef.current?.finishNow();
+        return;
+      }
+      setTargetIndex((prev) => prev + 1);
+    }, windowMs);
+
+    return () => clearInterval(interval);
+  }, [clock, timer.phase, targetIndex, logMiss]);
 
   return useMemo(
     () => ({

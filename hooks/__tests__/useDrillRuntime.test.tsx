@@ -6,6 +6,7 @@ import { appendLocalWorkshopEvent } from "@/lib/local-practice-history";
 const start = vi.fn();
 const cancel = vi.fn();
 const finishRound = vi.fn();
+const finishNow = vi.fn();
 const nextRep = vi.fn();
 
 let mockPhase = "idle";
@@ -31,6 +32,7 @@ vi.mock("@/hooks/useDrillTimer", () => ({
       }),
       nextRep,
       finishRound,
+      finishNow,
       cancel,
     };
   }),
@@ -360,6 +362,79 @@ describe("useDrillRuntimeProvider", () => {
     expect(logPracticeEvent).toHaveBeenCalledWith(
       expect.objectContaining({ chord: "Cmaj7", grade: "Good" })
     );
+  });
+
+  it("clock expiry counts a miss and advances to the next target", () => {
+    vi.useFakeTimers();
+    try {
+      mockPhase = "timing";
+
+      // 60bpm, 4/4 → one bar = 4000ms per target.
+      const { result } = renderHook(() =>
+        useDrillRuntimeProvider({
+          pageId: "page-1",
+          clock: { bpm: 60, beatsPerBar: 4 },
+        })
+      );
+
+      act(() => {
+        result.current.setTargets([
+          { id: "Cmaj7", symbol: "Cmaj7", notes: ["C", "E", "G", "B"], pcs: new Set([0, 4, 7, 11]) },
+          { id: "G7", symbol: "G7", notes: ["G", "B", "D", "F"], pcs: new Set([7, 11, 2, 5]) },
+        ]);
+      });
+
+      act(() => {
+        vi.advanceTimersByTime(4000);
+      });
+
+      // The window closed unmet: a late (absent) note is a miss and the
+      // clock moved on.
+      expect(result.current.targetIndex).toBe(1);
+      expect(result.current.misses).toBe(1);
+      expect(logMissEvent).toHaveBeenCalledWith(
+        expect.objectContaining({ chord: "Cmaj7", played: "" })
+      );
+
+      act(() => {
+        vi.advanceTimersByTime(4000);
+      });
+
+      // Last target expired: the round ends.
+      expect(finishNow).toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("a page without a transport never advances on the clock", () => {
+    vi.useFakeTimers();
+    try {
+      mockPhase = "timing";
+
+      const { result } = renderHook(() =>
+        useDrillRuntimeProvider({ pageId: "page-1" })
+      );
+
+      act(() => {
+        result.current.setTargets([
+          { id: "Cmaj7", symbol: "Cmaj7", notes: ["C", "E", "G", "B"], pcs: new Set([0, 4, 7, 11]) },
+          { id: "G7", symbol: "G7", notes: ["G", "B", "D", "F"], pcs: new Set([7, 11, 2, 5]) },
+        ]);
+      });
+
+      act(() => {
+        vi.advanceTimersByTime(8000);
+      });
+
+      // Event-advanced path unchanged: no clock expiry, no misses.
+      expect(result.current.targetIndex).toBe(0);
+      expect(result.current.misses).toBe(0);
+      expect(logMissEvent).not.toHaveBeenCalled();
+      expect(finishNow).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("a miss beyond the good threshold grades Hard by default", () => {

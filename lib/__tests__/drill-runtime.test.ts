@@ -11,7 +11,17 @@ describe("runtimeOptionsFromBlocks", () => {
       requireExact: false,
       goodThreshold: 0,
       hardThreshold: 2,
+      // No transport block: the page stays event-advanced.
+      clock: null,
     });
+  });
+
+  it("threads transport config into the clock", () => {
+    const options = runtimeOptionsFromBlocks([
+      { type: "transport", config: { bpm: 90, beatsPerBar: 3 } },
+    ]);
+
+    expect(options.clock).toEqual({ bpm: 90, beatsPerBar: 3 });
   });
 
   it("threads drillTimer config into round shape", () => {
