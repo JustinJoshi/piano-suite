@@ -1,4 +1,7 @@
 import type { FeatureBlock } from "./types";
+import { targetDisplayManifest } from "./target-display/manifest";
+import { chordLibraryManifest } from "./chord-library/manifest";
+import { scaleLibraryManifest } from "./scale-library/manifest";
 import type {
   ComponentManifest,
   ComponentKind,
@@ -598,6 +601,9 @@ const ALL_MANIFESTS: Record<string, ComponentManifest> = {
   ...EXISTING_BLOCK_MANIFESTS,
   transport: transportManifest,
   rhythmPattern: rhythmPatternManifest,
+  targetDisplay: targetDisplayManifest,
+  chordLibrary: chordLibraryManifest,
+  scaleLibrary: scaleLibraryManifest,
 };
 
 /**

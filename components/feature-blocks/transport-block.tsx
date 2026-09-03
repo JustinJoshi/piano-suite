@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { useAudio } from "@/hooks/useAudio";
 import type { TransportConfig } from "@/lib/feature-blocks/transport/config";
 
-type TransportBlockProps = TransportConfig & {
+type TransportBlockProps = Partial<TransportConfig> & {
   /** When provided alongside onBpmChange, the parent controls the BPM value. */
   bpm?: number;
   /** Called when the user moves the BPM slider. Use with the controlled `bpm` prop. */
@@ -22,13 +22,13 @@ type TransportBlockProps = TransportConfig & {
 export function TransportBlock({
   bpm,
   onBpmChange,
-  beatsPerBar,
-  countInBars,
-  loopEnabled,
-  loopStartBar,
-  loopEndBar,
-  rampEnabled,
-  rampTargetBpm,
+  beatsPerBar = 4,
+  countInBars = 1,
+  loopEnabled = false,
+  loopStartBar = 0,
+  loopEndBar = 8,
+  rampEnabled = false,
+  rampTargetBpm = 140,
 }: TransportBlockProps) {
   const isControlled = bpm !== undefined && onBpmChange !== undefined;
   const initialBpm = bpm ?? 120;

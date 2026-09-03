@@ -13,6 +13,9 @@ import {
   Coffee,
   Gauge,
   Music4,
+  Crosshair,
+  Layers,
+  Activity,
 } from "lucide-react";
 import { MetronomeBlock } from "@/components/feature-blocks/metronome-block";
 import { DrillTimerBlock } from "@/components/feature-blocks/drill-timer-block";
@@ -98,6 +101,24 @@ import {
 } from "@/lib/feature-blocks/rhythm-pattern/config";
 import { TransportBlock } from "@/components/feature-blocks/transport-block";
 import { RhythmPatternBlock } from "@/components/feature-blocks/rhythm-pattern-block";
+import {
+  targetDisplayDefaultConfig,
+  normalizeTargetDisplayConfig,
+  targetDisplayFields,
+} from "@/lib/feature-blocks/target-display/config";
+import {
+  chordLibraryDefaultConfig,
+  normalizeChordLibraryConfig,
+  chordLibraryFields,
+} from "@/lib/feature-blocks/chord-library/config";
+import {
+  scaleLibraryDefaultConfig,
+  normalizeScaleLibraryConfig,
+  scaleLibraryFields,
+} from "@/lib/feature-blocks/scale-library/config";
+import { TargetDisplayBlock } from "@/components/feature-blocks/target-display-block";
+import { ChordLibraryBlock } from "@/components/feature-blocks/chord-library-block";
+import { ScaleLibraryBlock } from "@/components/feature-blocks/scale-library-block";
 import type { ComponentType } from "react";
 import type { FeatureDefinition } from "@/lib/feature-blocks/types";
 
@@ -271,6 +292,41 @@ export const featureRegistry = {
     defaultConfig: rhythmPatternDefaultConfig,
     normalizeConfig: normalizeRhythmPatternConfig,
     component: RhythmPatternBlock as ComponentType<Record<string, unknown>>,
+  } satisfies FeatureDefinition<Record<string, unknown>>,
+  targetDisplay: {
+    type: "targetDisplay",
+    category: "technique",
+    label: "Target display",
+    description: "Show the chords or notes to play now, as symbols or a keys diagram.",
+    icon: Crosshair,
+    fields: targetDisplayFields,
+    defaultConfig: targetDisplayDefaultConfig,
+    normalizeConfig: normalizeTargetDisplayConfig,
+    component: TargetDisplayBlock as ComponentType<Record<string, unknown>>,
+  } satisfies FeatureDefinition<Record<string, unknown>>,
+  chordLibrary: {
+    type: "chordLibrary",
+    category: "theory",
+    label: "Chord library",
+    description:
+      "A chord stream from symbols or roman numerals, in closed or rootless voicings.",
+    icon: Layers,
+    fields: chordLibraryFields,
+    defaultConfig: chordLibraryDefaultConfig,
+    normalizeConfig: normalizeChordLibraryConfig,
+    component: ChordLibraryBlock as ComponentType<Record<string, unknown>>,
+  } satisfies FeatureDefinition<Record<string, unknown>>,
+  scaleLibrary: {
+    type: "scaleLibrary",
+    category: "technique",
+    label: "Scale library",
+    description:
+      "Scale runs in any key, span, and direction — plus custom Hanon-style cells.",
+    icon: Activity,
+    fields: scaleLibraryFields,
+    defaultConfig: scaleLibraryDefaultConfig,
+    normalizeConfig: normalizeScaleLibraryConfig,
+    component: ScaleLibraryBlock as ComponentType<Record<string, unknown>>,
   } satisfies FeatureDefinition<Record<string, unknown>>,
 };
 
