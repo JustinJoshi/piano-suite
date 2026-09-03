@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useDrillRuntimeProvider } from "@/hooks/useDrillRuntime";
 import { appendLocalWorkshopEvent } from "@/lib/local-practice-history";
+import { buildStream } from "@/lib/feature-blocks/build-stream";
 
 const start = vi.fn();
 const cancel = vi.fn();
@@ -326,6 +327,28 @@ describe("useDrillRuntimeProvider", () => {
       expect.objectContaining({ chord: "Cmaj7", played: "0,2,4,7,11" })
     );
     expect(logPracticeEvent).not.toHaveBeenCalled();
+  });
+
+  it("wires the transport block's bpm into buildStream inside the runtime", () => {
+    const blocks = [
+      { id: "b1", type: "chordLibrary", config: { chords: "Cmaj7, Dm7" } },
+      { id: "b2", type: "rhythmPattern", config: {} },
+    ];
+
+    const { result } = renderHook(() =>
+      useDrillRuntimeProvider({
+        pageId: "page-1",
+        clock: { bpm: 60, beatsPerBar: 4 },
+        blocks,
+      })
+    );
+
+    // The transport's 60bpm must time the stream, not the composer's
+    // 120bpm default: the second 16th-step lands at 250ms.
+    expect(result.current.stream.map((n) => n.onsetMs)).toEqual(
+      buildStream(blocks, 60).map((n) => n.onsetMs)
+    );
+    expect(result.current.stream[1].onsetMs).toBe(250);
   });
 
   it("grades by miss count using the configured thresholds", async () => {

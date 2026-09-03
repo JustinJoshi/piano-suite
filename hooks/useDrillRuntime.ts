@@ -213,8 +213,12 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
   const currentTarget = targets[targetIndex] ?? null;
 
   // The page's composed stream, memoised on the blocks array the same way
-  // runtimeOptionsFromBlocks memoises the config.
-  const stream = useMemo(() => buildStream(blocks ?? []), [blocks]);
+  // runtimeOptionsFromBlocks memoises the config. A transport block's tempo
+  // drives transform timing; pages without one use the composer's default.
+  const stream = useMemo(
+    () => buildStream(blocks ?? [], clock?.bpm),
+    [blocks, clock?.bpm]
+  );
 
   useEffect(() => {
     currentTargetRef.current = currentTarget;

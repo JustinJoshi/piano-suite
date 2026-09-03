@@ -37,10 +37,6 @@ function visibleNoteCount(): number {
   return screen.queryAllByTestId("note-roll-note").length;
 }
 
-function blocks(blocks: object[]) {
-  return blocks as Array<{ id: string; type: string; config: unknown }>;
-}
-
 describe("NoteRollBlock", () => {
   it('shows the preview fixture inside a pageId="" runtime with no blocks', () => {
     render(
