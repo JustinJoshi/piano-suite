@@ -16,5 +16,7 @@ export const targetDisplayManifest: ComponentManifest = {
   defaultSize: { w: 2, h: 2 },
   minSize: { w: 1, h: 1 },
   docsPath: "docs/components/target-display.md",
-  status: "stable",
+  // Wired to the page stream in phase 2.0, but new enough that its shape
+  // may still change.
+  status: "experimental",
 };

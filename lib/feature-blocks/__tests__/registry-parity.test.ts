@@ -1,4 +1,7 @@
 import { describe, it, expect } from "vitest";
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { featureRegistry, featureCategories } from "@/lib/feature-blocks/registry";
 import { KNOWN_BLOCK_TYPES, normalizeStoredBlock } from "@/lib/feature-blocks/schemas";
 import { blockSize } from "@/lib/workshop-grid";
@@ -148,4 +151,45 @@ describe("manifest parity", () => {
       }
     }
   });
+
+  it("marks a manifest stable only when the block reads or writes the runtime", () => {
+    for (const manifest of listManifests()) {
+      if (manifest.status !== "stable") continue;
+
+      const wired = readsOrWritesRuntime(manifest.type);
+      const chrome = LEGACY_PAGE_CHROME.has(manifest.type);
+
+      expect(
+        wired || chrome,
+        `${manifest.type} claims stable but neither touches the runtime nor predates the stream chain`
+      ).toBe(true);
+    }
+  });
 });
+
+/** Blocks whose component imports a runtime hook. Checked against source. */
+const RUNTIME_HOOKS = /useDrillRuntime|useTargetSource|useNoteStream/;
+
+/**
+ * Page-chrome blocks shipped before the stream chain. They may claim
+ * stable without touching the runtime; the runtime composes around them.
+ */
+const LEGACY_PAGE_CHROME = new Set([
+  "metronome",
+  "textBlock",
+  "midiConnectionBar",
+  "drillShortcuts",
+  "keyboardDisplay",
+  "restTimer",
+]);
+
+function kebab(type: string): string {
+  return type.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+}
+
+function readsOrWritesRuntime(type: string): boolean {
+  const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
+  const file = join(root, "components", "feature-blocks", `${kebab(type)}-block.tsx`);
+  if (!existsSync(file)) return false;
+  return RUNTIME_HOOKS.test(readFileSync(file, "utf8"));
+}

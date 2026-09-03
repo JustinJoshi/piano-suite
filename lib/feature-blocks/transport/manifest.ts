@@ -19,5 +19,7 @@ export const transportManifest: ComponentManifest = {
   minSize: { w: 2, h: 1 },
   maxPerPage: 1,
   docsPath: "docs/components/transport.md",
-  status: "stable",
+  // The runtime reads the transport's config, but the block neither reads
+  // nor writes the runtime yet — clock-advanced pages are the first step.
+  status: "experimental",
 };
