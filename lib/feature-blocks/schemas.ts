@@ -15,6 +15,8 @@ import { normalizeRhythmPatternConfig } from "./rhythm-pattern/config";
 import { normalizeTargetDisplayConfig } from "./target-display/config";
 import { normalizeChordLibraryConfig } from "./chord-library/config";
 import { normalizeScaleLibraryConfig } from "./scale-library/config";
+import { normalizeNoteRollConfig } from "./note-roll/config";
+import { normalizePieceLibraryConfig } from "./piece-library/config";
 import { normalizeSize } from "../workshop-grid";
 
 /**
@@ -49,6 +51,8 @@ const blockNormalizers: Record<string, BlockNormalizer> = {
   targetDisplay: normalizeTargetDisplayConfig as BlockNormalizer,
   chordLibrary: normalizeChordLibraryConfig as BlockNormalizer,
   scaleLibrary: normalizeScaleLibraryConfig as BlockNormalizer,
+  noteRoll: normalizeNoteRollConfig as BlockNormalizer,
+  pieceLibrary: normalizePieceLibraryConfig as BlockNormalizer,
 };
 
 /** The block types `normalizeStoredBlock` will accept. */

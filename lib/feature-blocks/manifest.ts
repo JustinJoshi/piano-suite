@@ -2,6 +2,8 @@ import type { FeatureBlock } from "./types";
 import { targetDisplayManifest } from "./target-display/manifest";
 import { chordLibraryManifest } from "./chord-library/manifest";
 import { scaleLibraryManifest } from "./scale-library/manifest";
+import { noteRollManifest } from "./note-roll/manifest";
+import { pieceLibraryManifest } from "./piece-library/manifest";
 import type {
   ComponentManifest,
   ComponentKind,
@@ -604,6 +606,8 @@ const ALL_MANIFESTS: Record<string, ComponentManifest> = {
   targetDisplay: targetDisplayManifest,
   chordLibrary: chordLibraryManifest,
   scaleLibrary: scaleLibraryManifest,
+  noteRoll: noteRollManifest,
+  pieceLibrary: pieceLibraryManifest,
 };
 
 /**
