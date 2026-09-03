@@ -9,7 +9,7 @@ import {
   filterByHand,
   type RollNote,
 } from "@/lib/feature-blocks/note-roll/geometry";
-import { previewNotes } from "@/lib/feature-blocks/preview-fixtures";
+import { useNoteStream } from "@/hooks/useNoteStream";
 import { cn } from "@/lib/utils";
 
 const ROLL_HEIGHT_PX = 260;
@@ -22,15 +22,15 @@ function nameOf(midi: number): string {
 }
 
 /**
- * Note roll block: a falling-notes view over a hit line. In the library it
- * animates the preview sequence; with the phase-2 runtime it renders the
- * page's source stream instead.
+ * Note roll block: a falling-notes view over a hit line. Renders the page's
+ * source stream; empty until a source block feeds the runtime.
  */
 export function NoteRollBlock(raw: Record<string, unknown>) {
   const config = normalizeNoteRollConfig(raw);
+  const stream = useNoteStream();
   const notes = useMemo(
-    () => filterByHand(previewNotes("noteRoll") as RollNote[], config.handFilter),
-    [config.handFilter]
+    () => filterByHand(stream as RollNote[], config.handFilter),
+    [stream, config.handFilter]
   );
 
   const [nowMs, setNowMs] = useState(0);
