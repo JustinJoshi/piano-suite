@@ -13,6 +13,7 @@ import {
   appendLocalWorkshopMiss,
 } from "@/lib/local-practice-history";
 import { captureEvent } from "@/lib/analytics";
+import { buildStream } from "@/lib/feature-blocks/build-stream";
 import type { ChordTarget, DrillPhase, DrillRuntimeConfig } from "@/lib/drill-runtime";
 
 function emitAnalytics(name: "drill_started" | "drill_completed", pageId: string) {
@@ -21,6 +22,8 @@ function emitAnalytics(name: "drill_started" | "drill_completed", pageId: string
 
 export type DrillRuntimeOptions = {
   pageId?: string;
+  /** Page blocks; their sources compose the runtime's stream. */
+  blocks?: Array<{ id: string; type: string; config: unknown }>;
 } & Partial<DrillRuntimeConfig>;
 
 const DEFAULT_GRADE_THRESHOLDS = { good: 0, hard: 2 };
@@ -28,6 +31,7 @@ const DEFAULT_GRADE_THRESHOLDS = { good: 0, hard: 2 };
 export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
   const {
     pageId = "",
+    blocks,
     countdownSeconds = 3,
     breakSeconds = 5,
     multiRep = true,
@@ -206,6 +210,10 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
 
   const currentTarget = targets[targetIndex] ?? null;
 
+  // The page's composed stream, memoised on the blocks array the same way
+  // runtimeOptionsFromBlocks memoises the config.
+  const stream = useMemo(() => buildStream(blocks ?? []), [blocks]);
+
   useEffect(() => {
     currentTargetRef.current = currentTarget;
   }, [currentTarget]);
@@ -255,6 +263,7 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
       targetIndex,
       totalTargets: targets.length,
       misses,
+      stream,
       start,
       reset,
       setTargets,
@@ -271,6 +280,7 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
       targetIndex,
       targets.length,
       misses,
+      stream,
       start,
       reset,
       setTargets,

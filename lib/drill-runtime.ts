@@ -7,6 +7,7 @@ import {
   resolveTargetScoring,
   DEFAULT_TARGET_SCORING,
 } from "@/lib/feature-blocks/target-blocks";
+import type { PracticeNote } from "@/lib/practice-note";
 
 export type DrillPhase =
   | "idle"
@@ -37,6 +38,12 @@ export type DrillRuntime = {
   targetIndex: number;
   totalTargets: number;
   misses: number;
+
+  /**
+   * The page's composed practice stream: source blocks in page order with
+   * transforms applied. Displays read it via `hooks/useNoteStream.ts`.
+   */
+  stream: PracticeNote[];
 
   start: () => void;
   reset: () => void;

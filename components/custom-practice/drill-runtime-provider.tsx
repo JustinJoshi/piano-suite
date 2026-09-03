@@ -14,12 +14,12 @@ export function DrillRuntimeProvider({
   children,
 }: {
   pageId: string;
-  /** Page blocks; the drillTimer/chordSet configs drive the runtime. */
-  blocks?: Array<{ type: string; config: unknown }>;
+  /** Page blocks; the drillTimer/chordSet configs drive the runtime and the sources compose the stream. */
+  blocks?: Array<{ id: string; type: string; config: unknown }>;
   children: React.ReactNode;
 }) {
   const config = useMemo(() => runtimeOptionsFromBlocks(blocks ?? []), [blocks]);
-  const runtime = useDrillRuntimeProvider({ pageId, ...config });
+  const runtime = useDrillRuntimeProvider({ pageId, ...config, blocks });
   return (
     <RuntimeProvider value={runtime}>
       {children}
