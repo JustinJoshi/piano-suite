@@ -7,27 +7,31 @@ import type { PracticeNote } from "../preview-fixtures";
 import type { RhythmPatternConfig } from "./config";
 
 /**
- * Parse a binary pattern string (e.g., "1010") into onset positions.
- * "1" means an onset, "0" means a rest.
+ * Grid resolution: each pattern character is one 16th-note step. This is
+ * what lets "1000" mean quarter notes and "10" mean eighths.
+ */
+const STEPS_PER_BEAT = 4;
+
+/**
+ * Parse a binary pattern string (e.g., "1010") into onset positions in beats.
+ * "1" means an onset, "0" means a rest. Each character is a 16th-note step
+ * and the pattern repeats for as long as the cycle runs.
  * @param pattern - Binary string like "1010"
  * @param barsPerCycle - How many bars this pattern spans
  * @param beatsPerBar - Beats per bar (default 4)
- * @returns Array of beat positions where onsets occur
+ * @returns Beat positions (fractional) where onsets occur
  */
 export function gridOnsets(
   pattern: string,
   barsPerCycle: number,
   beatsPerBar: number = 4
 ): number[] {
-  const totalBeats = barsPerCycle * beatsPerBar;
+  const totalSteps = barsPerCycle * beatsPerBar * STEPS_PER_BEAT;
   const onsets: number[] = [];
 
-  // Repeat the pattern to cover the full duration
-  const repeatedPattern = pattern.repeat(Math.ceil(totalBeats / pattern.length));
-
-  for (let i = 0; i < totalBeats && i < repeatedPattern.length; i++) {
-    if (repeatedPattern[i] === "1") {
-      onsets.push(i);
+  for (let step = 0; step < totalSteps; step++) {
+    if (pattern[step % pattern.length] === "1") {
+      onsets.push(step / STEPS_PER_BEAT);
     }
   }
 
@@ -52,33 +56,35 @@ export function assignOnsets(
 ): PracticeNote[] {
   if (notes.length === 0) return [];
 
-  // Get onsets for both hands
-  const leftOnsets = gridOnsets(config.leftPattern, config.barsPerCycle, beatsPerBar);
-  const rightOnsets = gridOnsets(config.rightPattern, config.barsPerCycle, beatsPerBar);
-
-  // Combine into a map of beat position to hand (left = 0, right = 1)
+  // Combine both hands' grids into a map of beat position to hand.
+  // Left wins a shared beat so an explicit LH pattern is not silently
+  // overwritten by the right.
   const onsetMap = new Map<number, "left" | "right">();
-  leftOnsets.forEach((beat) => onsetMap.set(beat, "left"));
-  rightOnsets.forEach((beat) => {
-    // If both hands have the same beat, prefer right (can be refined later)
-    onsetMap.set(beat, "right");
-  });
+  gridOnsets(config.leftPattern, config.barsPerCycle, beatsPerBar).forEach(
+    (beat) => onsetMap.set(beat, "left")
+  );
+  gridOnsets(config.rightPattern, config.barsPerCycle, beatsPerBar).forEach(
+    (beat) => onsetMap.set(beat, "right")
+  );
 
   const sortedOnsets = Array.from(onsetMap.keys()).sort((a, b) => a - b);
-  const durationMs = applyDurationRatio([{ onsetMs: 0, durationMs: 1000 }], config.durationRatio)[0]
-    .durationMs;
+  if (sortedOnsets.length === 0) return notes;
+
+  const cycleBeats = config.barsPerCycle * beatsPerBar;
+  const noteMs = (60000 / bpm) * config.durationRatio;
 
   return notes.map((note, idx) => {
     const onsetIdx = idx % sortedOnsets.length;
     const cycleNum = Math.floor(idx / sortedOnsets.length);
-    const beatPosition = sortedOnsets[onsetIdx] + cycleNum * config.barsPerCycle * beatsPerBar;
-    const onsetMs = (beatPosition / bpm) * 60000;
+    const beatPosition = sortedOnsets[onsetIdx] + cycleNum * cycleBeats;
 
     return {
       ...note,
-      onsetMs,
-      durationMs,
-      hand: onsetMap.get(sortedOnsets[onsetIdx]),
+      onsetMs: (beatPosition / bpm) * 60000,
+      durationMs: noteMs,
+      // The grid's hand only fills notes that arrive without one, so a
+      // source's own hand labeling survives the transform.
+      hand: note.hand ?? onsetMap.get(sortedOnsets[onsetIdx]),
     };
   });
 }
@@ -114,11 +120,7 @@ export function transform(
   bpm: number = 120,
   beatsPerBar: number = 4
 ): PracticeNote[] {
-  if (notes.length === 0) return [];
-
-  // Assign onsets based on the grid pattern
-  const timedNotes = assignOnsets(notes, config, bpm, beatsPerBar);
-
-  // Apply the duration ratio for articulation
-  return applyDurationRatio(timedNotes, config.durationRatio);
+  // assignOnsets already applies the duration ratio, so the transform is a
+  // single pass: pitches in, timed notes out.
+  return assignOnsets(notes, config, bpm, beatsPerBar);
 }

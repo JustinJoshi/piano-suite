@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Play, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAudio } from "@/hooks/useAudio";
 import type { TransportConfig } from "@/lib/feature-blocks/transport/config";
 
 type TransportBlockProps = TransportConfig & {
@@ -48,19 +49,38 @@ export function TransportBlock({
   const [isPlaying, setIsPlaying] = useState(false);
   const [pulse, setPulse] = useState(false);
 
-  const toggle = useCallback(() => {
-    setIsPlaying((p) => !p);
-  }, []);
+  // Audible tick goes through the shared audio primitive — the transport
+  // never touches Web Audio directly.
+  const { ready, startMetronome, stopMetronome, metronomeRunning } = useAudio();
 
-  // Pulse indicator when playing
+  const toggle = useCallback(() => {
+    if (metronomeRunning) {
+      stopMetronome();
+      setIsPlaying(false);
+      return;
+    }
+    startMetronome(effectiveBpm, () => setPulse((p) => !p), {
+      beatsPerBar,
+      accentFirstBeat: true,
+    });
+    setIsPlaying(true);
+  }, [
+    metronomeRunning,
+    stopMetronome,
+    startMetronome,
+    effectiveBpm,
+    beatsPerBar,
+  ]);
+
+  // Keep the tick in tempo while the transport runs.
   useEffect(() => {
-    if (!isPlaying) return;
-    const beatDurationMs = (60000 / effectiveBpm);
-    const interval = setInterval(() => {
-      setPulse((p) => !p);
-    }, beatDurationMs);
-    return () => clearInterval(interval);
-  }, [isPlaying, effectiveBpm]);
+    if (metronomeRunning) {
+      startMetronome(effectiveBpm, () => setPulse((p) => !p), {
+        beatsPerBar,
+        accentFirstBeat: true,
+      });
+    }
+  }, [effectiveBpm, metronomeRunning, beatsPerBar, startMetronome]);
 
   return (
     <div className="space-y-4 p-2">
@@ -150,10 +170,11 @@ export function TransportBlock({
       <Button
         data-testid="transport-btn"
         onClick={toggle}
-        variant={isPlaying ? "destructive" : "default"}
+        disabled={!ready}
+        variant={metronomeRunning ? "destructive" : "default"}
         className="w-full"
       >
-        {isPlaying ? (
+        {metronomeRunning ? (
           <>
             <Square className="h-4 w-4" /> Stop
           </>

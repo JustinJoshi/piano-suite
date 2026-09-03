@@ -27,8 +27,9 @@ function clamp(n: number, min: number, max: number): number {
 }
 
 export const rhythmPatternDefaultConfig: RhythmPatternConfig = {
-  leftPattern: "1010",
-  rightPattern: "0101",
+  // Alternating quarter notes between the hands: the natural starting drill.
+  leftPattern: "1000",
+  rightPattern: "0100",
   barsPerCycle: 1,
   durationRatio: 1.0,
 };
@@ -58,13 +59,13 @@ export const rhythmPatternFields: FieldDescriptor[] = [
     kind: "text",
     key: "leftPattern",
     label: "Left hand pattern",
-    placeholder: "e.g., 1010 (binary onset grid)",
+    placeholder: "16th-note grid: 1000 = quarters, 10 = eighths",
   },
   {
     kind: "text",
     key: "rightPattern",
     label: "Right hand pattern",
-    placeholder: "e.g., 0101 (binary onset grid)",
+    placeholder: "16th-note grid: 1000 = quarters, 10 = eighths",
   },
   {
     kind: "range",
