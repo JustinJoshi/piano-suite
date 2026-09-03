@@ -1,14 +1,6 @@
 // Preview data for component demonstrations in the library.
 
-export type PracticeNote = {
-  midi: number[];
-  pcs: Set<number>;
-  symbol: string;
-  hand?: "left" | "right";
-  onsetMs?: number;
-  durationMs?: number;
-  velocity?: number;
-};
+import type { PracticeNote } from "../practice-note";
 
 /**
  * Generate preview note sequences by kind. Used when rendering components
