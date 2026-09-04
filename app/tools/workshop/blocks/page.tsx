@@ -20,7 +20,7 @@ import {
 } from "@/lib/custom-practice-storage";
 
 export default function WorkshopMarketplacePage() {
-  const { canAccess, userReady } = useToolUserReady();
+  const { userReady } = useToolUserReady();
 
   const store = useSyncExternalStore(
     subscribePracticePageStore,
@@ -56,11 +56,7 @@ export default function WorkshopMarketplacePage() {
         </Link>
       }
     >
-      {!canAccess ? (
-        <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-          Sign in to build your workshop.
-        </div>
-      ) : !userReady ? (
+      {!userReady ? (
         <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
           Loading your account…
         </div>
