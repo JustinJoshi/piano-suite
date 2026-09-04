@@ -20,7 +20,7 @@ import {
 } from "@/lib/custom-practice-storage";
 
 export default function WorkshopMarketplacePage() {
-  const { userReady } = useToolUserReady();
+  const { canPersist, userReady } = useToolUserReady();
 
   const store = useSyncExternalStore(
     subscribePracticePageStore,
@@ -56,7 +56,9 @@ export default function WorkshopMarketplacePage() {
         </Link>
       }
     >
-      {!userReady ? (
+      {/* Only a Pro user waiting on their Convex row must wait — signed-out
+          and Free users keep no server state, so they render immediately. */}
+      {canPersist && !userReady ? (
         <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
           Loading your account…
         </div>
