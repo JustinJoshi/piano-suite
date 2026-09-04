@@ -21,6 +21,7 @@ import { WorkshopSyncBadge } from "@/components/custom-practice/workshop-sync-ba
 import { StarterPicker } from "@/components/custom-practice/starter-picker";
 import { WorkshopGrid } from "@/components/workshop-grid/workshop-grid";
 import { useWorkshopSync } from "@/hooks/useWorkshopSync";
+import { useAuthAccess } from "@/hooks/useAuthAccess";
 import { DrillRuntimeProvider } from "@/components/custom-practice/drill-runtime-provider";
 import {
   getPracticePageStore,
@@ -60,6 +61,7 @@ function subscribeToStarterPicker(callback: () => void) {
 
 export function PracticePageEditor() {
   const syncStatus = useWorkshopSync(true);
+  const { isSignedIn } = useAuthAccess();
   const router = useRouter();
 
   const store = useSyncExternalStore(
@@ -225,6 +227,25 @@ export function PracticePageEditor() {
             placeholder="Untitled practice page"
             aria-label="Practice page title"
           />
+
+          {/* Signed-out only: say what signing in adds, never block. The
+              sync badge renders nothing for status "local", so this hint
+              takes its slot. */}
+          {!isSignedIn ? (
+            <p
+              data-testid="workshop-signin-hint"
+              className="text-xs text-muted-foreground"
+            >
+              Your pages are saved in this browser.{" "}
+              <Link
+                href="/sign-in"
+                className="font-medium text-primary underline-offset-4 hover:underline"
+              >
+                Sign in
+              </Link>{" "}
+              to sync them across devices.
+            </p>
+          ) : null}
 
           <WorkshopSyncBadge status={syncStatus} />
 

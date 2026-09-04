@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { PracticePageEditor } from "@/components/custom-practice/practice-page-editor";
 import { AudioSettingsProvider } from "@/hooks/useAudioSettings";
 import {
@@ -10,18 +10,23 @@ import {
   createEmptyPracticePageStore,
 } from "@/lib/custom-practice-storage";
 
-const { pushMock } = vi.hoisted(() => ({ pushMock: vi.fn() }));
+const { pushMock, useAuthAccessMock } = vi.hoisted(() => ({
+  pushMock: vi.fn(),
+  useAuthAccessMock: vi.fn(),
+}));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: pushMock }),
 }));
 
+const SIGNED_OUT_AUTH = {
+  canPersist: false,
+  canAccess: true,
+  isSignedIn: false,
+} as const;
+
 vi.mock("@/hooks/useAuthAccess", () => ({
-  useAuthAccess: vi.fn(() => ({
-    canPersist: false,
-    canAccess: true,
-    isSignedIn: false,
-  })),
+  useAuthAccess: useAuthAccessMock,
 }));
 
 vi.mock("convex/react", () => ({
@@ -73,6 +78,8 @@ describe("PracticePageEditor", () => {
   beforeEach(() => {
     resetPracticePageStore();
     pushMock.mockClear();
+    useAuthAccessMock.mockReset();
+    useAuthAccessMock.mockReturnValue(SIGNED_OUT_AUTH);
     window.localStorage.setItem("piano-suite:starter-picker-dismissed-v1", "true");
     vi.stubGlobal("AudioContext", vi.fn(createMockAudioContext));
     vi.stubGlobal("matchMedia", vi.fn().mockReturnValue({ matches: false }));
@@ -248,6 +255,41 @@ describe("PracticePageEditor", () => {
     expect(
       screen.getByRole("link", { name: /open the block library/i })
     ).toHaveAttribute("href", "/tools/workshop/blocks");
+  });
+
+  it("shows a non-blocking sign-in hint when signed out", () => {
+    seedWithPage();
+    render(
+      <AudioSettingsProvider>
+        <PracticePageEditor />
+      </AudioSettingsProvider>
+    );
+
+    const hint = screen.getByTestId("workshop-signin-hint");
+    expect(hint).toBeInTheDocument();
+    expect(hint).toHaveTextContent(/saved in this browser/i);
+    // The hint itself invites sign-in via a link, not a modal.
+    expect(
+      within(hint).getByRole("link", { name: /sign in/i })
+    ).toHaveAttribute("href", "/sign-in");
+  });
+
+  it("hides the sign-in hint when signed in", () => {
+    useAuthAccessMock.mockReturnValue({
+      canPersist: false,
+      canAccess: true,
+      isSignedIn: true,
+    });
+    seedWithPage();
+    render(
+      <AudioSettingsProvider>
+        <PracticePageEditor />
+      </AudioSettingsProvider>
+    );
+
+    expect(
+      screen.queryByTestId("workshop-signin-hint")
+    ).not.toBeInTheDocument();
   });
 
   it("opens the block library with the / shortcut", () => {
