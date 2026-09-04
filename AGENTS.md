@@ -81,7 +81,7 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `app/terms`, `app/privacy` | Public legal pages (proxy.ts allowlist); Privacy must disclose every analytics/error processor actually wired |
 | `lib/chat-auth.ts` | Chat API allowlist decisions (`authorizeChatAccess`); always session + `ALLOWED_CLERK_USER_ID` — the `AUTH_DISABLED` bypass never opens the paid endpoint |
 | `convex/lib/auth.ts` | `optionalUserId` (queries), `ensureUserId` (mutations, upserts the row), `requireUserId` (throws) |
-| `proxy.ts` | Clerk route gate (Next 16 proxy convention); public-route list + `unauthenticatedUrl` redirect. The four ready-made drill routes and `/marketplace` (+ legacy `/workshop`) are public; `/api` is public by design — **every `app/api/**/route.ts` handler must authorize itself via `auth()`** (e.g. `/api/chat`) |
+| `proxy.ts` | Clerk route gate (Next 16 proxy convention); public-route list + `unauthenticatedUrl` redirect. The four ready-made drill routes, the Workshop (`/tools/workshop` incl. its block library), `/start`, and `/marketplace` (+ legacy `/workshop`) are public; `/api` is public by design — **every `app/api/**/route.ts` handler must authorize itself via `auth()`** (e.g. `/api/chat`) |
 | `app/error.tsx`, `app/global-error.tsx` | Error boundaries so a thrown query cannot blank the app |
 | `components/drills/drill-shell.tsx` | Shared layout wrapper for every tool page |
 | `lib/tools.ts` | Grouped tool registry (`workshopTool`, `drillTools`, `insightTools`, `labTools`) driving sidebar sections and the landing grid |

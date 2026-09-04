@@ -685,6 +685,36 @@ wired them together:
 - `PracticeNote` moved to `lib/practice-note.ts` — the production stream
   type no longer lives in the preview-fixtures file.
 
+## Stage 2, phase 2.1 — open the door (2026-09)
+
+Phase 2.1
+([`docs/stage-2/phase-2.1-open-door/PLAN.md`](stage-2/phase-2.1-open-door/PLAN.md))
+removed the sign-in wall in front of the Workshop. The gate was never
+technical — pages already persisted to `localStorage` for the Free tier —
+and every later Stage 2 phase improves a page most visitors could not
+reach:
+
+- **The proxy admits the core.** `/tools/workshop` (with its block library
+  as a descendant) and `/start` joined the public list; every sibling
+  `/tools/*` route stays gated. Next.js applies `next.config.ts` redirects
+  before the proxy, so `/tools` now 307s unsigned visitors straight to the
+  public Workshop — the auth-protection spec moved `/tools` off the
+  redirect list and pins the new landing.
+- **The client wall came down.** The workshop and block-library pages
+  dropped their `!canAccess` branches. Signed-out, `userReady` is false
+  (`canAccess` is false), so the "Loading your account…" wait is now
+  gated on `canPersist` — only a Pro user waiting on their Convex row
+  waits; signed-out and Free users render immediately.
+- **The doors differ.** Play opens a public ready-made drill
+  (`/tools/chord-drill`) instead of duplicating Build's destination; both
+  descriptions state the difference without clicking.
+- **A hint, not a wall.** The Workshop header tells signed-out visitors
+  their pages are saved in this browser and that signing in adds
+  cross-device sync — non-blocking, no modal (audit criterion 3).
+- **Sync proven inert signed-out.** `useWorkshopSync` is tested to skip
+  the remote query (`"skip"`) and to fire no Convex mutation when a
+  signed-out visitor builds a page.
+
 ## Roadmap
 
 - [x] Scaffold Next.js + Tailwind + shadcn/ui
