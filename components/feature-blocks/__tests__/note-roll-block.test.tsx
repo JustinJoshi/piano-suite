@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, act } from "@testing-library/react";
 import { NoteRollBlock } from "@/components/feature-blocks/note-roll-block";
 import { DrillRuntimeProvider } from "@/components/custom-practice/drill-runtime-provider";
 
@@ -82,5 +82,57 @@ describe("NoteRollBlock", () => {
 
     // Three timed chords: all inside the lookahead window at t=0.
     expect(visibleNoteCount()).toBe(3);
+  });
+
+  it("scrolls the preview roll monotonically across frames", () => {
+    // Controllable frame clock, overriding the shared frozen-clock stub:
+    // this test needs the loop to actually run.
+    let cbs: Array<(t: number) => void> = [];
+    let cancels = 0;
+    vi.stubGlobal("requestAnimationFrame", (cb: (t: number) => void) => {
+      cbs.push(cb);
+      return cbs.length;
+    });
+    vi.stubGlobal("cancelAnimationFrame", () => {
+      cancels++;
+    });
+
+    const frame = (t: number) => {
+      const pending = cbs;
+      cbs = [];
+      act(() => {
+        pending.forEach((cb) => cb(t));
+      });
+    };
+
+    render(
+      <DrillRuntimeProvider pageId="">
+        <NoteRollBlock />
+      </DrillRuntimeProvider>
+    );
+
+    const firstBottom = (): number =>
+      parseFloat(screen.getAllByTestId("note-roll-note")[0].style.bottom);
+
+    // The component's `start === 0` sentinel makes the first delivered
+    // frame measure zero elapsed, so drive from frame 1 and sample after
+    // every frame.
+    const trace: number[] = [];
+    for (let i = 1; i <= 8; i++) {
+      frame(i * (1000 / 60));
+      trace.push(firstBottom());
+    }
+
+    // Strictly monotonic — a distinct-values check would pass on the
+    // teardown bug, which oscillates between two positions.
+    for (let i = 1; i < trace.length; i++) {
+      expect(
+        trace[i],
+        `positions: ${trace.join(" → ")}; effect teardowns: ${cancels}`
+      ).toBeGreaterThan(trace[i - 1]);
+    }
+
+    // Direct thrash signal: the loop effect must not tear down per frame.
+    expect(cancels).toBeLessThanOrEqual(1);
   });
 });

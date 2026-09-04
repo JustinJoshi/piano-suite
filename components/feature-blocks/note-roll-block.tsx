@@ -35,12 +35,17 @@ export function NoteRollBlock(raw: Record<string, unknown>) {
   const stream = useNoteStream();
 
   // `pageId: ""` is the marketplace/library preview signal (the same
-  // convention session-stats uses).
+  // convention session-stats uses). previewNotes builds a fresh array on
+  // every call, so it must stay inside the memo — feeding its result into
+  // the dependency array would bust the animation effect every render.
   const isPreview = (runtime?.pageId ?? "") === "";
-  const source = isPreview ? previewNotes("noteRoll") : stream;
   const notes = useMemo(
-    () => filterByHand(source as RollNote[], config.handFilter),
-    [source, config.handFilter]
+    () =>
+      filterByHand(
+        (isPreview ? previewNotes("noteRoll") : stream) as RollNote[],
+        config.handFilter
+      ),
+    [isPreview, stream, config.handFilter]
   );
 
   const [nowMs, setNowMs] = useState(0);
