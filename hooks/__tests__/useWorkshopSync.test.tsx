@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, waitFor, act } from "@testing-library/react";
+import { render, waitFor, act, screen } from "@testing-library/react";
 import { useWorkshopSync } from "@/hooks/useWorkshopSync";
+import { api } from "@/convex/_generated/api";
 import {
   resetPracticePageStore,
   setPracticePageStore,
@@ -10,13 +11,16 @@ import {
 import type { PracticePage } from "@/lib/feature-blocks/types";
 
 let mockCanPersist = true;
+let mockSignedIn = true;
 let mockRemoteRows: unknown = undefined;
+
+const { useQueryMock } = vi.hoisted(() => ({ useQueryMock: vi.fn() }));
 
 vi.mock("@/hooks/useAuthAccess", () => ({
   useAuthAccess: vi.fn(() => ({
-    canAccess: true,
+    canAccess: mockSignedIn,
     canPersist: mockCanPersist,
-    isSignedIn: true,
+    isSignedIn: mockSignedIn,
   })),
 }));
 
@@ -24,7 +28,7 @@ const upsertMock = vi.fn().mockResolvedValue({ accepted: true });
 const deleteMock = vi.fn().mockResolvedValue(null);
 
 vi.mock("convex/react", () => ({
-  useQuery: vi.fn(() => mockRemoteRows),
+  useQuery: useQueryMock,
   useMutation: vi.fn((ref: { name: string }) =>
     ref.name === "upsertCustomDrill" ? upsertMock : deleteMock
   ),
@@ -59,7 +63,10 @@ describe("useWorkshopSync", () => {
   beforeEach(() => {
     resetPracticePageStore();
     mockCanPersist = true;
+    mockSignedIn = true;
     mockRemoteRows = undefined;
+    useQueryMock.mockReset();
+    useQueryMock.mockImplementation(() => mockRemoteRows);
     upsertMock.mockClear();
     deleteMock.mockClear();
   });
@@ -70,8 +77,50 @@ describe("useWorkshopSync", () => {
 
   it("stays local-only when canPersist is false", () => {
     mockCanPersist = false;
+    mockSignedIn = false;
     const { getByTestId } = render(<Harness />);
     expect(getByTestId("status").textContent).toBe("local");
+  });
+
+  it("skips the remote query for a signed-out visitor", () => {
+    mockCanPersist = false;
+    mockSignedIn = false;
+    render(<Harness />);
+    expect(useQueryMock).toHaveBeenCalledWith(
+      api.workshop.listCustomDrills,
+      "skip"
+    );
+  });
+
+  it("queries the remote pages when the user can persist", () => {
+    render(<Harness />);
+    expect(useQueryMock).toHaveBeenCalledWith(
+      api.workshop.listCustomDrills,
+      {}
+    );
+  });
+
+  it("never fires a Convex mutation for a signed-out visitor building a page", async () => {
+    mockCanPersist = false;
+    mockSignedIn = false;
+    render(<Harness />);
+
+    // The visitor builds a page — a real local write, as the editor does.
+    const page = createEmptyPracticePage("Offline build");
+    act(() => {
+      setPracticePageStore({
+        version: 2,
+        pages: [page],
+        activePageId: page.id,
+      });
+    });
+
+    // Well past the debounce window that an active push effect would use.
+    await new Promise((resolve) => setTimeout(resolve, FAST_DEBOUNCE * 5));
+
+    expect(upsertMock).not.toHaveBeenCalled();
+    expect(deleteMock).not.toHaveBeenCalled();
+    expect(screen.getByTestId("status").textContent).toBe("local");
   });
 
   it("merges newer remote pages into the local store", async () => {

@@ -4,6 +4,7 @@ import {
   validateWelcomeConfig,
   type WelcomeConfig,
 } from "@/lib/welcome-config";
+import { drillTools } from "@/lib/tools";
 
 describe("welcome-config", () => {
   it("default config round-trips through validation unchanged", () => {
@@ -109,6 +110,20 @@ describe("welcome-config", () => {
 
     it("TC1: hero CTA points to /start (three-door chooser)", () => {
       expect(defaultWelcomeConfig.hero.ctaHref).toBe("/start");
+    });
+
+    it("Phase 2.1: play and build doors lead to different places", () => {
+      const play = defaultWelcomeConfig.doors.items.find((d) => d.id === "play")!;
+      const build = defaultWelcomeConfig.doors.items.find((d) => d.id === "build")!;
+      expect(play.href).not.toBe(build.href);
+    });
+
+    it("Phase 2.1: play door opens a public ready-made drill", () => {
+      const play = defaultWelcomeConfig.doors.items.find((d) => d.id === "play")!;
+      // The four drillTools hrefs are exactly the proxy's public drill
+      // routes, so this keeps the Play door on a route a signed-out
+      // visitor can actually open.
+      expect(drillTools.map((t) => t.href)).toContain(play.href);
     });
 
     it("TC1: hero subheadline mentions blocks, templates, or building", () => {

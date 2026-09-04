@@ -2,7 +2,6 @@ import { test, expect } from "@playwright/test";
 import { signInAsTestUser } from "./auth-helper";
 import {
   assertAuthBypassOffForE2E,
-  expectRedirectedToSignIn,
 } from "./auth-assertions";
 
 const SIDEBAR_TOOLS = [
@@ -21,12 +20,17 @@ test.describe("/tools dashboard", () => {
   test.describe("unsigned", () => {
     test.use({ storageState: emptyStorageState });
 
-    test("redirects unauthenticated visitors to sign-in", async ({ page }) => {
+    test("lands unsigned visitors on the public workshop", async ({ page }) => {
       assertAuthBypassOffForE2E();
       await page.goto("/tools");
 
-      // Clerk middleware will redirect to /sign-in when there is no session.
-      await expectRedirectedToSignIn(page);
+      // Phase 2.1: /tools 307-redirects to the Workshop (redirects run
+      // before the proxy), and the Workshop is public — the dashboard is
+      // reachable with no account.
+      await expect(page).toHaveURL("/tools/workshop");
+      await expect(
+        page.getByRole("heading", { name: "Workshop" })
+      ).toBeVisible();
     });
   });
 

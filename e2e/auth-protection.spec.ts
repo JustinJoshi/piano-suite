@@ -7,9 +7,11 @@ import {
   expectRedirectedToSignIn,
 } from "./auth-assertions";
 
-/** Routes that must redirect unsigned visitors to sign-in (not bare 404). */
+/** Routes that must redirect unsigned visitors to sign-in (not bare 404).
+ * `/tools` is deliberately absent: next.config.ts 307-redirects it to the
+ * public /tools/workshop (redirects run before the proxy), so it no longer
+ * lands on sign-in — the dedicated unsigned test below pins that. */
 const PROTECTED_ROUTES = [
-  "/tools",
   "/tools/technique",
   "/tools/tracking",
   "/tools/chladni-ripple",
@@ -174,6 +176,20 @@ test.describe("auth protection (bypass off)", () => {
         await assert(page);
       });
     }
+
+    // /tools cannot live in PROTECTED_ROUTES (it 307s to the public
+    // workshop before the proxy) nor in PUBLIC_ROUTES (that loop pins the
+    // exact URL, which a redirecting path fails). Assert the redirect and
+    // the destination instead.
+    test("unsigned /tools lands on the public workshop", async ({ page }) => {
+      await page.goto("/tools");
+      await expect(page).toHaveURL("/tools/workshop");
+      await expectNotBare404(page);
+      await expectNoApplicationError(page);
+      await expect(
+        page.getByRole("heading", { name: "Workshop" }).first()
+      ).toBeVisible();
+    });
   });
 
   test.describe("signed-in", () => {

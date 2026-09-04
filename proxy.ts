@@ -6,8 +6,9 @@ import { getAuthorizedPartiesFromEnv } from "@/lib/clerk-authorized-parties";
  * Clerk proxy middleware for Next.js 16+.
  *
  * Public routes: home, Pricing, Articles, Pattern Lab (homepage hero
- * editor), dev lab, sign-in/up, API, and Clerk's frontend API. Other
- * /tools/* routes require authentication, unless
+ * editor), the Workshop (plus its block library), /start, dev lab,
+ * sign-in/up, API, and Clerk's frontend API. Other /tools/* routes
+ * require authentication, unless
  * `NEXT_PUBLIC_AUTH_DISABLED=true`. The bypass is never honored on Vercel
  * Production (see `isAuthBypassEffective`), so a stray env assignment there
  * cannot open the site.
@@ -63,6 +64,14 @@ export default clerkMiddleware(
       pathname === "/pricing" ||
       pathname === "/tools/chladni" ||
       publicDrillRoutes.includes(pathname) ||
+      // The Workshop is the product's core (audit 2026-09, entry-flow §2):
+      // free, no-account use is the default. Pages persist to localStorage
+      // when signed out (lib/custom-practice-storage.ts). The block library
+      // (/tools/workshop/blocks) is a descendant and opens with it.
+      isExactOrUnder(pathname, "/tools/workshop") ||
+      // /start is the three-door chooser the landing CTA points at; it
+      // must open for visitors who have not signed up yet.
+      pathname === "/start" ||
       // Guided routes are help content; activation starts before sign-up.
       isExactOrUnder(pathname, "/routes") ||
       // Legal pages must be readable by anonymous visitors.

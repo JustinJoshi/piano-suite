@@ -5,7 +5,7 @@ import { PracticePageEditor } from "@/components/custom-practice/practice-page-e
 import { useToolUserReady } from "@/hooks/useToolUserReady";
 
 export default function WorkshopPage() {
-  const { canAccess, userReady } = useToolUserReady();
+  const { canPersist, userReady } = useToolUserReady();
 
   return (
     <DrillShell
@@ -13,11 +13,9 @@ export default function WorkshopPage() {
       title="Workshop"
       subtitle="Your practice page is a grid — drag, resize, and make it yours."
     >
-      {!canAccess ? (
-        <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-          Sign in to create custom practice pages.
-        </div>
-      ) : !userReady ? (
+      {/* Only a Pro user waiting on their Convex row must wait — signed-out
+          and Free users keep no server state, so they render immediately. */}
+      {canPersist && !userReady ? (
         <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
           Loading your account…
         </div>

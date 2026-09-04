@@ -31,7 +31,11 @@ test.describe("/tools/workshop block library", () => {
     await page
       .getByRole("link", { name: /open the block library/i })
       .click();
-    await expect(page).toHaveURL(/\/tools\/workshop\/blocks$/);
+    // Dev server compiles routes on demand and parallel workers contend,
+    // so the soft navigation needs more than the default 5s window.
+    await expect(page).toHaveURL(/\/tools\/workshop\/blocks$/, {
+      timeout: 15_000,
+    });
 
     // Plus adds the component; the button flips to an added state.
     await page.getByRole("button", { name: /add metronome/i }).click();
