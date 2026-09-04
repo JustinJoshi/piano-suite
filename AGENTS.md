@@ -100,6 +100,9 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `lib/dev-tools.ts` | Environment helpers for `/dev/*` pages and links (currently always enabled) |
 | `components/dev-tools-link.tsx` | Floating link to the dev lab |
 | `lib/feature-blocks/*` | Workshop feature-block registry, types, and per-block config schemas + editor field descriptors |
+| `lib/practice-note.ts` | The `PracticeNote` stream type (bare type file, Convex-safe); `preview-fixtures.ts` imports it but exports only `previewNotes()` |
+| `lib/feature-blocks/build-stream.ts` | Pure page-stream composer: `buildStream(blocks, bpm?)` concatenates source generators in page order, then applies transforms in page order. Client-only — nothing Convex-bundled may import it |
+| `hooks/useNoteStream.ts` | The page's composed stream from the drill runtime context; returns `[]` outside a `DrillRuntimeProvider`. Display blocks read this, not `previewNotes` |
 | `components/feature-blocks/*` | Feature-block render components (metronome, drill timer, chord set) |
 | `lib/workshop-grid.ts` | Pure Workshop grid layout math: canonical 4-column span model, size normalization/clamping, resize deltas, dnd-kit reorder |
 | `components/workshop-grid/*` | Draggable/resizable grid for the Workshop editor; fills the page via `fill` (`data-grid-full`); grid chrome (guides) visible only while dragging (or when empty via `showGuides`); tiles persist `size` spans and open settings behind a per-tile gear |
@@ -146,6 +149,7 @@ The block library is the bottleneck (audit `04-roadmap.md`), so adding a block s
 4. **Put the `config → targets` math in `lib/drill-targets.ts`** (pure, unit-tested) and keep the component to rendering. `ChordTarget` is a pitch-class set, so a single note is a one-element target — scales, intervals, and arpeggios all fit without touching the runtime.
 5. **Scoring is per target block.** `requireExact` defaults to `true` for single-note targets (a scale step) and `false` for chords; reuse `scoringFields` from `lib/feature-blocks/coerce.ts` so the settings read the same everywhere.
 6. **Known limitation:** the runtime scores pitch classes, so octave, voicing, fingering, and hand separation are *not* verified. Chord inversions can be prompted but not graded until `ChordTarget` grows an optional voicing-aware field.
+7. **Displays read the stream, not fixtures.** A block that renders content calls `useNoteStream()`; `buildStream` (source generators in page order, transforms in page order) composes it and the runtime context carries it. `previewNotes` is for library previews only, where no page context exists. `PracticeNote` lives in `lib/practice-note.ts`; `build-stream.ts` and its dispatch maps live outside the Convex bundle. Manifest `status` must stay truthful: `stable` only if the block reads or writes the runtime (registry parity enforces it; shipped page chrome is the only exemption).
 
 ## Navigation conventions (Workshop-first)
 

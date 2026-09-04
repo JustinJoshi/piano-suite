@@ -5,7 +5,7 @@
  */
 
 import type { MusicPlayerNote, ParsedMidi } from "../../music-player";
-import type { PracticeNote } from "../preview-fixtures";
+import type { PracticeNote } from "../../practice-note";
 import type { PieceLibraryConfig } from "./config";
 
 const MS_PER_SECOND = 1000;

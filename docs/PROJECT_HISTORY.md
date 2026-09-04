@@ -657,6 +657,34 @@ landed as code:
 - **Truth-in-UI.** Dev-lab link hidden in production (route stays reachable);
   `/chat` removed from the navbar (route kept).
 
+## Stage 2, phase 2.0 — the chain is real (2026-09)
+
+Stage 1 shipped eight source/transform/display components; none were
+connected to the runtime. Phase 2.0
+([`docs/stage-2/phase-2.0-chain-runtime/PLAN.md`](stage-2/phase-2.0-chain-runtime/PLAN.md))
+wired them together:
+
+- **Sources feed displays.** `buildStream(blocks)` composes a page's
+  `PracticeNote[]` — sources concatenated in page order, transforms applied
+  in page order — and the drill runtime exposes it; Target display and Note
+  roll render the page's real stream instead of preview fixtures, and the
+  display follows the runtime's `targetIndex` (its `setTimeout`
+  auto-advance is gone). `previewNotes` remains for library previews, where
+  no page context exists.
+- **The transport is the clock.** A page with a Transport block is
+  clock-advanced: each target gets one bar, an unmet target counts as a
+  miss, and the round ends through the timer's new `finishNow`. Pages
+  without a Transport keep the event-advanced path unchanged.
+- **Wiring tells the truth.** `validatePageWiring` no longer reports a
+  false `unmet_requirement` for pages with a MIDI connection bar
+  (`midiInput` is a capability check, not a stream match), and the
+  Transport advertises its clock so `requires: ["transport"]` is
+  satisfiable. Transport and Target display manifests dropped their false
+  `stable` claims; registry parity now enforces that `stable` means the
+  block reads or writes the runtime (or is shipped page chrome).
+- `PracticeNote` moved to `lib/practice-note.ts` — the production stream
+  type no longer lives in the preview-fixtures file.
+
 ## Roadmap
 
 - [x] Scaffold Next.js + Tailwind + shadcn/ui

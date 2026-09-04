@@ -2,11 +2,13 @@
 
 import { createContext, useContext } from "react";
 import { normalizeDrillTimerConfig } from "@/lib/feature-blocks/drill-timer/config";
+import { normalizeTransportConfig } from "@/lib/feature-blocks/transport/config";
 import {
   activeTargetBlock,
   resolveTargetScoring,
   DEFAULT_TARGET_SCORING,
 } from "@/lib/feature-blocks/target-blocks";
+import type { PracticeNote } from "@/lib/practice-note";
 
 export type DrillPhase =
   | "idle"
@@ -24,6 +26,13 @@ export type ChordTarget = {
   pcs: Set<number>;
 };
 
+/**
+ * The transport block's tempo and meter. When present on a page the runtime
+ * is clock-advanced: each target gets one bar, and a target still unmet when
+ * its bar elapses counts as a miss.
+ */
+export type DrillClock = { bpm: number; beatsPerBar: number };
+
 export type DrillRuntime = {
   /** Practice page this runtime belongs to; "" in preview contexts. */
   pageId: string;
@@ -37,6 +46,12 @@ export type DrillRuntime = {
   targetIndex: number;
   totalTargets: number;
   misses: number;
+
+  /**
+   * The page's composed practice stream: source blocks in page order with
+   * transforms applied. Displays read it via `hooks/useNoteStream.ts`.
+   */
+  stream: PracticeNote[];
 
   start: () => void;
   reset: () => void;
@@ -75,6 +90,8 @@ export type DrillRuntimeConfig = {
   requireExact: boolean;
   goodThreshold: number;
   hardThreshold: number;
+  /** Set only when the page carries a transport block; null = event-advanced. */
+  clock: DrillClock | null;
 };
 
 /** Used when a page carries no drill-timer block at all. */
@@ -95,6 +112,7 @@ export function runtimeOptionsFromBlocks(
   blocks: Array<{ type: string; config: unknown }>
 ): DrillRuntimeConfig {
   const timerBlock = blocks.find((b) => b.type === "drillTimer");
+  const transportBlock = blocks.find((b) => b.type === "transport");
   const targetBlock = activeTargetBlock(blocks);
 
   const timer = timerBlock
@@ -105,6 +123,10 @@ export function runtimeOptionsFromBlocks(
       ? resolveTargetScoring(targetBlock.type, targetBlock.config)
       : null) ?? DEFAULT_TARGET_SCORING;
 
+  const transport = transportBlock
+    ? normalizeTransportConfig(transportBlock.config)
+    : null;
+
   return {
     countdownSeconds: timer?.countdownSeconds ?? 3,
     breakSeconds: timer?.breakSeconds ?? 5,
@@ -112,5 +134,8 @@ export function runtimeOptionsFromBlocks(
     requireExact: scoring.requireExact,
     goodThreshold: scoring.goodThreshold,
     hardThreshold: scoring.hardThreshold,
+    clock: transport
+      ? { bpm: transport.bpm, beatsPerBar: transport.beatsPerBar }
+      : null,
   };
 }

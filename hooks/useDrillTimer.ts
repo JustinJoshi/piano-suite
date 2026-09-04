@@ -229,6 +229,14 @@ export function useDrillTimer(options: DrillTimerOptions = {}) {
     finishRoundInternal();
   }, [finishRoundInternal]);
 
+  // End the round from any active phase. Clock-advanced pages use this when
+  // a target's window closes without success; event-advanced drills never
+  // call it.
+  const finishNow = useCallback(() => {
+    stopTimingLoop();
+    finishRoundInternal();
+  }, [stopTimingLoop, finishRoundInternal]);
+
   const cancel = useCallback(() => {
     clearCountdown();
     clearBreak();
@@ -263,6 +271,7 @@ export function useDrillTimer(options: DrillTimerOptions = {}) {
       markSuccess,
       nextRep,
       finishRound,
+      finishNow,
       cancel,
       reset,
     }),
@@ -276,6 +285,7 @@ export function useDrillTimer(options: DrillTimerOptions = {}) {
       markSuccess,
       nextRep,
       finishRound,
+      finishNow,
       cancel,
       reset,
     ]

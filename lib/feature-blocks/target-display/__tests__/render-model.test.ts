@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { buildSymbolView, buildKeysDiagramView } from "../render-model";
-import type { PracticeNote } from "../../preview-fixtures";
+import type { PracticeNote } from "../../../practice-note";
 
 const notes: PracticeNote[] = [
   { midi: [60], pcs: new Set([0]), symbol: "C" },

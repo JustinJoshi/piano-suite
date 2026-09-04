@@ -3,7 +3,7 @@
  * Applies timing and duration to practice notes based on a binary onset grid.
  */
 
-import type { PracticeNote } from "../preview-fixtures";
+import type { PracticeNote } from "../../practice-note";
 import type { RhythmPatternConfig } from "./config";
 
 /**

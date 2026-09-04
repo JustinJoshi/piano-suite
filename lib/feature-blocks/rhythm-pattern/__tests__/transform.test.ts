@@ -5,7 +5,7 @@ import {
   applyDurationRatio,
   transform,
 } from "../transform";
-import type { PracticeNote } from "../../preview-fixtures";
+import type { PracticeNote } from "../../../practice-note";
 
 const config = {
   leftPattern: "1000",

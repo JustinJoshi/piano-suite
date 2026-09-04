@@ -13,6 +13,8 @@ import {
   appendLocalWorkshopMiss,
 } from "@/lib/local-practice-history";
 import { captureEvent } from "@/lib/analytics";
+import { buildStream } from "@/lib/feature-blocks/build-stream";
+import { beatsToMs } from "@/lib/feature-blocks/transport/clock";
 import type { ChordTarget, DrillPhase, DrillRuntimeConfig } from "@/lib/drill-runtime";
 
 function emitAnalytics(name: "drill_started" | "drill_completed", pageId: string) {
@@ -21,6 +23,8 @@ function emitAnalytics(name: "drill_started" | "drill_completed", pageId: string
 
 export type DrillRuntimeOptions = {
   pageId?: string;
+  /** Page blocks; their sources compose the runtime's stream. */
+  blocks?: Array<{ id: string; type: string; config: unknown }>;
 } & Partial<DrillRuntimeConfig>;
 
 const DEFAULT_GRADE_THRESHOLDS = { good: 0, hard: 2 };
@@ -28,6 +32,8 @@ const DEFAULT_GRADE_THRESHOLDS = { good: 0, hard: 2 };
 export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
   const {
     pageId = "",
+    blocks,
+    clock = null,
     countdownSeconds = 3,
     breakSeconds = 5,
     multiRep = true,
@@ -206,6 +212,14 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
 
   const currentTarget = targets[targetIndex] ?? null;
 
+  // The page's composed stream, memoised on the blocks array the same way
+  // runtimeOptionsFromBlocks memoises the config. A transport block's tempo
+  // drives transform timing; pages without one use the composer's default.
+  const stream = useMemo(
+    () => buildStream(blocks ?? [], clock?.bpm),
+    [blocks, clock?.bpm]
+  );
+
   useEffect(() => {
     currentTargetRef.current = currentTarget;
   }, [currentTarget]);
@@ -244,6 +258,32 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
     }
   }, [heldPcs, currentTarget, timer, requireExact, logMiss]);
 
+  // Clock-advanced pages: the transport owns progression. Each target gets
+  // one bar; when the bar closes on an unmet target, the late (or absent)
+  // note counts as a miss and the clock moves on. Pages without a transport
+  // never enter this effect — their path is unchanged.
+  useEffect(() => {
+    if (!clock || timer.phase !== "timing") return;
+
+    const windowMs = beatsToMs(clock.beatsPerBar, clock.bpm);
+    const interval = setInterval(() => {
+      const target = currentTargetRef.current;
+
+      if (target) {
+        logMiss(target, new Set());
+        setMisses((prev) => prev + 1);
+      }
+
+      if (targetIndexRef.current + 1 >= targetsLengthRef.current) {
+        timerRef.current?.finishNow();
+        return;
+      }
+      setTargetIndex((prev) => prev + 1);
+    }, windowMs);
+
+    return () => clearInterval(interval);
+  }, [clock, timer.phase, targetIndex, logMiss]);
+
   return useMemo(
     () => ({
       pageId,
@@ -255,6 +295,7 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
       targetIndex,
       totalTargets: targets.length,
       misses,
+      stream,
       start,
       reset,
       setTargets,
@@ -271,6 +312,7 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
       targetIndex,
       targets.length,
       misses,
+      stream,
       start,
       reset,
       setTargets,

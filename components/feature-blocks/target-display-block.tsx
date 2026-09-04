@@ -1,25 +1,19 @@
 "use client";
 
-import { previewNotes } from "@/lib/feature-blocks/preview-fixtures";
 import {
   buildSymbolView,
   buildKeysDiagramView,
 } from "@/lib/feature-blocks/target-display/render-model";
 import type { TargetDisplayConfig } from "@/lib/feature-blocks/target-display/config";
-import { useState, useEffect } from "react";
+import { useDrillRuntime } from "@/lib/drill-runtime";
+import { useNoteStream } from "@/hooks/useNoteStream";
 
 export function TargetDisplayBlock(config: TargetDisplayConfig) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const notes = previewNotes("targetDisplay");
+  const runtime = useDrillRuntime();
+  const notes = useNoteStream();
 
-  // Auto-advance for demo purposes (can be controlled by runtime later)
-  useEffect(() => {
-    if (notes.length === 0) return;
-    const timer = setTimeout(() => {
-      setCurrentIndex((prev) => (prev + 1) % notes.length);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, [notes.length]);
+  // The runtime owns progression; there is no local auto-advance.
+  const currentIndex = runtime?.targetIndex ?? 0;
 
   if (notes.length === 0) {
     return (

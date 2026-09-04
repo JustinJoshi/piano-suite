@@ -3,7 +3,7 @@
  * No React, DOM, or external dependencies.
  */
 
-import type { PracticeNote } from "../preview-fixtures";
+import type { PracticeNote } from "../../practice-note";
 
 export type SymbolView = {
   kind: "symbols";

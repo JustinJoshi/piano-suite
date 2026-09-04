@@ -15,7 +15,7 @@ import {
   type Quality,
 } from "../../music-theory";
 import { parseRomanNumerals, MAJOR_TRIAD } from "../../roman-numerals";
-import type { PracticeNote } from "../preview-fixtures";
+import type { PracticeNote } from "../../practice-note";
 import type { ChordLibraryConfig, ChordVoicing } from "./config";
 
 const BASS_OCTAVE_START = 48; // C3

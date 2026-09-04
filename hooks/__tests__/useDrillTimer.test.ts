@@ -237,6 +237,28 @@ describe("useDrillTimer", () => {
     expect(onFinish).toHaveBeenCalled();
   });
 
+  it("allows finishNow from the timing phase (clock-advanced pages)", () => {
+    const onFinish = vi.fn();
+    const { result } = renderHook(() =>
+      useDrillTimer({ multiRep: true, breakSeconds: 0, onFinish })
+    );
+
+    act(() => {
+      result.current.start();
+      result.current.arm();
+    });
+
+    // Timing when the clock expires — finishRound would no-op here.
+    expect(result.current.phase).toBe("timing");
+
+    act(() => {
+      result.current.finishNow();
+    });
+
+    expect(result.current.phase).toBe("finished");
+    expect(onFinish).toHaveBeenCalledTimes(1);
+  });
+
   it("allows finishRound from onSuccess without being overwritten back to success", () => {
     const onFinish = vi.fn();
     let timerApi: ReturnType<typeof useDrillTimer> | null = null;

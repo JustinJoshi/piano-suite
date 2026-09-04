@@ -12,7 +12,7 @@ import {
   applyDirection,
 } from "../../scales";
 import { parseRoot, noteName } from "../../music-theory";
-import type { PracticeNote } from "../preview-fixtures";
+import type { PracticeNote } from "../../practice-note";
 import type { ScaleLibraryConfig } from "./config";
 
 /**
