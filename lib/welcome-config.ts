@@ -144,13 +144,15 @@ export const defaultWelcomeConfig: WelcomeConfig = {
       {
         id: "play",
         label: "Play",
-        description: "Just let me do something — pick a ready-made drill and start now.",
-        href: "/tools/workshop",
+        description:
+          "Start playing now — a ready-made chord drill opens immediately, no account needed.",
+        href: "/tools/chord-drill",
       },
       {
         id: "build",
         label: "Build",
-        description: "I want to make my own — build a practice page from the shelf of blocks.",
+        description:
+          "Make your own — build a practice page from the shelf of blocks in the Workshop.",
         href: "/tools/workshop",
       },
       {
