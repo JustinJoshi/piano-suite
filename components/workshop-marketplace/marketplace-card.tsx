@@ -1,34 +1,46 @@
 "use client";
 
+import { useMemo } from "react";
 import { Check, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { FeatureBlock } from "@/lib/feature-blocks/types";
 import { featureRegistry } from "@/lib/feature-blocks/registry";
+import { getManifest } from "@/lib/feature-blocks/manifest";
 import { FeatureRenderer } from "@/components/feature-blocks/feature-renderer";
+import { AboutPanel, ExperimentalBadge, requirementLinesFor } from "./about-panel";
 
 type MarketplaceCardProps = {
   block: FeatureBlock;
   added: boolean;
   onAdd: () => void;
   onRemove: () => void;
+  pageBlocks: FeatureBlock[];
 };
 
 /**
  * One marketplace entry: a live, interactive preview of the real component
- * plus a plus/check button that adds it to (or removes it from) the
- * active workshop page.
+ * plus a plus/check button that adds it to (or removes it from) the active
+ * workshop page, and an About panel with the manifest's summary,
+ * justification, requirements, and status.
  */
 export function MarketplaceCard({
   block,
   added,
   onAdd,
   onRemove,
+  pageBlocks,
 }: MarketplaceCardProps) {
+  const requirements = useMemo(
+    () => requirementLinesFor(block.type, pageBlocks),
+    [block.type, pageBlocks]
+  );
+
   const def = featureRegistry[block.type as keyof typeof featureRegistry];
   if (!def) return null;
 
+  const manifest = getManifest(block.type);
   const Icon = def.icon;
 
   return (
@@ -38,9 +50,12 @@ export function MarketplaceCard({
           <div className="flex min-w-0 items-center gap-2">
             <Icon className="h-4 w-4 shrink-0 text-primary" />
             <div className="min-w-0">
-              <h3 className="truncate text-sm font-medium text-foreground">
-                {def.label}
-              </h3>
+              <div className="flex min-w-0 items-center gap-2">
+                <h3 className="truncate text-sm font-medium text-foreground">
+                  {def.label}
+                </h3>
+                {manifest?.status === "experimental" && <ExperimentalBadge />}
+              </div>
               <p className="truncate text-xs text-muted-foreground">
                 {def.description}
               </p>
@@ -60,9 +75,20 @@ export function MarketplaceCard({
           </Button>
         </div>
 
-        <div className="min-h-0 flex-1">
+        <div className="min-h-0 flex-1" data-testid={`marketplace-preview-${block.type}`}>
           <FeatureRenderer blocks={[block]} />
         </div>
+
+        {manifest && (
+          <AboutPanel
+            type={manifest.type}
+            label={manifest.label}
+            summary={manifest.summary}
+            justification={manifest.justification}
+            requirements={requirements}
+            experimental={manifest.status === "experimental"}
+          />
+        )}
       </CardContent>
     </Card>
   );
