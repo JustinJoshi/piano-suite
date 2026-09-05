@@ -17,6 +17,7 @@ import type { FeatureBlock } from "@/lib/feature-blocks/types";
 import { getFeatureDefinition } from "@/lib/feature-blocks/registry";
 import { FeatureRenderer } from "@/components/feature-blocks/feature-renderer";
 import { FieldInput } from "@/components/custom-practice/field-input";
+import { OPEN_TILE_SETTINGS_EVENT } from "@/lib/keyboard";
 import {
   blockSize,
   clampSize,
@@ -80,6 +81,21 @@ export function WorkshopTile({
   const [resizing, setResizing] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const resizeStartRef = useRef<ResizeStart | null>(null);
+
+  // The command palette targets tiles by id through pub/sub — the panel
+  // state is tile-internal, same pattern as the starter picker.
+  useEffect(() => {
+    function requestSettings(event: Event) {
+      const detail = (event as CustomEvent<{ tileId: string }>).detail;
+      if (detail?.tileId === block.id) {
+        setSettingsOpen(true);
+      }
+    }
+
+    window.addEventListener(OPEN_TILE_SETTINGS_EVENT, requestSettings);
+    return () =>
+      window.removeEventListener(OPEN_TILE_SETTINGS_EVENT, requestSettings);
+  }, [block.id]);
 
   const def = getFeatureDefinition(block.type);
 
@@ -169,6 +185,7 @@ export function WorkshopTile({
       ref={setNodeRef}
       data-workshop-tile=""
       data-tile-id={block.id}
+      tabIndex={0}
       style={{
         transform: CSS.Transform.toString(transform),
         transition,

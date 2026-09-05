@@ -23,6 +23,8 @@ import { WorkshopGrid } from "@/components/workshop-grid/workshop-grid";
 import { useWorkshopSync } from "@/hooks/useWorkshopSync";
 import { useAuthAccess } from "@/hooks/useAuthAccess";
 import { DrillRuntimeProvider } from "@/components/custom-practice/drill-runtime-provider";
+import { CommandPalette } from "@/components/custom-practice/command-palette";
+import { isEditableTarget } from "@/lib/keyboard";
 import {
   getPracticePageStore,
   setPracticePageStore,
@@ -73,6 +75,7 @@ export function PracticePageEditor() {
   const page = useMemo(() => getActivePage(store), [store]);
 
   const [shareOpen, setShareOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const [showTemplateLibrary, setShowTemplateLibrary] = useState(false);
   const starterPickerDismissed = useSyncExternalStore(
     subscribeToStarterPicker,
@@ -179,20 +182,21 @@ export function PracticePageEditor() {
     }));
   }
 
+  // Window-level shortcuts share one guard: unmodified letters are piano
+  // notes, so only Ctrl/Cmd+K, `?`, and `/` are safe. Escape while a dialog
+  // is open is handled on the dialog element itself (see command-palette),
+  // never here — pages-menu and dashboard-nav own their window Escape.
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key !== "/") return;
-
-      const target = event.target;
-      if (target instanceof HTMLElement) {
-        const tagName = target.tagName.toLowerCase();
-        const isEditable =
-          tagName === "input" ||
-          tagName === "textarea" ||
-          target.isContentEditable;
-
-        if (isEditable) return;
+      if (event.key === "k" && (event.ctrlKey || event.metaKey)) {
+        if (isEditableTarget(event.target)) return;
+        event.preventDefault();
+        setPaletteOpen((open) => !open);
+        return;
       }
+
+      if (event.key !== "/") return;
+      if (isEditableTarget(event.target)) return;
 
       event.preventDefault();
       router.push(BLOCKS_HREF);
@@ -201,6 +205,8 @@ export function PracticePageEditor() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [router]);
+
+
 
   return (
     <DrillRuntimeProvider pageId={page.id} blocks={page.blocks}>
@@ -258,6 +264,16 @@ export function PracticePageEditor() {
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
+
+        <CommandPalette
+          open={paletteOpen}
+          onClose={() => setPaletteOpen(false)}
+          store={store}
+          page={page}
+          updatePage={updatePage}
+          onSwitchPage={switchPage}
+          onOpenBlockLibrary={() => router.push(BLOCKS_HREF)}
+        />
 
         {shareOpen ? (
           <ShareMenu
