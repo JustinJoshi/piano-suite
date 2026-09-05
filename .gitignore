@@ -66,3 +66,6 @@ next-env.d.ts
 clerk/billing.pulled.json
 .agents/
 skills-lock.json
+
+# paseo-delegate run state (orchestrator ledger — do not commit)
+.paseo-delegate/
