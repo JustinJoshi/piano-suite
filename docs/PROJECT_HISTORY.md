@@ -715,6 +715,38 @@ reach:
   the remote query (`"skip"`) and to fire no Convex mutation when a
   signed-out visitor builds a page.
 
+## Stage 2, phase 2.4 — stock the shelves (2026-09)
+
+Phase 2.4
+([`docs/stage-2/phase-2.4-stock-shelves/PLAN.md`](stage-2/phase-2.4-stock-shelves/PLAN.md))
+put the Stage 1 block library in front of users. The library grew from
+twelve components to twenty; no starter template or marketplace seed used
+any of the eight new blocks, and `docs/components/README.md` still listed
+twelve.
+
+- **New content on the shelves.** Three starter templates and three
+  marketplace seeds now use Stage 1 blocks — a Hanon-style custom cell
+  through Rhythm pattern, Transport, and Note roll; a rootless ii-V-I via
+  Chord library roman numerals into Target display; a pentatonic
+  improvisation scope through Free play and a scale-ringed keyboard.
+  `pieceLibrary` is deliberately absent: its notes come from an uploaded
+  MIDI file outside block config, so `buildStream` composes an empty stream
+  for it (`lib/feature-blocks/build-stream.ts:31-36`). A template built on
+  it would be a broken demo; teaching `buildStream` about uploaded-MIDI
+  state is an operator decision outside this phase.
+- **A real bug fell out of the harness.** The all-twelve-keys template and
+  twelve-keys seed spelled four roots sharp (`C# D# G# A#`); the chord-set
+  normalizer spells accidentals flat only, so both pages silently cycled
+  8 keys under a twelve-key title. Respelled flat in content — the
+  normalizer and `music-theory.ts` were left alone.
+- **The component list cannot go stale.** The table in
+  `docs/components/README.md` is generated from `listManifests()` between
+  markers by the registry parity test:
+  `UPDATE_COMPONENT_DOCS=1 ./node_modules/.bin/vitest run lib/feature-blocks/__tests__/registry-parity.test.ts`
+  rewrites it; the same test in assert mode fails on drift. The dangling
+  `workshop-component-plan-v2.md` link now points at
+  `docs/stage-2/README.md`.
+
 ## Roadmap
 
 - [x] Scaffold Next.js + Tailwind + shadcn/ui
