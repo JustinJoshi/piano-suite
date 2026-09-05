@@ -589,6 +589,122 @@ export const starterTemplates: StarterTemplate[] = [
       }),
     ],
   },
+  {
+    id: "hanon-cell-warmup",
+    title: "Hanon cell warmup",
+    description:
+      "The 1-2-3-5 cell through two octaves on a falling-note roll, at a count that stays honest.",
+    category: "technique",
+    icon: AudioWaveform,
+    blocks: [
+      block("hanon-cell-scale", "scaleLibrary", {
+        scale: "major",
+        root: "C",
+        span: "twoOctaves",
+        pattern: "custom",
+        customCell: "1235",
+        direction: "upDown",
+        hands: "right",
+        loopCount: 2,
+        metronomeAdvanced: false,
+      }),
+      block("hanon-cell-rhythm", "rhythmPattern", {
+        leftPattern: "1000",
+        rightPattern: "0100",
+        barsPerCycle: 1,
+        durationRatio: 1.0,
+      }),
+      block("hanon-cell-transport", "transport", {
+        bpm: 60,
+        beatsPerBar: 4,
+        countInBars: 1,
+        loopEnabled: false,
+        loopStartBar: 0,
+        loopEndBar: 8,
+        rampEnabled: false,
+        rampTargetBpm: 80,
+      }),
+      block("hanon-cell-roll", "noteRoll", {
+        lookaheadMs: 2000,
+        scrollSpeed: 200,
+        handFilter: "right",
+        showNoteNames: true,
+        waitMode: true,
+      }),
+      block("hanon-cell-stats", "sessionStats", {
+        windowDays: 7,
+        showGrades: true,
+        showBest: true,
+      }),
+    ],
+  },
+  {
+    id: "rootless-ii-v-i",
+    title: "Rootless ii-V-I, twelve keys",
+    description:
+      "A 3-5-7-9 voicing in the key of C, looped twelve times so the whole cycle passes.",
+    category: "chords",
+    icon: ListMusic,
+    blocks: [
+      block("rootless-chords", "chordLibrary", {
+        mode: "romanNumerals",
+        numerals: "ii7 V7 Imaj7",
+        keyRoot: "C",
+        voicing: "rootlessA",
+        showNext: true,
+        loopCount: 12,
+      }),
+      block("rootless-target", "targetDisplay", {
+        view: "symbols",
+        showNext: true,
+        showPosition: true,
+      }),
+      block("rootless-timer", "drillTimer", {
+        countdownSeconds: 3,
+        breakSeconds: 5,
+        multiRep: true,
+        showLiveTimer: true,
+      }),
+      block("rootless-stats", "sessionStats", {
+        windowDays: 30,
+        showGrades: true,
+        showBest: true,
+      }),
+    ],
+  },
+  {
+    id: "pentatonic-improv",
+    title: "Pentatonic improvisation",
+    description:
+      "Five notes that cannot sound wrong: a run to start your ear, a live scope, and a keyboard that rings the scale.",
+    category: "technique",
+    icon: Music2,
+    blocks: [
+      block("pentatonic-scale", "scaleLibrary", {
+        scale: "majorPentatonic",
+        root: "C",
+        span: "octave",
+        pattern: "straight",
+        direction: "up",
+        hands: "right",
+        loopCount: 1,
+        metronomeAdvanced: false,
+      }),
+      block("pentatonic-scope", "freePlay", {
+        scale: "majorPentatonic",
+        root: "C",
+        windowSeconds: 30,
+      }),
+      block("pentatonic-keyboard", "keyboardDisplay", {
+        lowNote: 48,
+        octaves: 2,
+        showNoteNames: true,
+        computerKeys: true,
+        highlightScale: "majorPentatonic",
+        highlightRoot: "C",
+      }),
+    ],
+  },
 ];
 
 export function normalizeStarterTemplate(raw: unknown): StarterTemplate | null {
