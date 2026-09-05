@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { render, screen, fireEvent, cleanup, within } from "@testing-library/react";
 import { DndContext } from "@dnd-kit/core";
 import { WorkshopTile } from "@/components/workshop-grid/workshop-tile";
 import type { FeatureBlock } from "@/lib/feature-blocks/types";
@@ -83,5 +83,46 @@ describe("WorkshopTile", () => {
     fireEvent.focus(settingsButton);
 
     expect(toolbar.className).toContain("focus-within:md:opacity-100");
+  });
+  it("scopes settings field ids per tile when two gear panels are open", () => {
+    render(
+      <>
+        <DndContext>
+          <WorkshopTile
+            block={tileBlock("tile-a")}
+            onResize={vi.fn()}
+            onDuplicate={vi.fn()}
+            onRemove={vi.fn()}
+            onConfigChange={vi.fn()}
+          />
+        </DndContext>
+        <DndContext>
+          <WorkshopTile
+            block={tileBlock("tile-b")}
+            onResize={vi.fn()}
+            onDuplicate={vi.fn()}
+            onRemove={vi.fn()}
+            onConfigChange={vi.fn()}
+          />
+        </DndContext>
+      </>
+    );
+
+    const settingsButtons = screen.getAllByLabelText("Tile settings");
+    expect(settingsButtons).toHaveLength(2);
+    settingsButtons.forEach((button) => fireEvent.click(button));
+
+    const panels = screen.getAllByTestId("tile-settings");
+    expect(panels).toHaveLength(2);
+
+    const bpmLabels = panels.map((panel) =>
+      within(panel).getByText("Tempo")
+    );
+    const bpmIds = bpmLabels.map((label) =>
+      label.getAttribute("for")
+    );
+    expect(new Set(bpmIds).size).toBe(2);
+    expect(bpmIds[0]).toContain("tile-a");
+    expect(bpmIds[1]).toContain("tile-b");
   });
 });

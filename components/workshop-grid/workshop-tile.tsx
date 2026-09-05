@@ -167,6 +167,7 @@ export function WorkshopTile({
                 <FieldInput
                   key={field.key}
                   field={field}
+                  idPrefix={block.id}
                   value={
                     (block.config as Record<string, unknown>)[field.key]
                   }

@@ -10,12 +10,15 @@ export function FieldInput({
   field,
   value,
   onChange,
+  idPrefix,
 }: {
   field: FieldDescriptor;
   value: unknown;
   onChange: (value: unknown) => void;
+  /** Scopes DOM ids so several open panels never emit duplicates. */
+  idPrefix?: string;
 }) {
-  const id = `field-${field.key}`;
+  const id = idPrefix ? `field-${idPrefix}-${field.key}` : `field-${field.key}`;
 
   if (field.kind === "range") {
     const numericValue = typeof value === "number" ? value : field.min;
