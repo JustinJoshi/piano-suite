@@ -36,6 +36,9 @@ test.describe("workshop a11y (signed out)", () => {
     await expect(page).toHaveURL(/\/tools\/workshop\/blocks$/, {
       timeout: 15_000,
     });
+    // Freeze auto-advancing previews so the scan is deterministic, and
+    // exercise the reduced-motion path the blocks must honor.
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await expect(
       page.getByTestId("marketplace-card-metronome").first()
     ).toBeVisible({ timeout: 15_000 });
@@ -48,6 +51,7 @@ test.describe("workshop a11y (signed out)", () => {
 
     await page.goto("/marketplace");
     await expect(page).toHaveURL(/\/marketplace$/, { timeout: 15_000 });
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await expect(
       page.getByRole("heading", { name: /marketplace/i })
     ).toBeVisible({ timeout: 15_000 });
@@ -66,6 +70,7 @@ test.describe("workshop a11y (signed out)", () => {
 
     await page.goto("/tools/workshop");
     await expect(page).toHaveURL(/\/tools\/workshop$/, { timeout: 15_000 });
+    await page.emulateMedia({ reducedMotion: "reduce" });
 
     // A fresh signed-out browser gets the onboarding overlay; axe on an
     // overlay-dimmed DOM reports focus traps. Dismiss it, then the starter

@@ -138,9 +138,11 @@ export function NoteRollBlock(raw: Record<string, unknown>) {
               data-testid="note-roll-note"
               className={cn(
                 "absolute flex items-end justify-center rounded-sm border text-[10px] font-semibold",
+                // Solid block backgrounds with their foreground tokens:
+                // 10px chip text needs 4.5:1, which the 40% tints miss.
                 note.hand === "left"
-                  ? "border-accent/60 bg-accent/40 text-accent"
-                  : "border-primary/60 bg-primary/40 text-primary"
+                  ? "border-accent/60 bg-accent text-accent-foreground"
+                  : "border-primary/60 bg-primary text-primary-foreground"
               )}
               style={{
                 left: `calc(${col} * ${width})`,
