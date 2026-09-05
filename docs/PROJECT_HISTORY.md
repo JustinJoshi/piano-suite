@@ -740,6 +740,35 @@ adding it:
   rewired onto the same tiers, so the library and the marketplace read
   identically.
 
+## Stage 2, phase 2.3 — keyboard-first Workshop (2026-09)
+
+Phase 2.3
+([`docs/stage-2/phase-2.3-keyboard-first/PLAN.md`](stage-2/phase-2.3-keyboard-first/PLAN.md))
+made the public Workshop operable without a mouse and added the
+accessibility gate that keeps it that way. Four verified defects fell:
+desktop tile toolbars were invisible to keyboard focus (`focus-within`),
+two open gear panels emitted duplicate DOM ids (optional `idPrefix` on
+`FieldInput`), resize was pointer-only (Width/Height range fields in the
+gear panel over the existing grid bounds), and there was no way past the
+sidebar (skip link in `DashboardShell` targeting focusable `#main-content`).
+
+- **Command palette.** Ctrl/Cmd+K opens `command-palette.tsx`: add any
+  block by name, switch pages, open a tile's gear panel, focus a tile,
+  or jump to the block library. The editable-target guard was deduplicated
+  into `lib/keyboard.ts` (it existed twice) together with the
+  `WORKSHOP_SHORTCUTS` constant that both the palette hint and the `?`
+  help dialog render. Tile settings open through a window CustomEvent —
+  the starter-picker pub/sub precedent — because panel state is
+  tile-internal. Transport play-state toggling is descoped (state is
+  local to `useAudio` inside the block).
+- **Motion discipline.** `usePrefersReducedMotion` (extracted from the
+  onboarding hook) suppresses the Note roll's rAF loop entirely under
+  `prefers-reduced-motion: reduce`, and a visible pause control drives
+  the same loop (WCAG 2.2.2).
+- **The gate.** `@axe-core/playwright` (the phase's one dependency;
+  installed under npm 10) scans `/tools/workshop`, `/tools/workshop/blocks`,
+  and `/marketplace` signed-out for zero serious/critical violations.
+
 ## Roadmap
 
 - [x] Scaffold Next.js + Tailwind + shadcn/ui

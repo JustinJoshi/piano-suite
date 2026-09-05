@@ -17,16 +17,21 @@ import type { FeatureBlock } from "@/lib/feature-blocks/types";
 import { getFeatureDefinition } from "@/lib/feature-blocks/registry";
 import { FeatureRenderer } from "@/components/feature-blocks/feature-renderer";
 import { FieldInput } from "@/components/custom-practice/field-input";
+import { OPEN_TILE_SETTINGS_EVENT } from "@/lib/keyboard";
 import {
   blockSize,
   clampSize,
   effectiveSpan,
   currentGridColumns,
   sizeFromDelta,
+  MAX_GRID_COLUMNS,
+  MIN_HEIGHT,
+  MAX_HEIGHT,
   GAP_PX,
   ROW_UNIT_PX,
   type BlockSize,
 } from "@/lib/workshop-grid";
+import type { FieldDescriptor } from "@/lib/feature-blocks/types";
 
 /**
  * Column span classes per canonical width. Responsive prefixes clamp the
@@ -76,6 +81,21 @@ export function WorkshopTile({
   const [resizing, setResizing] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const resizeStartRef = useRef<ResizeStart | null>(null);
+
+  // The command palette targets tiles by id through pub/sub — the panel
+  // state is tile-internal, same pattern as the starter picker.
+  useEffect(() => {
+    function requestSettings(event: Event) {
+      const detail = (event as CustomEvent<{ tileId: string }>).detail;
+      if (detail?.tileId === block.id) {
+        setSettingsOpen(true);
+      }
+    }
+
+    window.addEventListener(OPEN_TILE_SETTINGS_EVENT, requestSettings);
+    return () =>
+      window.removeEventListener(OPEN_TILE_SETTINGS_EVENT, requestSettings);
+  }, [block.id]);
 
   const def = getFeatureDefinition(block.type);
 
@@ -138,11 +158,34 @@ export function WorkshopTile({
     onConfigChange(block.id, { ...config, [key]: value });
   }
 
+  // Keyboard resize: the drag handle is pointer-only, so the gear panel
+  // exposes the same operation as plain range fields. onResize flows to
+  // the editor, which already normalizes/clamps — no size math here.
+  const sizeFields: FieldDescriptor[] = [
+    {
+      kind: "range",
+      key: "width",
+      label: "Width",
+      min: 1,
+      max: MAX_GRID_COLUMNS,
+      step: 1,
+    },
+    {
+      kind: "range",
+      key: "height",
+      label: "Height",
+      min: MIN_HEIGHT,
+      max: MAX_HEIGHT,
+      step: 1,
+    },
+  ];
+
   return (
     <div
       ref={setNodeRef}
       data-workshop-tile=""
       data-tile-id={block.id}
+      tabIndex={0}
       style={{
         transform: CSS.Transform.toString(transform),
         transition,
@@ -163,10 +206,27 @@ export function WorkshopTile({
               data-testid="tile-settings"
               className="mt-4 space-y-4 border-t border-border pt-4"
             >
+              {sizeFields.map((field) => (
+                <FieldInput
+                  key={field.key}
+                  field={field}
+                  idPrefix={block.id}
+                  value={field.key === "width" ? size.w : size.h}
+                  onChange={(value) =>
+                    onResize(
+                      block.id,
+                      field.key === "width"
+                        ? { w: Number(value) }
+                        : { h: Number(value) }
+                    )
+                  }
+                />
+              ))}
               {def.fields.map((field) => (
                 <FieldInput
                   key={field.key}
                   field={field}
+                  idPrefix={block.id}
                   value={
                     (block.config as Record<string, unknown>)[field.key]
                   }
@@ -182,6 +242,7 @@ export function WorkshopTile({
         className={cn(
           "absolute right-1 top-1 flex gap-1 transition-opacity",
           "opacity-100 md:opacity-0 md:group-hover:opacity-100",
+          "focus-within:md:opacity-100",
           (resizing || settingsOpen) && "md:opacity-100"
         )}
         onClick={(e) => e.stopPropagation()}

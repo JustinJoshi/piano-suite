@@ -6,6 +6,7 @@ import {
   ONBOARDING_RESET_PARAM,
   ONBOARDING_STORAGE_KEY,
 } from "@/lib/onboarding";
+import { prefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 
 function getHasCompletedFromStorage(): boolean {
   if (typeof window === "undefined") return false;
@@ -34,12 +35,6 @@ function setCompletedInStorage(completed: boolean): void {
   } catch {
     // Ignore storage errors (e.g. private browsing).
   }
-}
-
-function prefersReducedMotion(): boolean {
-  if (typeof window === "undefined") return false;
-  if (typeof window.matchMedia !== "function") return false;
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
 function computeInstantMode(): boolean {
