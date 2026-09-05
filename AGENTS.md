@@ -235,6 +235,7 @@ For Canvas or WebGL visuals that cannot use Tailwind utilities, read the CSS cus
   ```bash
   CI=true E2E_PORT=3310 PORT=3310 ./node_modules/.bin/playwright test e2e/<touched-flow>.spec.ts
   ```
+- Nightly triage agents are titled `[Nightly] <slug>` (e.g. `[Nightly] e2e-red-20260905`). When the nightly bot goes red it spawns `[Nightly] e2e-red-<date>` on glm-5.3-flash following `scripts/nightly/investigator-protocol.md` (investigate only — never fix), writes a verdict to `~/.local/state/piano-suite-nightly/verdict.json`, and on a passing verdict hands its plan to paseo-delegate on full auto as `[Nightly] e2e-fix-<date>` in the `~/piano-suite-nightly` worktree. Review those agents' branches before merging; nothing pushes to main unattended.
 - All new primitives must have unit tests before a tool migration is considered complete.
 
 Vitest collects specs from `lib/`, `hooks/`, `components/`, **and `convex/`**. Convex functions are tested with [`convex-test`](https://docs.convex.dev/testing/convex-test) — see `convex/__tests__/settings-auth.test.ts`, which uses `t.withIdentity()` to simulate a Clerk session and guards the auth edge cases (no identity, signed in with no `users` row, first write creating the row).
