@@ -157,8 +157,8 @@ git -C "$WORKTREE" bisect reset >>"$REPORT" 2>&1 || true
 # and enforces the JSON itself), so the investigator runs foreground: spawn,
 # wait, and schema enforcement are one command. bypass_permissions is what
 # paseo's own delegate workers use for unattended runs.
-PROTOCOL_SRC="$REPO/scripts/nightly/investigator-protocol.md"
-SCHEMA_SRC="$REPO/scripts/nightly/schemas/nightly-verdict.json"
+PROTOCOL_SRC="${NIGHTLY_DIR:-$(dirname "$(readlink -f "$0")")/nightly}/investigator-protocol.md"
+SCHEMA_SRC="${NIGHTLY_DIR:-$(dirname "$(readlink -f "$0")")/nightly}/schemas/nightly-verdict.json"
 VERDICT_JSON="$STATE_DIR/verdict.json"
 PLAN_PATH="$STATE_DIR/plan.md"
 if [ ! -f "$PROTOCOL_SRC" ] || [ ! -f "$SCHEMA_SRC" ]; then

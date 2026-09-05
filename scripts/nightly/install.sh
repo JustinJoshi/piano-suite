@@ -4,7 +4,7 @@
 # switches in any checkout never affect the installed bot, then (re)installs
 # the systemd user units and enables the timer.
 set -eu
-SRC="$(cd "$(dirname "$0")/.." && pwd)"
+SRC="$(cd "$(dirname "$0")/../.." && pwd)"
 DEST="${NIGHTLY_INSTALL_DIR:-$HOME/.local/lib/piano-suite-nightly}"
 
 mkdir -p "$DEST/nightly"
