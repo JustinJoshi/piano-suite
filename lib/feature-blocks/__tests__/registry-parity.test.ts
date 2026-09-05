@@ -1,11 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { featureRegistry, featureCategories } from "@/lib/feature-blocks/registry";
 import { KNOWN_BLOCK_TYPES, normalizeStoredBlock } from "@/lib/feature-blocks/schemas";
 import { blockSize } from "@/lib/workshop-grid";
 import { getManifest, listManifests } from "@/lib/feature-blocks/manifest";
+import type { ComponentManifest } from "@/lib/feature-blocks/manifest-types";
 
 /**
  * The registry (client) and `schemas.ts` (Convex-bundled) keep two hand-written
@@ -182,6 +183,89 @@ const LEGACY_PAGE_CHROME = new Set([
   "keyboardDisplay",
   "restTimer",
 ]);
+
+/**
+ * The component list at the end of docs/components/README.md is generated
+ * from listManifests() so it cannot go stale. Write mode rewrites the table
+ * between the markers; assert mode (default) fails if the committed table
+ * drifted from the manifest.
+ */
+const COMPONENT_DOCS = join(
+  dirname(fileURLToPath(import.meta.url)),
+  "..",
+  "..",
+  "..",
+  "docs",
+  "components",
+  "README.md"
+);
+const TABLE_START = "<!-- GENERATED TABLE: START -->";
+const TABLE_END = "<!-- GENERATED TABLE: END -->";
+
+function kindLabel(kind: ComponentManifest["kind"]): string {
+  switch (kind) {
+    case "interactive":
+      return "Interactive";
+    case "source":
+      return "Source";
+    case "transform":
+      return "Transform";
+  }
+}
+
+function statusLabel(status: ComponentManifest["status"]): string {
+  return status === "stable" ? "Stable" : "Experimental";
+}
+
+export function generateComponentTable(
+  manifests: ComponentManifest[]
+): string {
+  const rows = [...manifests]
+    .sort(
+      (a, b) =>
+        a.kind.localeCompare(b.kind) ||
+        a.label.localeCompare(b.label) ||
+        a.type.localeCompare(b.type)
+    )
+    .map(
+      (m) =>
+        `| \`${m.type}\` | ${kindLabel(m.kind)} | ${m.label} | ${statusLabel(m.status)} |`
+    );
+  return ["| Type | Kind | Label | Status |", "| --- | --- | --- | --- |", ...rows].join("\n");
+}
+
+describe("generated component list", () => {
+  it("matches the manifest", () => {
+    const readme = readFileSync(COMPONENT_DOCS, "utf8");
+    const start = readme.indexOf(TABLE_START);
+    const end = readme.indexOf(TABLE_END);
+    expect(start, "GENERATED TABLE: START marker missing").toBeGreaterThan(-1);
+    expect(end, "GENERATED TABLE: END marker missing").toBeGreaterThan(start);
+
+    const generated = generateComponentTable(listManifests());
+    const section = readme.slice(start, end);
+    const current = section.slice(section.indexOf("\n") + 1).replace(/\n$/, "");
+
+    if (process.env.UPDATE_COMPONENT_DOCS === "1") {
+      writeFileSync(
+        COMPONENT_DOCS,
+        readme.slice(0, start) +
+          TABLE_START +
+          "\n" +
+          generated +
+          "\n" +
+          readme.slice(end),
+        "utf8"
+      );
+      return;
+    }
+
+    expect(
+      current,
+      "Committed component list drifted from the manifest. Regenerate with:\n  UPDATE_COMPONENT_DOCS=1 ./node_modules/.bin/vitest run lib/feature-blocks/__tests__/registry-parity.test.ts"
+    ).toBe(generated);
+  });
+});
 
 function kebab(type: string): string {
   return type.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
