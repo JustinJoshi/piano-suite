@@ -151,6 +151,14 @@ The block library is the bottleneck (audit `04-roadmap.md`), so adding a block s
 6. **Known limitation:** the runtime scores pitch classes, so octave, voicing, fingering, and hand separation are *not* verified. Chord inversions can be prompted but not graded until `ChordTarget` grows an optional voicing-aware field.
 7. **Displays read the stream, not fixtures.** A block that renders content calls `useNoteStream()`; `buildStream` (source generators in page order, transforms in page order) composes it and the runtime context carries it. `previewNotes` is for library previews only, where no page context exists. `PracticeNote` lives in `lib/practice-note.ts`; `build-stream.ts` and its dispatch maps live outside the Convex bundle. Manifest `status` must stay truthful: `stable` only if the block reads or writes the runtime (registry parity enforces it; shipped page chrome is the only exemption).
 
+## Keyboard conventions (Workshop-first)
+
+1. **Unmodified letters are piano notes.** `keyboard-display-block.tsx` binds A W S E D… as a QWERTY piano. Every global shortcut must use a modifier (Ctrl/Cmd+K) or a non-letter key (`?`, `/`, Escape), and every shortcut handler must bail on editable targets through the shared `isEditableTarget` in `lib/keyboard.ts` — no third inline copy.
+2. **One binding constant.** `WORKSHOP_SHORTCUTS` in `lib/keyboard.ts` is the single list of Workshop bindings; the palette hint and the shortcut-help dialog render it, so neither can drift.
+3. **Window-level Escape is owned by existing handlers** (`pages-menu.tsx`, `dashboard-nav.tsx`). New dialogs handle Escape on their own dialog element and suppress sibling shortcuts while open (see `command-palette.tsx`, `shortcut-help.tsx`).
+4. **Continuous animation needs `usePrefersReducedMotion`** plus a visible pause control (WCAG 2.2.2). Note roll is the reference implementation.
+5. **The axe gate:** `e2e/a11y.spec.ts` scans `/tools/workshop`, `/tools/workshop/blocks`, and `/marketplace` signed-out for zero `serious`/`critical` violations. Run it before merging UI work on those routes; fix in place or record out-of-scope findings with rule ids in the PR — never lower the threshold.
+
 ## Navigation conventions (Workshop-first)
 
 The Workshop is the core of the app, not one tool among many.
