@@ -182,6 +182,7 @@ export function WorkshopTile({
         className={cn(
           "absolute right-1 top-1 flex gap-1 transition-opacity",
           "opacity-100 md:opacity-0 md:group-hover:opacity-100",
+          "focus-within:md:opacity-100",
           (resizing || settingsOpen) && "md:opacity-100"
         )}
         onClick={(e) => e.stopPropagation()}
