@@ -10,8 +10,10 @@ import {
   type RollNote,
 } from "@/lib/feature-blocks/note-roll/geometry";
 import { useNoteStream } from "@/hooks/useNoteStream";
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { useDrillRuntime } from "@/lib/drill-runtime";
 import { previewNotes } from "@/lib/feature-blocks/preview-fixtures";
+import { Play, Pause } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const ROLL_HEIGHT_PX = 260;
@@ -50,8 +52,16 @@ export function NoteRollBlock(raw: Record<string, unknown>) {
 
   const [nowMs, setNowMs] = useState(0);
   const frame = useRef<number>(0);
+  const [paused, setPaused] = useState(false);
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const animationSuppressed = prefersReducedMotion || paused;
 
+  // Continuous rAF loop: WCAG 2.2.2 requires a pause control, and the OS
+  // reduced-motion preference must suppress it entirely (render the static
+  // initial frame).
   useEffect(() => {
+    if (animationSuppressed) return;
+
     let start = 0;
     const total = notes.reduce((max, n) => Math.max(max, n.onsetMs + (n.durationMs ?? 300)), 0) + 500;
     const tick = (t: number) => {
@@ -62,7 +72,7 @@ export function NoteRollBlock(raw: Record<string, unknown>) {
     };
     frame.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame.current);
-  }, [notes]);
+  }, [notes, animationSuppressed]);
 
   const span = useMemo(() => {
     const all = notes.flatMap((n) => n.midi);
@@ -97,6 +107,19 @@ export function NoteRollBlock(raw: Record<string, unknown>) {
         <span className="text-xs text-muted-foreground">
           {config.handFilter === "both" ? "Both hands" : `${config.handFilter} hand`}
         </span>
+        <button
+          type="button"
+          data-paused={paused ? "true" : "false"}
+          aria-label={paused ? "Resume animation" : "Pause animation"}
+          onClick={() => setPaused((p) => !p)}
+          className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+        >
+          {paused ? (
+            <Play className="h-3.5 w-3.5" />
+          ) : (
+            <Pause className="h-3.5 w-3.5" />
+          )}
+        </button>
       </div>
 
       <div
