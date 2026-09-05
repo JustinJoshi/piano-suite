@@ -125,4 +125,21 @@ describe("WorkshopTile", () => {
     expect(bpmIds[0]).toContain("tile-a");
     expect(bpmIds[1]).toContain("tile-b");
   });
+  it("resizes from the keyboard via gear-panel width and height fields", () => {
+    const onResize = vi.fn();
+    renderTile(tileBlock("tile-1", { w: 2, h: 1 }), { onResize });
+
+    fireEvent.click(screen.getByLabelText("Tile settings"));
+
+    const width = screen.getByLabelText("Width");
+    const height = screen.getByLabelText("Height");
+    expect(width).toHaveValue("2");
+    expect(height).toHaveValue("1");
+
+    fireEvent.change(width, { target: { value: "4" } });
+    expect(onResize).toHaveBeenCalledWith("tile-1", { w: 4 });
+
+    fireEvent.change(height, { target: { value: "3" } });
+    expect(onResize).toHaveBeenCalledWith("tile-1", { h: 3 });
+  });
 });

@@ -23,10 +23,14 @@ import {
   effectiveSpan,
   currentGridColumns,
   sizeFromDelta,
+  MAX_GRID_COLUMNS,
+  MIN_HEIGHT,
+  MAX_HEIGHT,
   GAP_PX,
   ROW_UNIT_PX,
   type BlockSize,
 } from "@/lib/workshop-grid";
+import type { FieldDescriptor } from "@/lib/feature-blocks/types";
 
 /**
  * Column span classes per canonical width. Responsive prefixes clamp the
@@ -138,6 +142,28 @@ export function WorkshopTile({
     onConfigChange(block.id, { ...config, [key]: value });
   }
 
+  // Keyboard resize: the drag handle is pointer-only, so the gear panel
+  // exposes the same operation as plain range fields. onResize flows to
+  // the editor, which already normalizes/clamps — no size math here.
+  const sizeFields: FieldDescriptor[] = [
+    {
+      kind: "range",
+      key: "width",
+      label: "Width",
+      min: 1,
+      max: MAX_GRID_COLUMNS,
+      step: 1,
+    },
+    {
+      kind: "range",
+      key: "height",
+      label: "Height",
+      min: MIN_HEIGHT,
+      max: MAX_HEIGHT,
+      step: 1,
+    },
+  ];
+
   return (
     <div
       ref={setNodeRef}
@@ -163,6 +189,22 @@ export function WorkshopTile({
               data-testid="tile-settings"
               className="mt-4 space-y-4 border-t border-border pt-4"
             >
+              {sizeFields.map((field) => (
+                <FieldInput
+                  key={field.key}
+                  field={field}
+                  idPrefix={block.id}
+                  value={field.key === "width" ? size.w : size.h}
+                  onChange={(value) =>
+                    onResize(
+                      block.id,
+                      field.key === "width"
+                        ? { w: Number(value) }
+                        : { h: Number(value) }
+                    )
+                  }
+                />
+              ))}
               {def.fields.map((field) => (
                 <FieldInput
                   key={field.key}
