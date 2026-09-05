@@ -7,7 +7,15 @@ test.describe("workshop a11y (signed out)", () => {
     storageState: { cookies: [] as never[], origins: [] as never[] },
   });
 
+  // @axe-core/playwright has no disableAnimations helper; freezing
+  // transitions at scan time is the same mechanism — a color computed
+  // halfway through transition-colors is an interpolated (non-token)
+  // pair and fails contrast intermittently.
+  const FREEZE_TRANSITIONS_CSS =
+    "*, *::before, *::after { transition: none !important; animation: none !important; }";
+
   async function scanForSeriousViolations(page: import("@playwright/test").Page) {
+    await page.addStyleTag({ content: FREEZE_TRANSITIONS_CSS });
     const results = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
       .analyze();
