@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  useEffect,
-  useMemo,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
@@ -14,7 +9,10 @@ import { cn } from "@/lib/utils";
 import type { PracticePage, FeatureBlock } from "@/lib/feature-blocks/types";
 import { resizeBlocks } from "@/lib/workshop-grid";
 import { isAtBlockLimit } from "@/lib/feature-blocks/registry";
-import { buildTemplatePage, type StarterTemplate } from "@/lib/starter-templates";
+import {
+  buildTemplatePage,
+  type StarterTemplate,
+} from "@/lib/starter-templates";
 import { ShareMenu } from "@/components/custom-practice/share-menu";
 import { PagesMenu } from "@/components/custom-practice/pages-menu";
 import { WorkshopSyncBadge } from "@/components/custom-practice/workshop-sync-badge";
@@ -23,6 +21,9 @@ import { WorkshopGrid } from "@/components/workshop-grid/workshop-grid";
 import { useWorkshopSync } from "@/hooks/useWorkshopSync";
 import { useAuthAccess } from "@/hooks/useAuthAccess";
 import { DrillRuntimeProvider } from "@/components/custom-practice/drill-runtime-provider";
+import { CommandPalette } from "@/components/custom-practice/command-palette";
+import { ShortcutHelp } from "@/components/custom-practice/shortcut-help";
+import { isEditableTarget } from "@/lib/keyboard";
 import {
   getPracticePageStore,
   setPracticePageStore,
@@ -67,22 +68,22 @@ export function PracticePageEditor() {
   const store = useSyncExternalStore(
     subscribePracticePageStore,
     getPracticePageStore,
-    getServerPracticePageStore
+    getServerPracticePageStore,
   );
 
   const page = useMemo(() => getActivePage(store), [store]);
 
   const [shareOpen, setShareOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [showTemplateLibrary, setShowTemplateLibrary] = useState(false);
   const starterPickerDismissed = useSyncExternalStore(
     subscribeToStarterPicker,
     readStarterPickerDismissed,
-    () => true
+    () => true,
   );
   const showStarterPicker =
-    store.pages.length === 1 &&
-    isStarterPage(page) &&
-    !starterPickerDismissed;
+    store.pages.length === 1 && isStarterPage(page) && !starterPickerDismissed;
   const showTemplates = showStarterPicker || showTemplateLibrary;
 
   function updatePage(updater: (prev: PracticePage) => PracticePage) {
@@ -104,7 +105,7 @@ export function PracticePageEditor() {
   function removePage() {
     if (store.pages.length <= 1) return;
     const confirmed = window.confirm(
-      `Delete "${page.title.trim() === "" ? "Untitled" : page.title}"? Its practice history is kept.`
+      `Delete "${page.title.trim() === "" ? "Untitled" : page.title}"? Its practice history is kept.`,
     );
     if (!confirmed) return;
     setPracticePageStore(deletePracticePage(store, page.id));
@@ -179,20 +180,28 @@ export function PracticePageEditor() {
     }));
   }
 
+  // Window-level shortcuts share one guard: unmodified letters are piano
+  // notes, so only Ctrl/Cmd+K, `?`, and `/` are safe. Escape while a dialog
+  // is open is handled on the dialog element itself (see command-palette),
+  // never here — pages-menu and dashboard-nav own their window Escape.
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key !== "/") return;
-
-      const target = event.target;
-      if (target instanceof HTMLElement) {
-        const tagName = target.tagName.toLowerCase();
-        const isEditable =
-          tagName === "input" ||
-          tagName === "textarea" ||
-          target.isContentEditable;
-
-        if (isEditable) return;
+      if (event.key === "k" && (event.ctrlKey || event.metaKey)) {
+        if (isEditableTarget(event.target) || paletteOpen) return;
+        event.preventDefault();
+        setPaletteOpen((open) => !open);
+        return;
       }
+
+      if (event.key === "?") {
+        if (isEditableTarget(event.target) || paletteOpen) return;
+        event.preventDefault();
+        setHelpOpen((open) => !open);
+        return;
+      }
+
+      if (event.key !== "/") return;
+      if (isEditableTarget(event.target)) return;
 
       event.preventDefault();
       router.push(BLOCKS_HREF);
@@ -200,7 +209,7 @@ export function PracticePageEditor() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [router]);
+  }, [router, paletteOpen]);
 
   return (
     <DrillRuntimeProvider pageId={page.id} blocks={page.blocks}>
@@ -258,6 +267,20 @@ export function PracticePageEditor() {
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
+
+        {paletteOpen ? (
+          <CommandPalette
+            open
+            onClose={() => setPaletteOpen(false)}
+            store={store}
+            page={page}
+            updatePage={updatePage}
+            onSwitchPage={switchPage}
+            onOpenBlockLibrary={() => router.push(BLOCKS_HREF)}
+          />
+        ) : null}
+
+        <ShortcutHelp open={helpOpen} onClose={() => setHelpOpen(false)} />
 
         {shareOpen ? (
           <ShareMenu

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, act } from "@testing-library/react";
+import { render, screen, fireEvent, cleanup, act } from "@testing-library/react";
 import { NoteRollBlock } from "@/components/feature-blocks/note-roll-block";
 import { DrillRuntimeProvider } from "@/components/custom-practice/drill-runtime-provider";
 
@@ -30,11 +30,26 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  cleanup();
   vi.unstubAllGlobals();
 });
 
 function visibleNoteCount(): number {
   return screen.queryAllByTestId("note-roll-note").length;
+}
+
+function stubMatchMedia(matchesReduce: boolean) {
+  vi.stubGlobal(
+    "matchMedia",
+    vi.fn().mockImplementation((query: string) => ({
+      matches:
+        matchesReduce && query === "(prefers-reduced-motion: reduce)",
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }))
+  );
 }
 
 describe("NoteRollBlock", () => {
@@ -134,5 +149,49 @@ describe("NoteRollBlock", () => {
 
     // Direct thrash signal: the loop effect must not tear down per frame.
     expect(cancels).toBeLessThanOrEqual(1);
+  });
+
+  it("does not start the animation loop when reduced motion is preferred", () => {
+    stubMatchMedia(true);
+    const rafSpy = vi.spyOn(window, "requestAnimationFrame");
+
+    // Preview runtime so the roll (and its loop) actually render.
+    render(
+      <DrillRuntimeProvider pageId="">
+        <NoteRollBlock />
+      </DrillRuntimeProvider>
+    );
+
+    expect(screen.getByTestId("note-roll")).toBeInTheDocument();
+    expect(rafSpy).not.toHaveBeenCalled();
+    rafSpy.mockRestore();
+  });
+
+  it("pauses and resumes the loop from the visible control", () => {
+    stubMatchMedia(false);
+    const rafSpy = vi.spyOn(window, "requestAnimationFrame");
+
+    render(
+      <DrillRuntimeProvider pageId="">
+        <NoteRollBlock />
+      </DrillRuntimeProvider>
+    );
+
+    expect(rafSpy).toHaveBeenCalled();
+
+    const pause = screen.getByRole("button", { name: /pause animation/i });
+    expect(pause).toHaveAttribute("data-paused", "false");
+
+    fireEvent.click(pause);
+    expect(pause).toHaveAttribute("data-paused", "true");
+    expect(
+      screen.getByRole("button", { name: /resume animation/i })
+    ).toHaveAttribute("data-paused", "true");
+
+    fireEvent.click(screen.getByRole("button", { name: /resume animation/i }));
+    expect(
+      screen.getByRole("button", { name: /pause animation/i })
+    ).toHaveAttribute("data-paused", "false");
+    rafSpy.mockRestore();
   });
 });
