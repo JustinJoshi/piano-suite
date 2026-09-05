@@ -67,7 +67,7 @@ export const starterTemplates: StarterTemplate[] = [
     icon: Music2,
     blocks: [
       block("twelve-keys-set", "chordSet", {
-        roots: ["C", "G", "D", "A", "E", "B", "F#", "C#", "G#", "D#", "A#", "F"],
+        roots: ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"],
         qualityGroups: ["7th"],
         order: "sequential",
         requireExact: false,

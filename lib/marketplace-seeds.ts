@@ -21,16 +21,16 @@ export type MarketplaceSeed = {
 
 const ALL_ROOTS = [
   "C",
-  "C#",
+  "Db",
   "D",
-  "D#",
+  "Eb",
   "E",
   "F",
   "F#",
   "G",
-  "G#",
+  "Ab",
   "A",
-  "A#",
+  "Bb",
   "B",
 ];
 
