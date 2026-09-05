@@ -3,9 +3,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { featureRegistry } from "@/lib/feature-blocks/registry";
 import { OPEN_TILE_SETTINGS_EVENT, WORKSHOP_SHORTCUTS } from "@/lib/keyboard";
+import type { PracticePage } from "@/lib/feature-blocks/types";
 import {
   appendBlockToPage,
-  type PracticePage,
   type PracticePageStore,
 } from "@/lib/custom-practice-storage";
 import { cn } from "@/lib/utils";
