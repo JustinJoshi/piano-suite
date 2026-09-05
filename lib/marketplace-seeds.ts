@@ -350,4 +350,118 @@ export const marketplaceSeeds: MarketplaceSeed[] = [
       }),
     ],
   },
+  {
+    id: "hanon-cell-lab",
+    title: "Hanon cell, falling notes",
+    authorName: "Justin",
+    authorNote:
+      "I always abandoned Hanon books until the drill played itself back at me. Watching my own cell fall toward the hit line at 60 is the first time I practised it more than three days running.",
+    blocks: [
+      block("scaleLibrary", {
+        scale: "major",
+        root: "C",
+        span: "twoOctaves",
+        pattern: "custom",
+        customCell: "1235",
+        direction: "upDown",
+        hands: "right",
+        loopCount: 2,
+        metronomeAdvanced: false,
+      }),
+      block("rhythmPattern", {
+        leftPattern: "1000",
+        rightPattern: "0100",
+        barsPerCycle: 1,
+        durationRatio: 0.5,
+      }),
+      block("transport", {
+        bpm: 60,
+        beatsPerBar: 4,
+        countInBars: 1,
+        loopEnabled: false,
+        loopStartBar: 0,
+        loopEndBar: 8,
+        rampEnabled: false,
+        rampTargetBpm: 80,
+      }),
+      block("noteRoll", {
+        lookaheadMs: 2500,
+        scrollSpeed: 200,
+        handFilter: "right",
+        showNoteNames: true,
+        waitMode: true,
+      }),
+      block("sessionStats", {
+        windowDays: 30,
+        showGrades: false,
+        showBest: true,
+        showDays: true,
+      }),
+    ],
+  },
+  {
+    id: "rootless-ii-v-i-slow",
+    title: "Rootless ii-V-I, no metronome",
+    authorName: "Justin",
+    authorNote:
+      "I could voice ii-V-I but panicked whenever a tempo was attached. This is the page that decoupled the two for me: the shapes, twelve keys in a loop, and no clock anywhere telling me to hurry.",
+    blocks: [
+      block("chordLibrary", {
+        mode: "romanNumerals",
+        numerals: "ii7 V7 Imaj7",
+        keyRoot: "C",
+        voicing: "rootlessA",
+        showNext: true,
+        loopCount: 12,
+      }),
+      block("targetDisplay", {
+        view: "keysDiagram",
+        showNext: true,
+        showPosition: true,
+      }),
+      block("drillTimer", {
+        countdownSeconds: 0,
+        breakSeconds: 0,
+        multiRep: true,
+        showLiveTimer: true,
+      }),
+      block("sessionStats", {
+        windowDays: 30,
+        showGrades: true,
+        showBest: true,
+      }),
+    ],
+  },
+  {
+    id: "pentatonic-scope",
+    title: "Pentatonic scope",
+    authorName: "Justin",
+    authorNote:
+      "Improvising used to feel like being graded with no answer key. Five notes, a live readout instead of a score, and a keyboard that rings the scale — this is where I let myself just play.",
+    blocks: [
+      block("scaleLibrary", {
+        scale: "majorPentatonic",
+        root: "C",
+        span: "octave",
+        pattern: "straight",
+        direction: "up",
+        hands: "right",
+        loopCount: 1,
+        metronomeAdvanced: false,
+      }),
+      block("freePlay", {
+        scale: "majorPentatonic",
+        root: "C",
+        windowSeconds: 30,
+      }),
+      block("keyboardDisplay", {
+        lowNote: 48,
+        octaves: 2,
+        showNoteNames: true,
+        computerKeys: true,
+        highlightScale: "majorPentatonic",
+        highlightRoot: "C",
+      }),
+    ],
+  },
 ];

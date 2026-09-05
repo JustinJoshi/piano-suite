@@ -42,4 +42,27 @@ describe("marketplace seeds", () => {
       true
     );
   });
+
+  it("keeps every seed to one block per type", () => {
+    // The local block() helper sets id: type, so two blocks of the same type
+    // would collide on the React key and the fork lineage marker.
+    for (const seed of marketplaceSeeds) {
+      const types = seed.blocks.map((b) => b.type);
+      expect(new Set(types).size).toBe(types.length);
+    }
+  });
+
+  it("includes the three Stage 1 seeds with first-person notes", () => {
+    const ids = marketplaceSeeds.map((seed) => seed.id);
+    for (const id of ["hanon-cell-lab", "rootless-ii-v-i-slow", "pentatonic-scope"]) {
+      expect(ids).toContain(id);
+    }
+    expect(marketplaceSeeds.length).toBeGreaterThanOrEqual(14);
+
+    for (const id of ["hanon-cell-lab", "rootless-ii-v-i-slow", "pentatonic-scope"]) {
+      const seed = marketplaceSeeds.find((s) => s.id === id);
+      expect(seed?.authorNote.length).toBeGreaterThan(0);
+      expect(seed?.authorNote).toMatch(/\b(I|my)\b/i);
+    }
+  });
 });
