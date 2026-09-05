@@ -4,6 +4,6 @@ After=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=/home/justin/piano-suite/scripts/nightly-e2e.sh
+ExecStart=%h/.local/lib/piano-suite-nightly/nightly-e2e.sh
 # The script reports via logs/notifications; failure must not vanish silently.
 TimeoutStartSec=3h
