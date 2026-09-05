@@ -22,6 +22,7 @@ import { useWorkshopSync } from "@/hooks/useWorkshopSync";
 import { useAuthAccess } from "@/hooks/useAuthAccess";
 import { DrillRuntimeProvider } from "@/components/custom-practice/drill-runtime-provider";
 import { CommandPalette } from "@/components/custom-practice/command-palette";
+import { ShortcutHelp } from "@/components/custom-practice/shortcut-help";
 import { isEditableTarget } from "@/lib/keyboard";
 import {
   getPracticePageStore,
@@ -74,6 +75,7 @@ export function PracticePageEditor() {
 
   const [shareOpen, setShareOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [showTemplateLibrary, setShowTemplateLibrary] = useState(false);
   const starterPickerDismissed = useSyncExternalStore(
     subscribeToStarterPicker,
@@ -185,9 +187,16 @@ export function PracticePageEditor() {
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "k" && (event.ctrlKey || event.metaKey)) {
-        if (isEditableTarget(event.target)) return;
+        if (isEditableTarget(event.target) || paletteOpen) return;
         event.preventDefault();
         setPaletteOpen((open) => !open);
+        return;
+      }
+
+      if (event.key === "?") {
+        if (isEditableTarget(event.target) || paletteOpen) return;
+        event.preventDefault();
+        setHelpOpen((open) => !open);
         return;
       }
 
@@ -200,7 +209,7 @@ export function PracticePageEditor() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [router]);
+  }, [router, paletteOpen]);
 
   return (
     <DrillRuntimeProvider pageId={page.id} blocks={page.blocks}>
@@ -270,6 +279,8 @@ export function PracticePageEditor() {
             onOpenBlockLibrary={() => router.push(BLOCKS_HREF)}
           />
         ) : null}
+
+        <ShortcutHelp open={helpOpen} onClose={() => setHelpOpen(false)} />
 
         {shareOpen ? (
           <ShareMenu

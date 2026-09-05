@@ -296,4 +296,23 @@ describe("CommandPalette", () => {
     expect(pushMock).toHaveBeenCalledWith("/tools/workshop/blocks");
     expect(vi.mocked(pressVirtualNote)).not.toHaveBeenCalled();
   });
+  it("opens shortcut help with ? and closes it with Escape", () => {
+    seedStore(createEmptyPracticePage());
+    renderEditor();
+
+    fireEvent.keyDown(window, { key: "?" });
+    expect(
+      screen.getByRole("dialog", { name: /keyboard shortcuts/i })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Ctrl/Cmd+K")).toBeInTheDocument();
+    expect(screen.getByText("Open the block library")).toBeInTheDocument();
+
+    fireEvent.keyDown(
+      screen.getByRole("dialog", { name: /keyboard shortcuts/i }),
+      { key: "Escape" }
+    );
+    expect(
+      screen.queryByRole("dialog", { name: /keyboard shortcuts/i })
+    ).not.toBeInTheDocument();
+  });
 });
