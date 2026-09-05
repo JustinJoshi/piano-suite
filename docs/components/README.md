@@ -163,19 +163,31 @@ Components are registered in two places:
 
 ## Component list
 
+<!-- GENERATED TABLE: START -->
 | Type | Kind | Label | Status |
 | --- | --- | --- | --- |
-| `metronome` | Interactive | Metronome | Stable |
-| `drillTimer` | Interactive | Drill timer | Stable |
 | `chordSet` | Interactive | Chord set | Stable |
+| `drillTimer` | Interactive | Drill timer | Stable |
+| `freePlay` | Interactive | Free play scope | Experimental |
 | `textBlock` | Interactive | Instructions | Stable |
-| `midiConnectionBar` | Interactive | MIDI connection | Stable |
-| `drillShortcuts` | Interactive | Ready-made drills | Stable |
-| `keyboardDisplay` | Interactive | On-screen keyboard | Stable |
-| `scaleRunner` | Interactive | Scale run | Stable |
 | `rootCycle` | Interactive | Key cycle | Stable |
+| `metronome` | Interactive | Metronome | Stable |
+| `midiConnectionBar` | Interactive | MIDI connection | Stable |
+| `noteRoll` | Interactive | Note roll | Experimental |
+| `keyboardDisplay` | Interactive | On-screen keyboard | Stable |
+| `sessionStats` | Interactive | Practice report | Stable |
 | `progression` | Interactive | Progression | Stable |
-| `sessionStats` | Interactive | Session stats | Stable |
+| `drillShortcuts` | Interactive | Ready-made drills | Stable |
 | `restTimer` | Interactive | Rest timer | Stable |
+| `scaleRunner` | Interactive | Scale run | Stable |
+| `targetDisplay` | Interactive | Target display | Experimental |
+| `transport` | Interactive | Transport | Experimental |
+| `chordLibrary` | Source | Chord library | Experimental |
+| `pieceLibrary` | Source | Piece library | Experimental |
+| `scaleLibrary` | Source | Scale library | Experimental |
+| `rhythmPattern` | Transform | Rhythm pattern | Experimental |
+<!-- GENERATED TABLE: END -->
 
-Future components are planned in `docs/workshop-component-plan-v2.md`.
+The list is generated from `listManifests()` and sorted by kind, then label. Do not edit it by hand — the parity test fails if the committed table drifts from the manifest.
+
+Future components are planned in `docs/stage-2/README.md`.
