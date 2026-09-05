@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  useEffect,
-  useMemo,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
@@ -14,7 +9,10 @@ import { cn } from "@/lib/utils";
 import type { PracticePage, FeatureBlock } from "@/lib/feature-blocks/types";
 import { resizeBlocks } from "@/lib/workshop-grid";
 import { isAtBlockLimit } from "@/lib/feature-blocks/registry";
-import { buildTemplatePage, type StarterTemplate } from "@/lib/starter-templates";
+import {
+  buildTemplatePage,
+  type StarterTemplate,
+} from "@/lib/starter-templates";
 import { ShareMenu } from "@/components/custom-practice/share-menu";
 import { PagesMenu } from "@/components/custom-practice/pages-menu";
 import { WorkshopSyncBadge } from "@/components/custom-practice/workshop-sync-badge";
@@ -69,7 +67,7 @@ export function PracticePageEditor() {
   const store = useSyncExternalStore(
     subscribePracticePageStore,
     getPracticePageStore,
-    getServerPracticePageStore
+    getServerPracticePageStore,
   );
 
   const page = useMemo(() => getActivePage(store), [store]);
@@ -80,12 +78,10 @@ export function PracticePageEditor() {
   const starterPickerDismissed = useSyncExternalStore(
     subscribeToStarterPicker,
     readStarterPickerDismissed,
-    () => true
+    () => true,
   );
   const showStarterPicker =
-    store.pages.length === 1 &&
-    isStarterPage(page) &&
-    !starterPickerDismissed;
+    store.pages.length === 1 && isStarterPage(page) && !starterPickerDismissed;
   const showTemplates = showStarterPicker || showTemplateLibrary;
 
   function updatePage(updater: (prev: PracticePage) => PracticePage) {
@@ -107,7 +103,7 @@ export function PracticePageEditor() {
   function removePage() {
     if (store.pages.length <= 1) return;
     const confirmed = window.confirm(
-      `Delete "${page.title.trim() === "" ? "Untitled" : page.title}"? Its practice history is kept.`
+      `Delete "${page.title.trim() === "" ? "Untitled" : page.title}"? Its practice history is kept.`,
     );
     if (!confirmed) return;
     setPracticePageStore(deletePracticePage(store, page.id));
@@ -206,8 +202,6 @@ export function PracticePageEditor() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [router]);
 
-
-
   return (
     <DrillRuntimeProvider pageId={page.id} blocks={page.blocks}>
       <div className="flex min-h-full flex-1 flex-col gap-4">
@@ -265,15 +259,17 @@ export function PracticePageEditor() {
           </Link>
         </div>
 
-        <CommandPalette
-          open={paletteOpen}
-          onClose={() => setPaletteOpen(false)}
-          store={store}
-          page={page}
-          updatePage={updatePage}
-          onSwitchPage={switchPage}
-          onOpenBlockLibrary={() => router.push(BLOCKS_HREF)}
-        />
+        {paletteOpen ? (
+          <CommandPalette
+            open
+            onClose={() => setPaletteOpen(false)}
+            store={store}
+            page={page}
+            updatePage={updatePage}
+            onSwitchPage={switchPage}
+            onOpenBlockLibrary={() => router.push(BLOCKS_HREF)}
+          />
+        ) : null}
 
         {shareOpen ? (
           <ShareMenu

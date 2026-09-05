@@ -2,10 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { featureRegistry } from "@/lib/feature-blocks/registry";
-import {
-  OPEN_TILE_SETTINGS_EVENT,
-  WORKSHOP_SHORTCUTS,
-} from "@/lib/keyboard";
+import { OPEN_TILE_SETTINGS_EVENT, WORKSHOP_SHORTCUTS } from "@/lib/keyboard";
 import {
   appendBlockToPage,
   type PracticePage,
@@ -89,7 +86,7 @@ export function CommandPalette({
             window.dispatchEvent(
               new CustomEvent(OPEN_TILE_SETTINGS_EVENT, {
                 detail: { tileId: block.id },
-              })
+              }),
             );
             onClose();
           },
@@ -99,9 +96,9 @@ export function CommandPalette({
           label: `Focus ${label}`,
           hint: "Move keyboard focus to this tile",
           run: () => {
-            document.querySelector<HTMLElement>(
-              `[data-tile-id="${block.id}"]`
-            )?.focus();
+            document
+              .querySelector<HTMLElement>(`[data-tile-id="${block.id}"]`)
+              ?.focus();
             onClose();
           },
         },
@@ -126,7 +123,7 @@ export function CommandPalette({
 
   const filtered = useMemo(
     () => commands.filter((command) => matches(query, command)),
-    [commands, query]
+    [commands, query],
   );
 
   // Dialog with no primitive: focus the input on open, restore focus to
@@ -134,7 +131,6 @@ export function CommandPalette({
   useEffect(() => {
     if (!open) return;
 
-    setQuery("");
     restoreFocusRef.current = document.activeElement as HTMLElement | null;
     inputRef.current?.focus();
 
@@ -206,12 +202,10 @@ export function CommandPalette({
                 type="button"
                 onClick={command.run}
                 className={cn(
-                  "flex w-full flex-col items-start gap-0.5 rounded-lg px-3 py-2 text-left hover:bg-muted/50"
+                  "flex w-full flex-col items-start gap-0.5 rounded-lg px-3 py-2 text-left hover:bg-muted/50",
                 )}
               >
-                <span className="text-sm text-foreground">
-                  {command.label}
-                </span>
+                <span className="text-sm text-foreground">{command.label}</span>
                 {command.hint ? (
                   <span className="text-xs text-muted-foreground">
                     {command.hint}
