@@ -231,7 +231,10 @@ For Canvas or WebGL visuals that cannot use Tailwind utilities, read the CSS cus
 ## Testing
 
 - Unit tests: `npm run test:unit:run`
-- E2E tests: `npm run test:e2e`
+- Full e2e suite (`npm run test:e2e`): **never run it during development.** It is owned by GitHub CI (every push/PR to main) and the nightly bot (`piano-suite-nightly.timer`, 03:30; reports in `~/.local/state/piano-suite-nightly/`). Agents run **only the specs covering the changed flow**, on their own port:
+  ```bash
+  CI=true E2E_PORT=3310 PORT=3310 ./node_modules/.bin/playwright test e2e/<touched-flow>.spec.ts
+  ```
 - All new primitives must have unit tests before a tool migration is considered complete.
 
 Vitest collects specs from `lib/`, `hooks/`, `components/`, **and `convex/`**. Convex functions are tested with [`convex-test`](https://docs.convex.dev/testing/convex-test) — see `convex/__tests__/settings-auth.test.ts`, which uses `t.withIdentity()` to simulate a Clerk session and guards the auth edge cases (no identity, signed in with no `users` row, first write creating the row).
@@ -326,7 +329,7 @@ Most new work fits cleanly inside one of these areas. Keep all related changes i
    npm run test:unit:run
    npm run build
    ```
-5. If e2e tests cover the changed flow, run `npm run test:e2e` as well.
+5. If e2e tests cover the changed flow, run **only those specs** (single command above in Testing). Never the full suite — CI and the nightly bot own it.
 
 ### Shared resources across worktrees
 
@@ -361,7 +364,7 @@ When you complete a task, follow this checklist before telling the user you are 
    npm run test:unit:run
    npm run build
    ```
-   Run `npm run test:e2e` if the change touches an authenticated or critical user flow.
+   Run the **touched-flow specs only** if the change touches an authenticated or critical user flow (`CI=true E2E_PORT=3310 PORT=3310 ./node_modules/.bin/playwright test e2e/<flow>.spec.ts`). Never the full suite.
 4. **Commit with descriptive messages.** Use one commit per logical change. Message titles should describe *what* and *why*, e.g.:
    - `feat: add token-driven theme system with six presets`
    - `fix: use theme grade tokens in tracking chart instead of hard-coded hex`
