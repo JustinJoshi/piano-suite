@@ -1,0 +1,9 @@
+[Unit]
+Description=Piano Suite nightly full-e2e (run + bisect on red)
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/justin/piano-suite/scripts/nightly-e2e.sh
+# The script reports via logs/notifications; failure must not vanish silently.
+TimeoutStartSec=3h
