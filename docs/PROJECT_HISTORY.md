@@ -715,6 +715,31 @@ reach:
   the remote query (`"skip"`) and to fire no Convex mutation when a
   signed-out visitor builds a page.
 
+## Stage 2, phase 2.2 — tier the library (2026-09)
+
+Phase 2.2
+([`docs/stage-2/phase-2.2-tier-library/PLAN.md`](stage-2/phase-2.2-tier-library/PLAN.md))
+turned the block library from one undifferentiated preview grid into
+manifest-driven tiers, so a visitor can tell what a block is before
+adding it:
+
+- **Two tiers.** `library-sections.tsx` groups the registry by manifest
+  `kind`: interactive blocks keep live previews with plus/check
+  add-remove buttons; sources and transforms render as quiet
+  single-line rows (`supplementary-row.tsx`) with a sample of the notes
+  they emit.
+- **An About panel per block.** `about-panel.tsx` explains each entry in
+  plain language — what it is, why it exists, and its requirements as
+  checkable lines ("Needs a source of notes") resolved against the page
+  you have via `validatePageWiring`. One honest correction shipped with
+  it: a MIDI connection entry no longer satisfies its own `midiInput`
+  requirement — the panel judges the page as it stands.
+- **Experimental means something.** The panel states what the
+  `experimental` status implies instead of showing a bare badge.
+- **One view everywhere.** The marketplace card and the fork flow were
+  rewired onto the same tiers, so the library and the marketplace read
+  identically.
+
 ## Roadmap
 
 - [x] Scaffold Next.js + Tailwind + shadcn/ui
