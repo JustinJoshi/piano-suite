@@ -7,6 +7,16 @@ set -eu
 SRC="$(cd "$(dirname "$0")/../.." && pwd)"
 DEST="${NIGHTLY_INSTALL_DIR:-$HOME/.local/lib/piano-suite-nightly}"
 
+# Capture paseo daemon auth (and anything else the invoker has) into an
+# out-of-repo env file the service loads. Only created, never overwritten.
+ENV_FILE="$DEST/env"
+if [ -n "${PASEO_PASSWORD:-}" ] && [ ! -f "$ENV_FILE" ]; then
+  umask 077
+  printf 'PASEO_PASSWORD=%s\n' "$PASEO_PASSWORD" >"$ENV_FILE"
+  echo "wrote $ENV_FILE (0600) from the invoking environment"
+fi
+[ -f "$ENV_FILE" ] || echo "WARN: no $ENV_FILE — paseo spawns will fail daemon auth unless PASEO_PASSWORD is set"
+
 mkdir -p "$DEST/nightly"
 cp "$SRC/scripts/nightly-e2e.sh" "$DEST/"
 cp -r "$SRC/scripts/nightly/." "$DEST/nightly/"

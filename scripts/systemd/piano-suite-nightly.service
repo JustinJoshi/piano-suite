@@ -4,6 +4,9 @@ After=network-online.target
 
 [Service]
 Type=oneshot
+# Optional env file (created by scripts/nightly/install.sh from the invoking
+# shell; holds PASEO_PASSWORD etc). Kept outside the repo — never commit it.
+EnvironmentFile=-%h/.local/lib/piano-suite-nightly/env
 # Runtime copy deployed by scripts/nightly/install.sh — immune to branch
 # switches and unmerged PRs in any checkout.
 ExecStart=%h/.local/lib/piano-suite-nightly/nightly-e2e.sh
