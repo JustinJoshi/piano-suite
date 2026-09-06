@@ -1,0 +1,15 @@
+{
+  "worktree": {
+    "setup": "npm ci\nif [ -f \"$PASEO_SOURCE_CHECKOUT_PATH/.env.local\" ]; then\n  cp \"$PASEO_SOURCE_CHECKOUT_PATH/.env.local\" .env.local\nelse\n  cp .env.example .env.local\nfi"
+  },
+  "scripts": {
+    "dev": {
+      "type": "service",
+      "command": "npm run dev -- --port $PASEO_PORT"
+    },
+    "test": { "command": "npm run test:unit:run" },
+    "lint": { "command": "npm run lint" },
+    "build": { "command": "npm run build" },
+    "e2e": { "command": "E2E_PORT=$PASEO_PORT npm run test:e2e" }
+  }
+}
