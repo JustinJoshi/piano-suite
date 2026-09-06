@@ -244,6 +244,16 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
     }
   }, [heldPcs, currentTarget, timer, requireExact, logMiss]);
 
+  // useDrillTimer requires an explicit arm() call to leave "armed" (see its
+  // header comment: "the consumer is responsible for ... calling arm() (hands
+  // lifted)") so a chord still held from the previous rep can't immediately
+  // re-trigger scoring. Only lifting all keys starts the clock.
+  useEffect(() => {
+    if (timer.phase === "armed" && heldPcs.size === 0) {
+      timer.arm();
+    }
+  }, [timer, heldPcs]);
+
   return useMemo(
     () => ({
       pageId,
