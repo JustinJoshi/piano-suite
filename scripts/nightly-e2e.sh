@@ -29,7 +29,7 @@ GREEN_FILE="$STATE_DIR/last-green.sha"
 # The investigator + every delegate role run glm-5.3-flash only (user
 # constraint). PASEO_PROVIDER uses paseo's provider/model form.
 PASEO_PROVIDER="${NIGHTLY_AGENT_PROVIDER:-zai/glm-5.3-flash}"
-OPENCODE_MODEL="${NIGHTLY_AGENT_PROVIDER#*/}"
+OPENCODE_MODEL="${NIGHTLY_AGENT_PROVIDER:-zai/glm-5.3-flash}"; OPENCODE_MODEL="${OPENCODE_MODEL#*/}"
 # Workspace the spawned agents attach to (paseo workspace ls). Env-overridable
 # in case the workspace is ever recreated.
 WORKSPACE_ID="${NIGHTLY_WORKSPACE_ID:-}"
