@@ -36,7 +36,7 @@ WORKSPACE_ID="${NIGHTLY_WORKSPACE_ID:-}"
 DELEGATE_WAIT="${NIGHTLY_DELEGATE_WAIT:-5400}"
 AGENT_TIMEOUT="${NIGHTLY_AGENT_TIMEOUT:-3600}"
 
-export PATH="/home/justin/.nvm/versions/node/v22.18.0/bin:/usr/local/bin:/usr/bin:/bin"
+export PATH="/home/justin/.nvm/versions/node/v22.18.0/bin:$HOME/.opencode/bin:/usr/local/bin:/usr/bin:/bin"
 
 mkdir -p "$STATE_DIR"
 STAMP="$(date +%Y%m%d-%H%M%S)"
@@ -210,7 +210,10 @@ VERDICT_PROMPT_EOF
       log "paseo daemon unreachable; attempting to start it"
       paseo daemon start >/dev/null 2>&1 || true
       sleep 3
-      timeout 5 paseo daemon status >/dev/null 2>&1 || log "WARN: paseo daemon still unreachable; investigator spawn will likely fail and fall back to opencode"
+    fi
+    # daemon status succeeds unauthenticated; run requires PASEO_PASSWORD.
+    if timeout 5 paseo daemon status 2>/dev/null | grep -q auth_required; then
+      log "WARN: paseo daemon requires auth — is PASEO_PASSWORD set in $STATE_DIR/env?"
     fi
     resolve_workspace
     log "spawning investigator (paseo, $PASEO_PROVIDER, title '[Nightly] e2e-red-$STAMP')"
