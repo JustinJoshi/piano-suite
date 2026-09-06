@@ -107,6 +107,9 @@ if [ -z "$FAILED_SPECS" ]; then
   notify "nightly e2e FAILED" "no bisect — see report"
   exit 1
 fi
+# Playwright re-run filters need bare file paths, not decorated titles.
+SPEC_FILES="$(printf '%s\n' $FAILED_SPECS | grep -oE 'e2e/[A-Za-z0-9._-]+\.spec\.ts' | sort -u | tr '\n' ' ')"
+if [ -z "$SPEC_FILES" ]; then SPEC_FILES="$FAILED_SPECS"; fi
 log "failing specs: $FAILED_SPECS"
 
 LAST_GREEN="$(cat "$GREEN_FILE" 2>/dev/null || true)"
@@ -123,8 +126,18 @@ else
   log "last green $LAST_GREEN is not an ancestor (force-push/rebase?); bisecting from merge-base $GOOD"
 fi
 
-log "bisecting $GOOD..$HEAD_SHA on specs: $FAILED_SPECS"
-git -C "$WORKTREE" bisect start "$HEAD_SHA" "$GOOD" >>"$REPORT" 2>&1
+# A history rewrite (phase-branch merges) can orphan the stored baseline.
+if ! git -C "$WORKTREE" cat-file -e "$GOOD^{commit}" 2>/dev/null; then
+  log "baseline $GOOD no longer exists (history rewritten?); skipping bisect — the investigator must attribute the culprit itself"
+  GOOD=""
+fi
+
+if [ -n "$GOOD" ]; then
+  log "bisecting $GOOD..$HEAD_SHA on specs: $FAILED_SPECS"
+fi
+if [ -n "$GOOD" ]; then
+  git -C "$WORKTREE" bisect start "$HEAD_SHA" "$GOOD" >>"$REPORT" 2>&1
+fi
 
 # One retry per step: the shared Clerk dev instance throws occasional
 # false failures (AGENTS.md notes 8s+ FAPI degradation under load).
@@ -137,13 +150,13 @@ set -u
 for attempt in 1 2; do
   npm ci --silent >>"$REPORT" 2>&1 || { [ "${attempt}" -eq 1 ] && sleep 30; continue; }
   npm run build >>"$REPORT" 2>&1 || { [ "${attempt}" -eq 1 ] && sleep 30; continue; }
-  CI=true E2E_PORT=$PORT PORT=$PORT ./node_modules/.bin/playwright test $FAILED_SPECS >>"$REPORT" 2>&1 && exit 0
+  CI=true E2E_PORT=$PORT PORT=$PORT ./node_modules/.bin/playwright test $SPEC_FILES >>"$REPORT" 2>&1 && exit 0
   [ "${attempt}" -eq 1 ] && sleep 30
 done
 exit 1
 STEP_EOF
 chmod +x "$STEP"
-export REPORT PORT FAILED_SPECS
+export REPORT PORT SPEC_FILES
 
 if git -C "$WORKTREE" bisect run "$STEP" >>"$REPORT" 2>&1; then
   CULPRIT="$(git -C "$WORKTREE" rev-parse refs/bisect/bad 2>/dev/null || git -C "$WORKTREE" rev-parse HEAD)"
@@ -193,6 +206,12 @@ never the full suite), author the phased fix plan, and write exactly one
 JSON verdict to $VERDICT_JSON. Do not fix anything.
 VERDICT_PROMPT_EOF
   if command -v paseo >/dev/null; then
+    if ! timeout 5 paseo daemon status >/dev/null 2>&1; then
+      log "paseo daemon unreachable; attempting to start it"
+      paseo daemon start >/dev/null 2>&1 || true
+      sleep 3
+      timeout 5 paseo daemon status >/dev/null 2>&1 || log "WARN: paseo daemon still unreachable; investigator spawn will likely fail and fall back to opencode"
+    fi
     resolve_workspace
     log "spawning investigator (paseo, $PASEO_PROVIDER, title '[Nightly] e2e-red-$STAMP')"
     VERDICT_RAW="$(cd "$STATE_DIR" && env -u PASEO_AGENT_ID timeout "$AGENT_TIMEOUT" paseo run --json --mode bypass_permissions ${WORKSPACE_ID:+--workspace "$WORKSPACE_ID"} --title "[Nightly] e2e-red-$STAMP" --provider "$PASEO_PROVIDER" --output-schema "$STATE_DIR/schemas/nightly-verdict.json" "$(cat "$STATE_DIR/verdict-prompt.txt")" 2>"$STATE_DIR/spawn.err")"
@@ -205,8 +224,9 @@ VERDICT_PROMPT_EOF
     if [ -z "$VERDICT_RAW" ] && [ -f "$VERDICT_JSON" ]; then
       VERDICT_RAW="$(cat "$VERDICT_JSON")"
     fi
-  elif command -v opencode >/dev/null; then
-    log "paseo CLI missing — investigator via opencode harness, model $OPENCODE_MODEL"
+  fi
+  if [ -z "$VERDICT_RAW" ] && command -v opencode >/dev/null; then
+    log "investigator via opencode harness (paseo unavailable or failed), model $OPENCODE_MODEL"
     timeout "$AGENT_TIMEOUT" opencode run -m "$OPENCODE_MODEL" "$(cat "$STATE_DIR/verdict-prompt.txt")" >>"$REPORT" 2>&1 || log "WARN: opencode investigator exited nonzero"
     [ -f "$VERDICT_JSON" ] && VERDICT_RAW="$(cat "$VERDICT_JSON")"
   else
