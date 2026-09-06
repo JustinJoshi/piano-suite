@@ -9,7 +9,7 @@ test.describe("home page mobile", () => {
     page,
   }) => {
     await page.goto("/");
-    const cta = page.getByRole("link", { name: /enter the workshop/i }).first();
+    const cta = page.getByRole("link", { name: /start free/i }).first();
     await expect(cta).toBeVisible();
     await expect(cta).toBeInViewport();
 

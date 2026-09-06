@@ -29,6 +29,7 @@ The roadmap is organized **Phase by Phase**. Phase 0 (open the drills, wire fork
 - [`DESIGN-PRINCIPLES.md`](DESIGN-PRINCIPLES.md) — Visual and interaction conventions
 - [`custom-drill-builder-plan.md`](custom-drill-builder-plan.md) — Workshop block architecture reference
 - [`clerk-billing-setup.md`](clerk-billing-setup.md) — Billing integration guide
+- [`nightly-e2e.md`](nightly-e2e.md) — Nightly full-e2e bot: schedule, red-path investigation agents, reports
 - [`go-live-runbook.md`](go-live-runbook.md) — Launch checklist and safety gates
 - [`PROJECT_HISTORY.md`](PROJECT_HISTORY.md) — Full feature inventory and commit landmarks
 

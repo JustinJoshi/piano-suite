@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Nightly investigator verdict",
+  "description": "Exactly one verdict from the [Nightly] e2e-red-<date> investigator agent spawned by scripts/nightly-e2e.sh. PASS means the root cause was independently verified (tests re-run, culprit commit re-read) and a fix plan exists; FAIL means the investigation was inconclusive.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "run",
+    "tested_sha",
+    "culprit_sha",
+    "verdict",
+    "root_cause",
+    "evidence",
+    "plan_path",
+    "drift",
+    "next_action",
+    "next_prompt"
+  ],
+  "properties": {
+    "run": {
+      "type": "string",
+      "description": "Nightly run stamp from the spawn prompt (e.g. \"20260905-033001\")."
+    },
+    "tested_sha": {
+      "type": "string",
+      "description": "origin/main commit the nightly run tested."
+    },
+    "culprit_sha": {
+      "type": "string",
+      "description": "The commit you verified as the culprit. Empty string when the bot's bisect was inconclusive and you could not attribute one."
+    },
+    "verdict": {
+      "type": "string",
+      "enum": ["PASS", "FAIL"],
+      "description": "PASS only when you re-ran the failing specs yourself and the root cause is verified with evidence. FAIL = inconclusive."
+    },
+    "root_cause": {
+      "type": "string",
+      "description": "One paragraph: what broke, why, which commit introduced it, and whether it is a code regression or an un-updated test expectation."
+    },
+    "evidence": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Each command you ran and the decisive part of its output. Must include the re-run of the failing specs."
+    },
+    "plan_path": {
+      "type": "string",
+      "description": "Absolute path to the phased fix plan you wrote (empty string on FAIL)."
+    },
+    "drift": {
+      "type": "string",
+      "enum": ["none", "detected"],
+      "description": "\"detected\" when the failure is an un-updated expectation (deliberate product change the spec never followed) rather than a code regression."
+    },
+    "next_action": {
+      "type": "string",
+      "enum": ["delegate_fix", "escalate"],
+      "description": "delegate_fix when a full-auto paseo-delegate run can execute the plan; escalate when a human must decide (drift with product questions, flaky infra, inconclusive)."
+    },
+    "next_prompt": {
+      "type": "string",
+      "description": "One line for the morning report: what the delegate run will do (or why it cannot). Empty string on FAIL."
+    }
+  }
+}
