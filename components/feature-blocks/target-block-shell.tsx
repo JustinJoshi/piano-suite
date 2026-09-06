@@ -1,10 +1,13 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useMemo } from "react";
 import { SkipForward } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useDrillRuntime } from "@/lib/drill-runtime";
+import { useMidi } from "@/hooks/useMidi";
+import { noteName } from "@/lib/music-theory";
 import type { TargetSourceState } from "@/hooks/useTargetSource";
 
 /**
@@ -29,6 +32,11 @@ export function TargetBlockShell({
   footer?: ReactNode;
 }) {
   const runtime = useDrillRuntime();
+  const { heldNotes } = useMidi();
+  const heldNotesDisplay = useMemo(
+    () => heldNotes.map((n) => noteName(((n % 12) + 12) % 12)),
+    [heldNotes]
+  );
 
   if (!state.hasRuntime || !runtime) {
     return (
@@ -81,6 +89,12 @@ export function TargetBlockShell({
         ) : (
           <div className="text-sm text-muted-foreground">{emptyMessage}</div>
         )}
+      </div>
+
+      <div className="text-center text-sm text-muted-foreground">
+        {heldNotesDisplay.length > 0
+          ? `Holding: ${heldNotesDisplay.join(" ")}`
+          : "No keys held"}
       </div>
 
       {footer}
