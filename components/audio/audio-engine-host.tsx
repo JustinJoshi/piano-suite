@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useAudioSettings } from "@/hooks/useAudioSettings";
-import { useMidi, type MidiNoteEventDetail } from "@/hooks/useMidi";
+import type { MidiNoteEventDetail } from "@/hooks/useMidi";
 import { createAudioEngine, type AudioEngine } from "@/lib/audio-engine";
 
 /**
@@ -14,23 +14,15 @@ import { createAudioEngine, type AudioEngine } from "@/lib/audio-engine";
  */
 export function AudioEngineHost() {
   const { settings, setEngineState } = useAudioSettings();
-  const { connected, virtualActive } = useMidi();
 
   const engineRef = useRef<AudioEngine | null>(null);
   const settingsRef = useRef(settings);
-  const inputActiveRef = useRef(connected || virtualActive);
   const sustainedNotesRef = useRef<Set<number>>(new Set());
   const musicActiveNotesRef = useRef<Set<number>>(new Set());
 
   useEffect(() => {
     settingsRef.current = settings;
   }, [settings]);
-
-  // Sound needs a live note source: a connected MIDI device or held
-  // on-screen keyboard notes.
-  useEffect(() => {
-    inputActiveRef.current = connected || virtualActive;
-  }, [connected, virtualActive]);
 
   // Create a new engine whenever the instrument preset or custom kit changes.
   // Volume is applied separately so we don't reload samples on every slide.
@@ -117,7 +109,16 @@ export function AudioEngineHost() {
   // Subscribe to global MIDI note events.
   useEffect(() => {
     const onNoteOn = (event: Event) => {
-      if (!settingsRef.current.enabled || !inputActiveRef.current) return;
+      // `midi-note-on`/`midi-note-off` are only ever dispatched from
+      // `lib/midi-session.ts`'s hardware and virtual-keyboard paths, and
+      // only when a note is genuinely pressed/released — the event firing
+      // is itself proof of a live source, so there's nothing else to gate
+      // on here besides the user's own audio toggle. (A previous version
+      // gated on a `connected`/`virtualActive`-derived ref that only
+      // updated via a `useEffect`, which raced with this listener running
+      // synchronously inside the same dispatch — the very first on-screen
+      // key press from an empty held state would silently no-op.)
+      if (!settingsRef.current.enabled) return;
       const detail = (event as CustomEvent<MidiNoteEventDetail>).detail;
       if (!detail) return;
       sustainedNotesRef.current.delete(detail.note);
@@ -125,7 +126,7 @@ export function AudioEngineHost() {
     };
 
     const onNoteOff = (event: Event) => {
-      if (!settingsRef.current.enabled || !inputActiveRef.current) return;
+      if (!settingsRef.current.enabled) return;
       const detail = (event as CustomEvent<MidiNoteEventDetail>).detail;
       if (!detail) return;
 

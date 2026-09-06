@@ -9,6 +9,7 @@ const cancel = vi.fn();
 const finishRound = vi.fn();
 const finishNow = vi.fn();
 const nextRep = vi.fn();
+const arm = vi.fn();
 
 let mockPhase = "idle";
 let mockHeldPcs = new Set<number>();
@@ -28,6 +29,7 @@ vi.mock("@/hooks/useDrillTimer", () => ({
       countdownValue: 0,
       breakRemaining: 0,
       start,
+      arm,
       markSuccess: vi.fn(() => {
         onSuccessCallback?.(1200);
       }),
@@ -387,6 +389,7 @@ describe("useDrillRuntimeProvider", () => {
     );
   });
 
+<<<<<<< HEAD
   it("clock expiry counts a miss and advances to the next target", () => {
     vi.useFakeTimers();
     try {
@@ -458,6 +461,40 @@ describe("useDrillRuntimeProvider", () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it("arms the timer once the phase is armed and no notes are held", () => {
+    mockPhase = "armed";
+    mockHeldPcs = new Set();
+
+    renderHook(() => useDrillRuntimeProvider({ pageId: "page-1" }));
+
+    expect(arm).toHaveBeenCalled();
+  });
+
+  it("does not arm while a chord is still held from the previous rep", () => {
+    mockPhase = "armed";
+    mockHeldPcs = new Set([0, 4, 7]);
+
+    renderHook(() => useDrillRuntimeProvider({ pageId: "page-1" }));
+
+    expect(arm).not.toHaveBeenCalled();
+  });
+
+  it("arms as soon as a held chord is released while armed", () => {
+    mockPhase = "armed";
+    mockHeldPcs = new Set([0, 4, 7]);
+
+    const { rerender } = renderHook(() =>
+      useDrillRuntimeProvider({ pageId: "page-1" })
+    );
+
+    expect(arm).not.toHaveBeenCalled();
+
+    mockHeldPcs = new Set();
+    rerender();
+
+    expect(arm).toHaveBeenCalled();
   });
 
   it("a miss beyond the good threshold grades Hard by default", () => {
