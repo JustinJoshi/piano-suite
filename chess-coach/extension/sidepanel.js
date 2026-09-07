@@ -109,7 +109,7 @@ async function refreshSession() {
   }
 }
 
-function renderSummary({ headers, classified, summary }) {
+function renderSummary({ headers, summary }) {
   summaryEl.hidden = false;
   const white = headers.White || "White";
   const black = headers.Black || "Black";
