@@ -1,0 +1,17 @@
+{
+  "name": "chess-coach",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Post-game chess coach: Lichess PGN evals -> classification -> Paseo/GLM agent review",
+  "scripts": {
+    "start": "node server/coach-proxy.js",
+    "test": "node --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@getpaseo/client": "*"
+  }
+}

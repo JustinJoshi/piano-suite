@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chess Coach</title>
+    <link rel="stylesheet" href="sidepanel.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Chess Coach</h1>
+      <p class="hint">
+        Paste a finished Lichess game. The coach reads the server analysis and
+        explains what to do differently. For studying only — don't use it during
+        live games.
+      </p>
+
+      <section id="coach-session" hidden>
+        <div class="session-row">
+          <span id="session-text"></span>
+          <button id="reset-btn" type="button" class="secondary">New coach</button>
+        </div>
+      </section>
+
+      <form id="analyze-form">
+        <label for="game-input">Lichess game URL or ID</label>
+        <input
+          id="game-input"
+          name="game"
+          type="text"
+          placeholder="https://lichess.org/AbCdEfGh or AbCdEfGh"
+          autocomplete="off"
+          spellcheck="false"
+          required
+        />
+        <label for="question-input">Your question (optional)</label>
+        <input
+          id="question-input"
+          name="question"
+          type="text"
+          placeholder="For example: how do I punish an early queen attack?"
+          autocomplete="off"
+        />
+        <label for="proxy-input">Coach proxy URL</label>
+        <input
+          id="proxy-input"
+          name="proxy"
+          type="text"
+          placeholder="https://thinkpad.tail4f5d20.ts.net:8452"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button id="analyze-btn" type="submit">Analyze with coach</button>
+      </form>
+
+      <section id="status" hidden></section>
+
+      <section id="summary" hidden>
+        <h2>Stockfish summary</h2>
+        <dl id="summary-grid"></dl>
+        <div id="class-counts"></div>
+        <h3>Toughest moments</h3>
+        <ol id="worst-list"></ol>
+      </section>
+
+      <section id="coaching" hidden>
+        <h2>Coach</h2>
+        <div id="coach-reply" class="coach-reply"></div>
+        <p class="meta" id="coach-meta"></p>
+      </section>
+    </main>
+    <script type="module" src="sidepanel.js"></script>
+  </body>
+</html>

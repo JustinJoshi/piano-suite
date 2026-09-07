@@ -1,0 +1,254 @@
+:root {
+  color-scheme: light dark;
+  --bg: #faf9f7;
+  --fg: #1f2430;
+  --muted: #6b7280;
+  --card: #ffffff;
+  --border: #e5e1da;
+  --accent: #2f6f4f;
+  --accent-fg: #ffffff;
+  --blunder: #b91c1c;
+  --mistake: #c2410c;
+  --inaccuracy: #a16207;
+  --good: #15803d;
+  --excellent: #1d4ed8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #17191e;
+    --fg: #e8e6e1;
+    --muted: #9aa2af;
+    --card: #1f232b;
+    --border: #33383f;
+    --accent: #58a97f;
+    --accent-fg: #10231a;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 12px;
+  font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+h1 {
+  font-size: 18px;
+  margin: 0;
+}
+
+h2 {
+  font-size: 14px;
+  margin: 0 0 8px;
+}
+
+h3 {
+  font-size: 13px;
+  margin: 12px 0 6px;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 12.5px;
+  margin: 0;
+}
+
+code {
+  font-size: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0 4px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+input {
+  font: inherit;
+  color: var(--fg);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+button {
+  font: inherit;
+  font-weight: 600;
+  color: var(--accent-fg);
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  padding: 9px 12px;
+  cursor: pointer;
+}
+
+form button {
+  margin-top: 6px;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+button.secondary {
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 4px 10px;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+button.secondary:hover {
+  color: var(--fg);
+  border-color: var(--muted);
+}
+
+section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+#coach-session {
+  padding: 8px 12px;
+}
+
+.session-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+#session-text {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+#status.info {
+  color: var(--muted);
+}
+
+#status.error {
+  color: var(--blunder);
+  border-color: var(--blunder);
+}
+
+#summary-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 12px;
+  margin: 0;
+}
+
+#summary-grid dt {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+#summary-grid dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.class-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.chip {
+  font-size: 11.5px;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+}
+
+.chip.blunder { color: #fff; background: var(--blunder); border-color: transparent; }
+.chip.mistake { color: #fff; background: var(--mistake); border-color: transparent; }
+.chip.inaccuracy { color: #fff; background: var(--inaccuracy); border-color: transparent; }
+.chip.good { color: #fff; background: var(--good); border-color: transparent; }
+.chip.excellent { color: #fff; background: var(--excellent); border-color: transparent; }
+.chip.zero { opacity: 0.35; }
+
+#worst-list {
+  margin: 0;
+  padding-left: 20px;
+}
+
+#worst-list li {
+  margin-bottom: 4px;
+}
+
+#worst-list .cls {
+  font-weight: 600;
+}
+
+#worst-list .cls.blunder { color: var(--blunder); }
+#worst-list .cls.mistake { color: var(--mistake); }
+#worst-list .cls.inaccuracy { color: var(--inaccuracy); }
+
+.coach-reply {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  color: var(--muted);
+  font-size: 11.5px;
+  margin: 8px 0 0;
+}
+
+.spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  vertical-align: -2px;
+  margin-right: 6px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

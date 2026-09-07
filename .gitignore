@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/chess-coach/node_modules
 /.pnp
 .pnp.*
 .yarn/*
@@ -69,3 +70,6 @@ skills-lock.json
 
 # paseo-delegate run state (orchestrator ledger — do not commit)
 .paseo-delegate/
+
+# chess-coach local state (persistent coach agent id)
+/chess-coach/server/.coach-agent

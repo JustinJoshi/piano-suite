@@ -1,0 +1,21 @@
+// Chess Coach proxy service (user systemd).
+// Loopback bind; exposed to the tailnet via `tailscale serve --https=8452`.
+// TERM is set because the paseo CLI probes an interactive login shell at
+// startup. See the runbook: ~/.config/opencode/opencode-paseo-agents.md
+
+[Unit]
+Description=Chess Coach Proxy (Lichess review -> Paseo agent)
+After=network.target paseo.service
+
+[Service]
+Type=simple
+WorkingDirectory=%h/piano-suite/chess-coach
+Environment=TERM=xterm-256color
+# The node CLI binary directly — skips the Electron wrapper at /usr/bin/paseo.
+Environment=PASEO_BIN=/usr/lib/paseo/packages/cli/bin/paseo
+ExecStart=/usr/bin/node server/coach-proxy.js
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "Chess Coach (Paseo)",
+  "version": "0.1.0",
+  "description": "Review your finished Lichess games with an AI coach.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "chess-coach@justin.local",
+      "strict_min_version": "121.0"
+    },
+    "gecko_android": {
+      "strict_min_version": "121.0"
+    }
+  },
+  "permissions": ["sidePanel", "storage"],
+  "host_permissions": [
+    "https://lichess.org/*",
+    "http://127.0.0.1:8787/*",
+    "https://thinkpad.tail4f5d20.ts.net:8452/*"
+  ],
+  "action": {
+    "default_title": "Open Chess Coach"
+  },
+  "background": {
+    "scripts": ["extension/background.js"],
+    "service_worker": "extension/background.js"
+  },
+  "side_panel": {
+    "default_path": "extension/sidepanel.html"
+  },
+  "sidebar_action": {
+    "default_panel": "extension/sidepanel.html",
+    "default_title": "Chess Coach"
+  }
+}
