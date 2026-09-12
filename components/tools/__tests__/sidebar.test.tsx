@@ -78,7 +78,9 @@ describe("Sidebar navigation sections", () => {
   it("leads with the Workshop, not a Welcome item", () => {
     render(<Sidebar />);
 
-    expect(screen.getByRole("link", { name: "Workshop" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /Workshop/ })
+    ).toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: "Welcome" })
     ).not.toBeInTheDocument();

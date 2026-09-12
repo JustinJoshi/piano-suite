@@ -255,6 +255,9 @@ export function Sidebar() {
                   )}
                 />
                 {workshopTool.title}
+                <span className="rounded-full border border-accent/40 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-accent">
+                  Beta
+                </span>
               </Link>
             </li>
           </ul>

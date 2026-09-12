@@ -11,6 +11,7 @@ export default function WorkshopPage() {
     <DrillShell
       wide
       title="Workshop"
+      badge="Beta"
       subtitle="Your practice page is a grid — drag, resize, and make it yours."
     >
       {/* Only a Pro user waiting on their Convex row must wait — signed-out
