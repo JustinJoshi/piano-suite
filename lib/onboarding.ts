@@ -82,7 +82,7 @@ export const onboardingPillars: OnboardingPillar[] = [
         title: "Isha Yoga hand stretches",
         description: "A short yoga routine for hand and wrist mobility.",
         href: "https://www.youtube.com/watch?v=M9VSpOiwwDU&t=251s",
-        imageSrc: "https://images.unsplash.com/photo-1544367563-12123d8965cd?w=600&auto=format&fit=crop&q=60",
+        imageSrc: "https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=600&auto=format&fit=crop&q=60",
       },
       {
         id: "dr-levi",
@@ -113,7 +113,7 @@ export const onboardingPillars: OnboardingPillar[] = [
         id: "pomodoro",
         title: "The Pomodoro Technique",
         description: "Twenty-five minutes of focus followed by a five-minute break.",
-        href: "https://francescocirillo.com/products/the-pomodoro-technique",
+        href: "https://www.pomodorotechnique.com",
         imageSrc: "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=600&auto=format&fit=crop&q=60",
       },
       {
