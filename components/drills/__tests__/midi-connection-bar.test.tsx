@@ -126,4 +126,47 @@ describe("MidiConnectionBar", () => {
       /Loading/i
     );
   });
+
+  it("hides the on-screen keyboard by default when connected", () => {
+    render(
+      <MidiConnectionBar
+        supported
+        connected
+        error={null}
+        inputs={[{ id: "input-1", name: "Piano Keyboard" }]}
+        selectedInputId="input-1"
+        onSelectInput={vi.fn()}
+        onConnect={vi.fn()}
+      />
+    );
+
+    const toggle = screen.getByTestId("midi-show-keyboard-toggle");
+    expect(toggle).toBeInTheDocument();
+    expect(toggle).not.toBeChecked();
+    expect(
+      screen.queryByTestId("keyboard-display-block")
+    ).not.toBeInTheDocument();
+  });
+
+  it("reveals the on-screen keyboard when the toggle is checked", () => {
+    render(
+      <MidiConnectionBar
+        supported
+        connected
+        error={null}
+        inputs={[{ id: "input-1", name: "Piano Keyboard" }]}
+        selectedInputId="input-1"
+        onSelectInput={vi.fn()}
+        onConnect={vi.fn()}
+      />
+    );
+
+    expect(
+      screen.queryByTestId("keyboard-display-block")
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("midi-show-keyboard-toggle"));
+
+    expect(screen.getByTestId("keyboard-display-block")).toBeInTheDocument();
+  });
 });

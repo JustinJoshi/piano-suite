@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Loader2, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,7 @@ export function MidiConnectionBar({
   onConnect,
 }: MidiConnectionBarProps) {
   const { settings, setEnabled, setSustain, engineState } = useAudioSettings();
+  const [showKeyboard, setShowKeyboard] = useState(false);
 
   if (!supported) {
     return (
@@ -70,7 +72,8 @@ export function MidiConnectionBar({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-3 text-sm">
+    <>
+      <div className="flex flex-wrap items-center gap-3 text-sm">
       <span className="inline-flex items-center gap-1.5 text-success">
         <span className="h-2 w-2 rounded-full bg-success" />
         Connected
@@ -117,6 +120,17 @@ export function MidiConnectionBar({
         <span className="text-xs">Sustain</span>
       </label>
 
+      <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-background px-2.5 py-1.5 text-foreground">
+        <input
+          type="checkbox"
+          checked={showKeyboard}
+          onChange={(e) => setShowKeyboard(e.target.checked)}
+          className="accent-primary"
+          data-testid="midi-show-keyboard-toggle"
+        />
+        <span className="text-xs">Show on-screen keyboard too</span>
+      </label>
+
       {engineState === "loading" && (
         <span
           className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"
@@ -135,6 +149,9 @@ export function MidiConnectionBar({
       >
         <Settings className="h-4 w-4" />
       </Link>
-    </div>
+      </div>
+
+      {showKeyboard && fallbackKeyboard}
+    </>
   );
 }

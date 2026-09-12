@@ -4,6 +4,8 @@ import { DashboardMenuButton } from "@/components/tools/dashboard-nav";
 export type DrillShellProps = {
   title: string;
   subtitle?: string;
+  /** Optional small pill rendered next to the title (e.g. "Beta"). */
+  badge?: string;
   children: React.ReactNode;
   right?: React.ReactNode;
   className?: string;
@@ -21,6 +23,7 @@ export type DrillShellProps = {
 export function DrillShell({
   title,
   subtitle,
+  badge,
   children,
   right,
   className,
@@ -38,6 +41,11 @@ export function DrillShell({
           <div className="min-w-0">
             <h1 className="font-heading text-lg font-semibold text-foreground">
               {title}
+              {badge ? (
+                <span className="ml-2 rounded-full border border-accent/40 px-1.5 py-0.5 align-middle text-[10px] font-medium uppercase tracking-wide text-accent">
+                  {badge}
+                </span>
+              ) : null}
             </h1>
             {subtitle ? (
               <p className="text-xs text-muted-foreground">{subtitle}</p>

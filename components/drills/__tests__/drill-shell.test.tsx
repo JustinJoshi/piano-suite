@@ -30,6 +30,16 @@ describe("DrillShell", () => {
     ).toBeInTheDocument();
   });
 
+  it("renders badge as a pill next to the title when provided", () => {
+    render(
+      <DrillShell title="Workshop" badge="Beta">
+        <div>Tool content</div>
+      </DrillShell>
+    );
+
+    expect(screen.getByText("Beta")).toBeInTheDocument();
+  });
+
   it("exposes a test id", () => {
     render(
       <DrillShell title="Chord Drill" data-testid="custom-shell">
