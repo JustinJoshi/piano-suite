@@ -304,7 +304,8 @@ await shoot("tracking", async (p) => {
   await p.waitForSelector('[data-testid="tracking-tab-rootcycle"]', { timeout: 60000 });
   await p.getByTestId("tracking-tab-rootcycle").click();
   await p.waitForSelector('[data-testid="tracking-panel"]', { timeout: 60000 });
-  await sleep(6000); // list + chart mount and settle
+  await sleep(14000); // list + chart mount and settle (long tail so the
+  // closing script line can host this clip end-to-end)
 });
 
 await browser.close();

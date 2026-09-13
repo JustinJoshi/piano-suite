@@ -1,0 +1,29 @@
+cd /home/justin/piano-content. Fix-up for phase video-root-cycling of the demo-videos delegation (paseo run). Zero context assumed; piano-content is NOT a git repo — files only, no commits there. Numeric verification only (ffmpeg signalstats/ffprobe/tesseract OCR); NEVER read images — doing so invalidates the work.
+
+# Task
+The shipped render /home/justin/piano-content/out/demo-root-cycling.mp4 (md5 0ab9b66a98751ab35641283fdcf9d6c2, 39.30s) has a 5.5s defect: the closing script line lost its footage. In src/config.generated.ts the last 5 caption chunks (30.971-36.778s) have "scene": null, sceneSegments end at 31.294s, and the render shows a solid near-black screen with captions only from ~31.3s to the end card at ~36.8s (validator-measured YAVG 12-14 at t=31.8/32.3/34.0/36.0, captions-only OCR). Cause: scenes-root-cycling.json's last entry ("completely free") never matched the real TTS chunk boundaries — the chunk "faster. All of this" (30.97-32.26) spans the script line-8/line-9 boundary and chunk "is free. Open Piano" (32.26-33.55) does not contain "completely free". Fix the mapping so every caption chunk maps to footage, regenerate, re-render, re-publish.
+
+# Relevant files
+- /home/justin/piano-content/scenes-root-cycling.json — the beat mapping to repair (the only file you should need to edit).
+- /home/justin/piano-content/script-root-cycling.txt — the script (edit ONLY if rewording is required to make chunks matchable; keep one idea per line and the beginner-first sense; never touch other variants' script/scenes files).
+- /home/justin/piano-content/src/config.generated.ts — shared slot; regenerate per the chain protocol.
+- /home/justin/piano-content/src/PianoVideo.tsx — read-only reference: segments play as Sequences; captions render over whatever background is behind; with segments present the gradient fallback does NOT render, so any span without a segment is the solid #0b0d17 fill.
+- /home/justin/piano-content/public/footage-root-cycling/ — existing beat clips (beat6.mp4 7.0s is the intended host for the closing line).
+- /home/justin/piano-content/out/demo-root-cycling.mp4 + dist/ + /home/justin/piano-suite/public/ — publish spots.
+- Chain protocol context: snapshot src/config.generated.ts to /tmp/opencode/ with md5 BEFORE regenerating, regenerate IMMEDIATELY before render (`node scripts/tts.mjs script-root-cycling.txt --scenes scenes-root-cycling.json --web --tts-speed 0.9`), snapshot after, count sceneSegments, re-verify md5 pre-render.
+
+# Acceptance criteria
+- [ ] scenes-root-cycling.json maps ALL 9 script lines; after regeneration, src/config.generated.ts has ZERO captions with "scene": null and its sceneSegments cover 0 through the last caption end with no gaps — last sceneSegment end must equal the last caption end (tolerance 0.05s). Show the numbers.
+- [ ] Post-regen fit re-derived and >= 2s headroom per beat holds (clips: beat1 10.52s, beat2 9.52s, beat3 14.52s, beat4 21.32s, beat5 10.52s, beat6 7.00s at last check; re-ffprobe after any re-cut). If beat6 is too short for its enlarged span, re-cut it from the existing take6 footage (9-16s window) rather than re-capturing.
+- [ ] Re-render: `npx remotion render PianoVideo out/demo-root-cycling.mp4 --concurrency=2` from /home/justin/piano-content. ffprobe the new render: h264 1440x900, duration within 0.5s of the regenerated config's durationSeconds.
+- [ ] Numeric QA on the NEW render: (a) OCR at the fixed CTA midpoints (use 32.3 and 34.0 and one point of your choosing inside 35-36.5): captions visible AND footage behind them — YAVG at those times must be > 20 (the defect span measured 12-14); (b) OCR at the 8 segment midpoints of the regenerated config: UI text AND caption present (expectations unchanged for segs 1-8: title card / Practice setup / press start / grades-then-jumps / 'that is how shapes' / arpeggio mode + LH pedal / Root Pool customize grid / Tracking Root Cycling panel); (c) per-segment YDIF freeze check on downscaled frames — no frozen segment; (d) end card OCR near the end ('Piano Suite').
+- [ ] Publish both spots: cp out/demo-root-cycling.mp4 to /home/justin/piano-content/dist/demo-root-cycling.mp4 and /home/justin/piano-suite/public/demo-root-cycling.mp4; md5 identical across all three; record it.
+- [ ] Piano-suite repo: commit ONLY the updated /home/justin/piano-suite/public/demo-root-cycling.mp4 (and any .paseo-delegate/demo-videos/ contract files the orchestrator staged for you) with scoped paths and trailers Phase: video-root-cycling (mention fix-up 1 in the message body), Agent-Id: $PASEO_AGENT_ID, Session-Id from ~/.paseo/agents/home-justin-piano-suite/$PASEO_AGENT_ID.json. Paste `git -C /home/justin/piano-suite status --porcelain` at the end; nothing NEW beyond docs/quick-fixes-2026-09/, public/demo-web.mp4, and .paseo-delegate relay/summary files.
+- [ ] Never modify: demo-web2/demo-chord-drill/demo-arpeggios files anywhere, /tmp/opencode/cfg-vert-backup.ts, other variants' script/scenes files, or any app source under /home/justin/piano-suite/app|components|lib.
+
+# Constraints
+- 45 minutes wall clock. Do not re-capture unless a re-cut is impossible from existing footage; if re-capture is unavoidable, use your own dev server on port >= 3002 with the port-scoped kill pattern.
+- Numeric verification only; NEVER read images.
+
+# Completion contract
+Your final chat message: STATUS: complete|blocked|failed; SUMMARY; FILES CHANGED; VERIFICATION (commands + numeric outputs: config md5, scene-coverage numbers, fit arithmetic, OCR lines incl. the fixed CTA span, YDIF, ffprobe, md5s); BLOCKERS; TOOLING NOTES; HANDOFF NOTES.
