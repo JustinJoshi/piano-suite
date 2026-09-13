@@ -1,0 +1,17 @@
+{
+  "task": "intro-copy-warmth",
+  "status": "complete",
+  "agentId": "3a7dce6c-7671-4f95-b8ac-4a4553cd3ac1",
+  "sessionId": "ses_f63bd9b63ffeT6GYsn13dsj1fQ",
+  "brief": ".paseo-delegate/demo-videos/briefs/intro-copy-warmth.md",
+  "filesChanged": ["lib/demo-videos.ts"],
+  "commit": "3b6908c",
+  "branch": "demo/intro-copy-warmth",
+  "notes": "Tone-only rewrite of all five introHeadline/introBody/introCta values; every factual claim from fe6378e preserved (MIDI gate, first-chord grading to Anki, miss filter, Root Pool, Start Loop + fastest-step saves, 20-block grid + marketplace fork). Banned-word grep clean; headline <= ~50 chars, bodies <= 2 sentences, CTAs 2-4 words.",
+  "verification": {
+    "lint": "0 errors, 12 pre-existing warnings",
+    "unit": "1340 tests passed (145 files)",
+    "build": "passed (worktree, cp -al hardlinked node_modules)"
+  },
+  "toolingNotes": "No test asserted exact copy strings; no test updates needed. node_modules symlink would break Turbopack; used cp -al hardlink copy as the previous phase did."
+}
