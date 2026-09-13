@@ -1,0 +1,17 @@
+{
+  "phase": "welcome-video",
+  "status": "complete",
+  "summary": "Embedded public/demo-web2.mp4 into the welcome page as a new numbered section ('06 / see it in action') rendered by components/welcome/demo-video-section.tsx and mounted in WelcomeContent between the Anki deck card and the tools grid. All section copy lives in a new demoVideo block in lib/welcome-config.ts (typed, defaulted, clamped in validateWelcomeConfig, unit-tested). The <video> uses visible native controls, muted, playsInline, preload=metadata, aspect-[16/10] w-full for mobile reflow, theme tokens only; no autoplay, so no reduced-motion pause path is required. Fixed a real gating bug found during verification: the Clerk proxy matcher excluded static-file extensions but not video, so a signed-out visitor got a 307 to /sign-in for the mp4; added mp4|webm|mov to the matcher. Verified against a dev server on :3005 (3002 is occupied by a Remotion server): rendered HTML contains the video element with all attributes and the mp4 serves 200 signed-out while /tools/tracking still 307s.",
+  "files_changed": [
+    "lib/welcome-config.ts",
+    "components/welcome/demo-video-section.tsx",
+    "components/welcome/welcome-content.tsx",
+    "lib/__tests__/welcome-config.test.ts",
+    "proxy.ts",
+    "public/demo-web2.mp4"
+  ],
+  "verification": "vitest run lib/__tests__/welcome-config.test.ts: 21 passed. npm run lint: 0 errors (9 pre-existing warnings). npm run test:unit:run: 144 files / 1334 tests passed. npm run build: exit 0. curl / on PORT=3005 dev server: <video src=\"/demo-web2.mp4\" controls muted playsInline preload=\"metadata\" aria-label=\"Product demo: ...\"> present; curl -I /demo-web2.mp4 -> 200 after proxy fix (307 before); curl -I /chord-symbols-CGDAE.txt -> 200; curl -I /tools/tracking -> 307 sign-in (gate intact). grep -rn demo-web2 app components lib on merged main: lib/welcome-config.ts + components/welcome/demo-video-section.tsx.",
+  "blockers": [],
+  "tooling_notes": "Port 3002 is occupied by an unrelated Remotion bundle server ('piano-content'); used PORT=3005. The worktree lacked the untracked public/demo-web2.mp4 (worktrees exclude untracked files) and the first merge into main aborted because of the untracked main-checkout copy; verified identical md5 (51420228f58ddbca588033fee6a35ab1), removed the untracked copy, merge then succeeded.",
+  "handoff_notes": "demoVideo config block is editable from /dev/welcome-lab like other sections. If a poster frame is ever added, wire it through the demoVideo config (e.g. videoPoster field) rather than hard-coding. proxy.ts matcher now skips mp4/webm/mov static requests; protected /tools/* routes still gate."
+}

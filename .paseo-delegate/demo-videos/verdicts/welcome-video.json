@@ -1,0 +1,12 @@
+{
+  "phase": "welcome-video",
+  "verdict": "PASS",
+  "gaps": [],
+  "assessment": "All six acceptance criteria verified on merged main: (1) grep -rn demo-web2 app components lib finds tracked references in lib/welcome-config.ts and components/welcome/demo-video-section.tsx; (2) committed embed is muted+playsInline with visible native controls, no autoplay so no reduced-motion pause path needed; (3) git ls-files public/demo-web2.mp4 non-empty; (4) npm run lint exit 0 (0 errors) and npm run build exit 0 on main; (5) the single deliverable commit 8f00873 carries all five required trailers; (6) git status --porcelain on main shows only the pre-existing baseline (docs/quick-fixes-2026-09/, public/demo-web.mp4). Bonus fix: Clerk proxy matcher now skips video static files so signed-out visitors can actually load the mp4 (was 307 to /sign-in before).",
+  "tooling_notes": "Port 3002 occupied by an unrelated Remotion server; dev verification ran on 3005. Worktree excluded the untracked mp4; main-checkout untracked copy (md5-identical) had to be removed before the merge could fast-forward.",
+  "handoff_notes": "demoVideo block is dev-lab editable; poster-frame support would be a new optional config field. proxy.ts matcher change affects all static video fetches repo-wide.",
+  "drift": "none",
+  "next_action": "done",
+  "target": "new",
+  "next_prompt": ""
+}

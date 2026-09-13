@@ -68,8 +68,14 @@ clerk/billing.pulled.json
 .agents/
 skills-lock.json
 
-# paseo-delegate run state (orchestrator ledger — do not commit)
-.paseo-delegate/
+# paseo-delegate run state (orchestrator ledger — do not commit);
+# phase contract artefacts (briefs/summaries/verdicts) are tracked
+.paseo-delegate/*
+!.paseo-delegate/demo-videos/
+.paseo-delegate/demo-videos/*
+!.paseo-delegate/demo-videos/briefs/
+!.paseo-delegate/demo-videos/summaries/
+!.paseo-delegate/demo-videos/verdicts/
 
 # chess-coach local state (persistent coach agent id)
 /chess-coach/server/.coach-agent
