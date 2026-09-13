@@ -2,6 +2,7 @@
 
 import { DrillShell } from "@/components/drills/drill-shell";
 import { RootCycling } from "@/components/drills/root-cycling/root-cycling";
+import { ToolDemoVideo } from "@/components/drills/tool-demo-video";
 import { useToolUserReady } from "@/hooks/useToolUserReady";
 
 export default function RootCyclingPage() {
@@ -23,6 +24,7 @@ export default function RootCyclingPage() {
       ) : (
         <RootCycling />
       )}
+      <ToolDemoVideo href="/tools/root-cycling" />
     </DrillShell>
   );
 }

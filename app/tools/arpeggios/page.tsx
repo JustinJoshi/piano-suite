@@ -2,6 +2,7 @@
 
 import { DrillShell } from "@/components/drills/drill-shell";
 import { Arpeggios } from "@/components/drills/arpeggios/arpeggios";
+import { ToolDemoVideo } from "@/components/drills/tool-demo-video";
 import { useToolUserReady } from "@/hooks/useToolUserReady";
 
 export default function ArpeggiosPage() {
@@ -23,6 +24,7 @@ export default function ArpeggiosPage() {
       ) : (
         <Arpeggios />
       )}
+      <ToolDemoVideo href="/tools/arpeggios" />
     </DrillShell>
   );
 }

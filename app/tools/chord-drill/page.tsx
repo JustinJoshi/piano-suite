@@ -2,6 +2,7 @@
 
 import { DrillShell } from "@/components/drills/drill-shell";
 import { ChordDrill } from "@/components/drills/chord-drill/chord-drill";
+import { ToolDemoVideo } from "@/components/drills/tool-demo-video";
 import { useToolUserReady } from "@/hooks/useToolUserReady";
 
 export default function ChordDrillPage() {
@@ -23,6 +24,7 @@ export default function ChordDrillPage() {
       ) : (
         <ChordDrill />
       )}
+      <ToolDemoVideo href="/tools/chord-drill" />
     </DrillShell>
   );
 }
