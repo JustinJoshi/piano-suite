@@ -59,6 +59,12 @@ const newPage = async (record = true) => {
   await p.addInitScript(() => {
     try {
       window.localStorage.setItem("piano-suite:onboarding-completed", "true");
+      // Pre-set the first-visit demo-intro flag so re-captures never film
+      // the overlay.
+      window.localStorage.setItem(
+        "piano-suite:demo-intro-seen:/tools/workshop",
+        "true",
+      );
     } catch {}
   });
   return { ctx, p };

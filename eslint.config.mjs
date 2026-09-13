@@ -30,6 +30,9 @@ const eslintConfig = defineConfig([
       "hooks/useProgressionSettings.ts",
       "hooks/useRootCycling.ts",
       "hooks/useRootCyclingSettings.ts",
+      // The tool-page demo intro reads localStorage once per mount —
+      // hydration-safe by design, and never re-checked mid-session.
+      "components/drills/tool-demo-video.tsx",
     ],
     rules: {
       // These hooks intentionally use refs to bridge async callbacks and

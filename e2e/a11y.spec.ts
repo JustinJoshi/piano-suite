@@ -80,9 +80,18 @@ test.describe("workshop a11y (signed out)", () => {
     await expect(page).toHaveURL(/\/tools\/workshop$/, { timeout: 15_000 });
     await page.emulateMedia({ reducedMotion: "reduce" });
 
-    // A fresh signed-out browser gets the onboarding overlay; axe on an
-    // overlay-dimmed DOM reports focus traps. Dismiss it, then the starter
-    // picker, so the scan sees the real dashboard.
+    // A fresh signed-out browser gets the onboarding overlay, then the
+    // first-visit demo-intro overlay, then the starter picker; axe on an
+    // overlay-dimmed DOM reports focus traps. Dismiss all three so the
+    // scan sees the real dashboard.
+    // Demo-intro overlay mounts after hydration and sits above the
+    // onboarding Skip button — dismiss it first when present.
+    const demoIntroCta = page.getByTestId("demo-intro-cta");
+    try {
+      await demoIntroCta.click({ timeout: 5_000 });
+    } catch {
+      // not a first visit — nothing to dismiss
+    }
     await page.getByRole("button", { name: /skip/i }).click();
     await expect(
       page.getByRole("link", { name: /open the block library/i })

@@ -66,6 +66,8 @@ const newPage = async (record = true) => {
   await clerk.signIn({ page: p, emailAddress: email, password });
   await p.waitForFunction(() => window.Clerk?.user !== null, { timeout: 20000 });
   await p.evaluate(() => localStorage.setItem("piano-suite:onboarding-completed", "true"));
+  // Pre-set the first-visit demo-intro flag so re-captures never film the overlay.
+  await p.evaluate((href) => localStorage.setItem("piano-suite:demo-intro-seen:" + href, "true"), "/tools/root-cycling");
   return { ctx, p };
 };
 
