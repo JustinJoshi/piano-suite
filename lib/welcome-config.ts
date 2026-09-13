@@ -73,6 +73,15 @@ export interface WelcomeDoorsConfig {
   items: WelcomeDoorItemConfig[];
 }
 
+export interface WelcomeDemoVideoConfig {
+  number: string;
+  label: string;
+  title: string;
+  body: string[];
+  videoSrc: string;
+  videoLabel: string;
+}
+
 export interface WelcomeConfig {
   hero: WelcomeHeroConfig;
   doors: WelcomeDoorsConfig;
@@ -105,6 +114,7 @@ export interface WelcomeConfig {
     subtitle: string;
     browseHref: string;
   };
+  demoVideo: WelcomeDemoVideoConfig;
   onboarding: {
     intro: {
       hi: string;
@@ -273,6 +283,18 @@ export const defaultWelcomeConfig: WelcomeConfig = {
     title: "Start with a drill, not a blank page",
     subtitle: "Use a starter routine as-is, then make it yours in the Workshop.",
     browseHref: "/marketplace",
+  },
+  demoVideo: {
+    number: "06",
+    label: "see it in action",
+    title: "Watch a 46-second tour of the Workshop.",
+    body: [
+      "See a practice page come together: blocks snapped into a drill, played on real keys, timed and scored as you go. No account, no setup — everything in the demo runs right in the browser.",
+      "When you're ready to try it yourself, the Workshop is one click away and every starter drill is free.",
+    ],
+    videoSrc: "/demo-web2.mp4",
+    videoLabel:
+      "Product demo: building and playing a practice page in the Piano Suite Workshop",
   },
   onboarding: {
     intro: {
@@ -613,6 +635,23 @@ export function validateWelcomeConfig(
     ),
   };
 
+  const demoVideoInput = isObject(input.demoVideo) ? input.demoVideo : {};
+  const demoVideo: WelcomeDemoVideoConfig = {
+    number: clampString(demoVideoInput.number, base.demoVideo.number),
+    label: clampString(demoVideoInput.label, base.demoVideo.label),
+    title: clampString(demoVideoInput.title, base.demoVideo.title),
+    body: clampArray(
+      demoVideoInput.body,
+      base.demoVideo.body,
+      (b): b is string => typeof b === "string"
+    ),
+    videoSrc: clampString(demoVideoInput.videoSrc, base.demoVideo.videoSrc),
+    videoLabel: clampString(
+      demoVideoInput.videoLabel,
+      base.demoVideo.videoLabel
+    ),
+  };
+
   const onboardingInput = isObject(input.onboarding) ? input.onboarding : {};
   const introInput = isObject(onboardingInput.intro)
     ? onboardingInput.intro
@@ -681,6 +720,7 @@ export function validateWelcomeConfig(
     toolsGrid,
     howItWorks,
     templateStrip,
+    demoVideo,
     onboarding,
     styleTokens,
   };

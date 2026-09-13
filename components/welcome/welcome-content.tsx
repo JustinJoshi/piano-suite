@@ -8,6 +8,7 @@ import { CtaSection } from "./cta-section";
 import { ToolsGridSection } from "./tools-grid-section";
 import { WorkshopHowItWorks } from "./workshop-how-it-works";
 import { StarterTemplatesSection } from "./starter-templates-section";
+import { DemoVideoSection } from "./demo-video-section";
 
 /**
  * Pure marketing content for the welcome page.
@@ -55,6 +56,8 @@ export function WelcomeContent() {
           </div>
         </div>
       </section>
+
+      <DemoVideoSection />
 
       <ToolsGridSection />
 

@@ -93,6 +93,32 @@ describe("welcome-config", () => {
     );
   });
 
+  it("clamps demoVideo fields against defaults", () => {
+    const partial = {
+      demoVideo: {
+        number: 7,
+        label: "",
+        title: "Custom demo title",
+        body: "not an array",
+        videoSrc: "",
+        videoLabel: null,
+      },
+    } as unknown as WelcomeConfig;
+    const validated = validateWelcomeConfig(partial);
+    expect(validated.demoVideo.title).toBe("Custom demo title");
+    expect(validated.demoVideo.number).toBe(
+      defaultWelcomeConfig.demoVideo.number
+    );
+    expect(validated.demoVideo.label).toBe(defaultWelcomeConfig.demoVideo.label);
+    expect(validated.demoVideo.body).toEqual(defaultWelcomeConfig.demoVideo.body);
+    expect(validated.demoVideo.videoSrc).toBe(
+      defaultWelcomeConfig.demoVideo.videoSrc
+    );
+    expect(validated.demoVideo.videoLabel).toBe(
+      defaultWelcomeConfig.demoVideo.videoLabel
+    );
+  });
+
   it("ignores non-object input and returns defaults", () => {
     expect(validateWelcomeConfig(null)).toEqual(defaultWelcomeConfig);
     expect(validateWelcomeConfig("nope")).toEqual(defaultWelcomeConfig);
