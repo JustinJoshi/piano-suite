@@ -51,7 +51,7 @@ export const toolDemoVideos: Record<string, ToolDemoVideo> = {
       "Video demo of the Chord Drill: practicing chords with the timer and MIDI scoring",
     introHeadline: "Welcome to Piano Suite — let's learn some chords",
     introBody:
-      "This is the Chord Drill, the friendliest place to start. Pick a chord, press play, and find it on your keyboard before the timer runs out. Your MIDI keyboard is scored note by note — but there's an on-screen keyboard too, so you can try it right now without any gear.",
+      "Pick a root and a chord quality, press Start Drill, and hold the chord on your MIDI keyboard — the timer stops once every note is down. Play the round's reps, and your first-chord time is auto-graded and sent to Anki.",
     introCta: "Start practicing chords",
   },
   "/tools/arpeggios": {
@@ -59,9 +59,9 @@ export const toolDemoVideos: Record<string, ToolDemoVideo> = {
     title: "Watch the demo",
     ariaLabel:
       "Video demo of the Arpeggios drill: practicing minor-11 arpeggio cells",
-    introHeadline: "Welcome to Piano Suite — meet the Arpeggios drill",
+    introHeadline: "Welcome to Piano Suite — one small arpeggio at a time",
     introBody:
-      "Arpeggios are how chords learn to move. This drill walks you through one small arpeggio cell at a time — play it, hear it, repeat it. It sounds fancier than it is, and the 30-second demo shows exactly what your hands will do.",
+      "Hold the left-hand pedal, then play the right-hand sequence as the strip lights up note by note. Laps and misses are counted, and each chord is auto-graded to Anki when the lap completes.",
     introCta: "Start practicing arpeggios",
   },
   "/tools/root-cycling": {
@@ -71,7 +71,7 @@ export const toolDemoVideos: Record<string, ToolDemoVideo> = {
       "Video demo of Root Cycling: practicing one idea across all 12 keys",
     introHeadline: "Welcome to Piano Suite — this is Root Cycling",
     introBody:
-      "Take one small idea and carry it through all twelve keys, one at a time. It's the habit that makes everything else on the piano feel familiar. No rush — the drill moves at your pace and scores each key as you land it.",
+      "Pick one chord quality and the drill calls it in a random key each rep — hold it down, then skip to the next root. Keep all twelve keys in the pool, or narrow it to the ones you're weak in.",
     introCta: "Start cycling keys",
   },
   "/tools/progression": {
@@ -81,7 +81,7 @@ export const toolDemoVideos: Record<string, ToolDemoVideo> = {
       "Video demo of the Progression drill: practicing ii-V-I and blues loops",
     introHeadline: "Welcome to Piano Suite — play real progressions",
     introBody:
-      "Chords are words; progressions are sentences. This drill loops you through ii-V-I and a 12-bar blues — the two progressions you'll hear in almost everything. Watch the 30-second demo, then play along.",
+      "Pick ii-V-I or a 12-bar blues, choose your key, and press Start Loop — the strip walks you chord by chord, timing each transition. Your best step times are kept for every progression and key.",
     introCta: "Start playing progressions",
   },
   "/tools/workshop": {
@@ -91,7 +91,7 @@ export const toolDemoVideos: Record<string, ToolDemoVideo> = {
       "Video demo of the Workshop: building your own practice page from blocks",
     introHeadline: "Welcome to Piano Suite — this is your Workshop",
     introBody:
-      "The Workshop is where you build your own practice page: drag in a metronome, a chord set, a keyboard — whatever today's session needs. It's blocks, not code. The demo shows a page coming together in under a minute.",
+      "Your practice page is a grid of blocks — a metronome, a chord set, an on-screen keyboard, a practice report — arranged however you like. Start from a ready-made page, or fork one from the community marketplace.",
     introCta: "Open my Workshop",
   },
 };
