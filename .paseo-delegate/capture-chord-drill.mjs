@@ -128,26 +128,78 @@ const seedHistory = (p) =>
     await p.getByTestId("setting-row-chord-notes").getByRole("button", { name: "Show" }).click();
     await sleep(1000);
 
+    // Locator click auto-scrolls the drill card into frame briefly; the
+    // opening framing is reset right after (this transient is not used by
+    // any beat window).
     await p.getByTestId("start-drill-btn").click();
-    await sleep(1000); // phase flips to armed
+    await sleep(1600); // phase flips to armed
+
+    // Hold the true page top — the beat 2 shot opens here (header + MIDI
+    // connect bar, drill armed; Settings still below the fold).
+    await p.evaluate(() => window.scrollTo(0, 0));
+    await sleep(2600);
+
+    // Settle on the drill card: settings card's first pixel exactly at the
+    // viewport bottom edge, so no settings rows are in frame.
+    const settleOnCard = (p) =>
+      p.evaluate(() => {
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+          if (n.nodeValue.includes("Configure how the drill behaves")) {
+            const card = n.parentElement.closest(".rounded-xl, .rounded-lg");
+            const top = card.getBoundingClientRect().top + window.scrollY;
+            window.scrollTo(0, Math.max(0, top - 900));
+            break;
+          }
+        }
+      });
+    await settleOnCard(p);
+    await sleep(600);
+    await sleep(600);
 
     // Play Cmaj7 (C E G B, any octave — scoring is pitch-class), rep target 5.
-    // Fire a 6th pulse too: if a dev-mode main-thread stall swallowed one
-    // note-on, the extra pulse scores the missing rep; harmless when done.
+    // Dev-mode stalls can swallow note-ons; track the X/5 counter and re-fire
+    // when a rep does not register.
     const chord = [60, 64, 67, 71];
-    for (let rep = 0; rep < 6; rep++) {
+    const repsDone = () =>
+      p.evaluate(() =>
+        parseInt(document.body.textContent?.match(/(\d+)\/5 reps/)?.[1] ?? "0", 10),
+      );
+    for (let rep = 0; rep < 12; rep++) {
+      const before = await repsDone();
       await p.evaluate((notes) => notes.forEach((n) => window.__mockNoteOn(n)), chord);
       await sleep(900);
       await p.evaluate((notes) => notes.forEach((n) => window.__mockNoteOff(n)), chord);
       await sleep(1500);
-      if (rep >= 4) {
-        const done = await p.evaluate(
-          () => document.body.textContent?.includes("Nice") ?? false
-        );
-        if (done) break;
-      }
+      if ((await repsDone()) > before) continue; // rep landed
+      console.log("stall:", before, "held:", await p.evaluate(() =>
+        document.querySelectorAll('[data-testid="held-note"], .held-note').length));
+      await p.evaluate((notes) => notes.forEach((n) => window.__mockNoteOn(n)), chord); // make-up pulse
+      await sleep(700);
+      await p.evaluate((notes) => notes.forEach((n) => window.__mockNoteOff(n)), chord);
+      await sleep(1500);
     }
-    await sleep(5000); // round completes: avg/best line + Redo/Next buttons
+    // Wait for the round-complete line (avg/best + Redo/Next buttons).
+    await p.waitForFunction(
+      () => /first chord \d/i.test(document.body.textContent ?? "") && document.body.textContent?.includes("Redo"),
+      { timeout: 20000 },
+    );
+
+    // Beat 3 framing: round stats up top, Settings card in view — the
+    // narration says "five at a time", which is the rep-target setting.
+    await p.evaluate(() => {
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      let anchor = null;
+      for (let n = walker.nextNode(); n && !anchor; n = walker.nextNode()) {
+        if (n.nodeValue.includes("Configure how the drill behaves")) {
+          anchor = n.parentElement.closest(".rounded-xl, .rounded-lg");
+        }
+      }
+      const card = anchor ?? document.body;
+      const top = card.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo(0, Math.max(0, top - 560));
+    });
+    await sleep(6000);
 
     // Same context → the seeded history plus today's live reps are visible.
     await p.goto(BASE + "/tools/tracking", { waitUntil: "networkidle" });
