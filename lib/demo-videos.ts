@@ -49,9 +49,9 @@ export const toolDemoVideos: Record<string, ToolDemoVideo> = {
     title: "Watch the demo",
     ariaLabel:
       "Video demo of the Chord Drill: practicing chords with the timer and MIDI scoring",
-    introHeadline: "Welcome to Piano Suite — let's learn some chords",
+    introHeadline: "Welcome to Piano Suite — let's try some chords",
     introBody:
-      "Pick a root and a chord quality, press Start Drill, and hold the chord on your MIDI keyboard — the timer stops once every note is down. Play the round's reps, and your first-chord time is auto-graded and sent to Anki.",
+      "Pick a root and a chord quality, press Start Drill, and hold the chord on your MIDI keyboard — the timer stops once every note is down. Play the round's reps at whatever pace feels right; your first-chord time is graded and sent to Anki.",
     introCta: "Start practicing chords",
   },
   "/tools/arpeggios": {
@@ -59,9 +59,9 @@ export const toolDemoVideos: Record<string, ToolDemoVideo> = {
     title: "Watch the demo",
     ariaLabel:
       "Video demo of the Arpeggios drill: practicing minor-11 arpeggio cells",
-    introHeadline: "Welcome to Piano Suite — one small arpeggio at a time",
+    introHeadline: "Welcome to Piano Suite — a little shape at a time",
     introBody:
-      "Hold the left-hand pedal, then play the right-hand sequence as the strip lights up note by note. Laps and misses are counted, and each chord is auto-graded to Anki when the lap completes.",
+      "Hold the left-hand pedal, then play the right-hand sequence as the strip lights up note by note, as slowly as you need to. Laps and misses are counted, the miss filter lets you leave a stubborn note out while you settle in, and the chord goes to Anki when the lap completes.",
     introCta: "Start practicing arpeggios",
   },
   "/tools/root-cycling": {
@@ -69,9 +69,9 @@ export const toolDemoVideos: Record<string, ToolDemoVideo> = {
     title: "Watch the demo",
     ariaLabel:
       "Video demo of Root Cycling: practicing one idea across all 12 keys",
-    introHeadline: "Welcome to Piano Suite — this is Root Cycling",
+    introHeadline: "Welcome to Piano Suite — meet Root Cycling",
     introBody:
-      "Pick one chord quality and the drill calls it in a random key each rep — hold it down, then skip to the next root. Keep all twelve keys in the pool, or narrow it to the ones you're weak in.",
+      "Pick one chord quality and the drill calls it in a random key each rep — hold it down, then skip along whenever you're ready. Keep all twelve keys in the Root Pool, or narrow it to the few that still feel new.",
     introCta: "Start cycling keys",
   },
   "/tools/progression": {
@@ -79,9 +79,9 @@ export const toolDemoVideos: Record<string, ToolDemoVideo> = {
     title: "Watch the demo",
     ariaLabel:
       "Video demo of the Progression drill: practicing ii-V-I and blues loops",
-    introHeadline: "Welcome to Piano Suite — play real progressions",
+    introHeadline: "Welcome to Piano Suite — let's play a progression",
     introBody:
-      "Pick ii-V-I or a 12-bar blues, choose your key, and press Start Loop — the strip walks you chord by chord, timing each transition. Your best step times are kept for every progression and key.",
+      "Pick ii-V-I or a 12-bar blues, choose your key, and press Start Loop — the strip walks you chord by chord, timing each transition. Your fastest steps are saved for every progression and key, so you can watch the loops get smoother.",
     introCta: "Start playing progressions",
   },
   "/tools/workshop": {
@@ -89,9 +89,9 @@ export const toolDemoVideos: Record<string, ToolDemoVideo> = {
     title: "Watch the demo",
     ariaLabel:
       "Video demo of the Workshop: building your own practice page from blocks",
-    introHeadline: "Welcome to Piano Suite — this is your Workshop",
+    introHeadline: "Welcome to Piano Suite — the Workshop is yours",
     introBody:
-      "Your practice page is a grid of blocks — a metronome, a chord set, an on-screen keyboard, a practice report — arranged however you like. Start from a ready-made page, or fork one from the community marketplace.",
+      "Your practice page is a grid of blocks — a metronome, a chord set, an on-screen keyboard, a practice report — arranged however works for you. Start from a ready-made page, or fork one from the community marketplace.",
     introCta: "Open my Workshop",
   },
 };
