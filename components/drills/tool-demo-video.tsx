@@ -7,6 +7,7 @@ import {
   toolDemoVideoFor,
   type ToolDemoVideo,
 } from "@/lib/demo-videos";
+import { useOnboarding } from "@/hooks/useOnboarding";
 
 /**
  * Collapsed demo-video section for a tool page ("Watch the demo").
@@ -16,17 +17,22 @@ import {
  * sets a device-local per-tool flag and the page falls back to this
  * collapsed details section. No autoplay — the drill stays primary and
  * no reduced-motion path is needed (WCAG 2.2.2).
+ *
+ * The overlay only shows after onboarding is complete, so it doesn't
+ * duplicate the onboarding welcome message.
  */
 export function ToolDemoVideo({ href }: { href: string }) {
   const demo = toolDemoVideoFor(href);
+  const { isCompleted } = useOnboarding();
   const [showIntro, setShowIntro] = useState(false);
   const [checked, setChecked] = useState(false);
 
   // Mount-time check only — never re-opens mid-drill on a timer.
+  // Only show if user has completed onboarding (avoid duplicate welcome).
   useEffect(() => {
-    if (demo) setShowIntro(!hasSeenDemoIntro(href));
+    if (demo && isCompleted) setShowIntro(!hasSeenDemoIntro(href));
     setChecked(true);
-  }, [demo, href]);
+  }, [demo, href, isCompleted]);
 
   if (!demo) return null;
 
