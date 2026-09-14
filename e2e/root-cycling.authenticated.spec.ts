@@ -1,8 +1,10 @@
 import { test, expect } from "@playwright/test";
 import { signInAsTestUser } from "./auth-helper";
+import { markDemoIntrosSeen } from "./demo-intro";
 
 test.describe("Root Cycling (authenticated)", () => {
   test.beforeEach(async ({ page }) => {
+    await markDemoIntrosSeen(page);
     await signInAsTestUser(page);
     await page.goto("/tools/root-cycling");
     await page.waitForSelector("[data-testid='root-cycling-drill']", {

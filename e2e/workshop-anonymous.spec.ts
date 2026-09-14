@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { expectNoApplicationError, expectNotBare404 } from "./auth-assertions";
+import { markDemoIntrosSeen } from "./demo-intro";
 
 // Signed-out visitor: the Workshop is the product's core and free,
 // no-account use is the default (audit 2026-09, entry-flow §2).
@@ -7,6 +8,8 @@ test.describe("workshop anonymous (signed out)", () => {
   test.use({
     storageState: { cookies: [] as never[], origins: [] as never[] },
   });
+
+  test.beforeEach(({ page }) => markDemoIntrosSeen(page));
 
   test("signed-out visitor opens the workshop, adds a block, keeps it across reload", async ({
     page,

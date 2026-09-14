@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { signInAsTestUser } from "./auth-helper";
+import { markDemoIntrosSeen } from "./demo-intro";
 import {
   assertAuthBypassOffForE2E,
 } from "./auth-assertions";
@@ -17,6 +18,8 @@ const SIDEBAR_TOOLS = [
 const emptyStorageState = { cookies: [] as never[], origins: [] as never[] };
 
 test.describe("/tools dashboard", () => {
+  test.beforeEach(({ page }) => markDemoIntrosSeen(page));
+
   test.describe("unsigned", () => {
     test.use({ storageState: emptyStorageState });
 

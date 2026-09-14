@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { signInAsTestUser } from "./auth-helper";
+import { markDemoIntrosSeen } from "./demo-intro";
 import {
   metronomeBlock,
   drillShortcutsBlock,
@@ -7,6 +8,8 @@ import {
 } from "./workshop-seed";
 
 test.describe("/tools/workshop grid", () => {
+  test.beforeEach(({ page }) => markDemoIntrosSeen(page));
+
   test("drag to reposition persists across reload", async ({ page }) => {
     await signInAsTestUser(page);
     await seedWorkshopPage(page, [

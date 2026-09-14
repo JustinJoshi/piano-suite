@@ -1,10 +1,13 @@
 import { test, expect } from "@playwright/test";
 import { signInAsTestUser } from "./auth-helper";
+import { markDemoIntrosSeen } from "./demo-intro";
 import { metronomeBlock, seedWorkshopPage } from "./workshop-seed";
 
 const STARTER_PICKER_KEY = "piano-suite:starter-picker-dismissed-v1";
 
 test.describe("/tools/workshop block library", () => {
+  test.beforeEach(({ page }) => markDemoIntrosSeen(page));
+
   test("first run: templates, blank grid, block library add flow", async ({
     page,
   }) => {

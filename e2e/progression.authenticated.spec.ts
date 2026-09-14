@@ -1,8 +1,10 @@
 import { test, expect } from "@playwright/test";
 import { signInAsTestUser } from "./auth-helper";
+import { markDemoIntrosSeen } from "./demo-intro";
 
 test.describe("Progression (authenticated)", () => {
   test.beforeEach(async ({ page }) => {
+    await markDemoIntrosSeen(page);
     await signInAsTestUser(page);
     await page.goto("/tools/progression");
     await page.waitForSelector("[data-testid='progression-drill']", {

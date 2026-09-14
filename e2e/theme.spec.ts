@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { signInAsTestUser } from "./auth-helper";
+import { markDemoIntrosSeen } from "./demo-intro";
 import { themeIds, type ThemeId } from "@/lib/themes";
 
 const EXPECTED_PRIMARY: Record<ThemeId, string> = {
@@ -30,6 +31,8 @@ async function expectExclusiveTheme(page: import("@playwright/test").Page, theme
 }
 
 test.describe("/settings/theme", () => {
+  test.beforeEach(({ page }) => markDemoIntrosSeen(page));
+
   test("lets an authenticated user switch themes", async ({ page }) => {
     await signInAsTestUser(page);
     await page.goto("/settings/theme");

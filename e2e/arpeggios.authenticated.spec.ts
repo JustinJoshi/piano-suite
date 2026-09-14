@@ -1,9 +1,11 @@
 import { test, expect } from "@playwright/test";
 import { signInAsTestUser } from "./auth-helper";
+import { markDemoIntrosSeen } from "./demo-intro";
 import { ArpeggiosPage } from "./pom/arpeggios-page";
 
 test.describe("Arpeggios (authenticated)", () => {
   test.beforeEach(async ({ page }) => {
+    await markDemoIntrosSeen(page);
     await signInAsTestUser(page);
   });
 
