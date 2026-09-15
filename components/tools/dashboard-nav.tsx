@@ -118,11 +118,13 @@ export function DashboardMenuButton({ className }: { className?: string }) {
 export function DashboardMobileTopBar() {
   return (
     <header
-      className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border/50 bg-background/95 px-4 backdrop-blur md:hidden"
+      className="glass sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border px-4 md:hidden"
       data-testid="dashboard-mobile-top-bar"
     >
       <DashboardMenuButton />
-      <AppliedLogoMark className="h-7 w-7" title="Piano Suite" />
+      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/12 text-primary ring-1 ring-primary/20">
+        <AppliedLogoMark className="h-4.5 w-4.5" title="Piano Suite" />
+      </span>
       <span className="font-heading text-base font-semibold tracking-tight text-foreground">
         Piano Suite
       </span>

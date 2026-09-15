@@ -48,8 +48,8 @@ export function ToolDemoVideo({ href }: { href: string }) {
 
 function DemoDetails({ demo }: { demo: ToolDemoVideo }) {
   return (
-    <details className="mt-6 rounded-xl border border-border bg-card">
-      <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium text-foreground">
+    <details className="mt-6 rounded-2xl border border-border bg-card shadow-surface">
+      <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium text-foreground marker:text-primary">
         {demo.title}
       </summary>
       <div className="px-4 pb-4">
@@ -124,7 +124,7 @@ function FirstVisitIntro({
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-background/70 p-4 pt-10 sm:items-center sm:pt-4">
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-background/75 p-4 pt-10 backdrop-blur-sm sm:items-center sm:pt-4">
       <div
         ref={dialogRef}
         role="dialog"
@@ -133,7 +133,7 @@ function FirstVisitIntro({
         aria-describedby="demo-intro-body"
         data-testid="demo-intro-overlay"
         tabIndex={-1}
-        className="max-h-[calc(100dvh-2rem)] w-full max-w-lg overflow-y-auto rounded-xl border border-border bg-card p-4 shadow-lg focus:outline-none sm:p-6"
+        className="max-h-[calc(100dvh-2rem)] w-full max-w-lg overflow-y-auto rounded-2xl border border-border bg-card p-4 shadow-raised focus:outline-none sm:p-6"
         onKeyDown={(e) => {
           if (e.key === "Escape") {
             e.stopPropagation();
@@ -144,7 +144,7 @@ function FirstVisitIntro({
         <div className="flex items-start justify-between gap-3">
           <h2
             id="demo-intro-heading"
-            className="text-base font-semibold text-foreground sm:text-lg"
+            className="font-heading text-xl font-semibold tracking-tight text-foreground sm:text-2xl"
           >
             {demo.introHeadline}
           </h2>
@@ -176,7 +176,7 @@ function FirstVisitIntro({
         </p>
 
         <video
-          className="mt-4 aspect-[16/10] w-full rounded-lg border border-border bg-background"
+          className="mt-4 aspect-[16/10] w-full rounded-xl border border-border bg-background"
           src={demo.mp4}
           controls
           muted
@@ -189,7 +189,7 @@ function FirstVisitIntro({
           type="button"
           onClick={dismiss}
           data-testid="demo-intro-cta"
-          className="mt-4 w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          className="key-press mt-4 w-full rounded-full bg-action px-4 py-2.5 text-sm font-medium text-action-foreground shadow-key transition-colors hover:bg-action-hover focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
         >
           {demo.introCta}
         </button>

@@ -1,5 +1,6 @@
 "use client";
 
+import { DrillGate } from "@/components/drills/drill-gate";
 import { DrillShell } from "@/components/drills/drill-shell";
 import { Progression } from "@/components/drills/progression/progression";
 import { ToolDemoVideo } from "@/components/drills/tool-demo-video";
@@ -14,13 +15,9 @@ export default function ProgressionPage() {
       subtitle="Loop ii-V-I and 12-bar blues progressions with per-chord transition timing."
     >
       {!canAccess ? (
-        <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-          Sign in to save your progression progress.
-        </div>
+        <DrillGate state="signed-out" message="Sign in to save your progression progress." />
       ) : !userReady ? (
-        <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-          Loading your settings…
-        </div>
+        <DrillGate state="loading" message="Sign in to save your progression progress." />
       ) : (
         <Progression />
       )}

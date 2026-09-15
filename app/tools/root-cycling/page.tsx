@@ -1,5 +1,6 @@
 "use client";
 
+import { DrillGate } from "@/components/drills/drill-gate";
 import { DrillShell } from "@/components/drills/drill-shell";
 import { RootCycling } from "@/components/drills/root-cycling/root-cycling";
 import { ToolDemoVideo } from "@/components/drills/tool-demo-video";
@@ -14,13 +15,9 @@ export default function RootCyclingPage() {
       subtitle="Drill one fixed chord or arpeggio idea across random roots in all 12 keys."
     >
       {!canAccess ? (
-        <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-          Sign in to save your root cycling progress.
-        </div>
+        <DrillGate state="signed-out" message="Sign in to save your root cycling progress." />
       ) : !userReady ? (
-        <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-          Loading your settings…
-        </div>
+        <DrillGate state="loading" message="Sign in to save your root cycling progress." />
       ) : (
         <RootCycling />
       )}

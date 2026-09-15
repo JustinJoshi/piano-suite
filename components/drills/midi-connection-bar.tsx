@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Loader2, Settings } from "lucide-react";
+import { Loader2, Piano, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAudioSettings } from "@/hooks/useAudioSettings";
 import { KeyboardDisplayBlock } from "@/components/feature-blocks/keyboard-display-block";
@@ -46,9 +46,12 @@ export function MidiConnectionBar({
   if (!supported) {
     return (
       <div className="space-y-3">
-        <div className="rounded-lg border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
-          {error ?? "Web MIDI is not supported in this browser."} You can
-          still play with the on-screen keyboard below.
+        <div className="flex items-start gap-3 rounded-xl border border-border bg-muted/40 p-3 text-sm text-muted-foreground">
+          <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-muted-foreground/60" />
+          <span>
+            {error ?? "Web MIDI is not supported in this browser."} You can
+            still play with the on-screen keyboard below.
+          </span>
         </div>
         {fallbackKeyboard}
       </div>
@@ -58,8 +61,9 @@ export function MidiConnectionBar({
   if (!connected) {
     return (
       <div className="space-y-3">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card/70 p-3 shadow-surface">
           <Button onClick={onConnect} data-testid="connect-midi-btn">
+            <Piano className="h-4 w-4" />
             Connect MIDI Keyboard
           </Button>
           <span className="text-xs text-muted-foreground">
@@ -73,9 +77,9 @@ export function MidiConnectionBar({
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-3 text-sm">
-      <span className="inline-flex items-center gap-1.5 text-success">
-        <span className="h-2 w-2 rounded-full bg-success" />
+      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card/70 px-3 py-2 text-sm shadow-surface">
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-success/30 bg-success/10 px-2.5 py-1 text-xs font-medium text-success">
+        <span className="h-2 w-2 rounded-full bg-success shadow-[0_0_8px_1px_var(--color-success)]" />
         Connected
       </span>
 
@@ -98,7 +102,7 @@ export function MidiConnectionBar({
         </select>
       )}
 
-      <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-background px-2.5 py-1.5 text-foreground">
+      <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-background/70 px-2.5 py-1.5 text-foreground transition-colors hover:border-foreground/25">
         <input
           type="checkbox"
           checked={settings.enabled}
@@ -109,7 +113,7 @@ export function MidiConnectionBar({
         <span className="text-xs">Use MIDI sounds</span>
       </label>
 
-      <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-background px-2.5 py-1.5 text-foreground">
+      <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-background/70 px-2.5 py-1.5 text-foreground transition-colors hover:border-foreground/25">
         <input
           type="checkbox"
           checked={settings.sustain}
@@ -120,7 +124,7 @@ export function MidiConnectionBar({
         <span className="text-xs">Sustain</span>
       </label>
 
-      <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-background px-2.5 py-1.5 text-foreground">
+      <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-background/70 px-2.5 py-1.5 text-foreground transition-colors hover:border-foreground/25">
         <input
           type="checkbox"
           checked={showKeyboard}

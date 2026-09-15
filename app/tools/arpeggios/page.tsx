@@ -1,5 +1,6 @@
 "use client";
 
+import { DrillGate } from "@/components/drills/drill-gate";
 import { DrillShell } from "@/components/drills/drill-shell";
 import { Arpeggios } from "@/components/drills/arpeggios/arpeggios";
 import { ToolDemoVideo } from "@/components/drills/tool-demo-video";
@@ -14,13 +15,9 @@ export default function ArpeggiosPage() {
       subtitle="Practice 7-note minor-11 arpeggio cells with two-phase root and sequence drilling."
     >
       {!canAccess ? (
-        <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-          Sign in to save your arpeggio progress.
-        </div>
+        <DrillGate state="signed-out" message="Sign in to save your arpeggio progress." />
       ) : !userReady ? (
-        <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-          Loading your settings…
-        </div>
+        <DrillGate state="loading" message="Sign in to save your arpeggio progress." />
       ) : (
         <Arpeggios />
       )}

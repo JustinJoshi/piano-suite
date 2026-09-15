@@ -57,7 +57,7 @@ export function GridBody({
       className={cn(
         "relative grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4",
         fill && "flex-1",
-        showChrome && "rounded-xl border border-dashed border-primary/40",
+        showChrome && "rounded-2xl border border-dashed border-primary/40 bg-primary/[0.03]",
         blocks.length === 0 && "min-h-[24rem] content-start"
       )}
       style={{ gridAutoRows: `minmax(${ROW_UNIT_PX}px, auto)` }}
@@ -71,7 +71,7 @@ export function GridBody({
             <div
               key={i}
               data-testid="grid-guide"
-              className="rounded-xl border border-dashed border-primary/30 bg-primary/5"
+              className="staff-lines rounded-2xl border border-dashed border-primary/25 bg-primary/5"
             />
           ))}
         </div>
