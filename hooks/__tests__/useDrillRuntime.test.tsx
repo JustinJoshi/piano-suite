@@ -389,7 +389,6 @@ describe("useDrillRuntimeProvider", () => {
     );
   });
 
-<<<<<<< HEAD
   it("clock expiry counts a miss and advances to the next target", () => {
     vi.useFakeTimers();
     try {

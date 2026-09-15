@@ -82,9 +82,16 @@ export interface WelcomeDemoVideoConfig {
   videoLabel: string;
 }
 
+export interface WelcomeClosingCtaConfig {
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+}
+
 export interface WelcomeConfig {
   hero: WelcomeHeroConfig;
   doors: WelcomeDoorsConfig;
+  closingCta: WelcomeClosingCtaConfig;
   features: {
     sections: WelcomeFeatureSectionConfig[];
     cardStyle: CardStyle;
@@ -173,6 +180,12 @@ export const defaultWelcomeConfig: WelcomeConfig = {
       },
     ],
   },
+  closingCta: {
+    eyebrow: "ready when you are",
+    title: "Sit down. Press start.",
+    subtitle:
+      "Every starter drill is free and runs in your browser. Your progress stays on this device until you choose to sign in.",
+  },
   features: {
     sections: [
       {
@@ -222,7 +235,7 @@ export const defaultWelcomeConfig: WelcomeConfig = {
         ],
       },
     ],
-    cardStyle: "filled",
+    cardStyle: "transparent",
     density: "default",
   },
   flow: {
@@ -562,6 +575,13 @@ export function validateWelcomeConfig(
     items: clampArray(doorsInput.items, base.doors.items, isValidDoor),
   };
 
+  const closingCtaInput = isObject(input.closingCta) ? input.closingCta : {};
+  const closingCta: WelcomeClosingCtaConfig = {
+    eyebrow: clampString(closingCtaInput.eyebrow, base.closingCta.eyebrow),
+    title: clampString(closingCtaInput.title, base.closingCta.title),
+    subtitle: clampString(closingCtaInput.subtitle, base.closingCta.subtitle),
+  };
+
   const featuresInput = isObject(input.features) ? input.features : {};
   const features: WelcomeConfig["features"] = {
     sections: clampArray(
@@ -714,6 +734,7 @@ export function validateWelcomeConfig(
   return {
     hero,
     doors,
+    closingCta,
     features,
     flow,
     decks,

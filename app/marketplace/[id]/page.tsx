@@ -89,21 +89,39 @@ export default function PublicDrillView() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-      <div className="mb-6 flex items-center justify-between gap-4">
-        <Link
-          href="/marketplace"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Marketplace
-        </Link>
-        <div className="flex items-center gap-2">
+    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+      <Link
+        href="/marketplace"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Marketplace
+      </Link>
+
+      <header className="mt-6 flex flex-col gap-5 rounded-2xl border border-border bg-card p-6 shadow-surface sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-door-explore">
+            community page
+          </span>
+          <h1 className="mt-2 font-heading text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            {drill.title}
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            by {drill.authorName}
+            {drill.blockCount > 0 && (
+              <>
+                {" "}· {drill.blockCount}{" "}
+                {drill.blockCount === 1 ? "block" : "blocks"}
+              </>
+            )}
+          </p>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
           <Button size="sm" variant="outline" onClick={handleCopyLink}>
             {copied ? (
-              <Copy className="mr-2 h-3.5 w-3.5 text-success" />
+              <Copy className="h-3.5 w-3.5 text-success" />
             ) : (
-              <Copy className="mr-2 h-3.5 w-3.5" />
+              <Copy className="h-3.5 w-3.5" />
             )}
             {copied ? "Copied" : "Copy link"}
           </Button>
@@ -112,24 +130,11 @@ export default function PublicDrillView() {
             onClick={() => void handleFork()}
             disabled={forkState === "forking"}
           >
-            <GitFork className="mr-2 h-3.5 w-3.5" />
+            <GitFork className="h-3.5 w-3.5" />
             {forkState === "forking" ? "Forking…" : "Fork to my workshop"}
           </Button>
         </div>
-      </div>
-
-      <h1 className="font-heading text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-        {drill.title}
-      </h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        by {drill.authorName}
-        {drill.blockCount > 0 && (
-          <>
-            {" "}· {drill.blockCount}{" "}
-            {drill.blockCount === 1 ? "block" : "blocks"}
-          </>
-        )}
-      </p>
+      </header>
 
       {!isSignedIn && (
         <p className="mt-3 text-sm text-muted-foreground">

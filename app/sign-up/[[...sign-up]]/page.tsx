@@ -1,9 +1,10 @@
 import { SignUp } from "@clerk/nextjs";
+import { AuthStage } from "@/components/auth/auth-stage";
 
 export default function SignUpPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+    <AuthStage eyebrow="Free forever" title="Save your practice pages.">
       <SignUp routing="path" path="/sign-up" signInUrl="/sign-in" />
-    </div>
+    </AuthStage>
   );
 }

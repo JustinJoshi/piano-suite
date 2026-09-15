@@ -15,15 +15,17 @@ export function DeckSection() {
           href={deck.href}
           download
           className={cn(
-            buttonVariants({ variant: variant === "solid" ? "default" : variant }),
-            "w-full justify-center rounded-full border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 hover:text-primary sm:w-auto",
-            variant === "solid" &&
-              "border-transparent bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground",
+            buttonVariants({
+              variant: variant === "solid" ? "default" : variant,
+            }),
+            "w-full justify-center rounded-full sm:w-auto",
+            variant === "outline" &&
+              "border-primary/30 bg-primary/8 text-primary hover:border-primary/50 hover:bg-primary/14 hover:text-primary",
             variant === "ghost" &&
               "border-transparent bg-transparent text-primary hover:bg-primary/10"
           )}
         >
-          <Download className="mr-2 h-4 w-4" />
+          <Download className="h-4 w-4" />
           {deck.label}
         </a>
       ))}

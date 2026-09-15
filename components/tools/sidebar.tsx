@@ -12,10 +12,12 @@ import {
   Palette,
   Volume2,
   X,
+  type LucideIcon,
 } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { AppUserButton } from "@/components/app-user-button";
 import { AppliedLogoMark } from "@/components/brand/applied-logo-mark";
+import { Keybed } from "@/components/brand/keybed";
 import { Button } from "@/components/ui/button";
 import { useDashboardNav } from "@/components/tools/dashboard-nav";
 import { useExperimentalFeatures } from "@/hooks/useExperimentalFeatures";
@@ -25,7 +27,6 @@ import {
   insightTools,
   labTools,
   workshopTool,
-  type ToolDef,
 } from "@/lib/tools";
 import { cn } from "@/lib/utils";
 
@@ -58,19 +59,44 @@ function subscribeToLabsNav(callback: () => void) {
   };
 }
 
+type NavLinkDef = { title: string; href: string; icon: LucideIcon };
+
 /** Logo Lab is a branding utility, not a practice tool — sidebar only. */
-const logoLabLink = {
+const logoLabLink: NavLinkDef = {
   title: "Logo Lab",
   href: "/tools/logo-lab",
   icon: Fingerprint,
 };
 
+const settingsLinks: NavLinkDef[] = [
+  { title: "Theme", href: "/settings/theme", icon: Palette },
+  { title: "Atmosphere", href: "/settings/atmosphere", icon: Aperture },
+  { title: "Audio", href: "/settings/audio", icon: Volume2 },
+  { title: "Billing", href: "/settings/billing", icon: CreditCard },
+];
+
+/** Hue of the section dot; mirrors the three doors on the landing page. */
+type SectionTone = "play" | "learn" | "explore" | "muted";
+
+const toneDot: Record<SectionTone, string> = {
+  play: "bg-door-play",
+  learn: "bg-door-learn",
+  explore: "bg-door-explore",
+  muted: "bg-muted-foreground/50",
+};
+
+function testIdFor(title: string) {
+  return `sidebar-link-${title.toLowerCase().replace(/\s+/g, "-")}`;
+}
+
 function NavLinks({
   links,
   onNavigate,
+  emphasis = "default",
 }: {
-  links: { title: string; href: string; icon: ToolDef["icon"] }[];
+  links: NavLinkDef[];
   onNavigate: () => void;
+  emphasis?: "default" | "strong";
 }) {
   const pathname = usePathname();
 
@@ -85,23 +111,28 @@ function NavLinks({
             <Link
               href={link.href}
               onClick={onNavigate}
-              data-testid={`sidebar-link-${link.title.toLowerCase().replace(/\s+/g, "-")}`}
+              data-testid={testIdFor(link.title)}
+              data-active={isActive ? "true" : undefined}
+              aria-current={isActive ? "page" : undefined}
               className={cn(
-                "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                "nav-key group flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                emphasis === "strong" ? "font-semibold" : "font-medium",
                 isActive
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                  ? "bg-primary/12 text-foreground"
+                  : emphasis === "strong"
+                    ? "text-foreground hover:bg-muted/60"
+                    : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
               )}
             >
               <Icon
                 className={cn(
-                  "h-4 w-4 transition-colors",
+                  "h-4 w-4 shrink-0 transition-colors",
                   isActive
                     ? "text-primary"
                     : "text-muted-foreground group-hover:text-foreground"
                 )}
               />
-              {link.title}
+              <span className="truncate">{link.title}</span>
             </Link>
           </li>
         );
@@ -110,9 +141,16 @@ function NavLinks({
   );
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
+function SectionLabel({
+  children,
+  tone = "muted",
+}: {
+  children: React.ReactNode;
+  tone?: SectionTone;
+}) {
   return (
-    <div className="mb-2 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+    <div className="mb-2 flex items-center gap-2 px-3 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+      <span className={cn("h-1.5 w-1.5 rounded-full", toneDot[tone])} />
       {children}
     </div>
   );
@@ -131,15 +169,9 @@ function LabsSection({ onNavigate }: { onNavigate: () => void }) {
     writeLabsNavOpen(!open);
   }
 
-  const labs = [
+  const labs: NavLinkDef[] = [
     ...labTools,
-    {
-      title: logoLabLink.title,
-      description: "",
-      icon: logoLabLink.icon,
-      href: logoLabLink.href,
-      category: "lab" as const,
-    },
+    logoLabLink,
   ].filter((lab) => experimentalEnabled || !isExperimentalToolHref(lab.href));
   const activeLab = labs.some((lab) => lab.href === pathname);
 
@@ -150,8 +182,9 @@ function LabsSection({ onNavigate }: { onNavigate: () => void }) {
         onClick={toggleOpen}
         aria-expanded={open}
         aria-controls="dashboard-sidebar-labs"
-        className="mb-2 flex w-full items-center gap-2 rounded-lg px-3 py-1 text-xs font-medium uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground"
+        className="mb-2 flex w-full items-center gap-2 rounded-lg px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
       >
+        <span className={cn("h-1.5 w-1.5 rounded-full", toneDot.explore)} />
         Labs
         <ChevronDown
           className={cn(
@@ -160,7 +193,7 @@ function LabsSection({ onNavigate }: { onNavigate: () => void }) {
           )}
         />
         {activeLab ? (
-          <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary" />
+          <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_1px_var(--primary-glow)]" />
         ) : null}
       </button>
       {open ? (
@@ -173,11 +206,9 @@ function LabsSection({ onNavigate }: { onNavigate: () => void }) {
 }
 
 export function Sidebar() {
-  const pathname = usePathname();
   const { user, isLoaded, isSignedIn } = useUser();
   const { open, setOpen } = useDashboardNav();
   const closeDrawer = () => setOpen(false);
-  const workshopActive = pathname === workshopTool.href;
 
   const accountLabel =
     isLoaded && isSignedIn
@@ -185,6 +216,12 @@ export function Sidebar() {
         user?.primaryEmailAddress?.emailAddress ??
         "Pianist")
       : "Anonymous pianist";
+
+  const workshopLink: NavLinkDef = {
+    title: workshopTool.title,
+    href: workshopTool.href,
+    icon: workshopTool.icon,
+  };
 
   return (
     <>
@@ -204,14 +241,16 @@ export function Sidebar() {
       <aside
         id="dashboard-sidebar"
         className={cn(
-          "dashboard-sidebar fixed left-0 top-0 z-50 flex h-screen flex-col border-r border-border/50 bg-sidebar-background transition-transform duration-200 ease-out md:z-40 md:translate-x-0",
+          "dashboard-sidebar fixed left-0 top-0 z-50 flex h-screen flex-col border-r border-border bg-sidebar-background transition-transform duration-200 ease-out md:z-40 md:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full"
         )}
         data-testid="dashboard-sidebar"
       >
         {/* Brand */}
-        <div className="flex h-16 items-center gap-2 border-b border-border/50 px-4">
-          <AppliedLogoMark className="h-8 w-8" title="Piano Suite" />
+        <div className="flex h-16 items-center gap-2.5 border-b border-border px-4">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/12 text-primary ring-1 ring-primary/20">
+            <AppliedLogoMark className="h-5 w-5" title="Piano Suite" />
+          </span>
           <Link
             href="/"
             className="min-w-0 flex-1 font-heading text-base font-semibold tracking-tight text-foreground"
@@ -232,45 +271,22 @@ export function Sidebar() {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4">
+        <nav className="flex-1 overflow-y-auto px-3 py-4" aria-label="Studio">
           <ul className="space-y-0.5">
             <li>
-              <Link
-                href={workshopTool.href}
-                onClick={closeDrawer}
-                data-testid="sidebar-link-workshop"
-                className={cn(
-                  "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold transition-colors",
-                  workshopActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-foreground hover:bg-muted/50"
-                )}
-              >
-                <workshopTool.icon
-                  className={cn(
-                    "h-4 w-4 transition-colors",
-                    workshopActive
-                      ? "text-primary"
-                      : "text-foreground group-hover:text-foreground"
-                  )}
-                />
-                {workshopTool.title}
-                <span className="rounded-full border border-accent/40 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-accent">
-                  Beta
-                </span>
-              </Link>
+              <WorkshopLink link={workshopLink} onNavigate={closeDrawer} />
             </li>
           </ul>
 
           <div className="mb-2 mt-6">
-            <SectionLabel>Ready-made drills</SectionLabel>
+            <SectionLabel tone="play">Ready-made drills</SectionLabel>
             <ul className="space-y-0.5">
               <NavLinks links={drillTools} onNavigate={closeDrawer} />
             </ul>
           </div>
 
           <div className="mb-2 mt-6">
-            <SectionLabel>Progress</SectionLabel>
+            <SectionLabel tone="learn">Progress</SectionLabel>
             <ul className="space-y-0.5">
               <NavLinks links={insightTools} onNavigate={closeDrawer} />
             </ul>
@@ -283,105 +299,15 @@ export function Sidebar() {
           <div className="mb-2 mt-6">
             <SectionLabel>Settings</SectionLabel>
             <ul className="space-y-0.5">
-              <li>
-                <Link
-                  href="/settings/theme"
-                  onClick={closeDrawer}
-                  data-testid="sidebar-link-theme"
-                  className={cn(
-                    "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                    pathname === "/settings/theme"
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                  )}
-                >
-                  <Palette
-                    className={cn(
-                      "h-4 w-4 transition-colors",
-                      pathname === "/settings/theme"
-                        ? "text-primary"
-                        : "text-muted-foreground group-hover:text-foreground"
-                    )}
-                  />
-                  Theme
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/settings/atmosphere"
-                  onClick={closeDrawer}
-                  data-testid="sidebar-link-atmosphere"
-                  className={cn(
-                    "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                    pathname === "/settings/atmosphere"
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                  )}
-                >
-                  <Aperture
-                    className={cn(
-                      "h-4 w-4 transition-colors",
-                      pathname === "/settings/atmosphere"
-                        ? "text-primary"
-                        : "text-muted-foreground group-hover:text-foreground"
-                    )}
-                  />
-                  Atmosphere
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/settings/audio"
-                  onClick={closeDrawer}
-                  data-testid="sidebar-link-audio"
-                  className={cn(
-                    "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                    pathname === "/settings/audio"
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                  )}
-                >
-                  <Volume2
-                    className={cn(
-                      "h-4 w-4 transition-colors",
-                      pathname === "/settings/audio"
-                        ? "text-primary"
-                        : "text-muted-foreground group-hover:text-foreground"
-                    )}
-                  />
-                  Audio
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/settings/billing"
-                  onClick={closeDrawer}
-                  data-testid="sidebar-link-billing"
-                  className={cn(
-                    "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                    pathname === "/settings/billing"
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                  )}
-                >
-                  <CreditCard
-                    className={cn(
-                      "h-4 w-4 transition-colors",
-                      pathname === "/settings/billing"
-                        ? "text-primary"
-                        : "text-muted-foreground group-hover:text-foreground"
-                    )}
-                  />
-                  Billing
-                </Link>
-              </li>
+              <NavLinks links={settingsLinks} onNavigate={closeDrawer} />
             </ul>
           </div>
         </nav>
 
         {/* User account */}
-        <div className="border-t border-border/50 p-3">
-          <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground">
+        <div className="border-t border-border">
+          <Keybed octaves={4} className="h-3 w-full opacity-70" />
+          <div className="flex items-center gap-3 px-4 py-3 text-sm text-muted-foreground">
             <AppUserButton
               appearance={{
                 elements: {
@@ -394,5 +320,48 @@ export function Sidebar() {
         </div>
       </aside>
     </>
+  );
+}
+
+function WorkshopLink({
+  link,
+  onNavigate,
+}: {
+  link: NavLinkDef;
+  onNavigate: () => void;
+}) {
+  const pathname = usePathname();
+  const isActive = pathname === link.href;
+  const Icon = link.icon;
+
+  return (
+    <Link
+      href={link.href}
+      onClick={onNavigate}
+      data-testid="sidebar-link-workshop"
+      data-active={isActive ? "true" : undefined}
+      aria-current={isActive ? "page" : undefined}
+      className={cn(
+        "nav-key group flex items-center gap-3 rounded-xl border px-3 py-2.5 text-sm font-semibold transition-colors",
+        isActive
+          ? "border-primary/30 bg-primary/12 text-foreground shadow-[0_0_24px_-12px_var(--primary-glow)]"
+          : "border-transparent text-foreground hover:border-border hover:bg-muted/60"
+      )}
+    >
+      <span
+        className={cn(
+          "flex h-7 w-7 items-center justify-center rounded-lg",
+          isActive
+            ? "bg-primary text-primary-foreground"
+            : "bg-muted text-foreground group-hover:bg-primary/15 group-hover:text-primary"
+        )}
+      >
+        <Icon className="h-4 w-4" />
+      </span>
+      {link.title}
+      <span className="ml-auto rounded-full border border-accent/40 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-accent">
+        Beta
+      </span>
+    </Link>
   );
 }

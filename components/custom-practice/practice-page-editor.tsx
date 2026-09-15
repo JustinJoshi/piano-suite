@@ -232,7 +232,7 @@ export function PracticePageEditor() {
             onChange={(e) =>
               updatePage((prev) => ({ ...prev, title: e.target.value }))
             }
-            className="min-w-0 flex-1 basis-48 rounded-lg border border-transparent bg-transparent px-2 py-1.5 text-lg font-semibold tracking-tight text-foreground outline-none transition-colors placeholder:text-muted-foreground hover:border-border focus:border-primary/50"
+            className="min-w-0 flex-1 basis-48 rounded-lg border border-transparent bg-transparent px-2 py-1.5 font-heading text-xl font-semibold tracking-tight text-foreground outline-none transition-colors placeholder:text-muted-foreground hover:border-border focus:border-primary/50 focus:bg-card/60"
             placeholder="Untitled practice page"
             aria-label="Practice page title"
           />
@@ -311,7 +311,7 @@ export function PracticePageEditor() {
             />
 
             {page.blocks.length === 0 ? (
-              <p className="text-center text-sm text-muted-foreground">
+              <p className="rounded-xl border border-dashed border-border bg-card/40 px-4 py-3 text-center text-sm text-muted-foreground">
                 Your workshop is empty. Browse the{" "}
                 <Link
                   href={BLOCKS_HREF}

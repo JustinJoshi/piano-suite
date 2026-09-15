@@ -197,7 +197,13 @@ export function WorkshopTile({
         isDragging && "z-50 opacity-80"
       )}
     >
-      <Card className="h-full overflow-hidden">
+      <Card
+        className={cn(
+          "h-full overflow-hidden transition-shadow",
+          (settingsOpen || resizing) && "border-primary/40 shadow-raised",
+          isDragging && "border-primary/60 shadow-raised"
+        )}
+      >
         <CardContent className="p-4">
           <FeatureRenderer blocks={[block]} />
 
@@ -240,7 +246,7 @@ export function WorkshopTile({
 
       <div
         className={cn(
-          "absolute right-1 top-1 flex gap-1 transition-opacity",
+          "glass absolute right-2 top-2 flex gap-0.5 rounded-lg border border-border p-0.5 shadow-surface transition-opacity",
           "opacity-100 md:opacity-0 md:group-hover:opacity-100",
           "focus-within:md:opacity-100",
           (resizing || settingsOpen) && "md:opacity-100"

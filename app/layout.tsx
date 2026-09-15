@@ -20,10 +20,14 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
+// Fraunces is the display face. Loading its optical-size, softness, and
+// "wonk" axes lets `.font-heading` (globals.css) dial in an engraved,
+// sheet-music feel instead of a flat web serif.
 const fraunces = Fraunces({
   variable: "--font-fraunces",
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  style: ["normal", "italic"],
+  axes: ["SOFT", "WONK", "opsz"],
 });
 
 const geistMono = Geist_Mono({

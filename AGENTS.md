@@ -60,6 +60,12 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `lib/logo-mark-settings.ts` | Serializable applied logo mark + presets / normalize / localStorage |
 | `hooks/useLogoMarkSettings.ts` | Applied logo mark; localStorage always; Convex when `canPersist` |
 | `components/brand/*` | `PianoSuiteMark`, `AppliedLogoMark`, `FaviconHost`; the musical-note mark (`app/icon.svg`, lucide `Music`) is the shipping default — custom Chladni marks apply only after Logo Lab's Apply (`isShippingLogoMark` decides) |
+| `lib/keybed.ts` + `components/brand/keybed.tsx` | Decorative SVG piano keybed (`Keybed`): pure geometry in `lib/`, `aria-hidden` render in `components/`. Keys are `--ivory` / `--ebony`; `lit` semitones take `litColor` (defaults to primary; door cards pass their door hue). The house motif for section edges, footers, cards, and theme previews |
+| `components/site-footer.tsx` | Shared public footer (keybed top edge, wordmark, Terms/Privacy — e2e checks those links); `compact` hides the primary links |
+| `components/auth/auth-stage.tsx` | Stage around Clerk `SignIn` / `SignUp` (brand, eyebrow, staff lines, keybed) |
+| `components/drills/drill-gate.tsx` | Signed-out / loading state for the four ready-made drills; keeps the exact "Sign in to save…" copy |
+| `components/tools/settings-page-header.tsx` | Eyebrow + heading + description + actions for `/settings/*` pages |
+| `components/welcome/section-heading.tsx` | Landing-page section heading with optional `measure-number` numeral |
 | `lib/ambient-effects.ts` | Per-route ambient backgrounds + float panel settings, soft viz defaults |
 | `hooks/useAmbientEffects.ts` | `AmbientEffectsProvider` + hook; localStorage always; Convex when `canPersist` |
 | `components/ambient/*` | Root ambient host, renderer, background, float panel |
@@ -196,7 +202,7 @@ Before making styling changes, read `DESIGN-PRINCIPLES.md` for the visual conven
 ### Where tokens live
 
 - `app/globals.css` — the single source of truth for all color tokens.
-- `lib/themes.ts` — the registry of preset themes (`amber`, `rose`, `emerald`, `ocean`, `violet`, `slate`).
+- `lib/themes.ts` — the registry of preset themes (`amber`, `ivory`, `rose`, `emerald`, `ocean`, `violet`, `slate`) with an `appearance` (`dark` | `light`). Ivory is the only light preset and overrides the whole surface ladder; the others override only the brand ramp.
 - `hooks/useThemePreference.ts` — the hook for reading and setting the active theme.
 - `hooks/useExperimentalFeatures.tsx` — `ExperimentalFeaturesProvider` in root layout; Theme toggle for experimental labs (Multigrid); off by default; shared so nav updates instantly.
 - `app/settings/theme/page.tsx` — the user-facing theme picker + experimental features toggle.
@@ -210,9 +216,14 @@ Before making styling changes, read `DESIGN-PRINCIPLES.md` for the visual conven
 
 | Token / utility | Purpose | Example |
 |---|---|---|
-| `--color-primary` / `bg-primary`, `text-primary`, `border-primary`, `ring-primary` | Main brand color (buttons, active nav, focus rings) | `bg-primary text-primary-foreground` |
-| `--color-accent` / `bg-accent`, `text-accent` | Accent highlights | `text-accent` |
-| `--color-background`, `--color-foreground`, `--color-card`, `--color-muted` | Surfaces and text | `bg-card text-foreground` |
+| `--color-primary` / `bg-primary`, `text-primary`, `border-primary`, `ring-primary` | Brand color: logo chip, eyebrows, links, active nav, focus rings, lit keys. **Not** button fills | `text-primary`, `bg-primary/12 ring-primary/20` |
+| `--color-accent` / `bg-accent`, `text-accent` | Accent highlights (italic headline clause) | `text-accent` |
+| `--color-action` / `bg-action`, `text-action-foreground`, `hover:bg-action-hover`, `shadow-key` | Primary buttons — ivory on dark themes, ebony on Ivory. The `Button` `default` variant already applies this; use `variant="brand"` only when a control should carry the theme hue | `<Button>Start free</Button>` |
+| `--color-background` → `--color-card` → `--color-elevated` → `--color-popover`, `--color-muted` | The surface ladder; `bg-elevated` is for a tile sitting on a card | `bg-card`, `bg-elevated` |
+| `--color-door-play` / `--color-door-explore` / `--color-door-learn` | The three entry paths; use the same hue wherever that door appears (door cards, sidebar dots, marketplace = explore, articles = learn, drills = play) | `bg-door-play/12 text-door-play` |
+| `--color-ivory`, `--color-ebony` | Piano constants for the `Keybed` motif; never themed | `text-ebony` on a door chip |
+| `shadow-surface`, `shadow-raised`, `shadow-key` | Card resting / hover elevation, and the key-edge under action buttons | `shadow-surface hover:shadow-raised` |
+| `.staff-lines`, `.staff-lines-faded`, `.bar-line`, `.measure-number`, `.grain`, `.glass`, `.key-press`, `.rise-in`, `.tone-inverse` | Music decor utilities (see `DESIGN-PRINCIPLES.md` §3). `.staff-lines-faded` is a mask — put it on an `absolute inset-0` decor layer, never on a content container | `<div aria-hidden className="staff-lines staff-lines-faded absolute inset-0" />` |
 | `--color-grade-again`, `--grade-hard`, `--grade-good`, `--grade-easy`, `--grade-ungraded` | Anki-style grade badges/dots | `bg-grade-good` |
 | `--color-success` / `bg-success`, `text-success`, `border-success` | Positive feedback (MIDI connected, drill phase complete, success flash) | `bg-success/10 text-success` |
 | `--color-destructive` / `bg-destructive`, `text-destructive` | Errors and unsupported states | `text-destructive` |
@@ -222,14 +233,15 @@ Before making styling changes, read `DESIGN-PRINCIPLES.md` for the visual conven
 
 ### Adding a new preset theme
 
-1. Add the theme id and metadata to `lib/themes.ts` (`themeIds` and `themes`).
-2. Add a matching CSS class in `app/globals.css` that overrides the relevant tokens (see existing `.rose`, `.emerald`, etc.).
+1. Add the theme id and metadata (including `appearance`) to `lib/themes.ts` (`themeIds` and `themes`), and its expected primary hex to `e2e/theme.spec.ts`.
+2. Add a matching CSS class in `app/globals.css` that overrides the relevant tokens (see existing `.rose`, `.emerald`, etc.). A dark preset overrides only the brand ramp (`--primary`, `--primary-foreground`, `--accent`, `--ring`, `--primary-glow`, hero glows); a light preset must also override the surface ladder, `--border` / `--input` / `--staff-line`, the action tokens (ebony key), the `--inverse-*` set, and `color-scheme` (see `.ivory`).
 3. Make sure the class name matches the `id` exactly — `next-themes` applies it to `<html>`.
 4. Keep `ThemeProvider` in `app/layout.tsx` wired as `themes={[...themeIds]}`. Without that list, `next-themes` only removes `light`/`dark` on switch, leftover preset classes accumulate on `<html>`, and later rules in `globals.css` win over the selected theme.
 
 ### Anti-patterns to avoid
 
 - `bg-[#c9a227]`, `text-[#E8CF7A]`, `shadow-[0_0_12px_2px_rgba(201,162,39,0.6)]` in components.
+- `bg-primary` on a primary button. Buttons are the action colour (`Button` default); the brand hue labels, it does not invite a press.
 - Inline SVG/chart strokes with raw hex strings — use `var(--color-*)` instead.
 - Adding one-off Tailwind color utilities like `text-blue-500` for branded UI; use the semantic tokens.
 

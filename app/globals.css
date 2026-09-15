@@ -13,6 +13,7 @@
   --font-heading: var(--font-fraunces);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
+  --color-elevated: var(--elevated);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
@@ -23,12 +24,20 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-action: var(--action);
+  --color-action-foreground: var(--action-foreground);
+  --color-action-hover: var(--action-hover);
   --color-destructive: var(--destructive);
   --color-success: var(--success);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-sidebar-background: var(--sidebar-background);
+  --color-ivory: var(--ivory);
+  --color-ebony: var(--ebony);
+  --color-door-play: var(--door-play);
+  --color-door-explore: var(--door-explore);
+  --color-door-learn: var(--door-learn);
   --color-grade-again: var(--grade-again);
   --color-grade-hard: var(--grade-hard);
   --color-grade-good: var(--grade-good);
@@ -41,59 +50,107 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  --shadow-key: var(--shadow-key);
+  --shadow-surface: var(--shadow-surface);
+  --shadow-raised: var(--shadow-raised);
+  --shadow-glow: 0 0 24px 4px var(--primary-glow);
 }
 
 /*
- * Theme token system
+ * Theme token system — "the studio"
  *
- * Colors are defined as CSS custom properties so they can be swapped at
- * runtime by changing a class on <html>. The Tailwind utilities above map
- * those properties to bg-primary, text-primary, etc.
+ * Colors are CSS custom properties swapped at runtime by a class on <html>.
+ * The Tailwind utilities above map them to bg-primary, text-action, etc.
  *
- * The :root block is the Amber (default) theme. Alternate themes override
- * only the variables they need to change.
+ * Four axes keep one accent from doing every job at once:
+ *
+ *   surfaces   background → card → elevated → popover (real luminance steps)
+ *   brand      --primary / --accent: logo, links, eyebrows, active nav, rings
+ *   action     --action: primary buttons only. Ivory on a dark stage, ebony
+ *              on the Ivory theme — a CTA reads as a piano key you can press.
+ *   doors      --door-play / --door-explore / --door-learn: the three entry
+ *              paths, used consistently wherever a door appears.
+ *
+ * :root is the Amber (default) dark theme. Presets override only the brand
+ * ramp; Ivory (light) overrides the whole surface ladder as well.
  */
 
 :root {
-  /* Core surfaces */
+  color-scheme: dark;
+
+  /* Piano constants */
+  --ivory: #f3ecd9;
+  --ebony: #0b0a09;
+
+  /* Surface ladder */
   --background: #0c0a08;
-  --foreground: #ede6d6;
-  --card: #16140f;
-  --card-foreground: #ede6d6;
-  --popover: #1c1912;
-  --popover-foreground: #ede6d6;
-  --secondary: #1c1912;
-  --secondary-foreground: #ede6d6;
-  --muted: #211e17;
-  --muted-foreground: #a79b85;
+  --foreground: #efe8d6;
+  --card: #171410;
+  --card-foreground: #efe8d6;
+  --elevated: #1f1b15;
+  --popover: #262119;
+  --popover-foreground: #efe8d6;
+  --secondary: #1f1b15;
+  --secondary-foreground: #efe8d6;
+  --muted: #242019;
+  --muted-foreground: #a99d87;
   --destructive: #c1614a;
   --radius: 0.75rem;
 
+  /* Neutral hairlines: ivory at low alpha so borders never carry the brand hue */
+  --border: rgba(243, 236, 217, 0.09);
+  --input: rgba(243, 236, 217, 0.14);
+  --staff-line: rgba(243, 236, 217, 0.07);
+
   /* Brand / accent (Amber) */
-  --primary: #c9a227;
+  --primary: #d3ab2e;
   --primary-foreground: #16140f;
-  --accent: #c9a227;
+  --accent: #e8cf7a;
   --accent-foreground: #16140f;
-  --ring: #c9a227;
-  --border: rgba(201, 162, 39, 0.12);
-  --input: rgba(201, 162, 39, 0.15);
-  --primary-glow: rgba(201, 162, 39, 0.6);
+  --ring: #d3ab2e;
+  --primary-glow: rgba(211, 171, 46, 0.55);
+
+  /* Action — the piano key */
+  --action: var(--ivory);
+  --action-foreground: var(--ebony);
+  --action-hover: #fff8e4;
+  --key-edge: rgba(0, 0, 0, 0.55);
+  --key-shadow: rgba(0, 0, 0, 0.7);
+
+  /* Doors */
+  --door-play: #ee8a66;
+  --door-explore: #4dbfab;
+  --door-learn: #ae9bee;
+
+  /* Inverse tone (used by .tone-inverse sections) */
+  --inverse-background: var(--ivory);
+  --inverse-foreground: #1a1611;
+  --inverse-card: #fbf6ea;
+  --inverse-muted: #e7dfcc;
+  --inverse-muted-foreground: #5f5748;
+  --inverse-border: rgba(26, 22, 17, 0.12);
+  --inverse-primary: #8f6d10;
+  --inverse-primary-foreground: #fff;
+  --inverse-action: var(--ebony);
+  --inverse-action-foreground: var(--ivory);
+  --inverse-action-hover: #221e19;
+  --inverse-staff-line: rgba(26, 22, 17, 0.1);
 
   /* Shared semantic tokens */
-  --sidebar-background: #0a0a0a;
+  --sidebar-background: #0a0908;
 
   /* Positive feedback: MIDI connected, drill phase complete, success flash.
      Matches --grade-good so "correct" reads the same everywhere. */
   --success: #7fa37a;
 
-  --hero-glow-1: rgba(201, 162, 39, 0.28);
-  --hero-glow-2: rgba(201, 162, 39, 0.16);
+  --hero-glow-1: rgba(211, 171, 46, 0.28);
+  --hero-glow-2: rgba(211, 171, 46, 0.16);
   --hero-glow-3: rgba(232, 207, 122, 0.08);
   --hero-orb-inner: #e8cf7a;
-  --hero-orb-mid: #c9a227;
+  --hero-orb-mid: #d3ab2e;
   --hero-orb-outer: #7a5f12;
-  --hero-orb-shadow: rgba(201, 162, 39, 0.35);
-  --beam-mid: rgba(201, 162, 39, 0.55);
+  --hero-orb-shadow: rgba(211, 171, 46, 0.35);
+  --beam-mid: rgba(211, 171, 46, 0.55);
   --beam-highlight: rgba(232, 207, 122, 0.8);
 
   --grade-again: #c1614a;
@@ -101,134 +158,243 @@
   --grade-good: #7fa37a;
   --grade-easy: #6fa9a3;
   --grade-ungraded: #5c5646;
+
+  /* Elevation */
+  --shadow-surface:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.035),
+    0 10px 30px -18px rgba(0, 0, 0, 0.8);
+  --shadow-raised:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.05),
+    0 18px 50px -24px rgba(0, 0, 0, 0.9);
+  --shadow-key:
+    0 1px 0 0 var(--key-edge),
+    0 10px 24px -12px var(--key-shadow);
 }
 
-/* ---------- Alternate presets ---------- */
+/* ---------- Alternate presets (brand ramp only) ---------- */
 
 .amber {
-  --primary: #c9a227;
+  --primary: #d3ab2e;
   --primary-foreground: #16140f;
-  --accent: #c9a227;
+  --accent: #e8cf7a;
   --accent-foreground: #16140f;
-  --ring: #c9a227;
-  --border: rgba(201, 162, 39, 0.12);
-  --input: rgba(201, 162, 39, 0.15);
-  --primary-glow: rgba(201, 162, 39, 0.6);
+  --ring: #d3ab2e;
+  --primary-glow: rgba(211, 171, 46, 0.55);
 
-  --hero-glow-1: rgba(201, 162, 39, 0.28);
-  --hero-glow-2: rgba(201, 162, 39, 0.16);
+  --hero-glow-1: rgba(211, 171, 46, 0.28);
+  --hero-glow-2: rgba(211, 171, 46, 0.16);
   --hero-glow-3: rgba(232, 207, 122, 0.08);
   --hero-orb-inner: #e8cf7a;
-  --hero-orb-mid: #c9a227;
+  --hero-orb-mid: #d3ab2e;
   --hero-orb-outer: #7a5f12;
-  --hero-orb-shadow: rgba(201, 162, 39, 0.35);
-  --beam-mid: rgba(201, 162, 39, 0.55);
+  --hero-orb-shadow: rgba(211, 171, 46, 0.35);
+  --beam-mid: rgba(211, 171, 46, 0.55);
   --beam-highlight: rgba(232, 207, 122, 0.8);
 }
 
 .rose {
-  --primary: #e11d48;
+  --primary: #e8506f;
   --primary-foreground: #0c0a08;
-  --accent: #fb7185;
+  --accent: #fb95a6;
   --accent-foreground: #0c0a08;
-  --ring: #e11d48;
-  --border: rgba(225, 29, 72, 0.12);
-  --input: rgba(225, 29, 72, 0.15);
-  --primary-glow: rgba(225, 29, 72, 0.6);
+  --ring: #e8506f;
+  --primary-glow: rgba(232, 80, 111, 0.55);
 
-  --hero-glow-1: rgba(225, 29, 72, 0.28);
-  --hero-glow-2: rgba(225, 29, 72, 0.16);
-  --hero-glow-3: rgba(251, 113, 133, 0.08);
+  --hero-glow-1: rgba(232, 80, 111, 0.28);
+  --hero-glow-2: rgba(232, 80, 111, 0.16);
+  --hero-glow-3: rgba(251, 149, 166, 0.08);
   --hero-orb-inner: #fda4af;
-  --hero-orb-mid: #e11d48;
+  --hero-orb-mid: #e8506f;
   --hero-orb-outer: #881337;
-  --hero-orb-shadow: rgba(225, 29, 72, 0.35);
-  --beam-mid: rgba(225, 29, 72, 0.55);
-  --beam-highlight: rgba(251, 113, 133, 0.8);
+  --hero-orb-shadow: rgba(232, 80, 111, 0.35);
+  --beam-mid: rgba(232, 80, 111, 0.55);
+  --beam-highlight: rgba(251, 149, 166, 0.8);
 }
 
 .emerald {
-  --primary: #10b981;
+  --primary: #2fc08f;
   --primary-foreground: #0c0a08;
-  --accent: #34d399;
+  --accent: #6ee7b7;
   --accent-foreground: #0c0a08;
-  --ring: #10b981;
-  --border: rgba(16, 185, 129, 0.12);
-  --input: rgba(16, 185, 129, 0.15);
-  --primary-glow: rgba(16, 185, 129, 0.6);
+  --ring: #2fc08f;
+  --primary-glow: rgba(47, 192, 143, 0.55);
 
-  --hero-glow-1: rgba(16, 185, 129, 0.28);
-  --hero-glow-2: rgba(16, 185, 129, 0.16);
-  --hero-glow-3: rgba(52, 211, 153, 0.08);
+  --hero-glow-1: rgba(47, 192, 143, 0.28);
+  --hero-glow-2: rgba(47, 192, 143, 0.16);
+  --hero-glow-3: rgba(110, 231, 183, 0.08);
   --hero-orb-inner: #6ee7b7;
-  --hero-orb-mid: #10b981;
+  --hero-orb-mid: #2fc08f;
   --hero-orb-outer: #065f46;
-  --hero-orb-shadow: rgba(16, 185, 129, 0.35);
-  --beam-mid: rgba(16, 185, 129, 0.55);
-  --beam-highlight: rgba(52, 211, 153, 0.8);
+  --hero-orb-shadow: rgba(47, 192, 143, 0.35);
+  --beam-mid: rgba(47, 192, 143, 0.55);
+  --beam-highlight: rgba(110, 231, 183, 0.8);
 }
 
 .ocean {
-  --primary: #06b6d4;
+  --primary: #2cc4dc;
   --primary-foreground: #0c0a08;
-  --accent: #22d3ee;
+  --accent: #7fe3f2;
   --accent-foreground: #0c0a08;
-  --ring: #06b6d4;
-  --border: rgba(6, 182, 212, 0.12);
-  --input: rgba(6, 182, 212, 0.15);
-  --primary-glow: rgba(6, 182, 212, 0.6);
+  --ring: #2cc4dc;
+  --primary-glow: rgba(44, 196, 220, 0.55);
 
-  --hero-glow-1: rgba(6, 182, 212, 0.28);
-  --hero-glow-2: rgba(6, 182, 212, 0.16);
-  --hero-glow-3: rgba(34, 211, 238, 0.08);
+  --hero-glow-1: rgba(44, 196, 220, 0.28);
+  --hero-glow-2: rgba(44, 196, 220, 0.16);
+  --hero-glow-3: rgba(127, 227, 242, 0.08);
   --hero-orb-inner: #67e8f9;
-  --hero-orb-mid: #06b6d4;
+  --hero-orb-mid: #2cc4dc;
   --hero-orb-outer: #155e75;
-  --hero-orb-shadow: rgba(6, 182, 212, 0.35);
-  --beam-mid: rgba(6, 182, 212, 0.55);
-  --beam-highlight: rgba(34, 211, 238, 0.8);
+  --hero-orb-shadow: rgba(44, 196, 220, 0.35);
+  --beam-mid: rgba(44, 196, 220, 0.55);
+  --beam-highlight: rgba(127, 227, 242, 0.8);
 }
 
 .violet {
-  --primary: #8b5cf6;
-  --primary-foreground: #ffffff;
-  --accent: #a78bfa;
+  --primary: #9d78f7;
+  --primary-foreground: #0c0a08;
+  --accent: #c4b5fd;
   --accent-foreground: #0c0a08;
-  --ring: #8b5cf6;
-  --border: rgba(139, 92, 246, 0.12);
-  --input: rgba(139, 92, 246, 0.15);
-  --primary-glow: rgba(139, 92, 246, 0.6);
+  --ring: #9d78f7;
+  --primary-glow: rgba(157, 120, 247, 0.55);
 
-  --hero-glow-1: rgba(139, 92, 246, 0.28);
-  --hero-glow-2: rgba(139, 92, 246, 0.16);
-  --hero-glow-3: rgba(167, 139, 250, 0.08);
+  --hero-glow-1: rgba(157, 120, 247, 0.28);
+  --hero-glow-2: rgba(157, 120, 247, 0.16);
+  --hero-glow-3: rgba(196, 181, 253, 0.08);
   --hero-orb-inner: #c4b5fd;
-  --hero-orb-mid: #8b5cf6;
+  --hero-orb-mid: #9d78f7;
   --hero-orb-outer: #5b21b6;
-  --hero-orb-shadow: rgba(139, 92, 246, 0.35);
-  --beam-mid: rgba(139, 92, 246, 0.55);
-  --beam-highlight: rgba(167, 139, 250, 0.8);
+  --hero-orb-shadow: rgba(157, 120, 247, 0.35);
+  --beam-mid: rgba(157, 120, 247, 0.55);
+  --beam-highlight: rgba(196, 181, 253, 0.8);
 }
 
 .slate {
-  --primary: #94a3b8;
+  --primary: #a3b1c6;
   --primary-foreground: #0c0a08;
-  --accent: #cbd5e1;
+  --accent: #d5dee9;
   --accent-foreground: #0c0a08;
-  --ring: #94a3b8;
-  --border: rgba(148, 163, 184, 0.12);
-  --input: rgba(148, 163, 184, 0.15);
-  --primary-glow: rgba(148, 163, 184, 0.6);
+  --ring: #a3b1c6;
+  --primary-glow: rgba(163, 177, 198, 0.55);
 
-  --hero-glow-1: rgba(148, 163, 184, 0.28);
-  --hero-glow-2: rgba(148, 163, 184, 0.16);
-  --hero-glow-3: rgba(203, 213, 225, 0.08);
+  --hero-glow-1: rgba(163, 177, 198, 0.28);
+  --hero-glow-2: rgba(163, 177, 198, 0.16);
+  --hero-glow-3: rgba(213, 222, 233, 0.08);
   --hero-orb-inner: #e2e8f0;
-  --hero-orb-mid: #94a3b8;
+  --hero-orb-mid: #a3b1c6;
   --hero-orb-outer: #475569;
-  --hero-orb-shadow: rgba(148, 163, 184, 0.35);
-  --beam-mid: rgba(148, 163, 184, 0.55);
-  --beam-highlight: rgba(203, 213, 225, 0.8);
+  --hero-orb-shadow: rgba(163, 177, 198, 0.35);
+  --beam-mid: rgba(163, 177, 198, 0.55);
+  --beam-highlight: rgba(213, 222, 233, 0.8);
+}
+
+/* ---------- Ivory: the light stage ---------- */
+/* Piano keys turned over — ivory surfaces, ebony action, brass brand. */
+.ivory {
+  color-scheme: light;
+
+  --background: #f4eee0;
+  --foreground: #1a1611;
+  --card: #fbf7ec;
+  --card-foreground: #1a1611;
+  --elevated: #ffffff;
+  --popover: #ffffff;
+  --popover-foreground: #1a1611;
+  --secondary: #ece5d3;
+  --secondary-foreground: #1a1611;
+  --muted: #e9e1cd;
+  --muted-foreground: #66604f;
+  --destructive: #b3452f;
+
+  --border: rgba(26, 22, 17, 0.11);
+  --input: rgba(26, 22, 17, 0.16);
+  --staff-line: rgba(26, 22, 17, 0.09);
+
+  --primary: #8f6d10;
+  --primary-foreground: #fffaf0;
+  --accent: #b88a15;
+  --accent-foreground: #fffaf0;
+  --ring: #8f6d10;
+  --primary-glow: rgba(143, 109, 16, 0.35);
+
+  --action: var(--ebony);
+  --action-foreground: var(--ivory);
+  --action-hover: #241f19;
+  --key-edge: rgba(0, 0, 0, 0.35);
+  --key-shadow: rgba(26, 22, 17, 0.35);
+
+  --door-play: #cf5a37;
+  --door-explore: #1f8f7e;
+  --door-learn: #6a55c4;
+
+  --inverse-background: #14110e;
+  --inverse-foreground: var(--ivory);
+  --inverse-card: #1d1913;
+  --inverse-muted: #262119;
+  --inverse-muted-foreground: #a99d87;
+  --inverse-border: rgba(243, 236, 217, 0.1);
+  --inverse-primary: #e0b73a;
+  --inverse-primary-foreground: #16140f;
+  --inverse-action: var(--ivory);
+  --inverse-action-foreground: var(--ebony);
+  --inverse-action-hover: #fff8e4;
+  --inverse-staff-line: rgba(243, 236, 217, 0.08);
+
+  --sidebar-background: #eee7d7;
+  --success: #4c8a48;
+
+  --hero-glow-1: rgba(184, 138, 21, 0.18);
+  --hero-glow-2: rgba(184, 138, 21, 0.1);
+  --hero-glow-3: rgba(143, 109, 16, 0.06);
+  --hero-orb-inner: #f1dc9b;
+  --hero-orb-mid: #c9a227;
+  --hero-orb-outer: #8f6d10;
+  --hero-orb-shadow: rgba(184, 138, 21, 0.25);
+  --beam-mid: rgba(184, 138, 21, 0.4);
+  --beam-highlight: rgba(232, 207, 122, 0.7);
+
+  --grade-again: #b3452f;
+  --grade-hard: #a67d0b;
+  --grade-good: #4c8a48;
+  --grade-easy: #2f8a84;
+  --grade-ungraded: #a79f8e;
+
+  --shadow-surface:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.7),
+    0 10px 30px -18px rgba(26, 22, 17, 0.35);
+  --shadow-raised:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.8),
+    0 18px 50px -24px rgba(26, 22, 17, 0.45);
+}
+
+/* ---------- Inverse tone ----------
+   A section that flips the stage (ivory on a dark theme, ebony on Ivory)
+   without leaving the token system. Children keep using bg-card, text-primary,
+   bg-action… and simply read the flipped values. */
+.tone-inverse {
+  --background: var(--inverse-background);
+  --foreground: var(--inverse-foreground);
+  --card: var(--inverse-card);
+  --card-foreground: var(--inverse-foreground);
+  --elevated: var(--inverse-card);
+  --popover: var(--inverse-card);
+  --popover-foreground: var(--inverse-foreground);
+  --secondary: var(--inverse-muted);
+  --secondary-foreground: var(--inverse-foreground);
+  --muted: var(--inverse-muted);
+  --muted-foreground: var(--inverse-muted-foreground);
+  --border: var(--inverse-border);
+  --input: var(--inverse-border);
+  --staff-line: var(--inverse-staff-line);
+  --primary: var(--inverse-primary);
+  --primary-foreground: var(--inverse-primary-foreground);
+  --accent: var(--inverse-primary);
+  --accent-foreground: var(--inverse-primary-foreground);
+  --ring: var(--inverse-primary);
+  --action: var(--inverse-action);
+  --action-foreground: var(--inverse-action-foreground);
+  --action-hover: var(--inverse-action-hover);
+  background-color: var(--background);
+  color: var(--foreground);
 }
 
 @layer base {
@@ -240,7 +406,154 @@
   }
   html {
     @apply font-sans;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
+  ::selection {
+    background: color-mix(in oklab, var(--primary) 35%, transparent);
+    color: var(--foreground);
+  }
+  /* Display type: Fraunces with a touch of its "wonky" and soft axes so
+     headings feel engraved rather than typeset. */
+  .font-heading {
+    font-variation-settings: "SOFT" 40, "WONK" 0, "opsz" 72;
+    letter-spacing: -0.015em;
+  }
+  h1, h2, h3, h4 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+}
+
+/* ---------- Music motifs ---------- */
+
+/* Five-line staff texture. One staff every 128px so it punctuates rather
+   than fills; lines read from --staff-line so inverse/light tones adapt. */
+.staff-lines {
+  background-image: linear-gradient(
+    to bottom,
+    var(--staff-line) 0 1px,
+    transparent 1px 12px,
+    var(--staff-line) 12px 13px,
+    transparent 13px 24px,
+    var(--staff-line) 24px 25px,
+    transparent 25px 36px,
+    var(--staff-line) 36px 37px,
+    transparent 37px 48px,
+    var(--staff-line) 48px 49px,
+    transparent 49px 100%
+  );
+  background-size: 100% 128px;
+  background-repeat: repeat-y;
+}
+
+/* Fade the staff toward the edges so it never fights copy. */
+.staff-lines-faded {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 18%,
+    black 82%,
+    transparent 100%
+  );
+}
+
+/* Felt / paper grain. Very low alpha; adds a tactile surface to large
+   flat areas (hero, inverse bands) at almost no cost. */
+.grain {
+  position: relative;
+}
+.grain::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+
+/* Glass chrome for sticky headers / floating chips. */
+.glass {
+  background-color: color-mix(in oklab, var(--background) 72%, transparent);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+}
+
+/* Pressed-key affordance for primary buttons. */
+.key-press {
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    background-color 120ms ease;
+}
+.key-press:active {
+  transform: translateY(2px);
+  box-shadow: 0 0 0 0 var(--key-edge), 0 2px 8px -6px var(--key-shadow);
+}
+
+/* Hairline rule with a soft brand highlight in the middle — a section
+   "bar line". */
+.bar-line {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--border) 20%,
+    color-mix(in oklab, var(--primary) 45%, transparent) 50%,
+    var(--border) 80%,
+    transparent 100%
+  );
+}
+
+/* Big translucent measure numbers behind section headings. */
+.measure-number {
+  font-family: var(--font-fraunces);
+  font-variation-settings: "SOFT" 100, "WONK" 1, "opsz" 144;
+  font-weight: 500;
+  line-height: 1;
+  color: color-mix(in oklab, var(--primary) 22%, transparent);
+  letter-spacing: -0.04em;
+  user-select: none;
+}
+
+/* Entrance motion for hero copy. Honors reduced motion. */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.rise-in {
+  animation: rise-in 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.rise-in-delay-1 { animation-delay: 90ms; }
+.rise-in-delay-2 { animation-delay: 180ms; }
+.rise-in-delay-3 { animation-delay: 270ms; }
+.rise-in-delay-4 { animation-delay: 360ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rise-in {
+    animation: none;
+  }
+  .key-press,
+  .key-press:active {
+    transition: none;
+    transform: none;
+  }
+}
+
+/* Thin, theme-aware scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--foreground) 18%, transparent) transparent;
 }
 
 /* Custom utilities for the hero visual. They read from theme tokens so the
@@ -256,7 +569,7 @@
    Bottom stays transparent so the fixed field continues under later sections.
    Center pocket is lighter so full-bleed edges stay visible under the nav. */
 .hero-scrim {
-  /* Pattern Lab “Hero shade” sets these from scrimDarkness (default 70% / ~40%). */
+  /* Pattern Lab "Hero shade" sets these from scrimDarkness (default 70% / ~40%). */
   --hero-scrim-strength: 70%;
   --hero-scrim-top-strength: 40%;
   background:
@@ -285,9 +598,9 @@
   filter: blur(2px);
 }
 
-/* ---------- Dashboard / Vercel-style tools layout ---------- */
+/* ---------- Dashboard / studio layout ---------- */
 :root {
-  --sidebar-width: 260px;
+  --sidebar-width: 264px;
 }
 
 .dashboard-sidebar {
@@ -303,6 +616,29 @@
   .dashboard-main {
     margin-left: var(--sidebar-width);
   }
+}
+
+/* Sidebar active row: a lit key edge on the left. */
+.nav-key {
+  position: relative;
+}
+.nav-key::before {
+  content: "";
+  position: absolute;
+  left: -0.75rem;
+  top: 20%;
+  bottom: 20%;
+  width: 3px;
+  border-radius: 999px;
+  background: var(--primary);
+  box-shadow: 0 0 12px 1px var(--primary-glow);
+  opacity: 0;
+  transform: scaleY(0.4);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+.nav-key[data-active="true"]::before {
+  opacity: 1;
+  transform: scaleY(1);
 }
 
 /* ---------- Onboarding ambient effects ---------- */
@@ -363,4 +699,11 @@
   background: radial-gradient(circle at 35% 35%, var(--hero-orb-inner) 0%, var(--hero-orb-mid) 35%, var(--hero-orb-outer) 70%, transparent 100%);
   animation: onboarding-pulse 8s ease-in-out infinite;
   filter: blur(80px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-ambient,
+  .onboarding-orb {
+    animation: none;
+  }
 }

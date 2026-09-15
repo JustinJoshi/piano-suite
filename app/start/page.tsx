@@ -1,6 +1,7 @@
 "use client";
 
 import { Navbar } from "@/components/navbar";
+import { SiteFooter } from "@/components/site-footer";
 import { WelcomeConfigProvider } from "@/components/welcome/welcome-config-provider";
 import { DoorChooser } from "@/components/welcome/door-chooser";
 
@@ -13,11 +14,16 @@ export default function StartPage() {
     <WelcomeConfigProvider>
       <div className="relative z-10 flex min-h-screen flex-col">
         <Navbar />
-        <main className="flex flex-1 items-center justify-center">
-          <div className="w-full">
+        <main className="relative flex flex-1 items-center justify-center">
+          <div
+            aria-hidden
+            className="staff-lines staff-lines-faded pointer-events-none absolute inset-0"
+          />
+          <div className="relative w-full">
             <DoorChooser />
           </div>
         </main>
+        <SiteFooter compact />
       </div>
     </WelcomeConfigProvider>
   );

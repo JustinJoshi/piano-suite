@@ -1,5 +1,6 @@
 "use client";
 
+import { DrillGate } from "@/components/drills/drill-gate";
 import { DrillShell } from "@/components/drills/drill-shell";
 import { ChordDrill } from "@/components/drills/chord-drill/chord-drill";
 import { ToolDemoVideo } from "@/components/drills/tool-demo-video";
@@ -14,13 +15,9 @@ export default function ChordDrillPage() {
       subtitle="Blocked-practice chord drill with timer, stats, and AnkiConnect integration."
     >
       {!canAccess ? (
-        <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-          Sign in to save your chord drill progress.
-        </div>
+        <DrillGate state="signed-out" message="Sign in to save your chord drill progress." />
       ) : !userReady ? (
-        <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-          Loading your settings…
-        </div>
+        <DrillGate state="loading" message="Sign in to save your chord drill progress." />
       ) : (
         <ChordDrill />
       )}
