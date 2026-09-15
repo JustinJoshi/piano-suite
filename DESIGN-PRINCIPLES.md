@@ -8,11 +8,12 @@ This document captures the visual and interaction design principles implemented 
 
 The entire interface is built on a single source of truth for color: CSS custom properties in `app/globals.css`. Tailwind utilities such as `bg-primary`, `text-muted-foreground`, and `ring-border` are mapped to these variables through the `@theme inline` block.
 
-- **Default theme**: Amber / piano-gold (`:root`).
-- **Alternate presets**: Rose, Emerald, Ocean, Violet, Slate — each defined as a CSS class that overrides only the brand-derived tokens.
-- **Registry**: `lib/themes.ts` lists the available presets and provides type-safe helpers (`isThemeId`, `findTheme`).
+- **Default theme**: Amber / brass-and-ebony (`:root`).
+- **Alternate dark presets**: Rose, Emerald, Ocean, Violet, Slate — each a CSS class that overrides only the brand ramp (`primary`, `accent`, `ring`, glow).
+- **Ivory** is the one light preset (`appearance: "light"` in the registry). It overrides the whole surface ladder and flips the action colour to ebony, so a CTA is still "the key you press".
+- **Registry**: `lib/themes.ts` lists the available presets, their `appearance`, and provides type-safe helpers (`isThemeId`, `findTheme`).
 - **Persistence**: `hooks/useThemePreference.ts` stores the choice in `localStorage` via `next-themes` and syncs it to Convex when the user has Pro sync (`canPersist`).
-- **UI entry point**: `/settings/theme` presents theme cards that preview `background`, `primary`, `accent`, and `card` swatches live.
+- **UI entry point**: `/settings/theme` presents theme cards with a live mini keybed, glow, and staff-line preview.
 
 > Principle: colors are semantic and swappable; no component should hard-code a hex value.
 
@@ -20,31 +21,52 @@ The entire interface is built on a single source of truth for color: CSS custom 
 
 ## 2. Semantic Color Architecture
 
-Colors are named by role, not by hue, so a theme change does not require touching components.
+Colors are named by role, not by hue, so a theme change does not require touching components. Four axes keep a single accent from doing every job at once.
 
 | Role | Token examples | Usage |
 |------|----------------|-------|
-| **Surfaces** | `background`, `card`, `popover`, `muted` | Page, panels, dropdowns, subtle fills |
+| **Surfaces** | `background` → `card` → `elevated` → `popover`, plus `muted` | A real luminance ladder: page, panels, raised tiles, dropdowns |
 | **Text** | `foreground`, `card-foreground`, `muted-foreground` | Headings, body, hints, labels |
-| **Brand** | `primary`, `primary-foreground`, `accent` | CTAs, active nav, focus rings, highlights |
-| **Borders** | `border`, `input`, `ring` | Dividers, fields, focus states |
-| **Feedback** | `destructive`, `grade-again`, `grade-hard`, `grade-good`, `grade-easy` | Errors, Anki-style grading badges |
+| **Brand** | `primary`, `primary-foreground`, `accent`, `ring` | Logo chip, eyebrows, links, active nav, focus rings, lit keys |
+| **Action** | `action`, `action-foreground`, `action-hover`, `shadow-key` | Primary buttons only — ivory on a dark stage, ebony on Ivory |
+| **Doors** | `door-play`, `door-explore`, `door-learn` | The three entry paths (Play / Explore / Learn) wherever they appear: door cards, sidebar section dots, marketplace and articles headers |
+| **Piano constants** | `ivory`, `ebony` | Key colours in the `Keybed` motif; never change between themes |
+| **Borders** | `border`, `input`, `staff-line` | Ivory at low alpha — hairlines never carry the brand hue |
+| **Feedback** | `success`, `destructive`, `grade-again`, `grade-hard`, `grade-good`, `grade-easy` | MIDI connected, errors, Anki-style grading badges |
 | **Graphics** | `hero-glow-*`, `hero-orb-*`, `beam-*`, `primary-glow` | Hero gradients, glows, chart accents |
+
+**Brand is not action.** The amber ramp labels and highlights; it does not fill buttons. The `default` `Button` variant is the action colour with a `shadow-key` edge (a piano key you can press); the `brand` variant exists for the rare control that should carry the theme hue (theme pickers, "applied" states).
+
+**Inverse bands.** `.tone-inverse` swaps the surface, text, border, action, and staff-line tokens for their `--inverse-*` counterparts, so a section can flip to an ivory (or, on Ivory, ebony) stage while every child keeps using the same utility names. Used by the closing CTA and one feature band on the landing page.
 
 Grade colors are used consistently in the tracking chart (`components/tracking/tracking-chart.tsx`) and in the chord-drill grading badge.
 
 ---
 
-## 3. Dark-First, Warm-Tone Aesthetic
+## 3. Dark-First, Warm-Tone Aesthetic — "the studio"
 
 The default palette assumes a dark environment:
 
 - Page background: `#0c0a08` (near-black with warm undertones)
-- Primary text: `#ede6d6` (warm off-white)
-- Cards: `#16140f` and `#1c1912` (deep brown-gray)
-- Primary brand: `#c9a227` (amber gold)
+- Primary text: `#efe8d6` (warm off-white)
+- Surface ladder: `#171410` card → `#1f1b15` elevated → `#262119` popover
+- Primary brand: `#d3ab2e` (amber brass), accent `#e8cf7a`
+- Piano constants: ivory `#f3ecd9`, ebony `#0b0a09`
 
-The warmth reinforces the “piano suite” metaphor — brass, wood, low studio light — while high contrast keeps data readable.
+The warmth reinforces the "piano suite" metaphor — brass, wood, low studio light — while high contrast keeps data readable. The Ivory preset is the same studio with the lights on: paper surfaces, ebony action colour, the same brass accents.
+
+### Music motifs
+
+A small vocabulary of decorative primitives carries the theme without illustration:
+
+- **`Keybed`** (`components/brand/keybed.tsx`, geometry in `lib/keybed.ts`) — an SVG piano keybed drawn from `--ivory` / `--ebony`, with optional lit keys (a chord) in the brand or a door hue. Used as a stage edge under the hero, the footer's top edge, door cards, marketplace cards, theme previews, the sidebar footer, and the auth pages. Always `aria-hidden`.
+- **`.staff-lines`** / **`.staff-lines-faded`** — five hairlines repeating every 128px, from `--staff-line`. The faded variant is a mask and must sit on its own absolutely positioned decor layer, never on a content container.
+- **`.bar-line`** — a thin brand-tinted rule with heavier end caps, used between section headings and content (a measure's bar line).
+- **`.measure-number`** — large, faint, italic Fraunces numerals for numbered sections (01, 02 …).
+- **`.grain`** — very-low-alpha noise overlay for large flat areas (inverse bands).
+- **`.glass`** — the sticky-chrome treatment (background at ~72% + blur).
+- **`.key-press`** — 2px downward translate on `:active` for primary buttons.
+- **`.rise-in`** — a short entrance for hero copy; respects `prefers-reduced-motion`.
 
 ---
 
@@ -53,7 +75,7 @@ The warmth reinforces the “piano suite” metaphor — brass, wood, low studio
 Three Google fonts create a clear hierarchy:
 
 - **Inter** (`--font-inter`) — body, labels, navigation, inputs.
-- **Fraunces** (`--font-fraunces`) — display headings, section titles, brand wordmarks. Used with `tracking-tight` and `font-semibold`.
+- **Fraunces** (`--font-fraunces`) — display headings, section titles, brand wordmarks. Loaded with its `SOFT`, `WONK`, and `opsz` axes; `.font-heading` dials these in so large headlines read as engraved sheet-music type rather than a flat web serif. Used with `tracking-tight` and `font-semibold`; the hero italicises the second clause of its headline in the accent colour.
 - **Geist Mono** (`--font-geist-mono`) — timers, chord notes, stats, code.
 
 Headings are large, tight, and high-contrast (`text-foreground`). Body copy uses `leading-relaxed` and `text-muted-foreground` to reduce eye strain during longer reads (see `components/articles/article-content.tsx`).
@@ -66,12 +88,12 @@ The **brand mark** is the musical-note glyph in `app/icon.svg` (lucide `Music`),
 
 Information is grouped inside rounded cards with a consistent treatment:
 
-- `rounded-xl`
-- `bg-card` / `text-card-foreground`
-- `ring-1 ring-foreground/10` or `border border-border`
+- `rounded-2xl`
+- `bg-card` / `text-card-foreground`, or `bg-elevated` for a tile that sits on a card
+- `border border-border` plus `shadow-surface`; `shadow-raised` on hover or for the one featured card on a page
 - Internal spacing via `p-6` / `p-4` and `gap-4`
 
-Cards appear in the tool dashboard (`ToolCard`), article listings (`ArticleCard`), chat (`ChatPage`), drill settings, and the tracking dashboard. Hover states typically shift the border toward `primary/30` and the background to `card/80`.
+Cards appear in the tool dashboard (`ToolCard`), article listings (`ArticleCard`), the Workshop grid (`WorkshopTile`), the block library (`MarketplaceCard`), drill settings, and the tracking dashboard. Hover states lift the card slightly (`-translate-y-0.5`), shift the border toward `primary/30`, and step the shadow up. Icon chips are `rounded-xl` with a hue tint and a `ring-1` in the same hue (`ToolCard` `tone` picks brand or a door hue).
 
 ---
 
@@ -79,10 +101,10 @@ Cards appear in the tool dashboard (`ToolCard`), article listings (`ArticleCard`
 
 Interactive elements favor soft, rounded forms:
 
-- **Buttons**: `rounded-lg` by default; primary CTAs often use `rounded-full`.
-- **Badges / chips**: `rounded-full` (e.g., deck tags, FSRS/Web MIDI chips, grade pills).
+- **Buttons**: `rounded-lg` by default; primary CTAs use `rounded-full` and the action colour with `shadow-key`.
+- **Badges / chips**: `rounded-full` (e.g., deck tags, FSRS/Web MIDI chips, grade pills, "Featured").
 - **Inputs / selects**: `rounded-lg` with `border-border` and `focus:border-ring`.
-- **Cards**: `rounded-xl`.
+- **Cards**: `rounded-2xl`; nested tiles `rounded-xl`.
 
 This creates a friendly, tactile feel appropriate for a practice app where users repeatedly tap controls while looking away at a keyboard.
 
@@ -92,9 +114,9 @@ This creates a friendly, tactile feel appropriate for a practice app where users
 
 Sticky headers and floating chips use translucent backgrounds plus blur to stay unobtrusive:
 
-- `Navbar`: `bg-background/80 backdrop-blur-md`
-- `DrillShell` header: `bg-background/95 backdrop-blur`
-- Hero chips: `bg-card/80 backdrop-blur-sm`
+- `Navbar`, `DrillShell` header, the mobile dashboard top bar, and the Workshop tile toolbar all use the shared `.glass` utility.
+- The public `Navbar` centres its links in a `rounded-full` pill; the active section gets a lit underline (`bg-primary` + `--primary-glow`).
+- Hero chips: `bg-primary/10 backdrop-blur-sm`
 
 The effect separates navigation from content without introducing solid bars that would visually chop the page.
 
@@ -121,10 +143,13 @@ The tools and settings sections follow a Vercel-style dashboard pattern:
 - Fixed left sidebar (`dashboard-sidebar`, `260px`) with `bg-sidebar-background` on `md` and up.
 - Main content offset by `dashboard-main margin-left: var(--sidebar-width)` from `md` up; full-width below `md`.
 - Below `md`, the sidebar is an off-canvas drawer (slide over content) with a glass backdrop (`bg-background/60 backdrop-blur-sm`). Open it from the Menu control in sticky dashboard headers (`DrillShell`, Tools hub, Tracking) or the settings mobile top bar. Close via link navigation, backdrop tap, Escape, or the drawer close control.
-- Each tool is wrapped in `DrillShell`, which provides a sticky top header with title, subtitle, optional right actions, and the mobile Menu control.
+- Each tool is wrapped in `DrillShell`, which provides a sticky glass header with title, subtitle, a `bar-line`, optional right actions, and the mobile Menu control.
+- Sidebar sections carry a door-hue dot (drills = play, progress = learn, labs = explore); the active link is a `nav-key` with a lit left edge, and the Workshop entry is the one raised item. A four-octave `Keybed` sits above the account row.
+- Settings pages open with `SettingsPageHeader` (eyebrow, heading, description, optional actions).
+- The signed-out state of the four ready-made drills is `DrillGate`: the message, a sign-in key, a pointer to the free Workshop, and a keybed edge.
 - Content is centered within `max-w-6xl` or `max-w-3xl` containers.
 
-This separates marketing pages (`/`, `/articles`, `/chat`) — which use the top `Navbar` — from the application workspace (`/tools/*`, `/settings/*`) — which uses the sidebar (fixed on desktop, drawer on mobile).
+This separates marketing pages (`/`, `/start`, `/marketplace`, `/pricing`, `/articles`) — which use the top `Navbar` and end in `SiteFooter` (keybed top edge, wordmark, links) — from the application workspace (`/tools/*`, `/settings/*`) — which uses the sidebar (fixed on desktop, drawer on mobile). The Clerk sign-in / sign-up pages sit on `AuthStage`. The landing page alternates treatments down the scroll: a hero with a keybed stage edge, a numbered "how it works" score, template cards, numbered feature bands (one inverse), the deck card, the demo framed as a stage, the Workshop marquee, grouped tool cards, and an inverse closing CTA.
 
 ---
 
@@ -168,4 +193,4 @@ If a component needs a color not covered by tokens, the convention is to add a n
 
 ## Summary
 
-Piano Suite’s design is intentionally cohesive: a dark, warm studio palette; semantic, swappable tokens; rounded, card-based surfaces; clear typographic hierarchy; and a dashboard-style workspace for practice tools. The result is an interface that feels like a single instrument rather than a collection of pages.
+Piano Suite's design is intentionally cohesive: a dark, warm studio palette with one light counterpart; semantic, swappable tokens on four axes (surface, brand, action, door); a small vocabulary of music motifs (keybed, staff lines, bar lines, measure numbers); rounded, elevated card surfaces; an engraved display face; and a dashboard-style workspace for practice tools. The result is an interface that feels like a single instrument rather than a collection of pages.

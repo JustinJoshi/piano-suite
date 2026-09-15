@@ -800,6 +800,43 @@ twelve.
   `workshop-component-plan-v2.md` link now points at
   `docs/stage-2/README.md`.
 
+## UI overhaul — "the studio" (2026-09)
+
+A full visual pass across the site, themed around the instrument rather
+than around a generic dashboard.
+
+- **Tokens on four axes.** `app/globals.css` was rewritten around a real
+  surface ladder (`background → card → elevated → popover`), a **brand**
+  ramp that labels and highlights, a separate **action** colour for
+  primary buttons (ivory on a dark stage, ebony on the light one, with a
+  `shadow-key` edge so a CTA reads as a piano key), and three **door**
+  hues for Play / Explore / Learn. Borders became ivory-at-low-alpha so
+  hairlines no longer carry the brand hue. `.tone-inverse` flips a section
+  to the opposite stage using `--inverse-*` tokens.
+- **Ivory.** A first light theme (`appearance: "light"` in
+  `lib/themes.ts`) that overrides the whole ladder; the five dark presets
+  still override only the brand ramp.
+- **Music motifs.** `Keybed` (`lib/keybed.ts` geometry + SVG component)
+  draws a piano keybed from the ivory/ebony constants with lit chords in
+  the brand or a door hue; `.staff-lines`, `.bar-line`, `.measure-number`,
+  `.grain`, `.glass`, `.key-press`, and `.rise-in` give sections a small
+  shared vocabulary. Fraunces is loaded with its `SOFT` / `WONK` / `opsz`
+  axes so display headings read as engraved type.
+- **Every surface touched.** Landing page (hero with keybed stage edge,
+  numbered score-style "how it works", template cards, alternating
+  numbered feature bands with one inverse, demo framed as a stage,
+  Workshop marquee, grouped tool cards, inverse closing CTA, shared
+  `SiteFooter`), `/start` door chooser with door hues, glass `Navbar` with
+  a pill nav and lit active underline, the dashboard sidebar (door-hue
+  section dots, `nav-key` active edge, keybed above the account row),
+  `DrillShell`, marketplace, pricing, articles, Workshop tiles / grid /
+  starter picker / target shell / MIDI bar / block library cards, the
+  theme settings page, the auth pages (`AuthStage`), the first-visit demo
+  overlay, and the drills' signed-out state (`DrillGate`).
+- **Kept stable for tests.** e2e-relevant text, roles, and test ids were
+  preserved; `e2e/theme.spec.ts` gained the Ivory entry and the new
+  primary hexes.
+
 ## Roadmap
 
 - [x] Scaffold Next.js + Tailwind + shadcn/ui
