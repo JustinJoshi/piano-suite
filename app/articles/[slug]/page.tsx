@@ -3,7 +3,7 @@ import { ArrowLeft, Calendar, Clock } from "lucide-react";
 import Link from "next/link";
 import { getAllArticles, getArticleBySlug } from "@/lib/articles";
 import { ArticleContent } from "@/components/articles/article-content";
-import { Separator } from "@/components/ui/separator";
+import { SiteFooter } from "@/components/site-footer";
 
 interface ArticlePageProps {
   params: Promise<{ slug: string }>;
@@ -45,13 +45,16 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           <div className="mb-8">
             <Link
               href="/articles"
-              className="mb-4 inline-flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className="mb-6 inline-flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to articles
             </Link>
 
-            <h1 className="mb-4 font-heading text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+            <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-door-learn">
+              article
+            </span>
+            <h1 className="mb-4 mt-3 font-heading text-4xl font-semibold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
               {article.title}
             </h1>
 
@@ -79,11 +82,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             </div>
           </div>
 
-          <Separator className="mb-10 bg-border" />
+          <div className="bar-line mb-10" aria-hidden />
 
           <ArticleContent content={article.content} />
         </article>
       </main>
+      <SiteFooter />
     </div>
   );
 }
