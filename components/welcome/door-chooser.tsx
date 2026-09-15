@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { BookOpen, Hammer, Play, type LucideIcon } from "lucide-react";
+import { ArrowRight, BookOpen, Hammer, Play, type LucideIcon } from "lucide-react";
+import { Keybed } from "@/components/brand/keybed";
 import { useWelcomeConfig } from "@/hooks/useWelcomeConfig";
 import type { WelcomeDoorItemConfig } from "@/lib/welcome-config";
+import { cn } from "@/lib/utils";
 
 const DOOR_ICONS: Record<WelcomeDoorItemConfig["id"], LucideIcon> = {
   play: Play,
@@ -12,14 +14,45 @@ const DOOR_ICONS: Record<WelcomeDoorItemConfig["id"], LucideIcon> = {
 };
 
 /**
+ * Each door has its own hue (see `--door-*` in globals.css) so the three
+ * paths stay recognisable everywhere they appear. Build borrows the Explore
+ * hue: it is the door into the Workshop and its marketplace.
+ */
+const DOOR_TONES: Record<
+  WelcomeDoorItemConfig["id"],
+  { chip: string; glow: string; text: string; lit: number[]; litColor: string }
+> = {
+  play: {
+    chip: "bg-door-play text-ebony",
+    glow: "from-door-play/25",
+    text: "text-door-play",
+    lit: [0, 4, 7],
+    litColor: "var(--color-door-play)",
+  },
+  build: {
+    chip: "bg-door-explore text-ebony",
+    glow: "from-door-explore/25",
+    text: "text-door-explore",
+    lit: [2, 5, 9, 12],
+    litColor: "var(--color-door-explore)",
+  },
+  learn: {
+    chip: "bg-door-learn text-ebony",
+    glow: "from-door-learn/25",
+    text: "text-door-learn",
+    lit: [4, 7, 11],
+    litColor: "var(--color-door-learn)",
+  },
+};
+
+/**
  * The second screen (Phase 1.3): three doors instead of a dense page.
  *
  * Play and Build carry almost all the intent, so they get two large cards.
  * Learn is a smaller row underneath, not an equal third column — three
  * identical blocks imply an even traffic split that isn't real and read as
- * machine-made. Play = ready-made drills, Build = the Workshop, Learn =
- * articles. Copy lives in `lib/welcome-config.ts` so `/dev/welcome-lab` can
- * tune it.
+ * machine-made. Copy lives in `lib/welcome-config.ts` so `/dev/welcome-lab`
+ * can tune it.
  */
 export function DoorChooser() {
   const { config } = useWelcomeConfig();
@@ -32,34 +65,64 @@ export function DoorChooser() {
     <section className="py-16 sm:py-20">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <span className="text-xs font-semibold uppercase tracking-widest text-primary">
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
             {doors.eyebrow}
           </span>
-          <h2 className="mt-3 font-heading text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+          <h2 className="mt-3 font-heading text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
             {doors.title}
           </h2>
         </div>
 
-        <div className="mt-10 grid gap-5 sm:grid-cols-2">
+        <div className="mt-12 grid gap-5 sm:grid-cols-2">
           {primary.map((door) => {
             const Icon = DOOR_ICONS[door.id] ?? Play;
+            const tone = DOOR_TONES[door.id];
             return (
               <Link
                 key={door.id}
                 href={door.href}
                 data-testid={`door-${door.id}`}
                 data-emphasis="primary"
-                className="group flex flex-col rounded-2xl border border-border bg-card p-8 transition-colors hover:border-primary/40 hover:bg-primary/5"
+                className="group relative flex flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-surface transition-all hover:-translate-y-1 hover:border-foreground/20 hover:shadow-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <Icon className="h-6 w-6" />
+                <div
+                  aria-hidden
+                  className={cn(
+                    "absolute inset-x-0 top-0 h-32 bg-gradient-to-b to-transparent opacity-80",
+                    tone.glow
+                  )}
+                />
+                <div className="relative flex flex-1 flex-col p-8">
+                  <span
+                    className={cn(
+                      "flex h-12 w-12 items-center justify-center rounded-2xl shadow-key",
+                      tone.chip
+                    )}
+                  >
+                    <Icon className="h-6 w-6" />
+                  </span>
+                  <h3 className="mt-6 font-heading text-2xl font-semibold tracking-tight text-foreground">
+                    {door.label}
+                  </h3>
+                  <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground sm:text-base">
+                    {door.description}
+                  </p>
+                  <span
+                    className={cn(
+                      "mt-6 inline-flex items-center gap-1.5 text-sm font-semibold",
+                      tone.text
+                    )}
+                  >
+                    {door.id === "play" ? "Start playing" : "Open the Workshop"}
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                  </span>
                 </div>
-                <h3 className="mt-5 font-heading text-xl font-semibold tracking-tight text-foreground">
-                  {door.label}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  {door.description}
-                </p>
+                <Keybed
+                  octaves={3}
+                  lit={tone.lit}
+                  litColor={tone.litColor}
+                  className="relative h-7 w-full opacity-90"
+                />
               </Link>
             );
           })}
@@ -67,25 +130,37 @@ export function DoorChooser() {
 
         {secondary.map((door) => {
           const Icon = DOOR_ICONS[door.id] ?? BookOpen;
+          const tone = DOOR_TONES[door.id];
           return (
             <Link
               key={door.id}
               href={door.href}
               data-testid={`door-${door.id}`}
               data-emphasis="secondary"
-              className="group mt-4 flex items-center gap-3 rounded-xl border border-border/60 bg-card/50 px-5 py-4 transition-colors hover:border-primary/30 hover:bg-primary/5"
+              className="group mt-5 flex items-center gap-4 rounded-2xl border border-border bg-card/70 px-5 py-4 shadow-surface transition-all hover:border-foreground/20 hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
             >
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+              <span
+                className={cn(
+                  "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl",
+                  tone.chip
+                )}
+              >
                 <Icon className="h-4 w-4" />
-              </div>
-              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                <span className="font-heading text-sm font-semibold text-foreground">
+              </span>
+              <span className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                <span className="font-heading text-base font-semibold text-foreground">
                   {door.label}
                 </span>
                 <span className="text-sm text-muted-foreground">
                   {door.description}
                 </span>
-              </div>
+              </span>
+              <ArrowRight
+                className={cn(
+                  "h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5",
+                  tone.text
+                )}
+              />
             </Link>
           );
         })}
