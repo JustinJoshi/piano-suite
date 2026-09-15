@@ -3,13 +3,16 @@ import { signInAsTestUser } from "./auth-helper";
 import { markDemoIntrosSeen } from "./demo-intro";
 import { themeIds, type ThemeId } from "@/lib/themes";
 
+// Brand ramp per preset — keep in sync with the theme classes in
+// app/globals.css.
 const EXPECTED_PRIMARY: Record<ThemeId, string> = {
-  amber: "#c9a227",
-  rose: "#e11d48",
-  emerald: "#10b981",
-  ocean: "#06b6d4",
-  violet: "#8b5cf6",
-  slate: "#94a3b8",
+  amber: "#d3ab2e",
+  ivory: "#8f6d10",
+  rose: "#e8506f",
+  emerald: "#2fc08f",
+  ocean: "#2cc4dc",
+  violet: "#9d78f7",
+  slate: "#a3b1c6",
 };
 
 async function expectExclusiveTheme(page: import("@playwright/test").Page, themeId: ThemeId) {
