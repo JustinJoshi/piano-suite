@@ -27,11 +27,11 @@ describe("DoorChooser (three doors)", () => {
 
     const play = screen.getByTestId("door-play");
     expect(play).toHaveAttribute("href", "/tools/chord-drill");
-    expect(play).toHaveTextContent(/start playing now/i);
+    expect(play).toHaveTextContent(/just want to play/i);
 
     const build = screen.getByTestId("door-build");
     expect(build).toHaveAttribute("href", "/tools/workshop");
-    expect(build).toHaveTextContent(/shelf of blocks/i);
+    expect(build).toHaveTextContent(/snap a few blocks together/i);
 
     const learn = screen.getByTestId("door-learn");
     expect(learn).toHaveAttribute("href", "/articles");

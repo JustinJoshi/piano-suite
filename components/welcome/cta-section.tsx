@@ -52,14 +52,15 @@ export function CtaSection() {
             </div>
 
             <p className="mt-6 max-w-md text-xs leading-relaxed text-muted-foreground">
-              MIDI drills work best with{" "}
+              Have a MIDI keyboard? Wonderful — drills shine with{" "}
               <Link
                 href="/articles/anki-ankiconnect-setup"
                 className="text-primary underline-offset-2 hover:underline"
               >
                 Anki + AnkiConnect
-              </Link>{" "}
-              and a keyboard — but every drill also runs on the on-screen keys.
+              </Link>
+              . Don&apos;t have one yet? No worries — every drill plays happily
+              on the on-screen keys too.
             </p>
           </div>
           <Keybed octaves={7} className="relative h-10 w-full sm:h-14" />

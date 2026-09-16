@@ -144,47 +144,47 @@ export interface WelcomeConfig {
 
 export const defaultWelcomeConfig: WelcomeConfig = {
   hero: {
-    eyebrow: "a free workshop for self-taught pianists",
+    eyebrow: "free tools for people learning piano",
     showEyebrow: true,
     headline:
-      "Build your own piano practice — or grab a drill and start playing.",
+      "Teaching yourself piano? — welcome home. Let's practice.",
     subheadline:
-      "Snap metronome, timer, and chord blocks together into your own drills, start instantly from a starter template, and share what you build with other self-taught pianists.",
-    ctaText: "Start free",
+      "Piano Suite is a free, friendly home for self-taught pianists. Build your own practice from simple blocks, borrow a starter template that already works, and grow alongside other learners.",
+    ctaText: "Come on in",
     ctaHref: "/start",
     align: "center",
   },
   doors: {
-    eyebrow: "pick a door",
-    title: "How do you want to begin?",
+    eyebrow: "welcome — pick a door",
+    title: "How would you like to start today?",
     items: [
       {
         id: "play",
         label: "Play",
         description:
-          "Start playing now — a ready-made chord drill opens immediately, no account needed.",
+          "Just want to play? A friendly chord drill opens right away — free, no account, no setup.",
         href: "/tools/chord-drill",
       },
       {
         id: "build",
         label: "Build",
         description:
-          "Make your own — build a practice page from the shelf of blocks in the Workshop.",
+          "Feeling curious? Snap a few blocks together in the Workshop and shape practice that fits you.",
         href: "/tools/workshop",
       },
       {
         id: "learn",
         label: "Learn",
-        description: "I want to read first — short articles on how practice actually works.",
+        description: "Rather read first? Short, gentle articles on how practice actually works.",
         href: "/articles",
       },
     ],
   },
   closingCta: {
-    eyebrow: "ready when you are",
-    title: "Sit down. Press start.",
+    eyebrow: "the bench is ready",
+    title: "Pull up the bench. We saved you a seat.",
     subtitle:
-      "Every starter drill is free and runs in your browser. Your progress stays on this device until you choose to sign in.",
+      "Everything here is free and runs right in your browser. Your progress stays safely on this device until you decide you'd like an account — no pressure, no paywall between you and the piano.",
   },
   features: {
     sections: [
@@ -192,31 +192,31 @@ export const defaultWelcomeConfig: WelcomeConfig = {
         id: "build-your-practice",
         number: "01",
         label: "build your practice",
-        title: "Your drill, your blocks, your tempo.",
+        title: "Practice that fits you, not the other way around.",
         body: [
-          "A metronome. A timer. A chord target. Snap them together and you have a practice page. Change the chords, adjust the tempo, add instructions — the Workshop lets you build exactly the drill you need, then practice it right there.",
-          "No code, no setup. Press the slash key, pick a block, and start playing. Every page saves automatically and runs live on your keyboard.",
+          "A metronome. A timer. A chord to aim for. Snap them together and you've made yourself a practice page. Change the chords, ease the tempo, leave yourself a kind note for tomorrow — the Workshop bends to whatever you need today, and you can practice right there.",
+          "No code, no setup, nothing to install. Press the slash key, pick a block, and play. Every page saves itself, so you can close the lid and pick up exactly where you left off.",
         ],
       },
       {
         id: "start-from-something-that-works",
         number: "02",
         label: "start from something that works",
-        title: "Not sure where to begin? Grab a starter template.",
+        title: "Blank pages are scary. Start with one that isn't.",
         body: [
-          "First chords. ii-V-I warmup. Five-minute metronome sprint. Starter templates give you a runnable drill in one click — then you can change anything once you're inside.",
-          "Browse community drills shared by other self-taught pianists, fork a copy into your own Workshop, and make it yours.",
+          "First chords. A gentle ii-V-I warmup. A five-minute metronome sprint. Starter templates give you a working drill in one click — sit down, press start, and change anything once you feel at home.",
+          "You can also wander through drills shared by other self-taught pianists, copy one into your own Workshop, and make it yours. Someone out there has already built the thing you were about to struggle with.",
         ],
       },
       {
         id: "why-these-drills-work",
         number: "03",
         label: "why these drills work",
-        title: "Built on the science of remembering.",
+        title: "Kind to you, and built on the science of remembering.",
         body: [
-          "Re-reading a chord chart feels like practice. It isn't. What actually builds memory is retrieval — forcing yourself to produce the answer instead of just recognizing it. Retrieval practice roughly doubled week-later retention over re-reading (Roediger & Karpicke, 2006).",
-          "Every drill in the Workshop is built on that principle. Enable Anki Sync and the Workshop loads your due cards automatically, scheduling reviews right before you forget. Or just pick chords manually — the motor-memory loop works either way.",
-          "Drilling a voicing through every root, in time, until it stops requiring thought, is the standard route from theory to fluency in jazz piano. This tool puts a stopwatch and a spaced-repetition schedule underneath a practice habit that already exists.",
+          "Re-reading a chord chart feels like practice. It isn't — and that's good news, because the thing that actually works is simpler: retrieval. Ask your hands for the answer instead of showing it to them. In one classic study, retrieval practice roughly doubled week-later retention over re-reading (Roediger & Karpicke, 2006).",
+          "Every drill here is built on that principle. Turn on Anki Sync and the Workshop quietly loads your due cards, scheduling reviews right before you'd forget. Or just pick chords by hand — the motor-memory loop works either way, and neither way is wrong.",
+          "Playing a voicing through every key, in time, until it stops needing thought — that's how jazz pianists have always gotten from theory to fluency. We just put a stopwatch and a gentle schedule underneath a habit that already works.",
         ],
         tags: [
           "Barry Harris — voicing drills",
@@ -228,10 +228,10 @@ export const defaultWelcomeConfig: WelcomeConfig = {
         id: "who-made-this",
         number: "04",
         label: "who made this",
-        title: "A community, not just a toolkit.",
+        title: "Made by a self-taught pianist, for the rest of us.",
         body: [
-          "Lessons run $60 an hour and up, so a lot of us teach ourselves. Piano Suite started as the toolkit I wanted for that path, but it is becoming something bigger: a free community where self-taught pianists learn together, share what works, and build tools that actually help beginners.",
-          "The project is open source. If you're teaching yourself too, questions and ideas are always welcome.",
+          "Lessons run $60 an hour and up, so a lot of us teach ourselves — usually alone, usually unsure if we're doing it right. Piano Suite started as the toolkit I wished I'd had, and it's growing into something warmer: a free community where self-taught pianists learn together, share what works, and cheer each other on.",
+          "The whole project is open source and always will be free to learn with. If you're teaching yourself too, you belong here — questions, ideas, and first attempts are all welcome.",
         ],
       },
     ],
@@ -243,7 +243,7 @@ export const defaultWelcomeConfig: WelcomeConfig = {
       {
         id: "pick",
         label: "pick",
-        text: "Choose a starter template or start from scratch",
+        text: "Start from a friendly template or a fresh page",
       },
       {
         id: "build",
@@ -253,12 +253,12 @@ export const defaultWelcomeConfig: WelcomeConfig = {
       {
         id: "play",
         label: "play",
-        text: "Press Start and practice on real keys",
+        text: "Press start and play — real keys or on-screen",
       },
       {
         id: "share",
         label: "share",
-        text: "Publish to the community or fork someone else's drill",
+        text: "Share what you built, or borrow someone else's",
       },
     ],
     layout: "auto",
@@ -277,33 +277,33 @@ export const defaultWelcomeConfig: WelcomeConfig = {
     variant: "outline",
   },
   toolsGrid: {
-    eyebrow: "also included",
-    title: "Starter drills and visual labs.",
+    eyebrow: "free, and included",
+    title: "A whole shelf of drills and playful labs.",
     subtitle:
-      "The Workshop is the core. These tools and labs come built in — use them as-is or pull their blocks into your own practice pages.",
+      "The Workshop is the heart of it all, and these friends come built in — ready-made drills, progress trackers, and labs that turn your playing into light. Use them as-is or pull their blocks into your own pages.",
   },
   howItWorks: {
     eyebrow: "how the Workshop works",
-    title: "Make practice fit the way you learn",
+    title: "Practice that fits the way you learn",
     steps: [
-      { id: "pick", label: "01", text: "Pick a starter drill or begin with a blank page" },
-      { id: "play", label: "02", text: "Press start and play, timed on real keys" },
-      { id: "build", label: "03", text: "Tweak the blocks or build your own routine" },
+      { id: "pick", label: "01", text: "Pick a starter drill or open a fresh page" },
+      { id: "play", label: "02", text: "Press start and play — we'll keep time for you" },
+      { id: "build", label: "03", text: "Tweak the blocks until it feels like yours" },
     ],
   },
   templateStrip: {
-    eyebrow: "ready when you are",
-    title: "Start with a drill, not a blank page",
-    subtitle: "Use a starter routine as-is, then make it yours in the Workshop.",
+    eyebrow: "no blank pages here",
+    title: "Start with a drill that already works",
+    subtitle: "Borrow a starter routine as-is, then make it yours in the Workshop.",
     browseHref: "/marketplace",
   },
   demoVideo: {
     number: "06",
     label: "see it in action",
-    title: "Watch a 46-second tour of the Workshop.",
+    title: "Take a 46-second peek at the Workshop.",
     body: [
-      "See a practice page come together: blocks snapped into a drill, played on real keys, timed and scored as you go. No account, no setup — everything in the demo runs right in the browser.",
-      "When you're ready to try it yourself, the Workshop is one click away and every starter drill is free.",
+      "Watch a practice page come together: blocks snapped into a drill, played on real keys, timed and scored as it goes. No account, no setup — everything you see runs right in the browser.",
+      "Ready to try it yourself? The Workshop is one click away, and everything you need to start is free.",
     ],
     videoSrc: "/demo-web2.mp4",
     videoLabel:
@@ -315,14 +315,14 @@ export const defaultWelcomeConfig: WelcomeConfig = {
       welcome: "welcome to piano suite",
     },
     pillarsOverview:
-      "These are the three most important pillars of learning on your piano journey.",
+      "We're glad you're here. Before you dive in, here are the three most important pillars of learning on your piano journey.",
     pillars: [
       {
         id: "active-recall",
         headline: "Active recall & spaced repetition",
         body: [
-          "The fastest way to waste practice time is to re-read something you already saw. What actually builds memory is retrieval: producing the answer from scratch, then spacing those retrievals over days.",
-          "Anki handles the scheduling. It tracks what you are about to forget and shows it to you right before that happens. Use it for chord names, progressions, and anything else you need to remember.",
+          "Here's a friendly secret: re-reading something you already saw is the easiest way to spend practice time without learning much. What actually builds memory is retrieval — producing the answer from scratch, then spacing those little wins out over days.",
+          "Anki handles the scheduling so you don't have to. It notices what you're about to forget and shows it to you right before that happens. Use it for chord names, progressions, and anything else worth keeping.",
         ],
         nextDelayMs: 1800,
         resources: [
@@ -359,8 +359,8 @@ export const defaultWelcomeConfig: WelcomeConfig = {
         id: "self-care",
         headline: "Take care of yourself",
         body: [
-          "Piano puts your hands under repeated load. If your wrists and tendons are not supported, practice becomes injury. Stretch, rest, and build the muscles around your wrists so they can absorb that load.",
-          "A few minutes of hand care is not a break from practice — it is part of it. Strong, mobile hands let you practice consistently, and consistency is what makes spaced repetition work.",
+          "Your hands are doing all the work here, so be good to them. Piano puts wrists and tendons under repeated load — stretch, rest, and build the muscles around your wrists so they can carry you for years of playing.",
+          "A few minutes of hand care isn't a break from practice — it is practice. Strong, comfortable hands let you show up every day, and showing up is what makes everything else work.",
         ],
         nextDelayMs: 0,
         resources: [
@@ -396,8 +396,8 @@ export const defaultWelcomeConfig: WelcomeConfig = {
         id: "manage-frustrations",
         headline: "Manage your frustrations",
         body: [
-          "Your brain has two modes: focused mode, where you absorb new material, and diffuse mode, where connections settle in the background. You need both.",
-          "Practice in short, focused blocks — twenty minutes of attention, then a real break. Walk away, breathe, let your mind wander. Consistent short sessions beat rare marathon sessions, and the diffuse time is when the memory actually sticks.",
+          "Some days the piano wins, and that's okay — it's part of how learning works. Your brain has two modes: focused mode, where you absorb new material, and diffuse mode, where connections quietly settle in the background. You need both.",
+          "So practice in short, kind blocks — twenty minutes of real attention, then a real break. Walk away, breathe, let your mind wander. Little sessions most days beat rare marathons every time, and the wandering is when the music actually sinks in.",
         ],
         nextDelayMs: 0,
         resources: [
@@ -431,7 +431,7 @@ export const defaultWelcomeConfig: WelcomeConfig = {
         ],
       },
     ],
-    closing: "Happy learning",
+    closing: "Happy playing — we're rooting for you",
     cta: "Let's practice!",
     resourceCardVariant: "image-card",
   },

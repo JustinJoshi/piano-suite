@@ -173,8 +173,8 @@ export default function MarketplacePage() {
               Marketplace
             </h1>
             <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Practice pages you can try, fork, and make yours. Copy a featured
-              page to start — no sign-up needed.
+              Practice pages built and shared by fellow learners — try one,
+              copy it, make it yours. No sign-up needed, ever.
             </p>
           </div>
           <Link
@@ -219,8 +219,8 @@ export default function MarketplacePage() {
             <div className="rounded-2xl border border-dashed border-border bg-card/60 p-12 text-center">
               <LayoutGrid className="mx-auto mb-4 h-8 w-8 text-muted-foreground" />
               <p className="text-muted-foreground">
-                No community pages yet. Publish one from the Workshop and it
-                appears here.
+                No community pages yet — yours could be the very first. Publish
+                one from the Workshop and it appears here.
               </p>
               <Link
                 href="/tools/workshop"

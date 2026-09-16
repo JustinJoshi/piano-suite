@@ -58,7 +58,7 @@ describe("PricingPage (pre-launch, BILLING_ENABLED=false)", () => {
       screen.queryByText(/Can I cancel anytime\?/i)
     ).not.toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Enter the drill" })
+      screen.getByRole("link", { name: "Back to the piano" })
     ).toHaveAttribute("href", "/tools");
     expect(screen.getByRole("link", { name: "Pricing" })).toHaveAttribute(
       "href",

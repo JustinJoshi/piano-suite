@@ -27,9 +27,10 @@ export default function ArticlesPage() {
               Articles
             </h1>
             <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Research-backed guides on how to learn piano efficiently — from
-              spaced repetition and active recall to the physical drill habits
-              jazz pianists have used for decades.
+              Friendly, research-backed guides for learning piano on your own —
+              from spaced repetition and active recall to the hands-on habits
+              jazz pianists have trusted for decades. Grab a cup of something
+              warm and read at your own pace.
             </p>
           </div>
         </section>
@@ -38,7 +39,7 @@ export default function ArticlesPage() {
           {articles.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border bg-card/60 p-8 text-center">
               <p className="text-muted-foreground">
-                No articles yet. Check back soon.
+                No articles yet — but they&apos;re coming. Check back soon!
               </p>
             </div>
           ) : (

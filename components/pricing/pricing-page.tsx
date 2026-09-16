@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 const freeFaq = [
   {
     q: "What’s free forever?",
-    a: "Local drills and Pattern Lab, including exploring Chladni Ripple with MIDI. You can practice without paying. Pro adds sync across devices — personal bests, tracking history, and preferences follow you — plus the float panel that pops live resonance beside Chord Drill.",
+    a: "Everything you need to learn: the drills, the Workshop, and Pattern Lab — including exploring Chladni Ripple with MIDI. You can practice for years without paying a cent. Pro simply adds sync across devices — personal bests, tracking history, and preferences follow you — plus the float panel that pops live resonance beside Chord Drill.",
   },
   {
     q: "Can I see resonance while I practice chords?",
@@ -27,7 +27,7 @@ const freeFaq = [
   },
   {
     q: "Do I need Anki and a MIDI keyboard?",
-    a: "Drills still need AnkiConnect and a MIDI keyboard. Pattern Lab and browsing plans do not.",
+    a: "Not to get started — every drill plays on the on-screen keyboard too. A MIDI keyboard and Anki make practice feel even better, and we'll help you set both up when you're ready.",
   },
 ] as const;
 
@@ -94,9 +94,9 @@ export function PricingPage() {
                 </>
               ) : (
                 <>
-                  Free forever for local drills. Pro is launching soon — join
-                  the Founding Pro waitlist to lock in founding-member pricing
-                  and sync personal bests across devices.
+                  Learning piano here is free, forever. Pro is launching soon —
+                  join the Founding Pro waitlist to lock in founding-member
+                  pricing and let your personal bests follow you across devices.
                 </>
               )}
             </p>
@@ -153,8 +153,8 @@ export function PricingPage() {
                 <WaitlistCta />
               )}
               <p className="mt-4 text-center text-xs text-muted-foreground">
-                Cancel anytime · Works with your Anki deck · MIDI keyboard
-                required for drills
+                Cancel anytime · Works with your Anki deck · On-screen keys
+                included, MIDI welcome
               </p>
             </div>
           </div>
@@ -188,7 +188,7 @@ export function PricingPage() {
             href="/tools"
             className={cn(buttonVariants({ size: "lg" }), "rounded-full px-7")}
           >
-            Enter the drill
+            Back to the piano
             <ArrowRight className="h-4 w-4" />
           </Link>
         </section>

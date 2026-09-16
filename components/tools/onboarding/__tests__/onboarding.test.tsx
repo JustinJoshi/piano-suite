@@ -61,7 +61,7 @@ describe("Onboarding", () => {
 
     // Pillar 3 -> closing
     fireEvent.click(screen.getAllByRole("button", { name: /next/i })[0]);
-    expect(screen.getByText("Happy learning")).toBeInTheDocument();
+    expect(screen.getByText("Happy playing — we're rooting for you")).toBeInTheDocument();
 
     // Closing -> complete
     fireEvent.click(screen.getByRole("button", { name: /let's practice/i }));
