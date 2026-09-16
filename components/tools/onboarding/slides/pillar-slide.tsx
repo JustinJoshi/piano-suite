@@ -51,7 +51,7 @@ export function PillarSlide({
         vertically. When it is taller than the viewport, the margins collapse
         to zero and the content flows from the top, letting the shell scroll.
       */}
-      <div className="my-auto flex flex-col py-4 pb-16 sm:py-8 sm:pb-20">
+      <div className="my-auto flex flex-col py-4 pb-24 sm:py-8 sm:pb-28">
         <div className="text-center">
           <h2
             className={cn(
@@ -107,7 +107,7 @@ export function PillarSlide({
 
         <div
           className={cn(
-            "mt-10 flex items-center justify-center gap-4 pt-2",
+            "mt-10 flex scroll-mb-24 items-center justify-center gap-4 pt-2",
             showButton
               ? "translate-y-0 opacity-100"
               : "translate-y-4 opacity-0",

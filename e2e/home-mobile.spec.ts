@@ -9,7 +9,7 @@ test.describe("home page mobile", () => {
     page,
   }) => {
     await page.goto("/");
-    const cta = page.getByRole("link", { name: /enter the workshop/i }).first();
+    const cta = page.getByRole("link", { name: /come on in/i }).first();
     await expect(cta).toBeVisible();
     await expect(cta).toBeInViewport();
 
@@ -20,9 +20,9 @@ test.describe("home page mobile", () => {
   test("shows Workshop how-it-works steps on mobile", async ({ page }) => {
     await page.goto("/");
     const steps = [
-      "Pick a starter drill or begin with a blank page",
-      "Press start and play, timed on real keys",
-      "Tweak the blocks or build your own routine",
+      "Pick a starter drill or open a fresh page",
+      "Press start and play — we'll keep time for you",
+      "Tweak the blocks until it feels like yours",
     ];
     for (const text of steps) {
       await expect(page.getByText(text, { exact: true })).toBeVisible();
@@ -34,10 +34,10 @@ test.describe("home page mobile", () => {
   }) => {
     await page.goto("/");
     const steps = [
-      "Choose a starter template or start from scratch",
+      "Start from a friendly template or a fresh page",
       "Snap metronome, timer, and chord blocks together",
-      "Press Start and practice on real keys",
-      "Publish to the community or fork someone else's drill",
+      "Press start and play — real keys or on-screen",
+      "Share what you built, or borrow someone else's",
     ];
     for (const text of steps) {
       await expect(page.getByText(text, { exact: true })).toBeVisible();
@@ -57,7 +57,7 @@ test.describe("home page mobile", () => {
   test("feature cards are readable on mobile", async ({ page }) => {
     await page.goto("/");
     const firstFeature = page.getByText(
-      "Re-reading a chord chart feels like practice. It isn't."
+      "Re-reading a chord chart feels like practice. It isn't — and that's good news"
     );
     await expect(firstFeature).toBeVisible();
   });

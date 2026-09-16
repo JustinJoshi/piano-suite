@@ -31,7 +31,7 @@ export const introSlides = {
   hi: "Hi",
   welcome: "welcome to piano suite",
   pillarsOverview: "These are the three most important pillars of learning on your piano journey.",
-  closing: "Happy learning",
+  closing: "Happy playing — we're rooting for you",
   cta: "Let's practice!",
 } as const;
 

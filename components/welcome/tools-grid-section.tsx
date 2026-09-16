@@ -39,15 +39,15 @@ export function ToolsGridSection() {
               </span>
               <div>
                 <span className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-                  the core
+                  the heart of it all
                 </span>
                 <h3 className="mt-1 font-heading text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
                   Workshop
                 </h3>
                 <p className="mt-2 max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base">
-                  Build your own practice page from reusable blocks — metronome,
-                  timer, chord sets, and more. Or grab a starter template and
-                  press Start.
+                  Build a practice page that&apos;s truly yours — metronome, timer,
+                  chord sets, and more, snapped together like building blocks.
+                  Or borrow a starter template and just press Start.
                 </p>
               </div>
             </div>

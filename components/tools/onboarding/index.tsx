@@ -83,7 +83,7 @@ export function Onboarding() {
         {/* Progress line anchored at the bottom */}
         <div
           className={cn(
-            "absolute bottom-0 left-0 right-0 z-20 p-4 sm:p-6",
+            "pointer-events-none absolute bottom-0 left-0 right-0 z-20 p-4 sm:p-6",
             !isInstant && "transition-opacity duration-700 ease-out delay-500"
           )}
         >

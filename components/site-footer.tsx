@@ -35,7 +35,7 @@ export function SiteFooter({
                 Piano Suite
               </div>
               <p className="text-sm text-muted-foreground">
-                A free practice community for self-taught pianists.
+                A free, friendly home for self-taught pianists.
               </p>
             </div>
           </div>

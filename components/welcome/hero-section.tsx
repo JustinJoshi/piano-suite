@@ -130,14 +130,14 @@ export function HeroSection({
                 "rounded-full px-5 text-base text-foreground/90"
               )}
             >
-              Browse the marketplace
+              See what others built
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
 
           <p className="rise-in rise-in-delay-4 max-w-sm text-xs leading-relaxed text-muted-foreground">
-            Explore the community gallery freely. Sign in when you are ready to
-            save your own pages.
+            Everything&apos;s free to try — explore the community gallery freely
+            and sign in only when you&apos;d like to keep your own pages.
           </p>
         </div>
       </div>

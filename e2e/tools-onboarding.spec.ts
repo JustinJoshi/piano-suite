@@ -39,7 +39,9 @@ test.describe("/tools onboarding", () => {
     await expect(shell.getByText("Manage your frustrations")).toBeVisible();
 
     await shell.getByRole("button", { name: /next/i }).first().click();
-    await expect(shell.getByText("Happy learning")).toBeVisible();
+    await expect(
+      shell.getByText("Happy playing — we're rooting for you")
+    ).toBeVisible();
 
     await shell.getByRole("button", { name: /let's practice/i }).click();
     await expect(page.getByRole("heading", { name: "Workshop" })).toBeVisible();
