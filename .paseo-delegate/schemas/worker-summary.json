@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Worker completion summary",
+  "description": "Final chat message of a paseo-delegate worker after executing one phase. Enforced by the daemon in strict mode via --output-schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "phase",
+    "status",
+    "summary",
+    "files_changed",
+    "verification",
+    "blockers",
+    "tooling_notes",
+    "handoff_notes"
+  ],
+  "properties": {
+    "phase": {
+      "type": "string",
+      "description": "Phase identifier from plan.json (e.g. \"phase-3-auth\")."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "complete",
+        "blocked",
+        "failed"
+      ],
+      "description": "complete = all acceptance criteria attempted and verification run; blocked = cannot proceed, see blockers; failed = attempt made and did not succeed."
+    },
+    "summary": {
+      "type": "string",
+      "description": "What was done, in prose."
+    },
+    "files_changed": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Paths of every file created, modified, or deleted. Empty array for analysis-only phases."
+    },
+    "verification": {
+      "type": "string",
+      "description": "Commands run and their results (tests, build, lint)."
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Anything that prevented progress. Empty array when unblocked."
+    },
+    "tooling_notes": {
+      "type": "string",
+      "description": "Defects, surprises or workarounds in the TOOLS themselves \u2014 the gate, the harness, the CLI \u2014 as distinct from this phase's own work. \"none\" when there are none. The validator copies this verbatim into its verdict; it is never summarised or judged away."
+    },
+    "handoff_notes": {
+      "type": "string",
+      "description": "What the next agent must know: deltas vs the plan, decisions taken, fragile spots."
+    }
+  }
+}

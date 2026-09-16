@@ -1,0 +1,45 @@
+{
+  "plan": "launch-prep",
+  "planFile": "/home/justin/piano-suite/.paseo-delegate/launch-prep-plan.md",
+  "project": "/home/justin/piano-suite",
+  "chainVerifier": null,
+  "phases": [
+    {
+      "id": "seo-basics",
+      "depends_on": [],
+      "thinking": "low",
+      "effort": "~1.5h",
+      "acceptance": [
+        "app/robots.ts, app/sitemap.ts, app/not-found.tsx exist with Next 16 conventions",
+        "sitemap covers every public route in proxy.ts allowlist",
+        "not-found.tsx uses only theme tokens (no hex/rgb literals)",
+        "npm run lint, npm run test:unit:run, npm run build pass",
+        "merged to main, clean tree, provenance trailers on commits"
+      ]
+    },
+    {
+      "id": "repo-hygiene",
+      "depends_on": ["seo-basics"],
+      "thinking": "low",
+      "effort": "~30m",
+      "acceptance": [
+        "git status --porcelain empty at repo root",
+        "docs/quick-fixes-2026-09/ tracked in git history",
+        "public/demo-web.mp4 exists on disk and is NOT in git history",
+        ".gitignore contains /public/demo-web.mp4",
+        "provenance trailers, merged to main"
+      ]
+    },
+    {
+      "id": "launch-smoke",
+      "depends_on": ["repo-hygiene"],
+      "thinking": "high",
+      "effort": "~45m",
+      "acceptance": [
+        "docs/quick-fixes-2026-09/launch-smoke-2026-09-16.md exists with real command output",
+        "no application source files modified",
+        "report committed with provenance trailers, tree clean"
+      ]
+    }
+  ]
+}
