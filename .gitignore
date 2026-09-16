@@ -79,3 +79,6 @@ skills-lock.json
 
 # chess-coach local state (persistent coach agent id)
 /chess-coach/server/.coach-agent
+
+# demo video (repo bloat; keep local only)
+/public/demo-web.mp4
