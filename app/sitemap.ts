@@ -1,0 +1,35 @@
+import type { MetadataRoute } from "next";
+
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
+// Public routes per proxy.ts's allowlist (audit 2026-09, Phase 1.7).
+const routes: Array<{
+  path: string;
+  changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"];
+  priority: number;
+}> = [
+  { path: "/", changeFrequency: "weekly", priority: 1 },
+  { path: "/start", changeFrequency: "monthly", priority: 0.9 },
+  { path: "/tools/chord-drill", changeFrequency: "monthly", priority: 0.8 },
+  { path: "/tools/arpeggios", changeFrequency: "monthly", priority: 0.8 },
+  { path: "/tools/root-cycling", changeFrequency: "monthly", priority: 0.8 },
+  { path: "/tools/progression", changeFrequency: "monthly", priority: 0.8 },
+  { path: "/tools/workshop", changeFrequency: "weekly", priority: 0.9 },
+  { path: "/tools/workshop/blocks", changeFrequency: "weekly", priority: 0.8 },
+  { path: "/marketplace", changeFrequency: "weekly", priority: 0.8 },
+  { path: "/routes", changeFrequency: "monthly", priority: 0.7 },
+  { path: "/pricing", changeFrequency: "monthly", priority: 0.7 },
+  { path: "/terms", changeFrequency: "yearly", priority: 0.3 },
+  { path: "/privacy", changeFrequency: "yearly", priority: 0.3 },
+];
+
+export default function sitemap(): MetadataRoute.Sitemap {
+  const lastModified = new Date();
+  return routes.map(({ path, changeFrequency, priority }) => ({
+    url: `${siteUrl}${path}`,
+    lastModified,
+    changeFrequency,
+    priority,
+  }));
+}

@@ -5,7 +5,7 @@ import { Navbar } from "@/components/navbar";
 import { learningRoutes } from "@/lib/routes";
 
 export const metadata: Metadata = {
-  title: "Guided routes · Piano Suite",
+  title: "Guided routes",
   description:
     "Pick a path — music theory or finger flexibility — and go from knowing nothing about piano to a daily practice habit.",
 };

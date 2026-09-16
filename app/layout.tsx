@@ -45,7 +45,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
-  title: "Piano Suite",
+  title: {
+    // Child segments that set their own title get the brand suffix;
+    // pages without a title fall back to the default.
+    template: "%s · Piano Suite",
+    default: "Piano Suite",
+  },
   description:
     "A piano practice suite that connects Anki reviews to a MIDI keyboard so you drill chords with spaced repetition.",
 };

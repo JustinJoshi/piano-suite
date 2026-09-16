@@ -22,7 +22,7 @@ export async function generateMetadata({
   const { routeId } = await params;
   const route = getLearningRoute(routeId);
   return {
-    title: route ? `${route.title} · Piano Suite` : "Guided route · Piano Suite",
+    title: route ? route.title : "Guided route",
     description: route?.description,
   };
 }

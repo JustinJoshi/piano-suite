@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: ArticlePageProps) {
   }
 
   return {
-    title: `${article.title} | Piano Suite`,
+    title: article.title,
     description: article.description,
   };
 }

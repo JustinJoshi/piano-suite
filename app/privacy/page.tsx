@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Navbar } from "@/components/navbar";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy · Piano Suite",
+  title: "Privacy Policy",
   description: "What Piano Suite collects, and why.",
 };
 

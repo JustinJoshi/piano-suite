@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Navbar } from "@/components/navbar";
 
 export const metadata: Metadata = {
-  title: "Terms of Service · Piano Suite",
+  title: "Terms of Service",
   description: "The ground rules for using Piano Suite.",
 };
 
