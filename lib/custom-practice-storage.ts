@@ -156,8 +156,29 @@ export function subscribePracticePageStore(listener: () => void): () => void {
   return () => listeners.delete(listener);
 }
 
+// Module-level server snapshot for useSyncExternalStore, built once and
+// deep-frozen so a caller mutating what it received cannot corrupt the
+// snapshot handed to a later caller.
+const SERVER_SNAPSHOT: PracticePageStore = (() => {
+  const store = createEmptyPracticePageStore();
+  const frozen: PracticePageStore = {
+    version: store.version,
+    pages: store.pages.map((page) =>
+      Object.freeze({
+        ...page,
+        blocks: Object.freeze(
+          page.blocks.map((block) => Object.freeze({ ...block }))
+        ) as unknown as FeatureBlock[],
+      })
+    ),
+    activePageId: store.activePageId,
+  };
+  frozen.pages = Object.freeze(frozen.pages) as unknown as PracticePage[];
+  return Object.freeze(frozen);
+})();
+
 export function getServerPracticePageStore(): PracticePageStore {
-  return createEmptyPracticePageStore();
+  return SERVER_SNAPSHOT;
 }
 
 /** Resets the in-memory singleton and localStorage. Exposed for tests. */
