@@ -3,7 +3,7 @@ import {
   normalizeStoredBlock,
   normalizeStoredPage,
 } from "@/lib/feature-blocks/schemas";
-import { MAX_GRID_COLUMNS, MAX_HEIGHT } from "@/lib/workshop-grid";
+import { MAX_GRID_COLUMNS, MAX_HEIGHT, type BlockSize } from "@/lib/workshop-grid";
 
 describe("normalizeStoredBlock size handling", () => {
   it("keeps a valid size on the block", () => {
@@ -99,5 +99,22 @@ describe("normalizeStoredPage size round-trip", () => {
 
     expect(page).not.toBeNull();
     expect(page?.blocks).toHaveLength(1);
+  });
+});
+
+// `ValidatedBlock` declares the `size` that `normalizeStoredBlock` attaches
+// at runtime (PR #95 typecheck finding): the typed read below is the point.
+describe("ValidatedBlock declares the runtime size field", () => {
+  it("carries the normalized size as a BlockSize on a known-good input", () => {
+    const block = normalizeStoredBlock({
+      id: "b1",
+      type: "metronome",
+      version: 1,
+      config: {},
+      size: { w: 3, h: 2 },
+    });
+
+    const size: BlockSize | undefined = block?.size;
+    expect(size).toEqual({ w: 3, h: 2 });
   });
 });

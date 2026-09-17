@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { FeatureBlock } from "@/lib/feature-blocks/types";
+import type { FieldDescriptor } from "@/lib/feature-blocks/types";
+import type { WiringIssue } from "@/lib/feature-blocks/manifest-types";
 import { getFeatureDefinition } from "@/lib/feature-blocks/registry";
 import { FeatureRenderer } from "@/components/feature-blocks/feature-renderer";
 import { FieldInput } from "@/components/custom-practice/field-input";
@@ -31,7 +33,6 @@ import {
   ROW_UNIT_PX,
   type BlockSize,
 } from "@/lib/workshop-grid";
-import type { FieldDescriptor } from "@/lib/feature-blocks/types";
 
 /**
  * Column span classes per canonical width. Responsive prefixes clamp the
@@ -55,6 +56,8 @@ type ResizeStart = {
 
 type WorkshopTileProps = {
   block: FeatureBlock;
+  /** Wiring issues for this block, when the page arrangement has any. */
+  issues?: WiringIssue[];
   onResize: (id: string, size: { w?: number; h?: number }) => void;
   onDuplicate: (id: string) => void;
   onRemove: (id: string) => void;
@@ -63,6 +66,7 @@ type WorkshopTileProps = {
 
 export function WorkshopTile({
   block,
+  issues,
   onResize,
   onDuplicate,
   onRemove,
@@ -241,6 +245,22 @@ export function WorkshopTile({
               ))}
             </div>
           ) : null}
+
+          {issues && issues.length > 0 ? (
+            <div
+              data-testid="tile-wiring-notice"
+              className="mt-4 space-y-1 rounded-lg border border-dashed border-border bg-muted/30 p-2.5"
+            >
+              {issues.map((wiring) => (
+                <p
+                  key={`${wiring.issue}-${wiring.detail}`}
+                  className="text-xs text-muted-foreground"
+                >
+                  {wiringNotice(wiring)}
+                </p>
+              ))}
+            </div>
+          ) : null}
         </CardContent>
       </Card>
 
@@ -344,4 +364,26 @@ function ToolbarButton({
       <Icon className="h-4 w-4" />
     </Button>
   );
+}
+
+/**
+ * Plain-language guidance per wiring issue, per the Step-3 mapping. The
+ * validator's enum never reaches the user; for an unmet requirement the
+ * `detail` ("Requires: transport" etc.) names what to add. Guidance, not
+ * enforcement — the block still renders.
+ */
+function wiringNotice(issue: WiringIssue): string {
+  if (issue.issue === "orphan_transform") {
+    return "This transform has nothing to transform. Add a source above it.";
+  }
+  switch (issue.detail) {
+    case "Requires: transport":
+      return "Add a transport block to set the tempo for this page.";
+    case "Requires: practiceNotes":
+      return "Add a source block (like the chord library) so there is something to show here.";
+    case "Requires: midiInput":
+      return "Connect a MIDI keyboard, or add the on-screen keyboard, so this block can hear notes.";
+    default:
+      return "This block is missing something it needs to run. Check its settings.";
+  }
 }

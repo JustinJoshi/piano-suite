@@ -7,6 +7,8 @@ import { ArrowRight } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { PracticePage, FeatureBlock } from "@/lib/feature-blocks/types";
+import { validateArrangement } from "@/lib/feature-blocks/validate-arrangement";
+import type { WiringIssue } from "@/lib/feature-blocks/manifest-types";
 import { resizeBlocks } from "@/lib/workshop-grid";
 import { isAtBlockLimit } from "@/lib/feature-blocks/registry";
 import {
@@ -72,6 +74,21 @@ export function PracticePageEditor() {
   );
 
   const page = useMemo(() => getActivePage(store), [store]);
+
+  // Wiring guidance is information, not enforcement: derive it once per
+  // block arrangement so tiles can show a short plain-language notice while
+  // the page still renders and saves (PLAN.md Step 3).
+  const issuesByBlockId = useMemo(() => {
+    const result = validateArrangement(page.blocks);
+    if (result.status === "valid") return new Map<string, WiringIssue[]>();
+    const map = new Map<string, WiringIssue[]>();
+    for (const issue of result.issues) {
+      const list = map.get(issue.blockId);
+      if (list) list.push(issue);
+      else map.set(issue.blockId, [issue]);
+    }
+    return map;
+  }, [page.blocks]);
 
   const [shareOpen, setShareOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -301,6 +318,7 @@ export function PracticePageEditor() {
           <>
             <WorkshopGrid
               blocks={page.blocks}
+              issuesByBlockId={issuesByBlockId}
               onReorder={handleReorder}
               onResize={handleResize}
               onDuplicate={duplicateBlock}
