@@ -3,19 +3,58 @@
 import { useState } from "react";
 import {
   DndContext,
+  DragOverlay,
   closestCenter,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
+  type DragStartEvent,
 } from "@dnd-kit/core";
-import { SortableContext, rectSortingStrategy, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  type SortingStrategy,
+} from "@dnd-kit/sortable";
+import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { getFeatureDefinition } from "@/lib/feature-blocks/registry";
 import type { FeatureBlock } from "@/lib/feature-blocks/types";
 import type { WiringIssue } from "@/lib/feature-blocks/manifest-types";
 import { MAX_GRID_COLUMNS, ROW_UNIT_PX, reorderBlocks } from "@/lib/workshop-grid";
 import { WorkshopTile } from "./workshop-tile";
+
+/**
+ * dnd-kit's rect-based strategies translate every preview from the dragged
+ * item's rectangle, which only works when all items share one size. Workshop
+ * tiles span 1-4 columns and 1-8 rows, so neighbours would warp mid-drag.
+ * No transform means no warp; the DragOverlay carries the visual instead.
+ */
+export const noTransformStrategy: SortingStrategy = () => null;
+
+/**
+ * Static drag preview: icon + label only. It must not mount the block's
+ * feature component — a second live mount of a `maxPerPage: 1` block
+ * (transport, midiConnectionBar) would double-run it for every drag.
+ */
+export function DragOverlayPlaceholder({ block }: { block: FeatureBlock }) {
+  const def = getFeatureDefinition(block.type);
+  if (!def) return null;
+  const Icon = def.icon;
+  return (
+    <Card
+      data-testid="drag-overlay-placeholder"
+      aria-hidden
+      className="border-primary/60 shadow-raised"
+    >
+      <CardContent className="flex items-center gap-2 p-4 text-muted-foreground">
+        <Icon className="h-4 w-4 shrink-0" />
+        <span className="text-sm font-medium">{def.label}</span>
+      </CardContent>
+    </Card>
+  );
+}
 
 type GridCallbacks = {
   onResize: (id: string, size: { w?: number; h?: number }) => void;
@@ -83,7 +122,7 @@ export function GridBody({
 
       <SortableContext
         items={blocks.map((b) => b.id)}
-        strategy={rectSortingStrategy}
+        strategy={noTransformStrategy}
       >
         {blocks.map((block) => (
           <WorkshopTile
@@ -128,6 +167,10 @@ export function WorkshopGrid({
   fill,
 }: WorkshopGridProps) {
   const [gridActive, setGridActive] = useState(false);
+  const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
+
+  const activeBlock =
+    blocks.find((b) => b.id === activeBlockId) ?? null;
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -138,11 +181,13 @@ export function WorkshopGrid({
     })
   );
 
-  function handleDragStart() {
+  function handleDragStart(event: DragStartEvent) {
+    setActiveBlockId(String(event.active.id));
     setGridActive(true);
   }
 
   function handleDragEnd(event: DragEndEvent) {
+    setActiveBlockId(null);
     setGridActive(false);
     const { active, over } = event;
     if (over && active.id !== over.id) {
@@ -156,7 +201,10 @@ export function WorkshopGrid({
       collisionDetection={closestCenter}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
-      onDragCancel={() => setGridActive(false)}
+      onDragCancel={() => {
+        setActiveBlockId(null);
+        setGridActive(false);
+      }}
     >
       <GridBody
         blocks={blocks}
@@ -169,6 +217,11 @@ export function WorkshopGrid({
         onRemove={onRemove}
         onConfigChange={onConfigChange}
       />
+      <DragOverlay aria-hidden>
+        {activeBlock
+          ? <DragOverlayPlaceholder block={activeBlock} />
+          : null}
+      </DragOverlay>
     </DndContext>
   );
 }

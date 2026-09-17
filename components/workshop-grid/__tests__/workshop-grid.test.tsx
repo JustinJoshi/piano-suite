@@ -1,7 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { DndContext } from "@dnd-kit/core";
-import { GridBody, WorkshopGrid } from "@/components/workshop-grid/workshop-grid";
+import {
+  DragOverlayPlaceholder,
+  GridBody,
+  noTransformStrategy,
+  WorkshopGrid,
+} from "@/components/workshop-grid/workshop-grid";
 import type { FeatureBlock } from "@/lib/feature-blocks/types";
 
 function createMockAudioContext() {
@@ -249,5 +254,20 @@ describe("WorkshopGrid", () => {
       "a",
       expect.objectContaining({ beatsPerBar: 3 })
     );
+  });
+
+  it("returns null from noTransformStrategy so no preview transform is applied", () => {
+    expect(noTransformStrategy({ active: { id: "a", data: { current: {} } }, over: null, rect: { width: 0, height: 0, top: 0, left: 0 }, draggingRect: null, items: [], containerRect: { width: 0, height: 0, top: 0, left: 0 } } as never)).toBeNull();
+  });
+
+  it("renders a static aria-hidden placeholder without mounting the feature", () => {
+    render(<DragOverlayPlaceholder block={block("a")} />);
+
+    const placeholder = screen.getByTestId("drag-overlay-placeholder");
+    expect(placeholder.getAttribute("aria-hidden")).toBe("true");
+    expect(placeholder).toHaveTextContent("Metronome");
+    // The guard for the maxPerPage double-mount: the placeholder shows what
+    // is moving — exactly zero live feature mounts.
+    expect(screen.queryAllByTestId("bpm-display")).toHaveLength(0);
   });
 });
