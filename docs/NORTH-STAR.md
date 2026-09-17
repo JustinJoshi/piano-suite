@@ -2,7 +2,7 @@
 
 The short, durable document. Read this before proposing a feature, writing copy,
 or starting a UI change. Everything here is a decision rule, not a task list.
-The task lists live in [`docs/overhaul-plan.md`](overhaul-plan.md).
+The task lists live in [`docs/audit-2026-09/04-roadmap.md`](audit-2026-09/04-roadmap.md).
 
 Last revised: 2026-08-31.
 

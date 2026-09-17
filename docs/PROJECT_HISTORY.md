@@ -206,7 +206,7 @@ Queries must never throw for a signed-in user whose row does not exist yet. `set
    | `NEXT_PUBLIC_ANKI_CONNECT_URL` | AnkiConnect endpoint; defaults to `http://127.0.0.1:8765` |
    | `NEXT_PUBLIC_AUTH_DISABLED` | `true` opens **every** route without signing in — except on Vercel Production (never honored) and `/api/chat` (always allowlist-gated). Convex saves still need a session. Restart `npm run dev` after changing it — see [the bypass notes](#the-next_public_auth_disabled-bypass) |
    | `NEXT_PUBLIC_CLERK_SIGN_IN_URL` / `_SIGN_UP_URL` / `_FALLBACK_REDIRECT_URL` | Clerk redirect overrides |
-   | `CLERK_AUTHORIZED_PARTIES` | Optional comma-separated origins for `clerkMiddleware` `authorizedParties` (recommended on Production after custom-domain cutover; see [`docs/phase-a-auth-cutover-plan.md`](docs/phase-a-auth-cutover-plan.md)) |
+   | `CLERK_AUTHORIZED_PARTIES` | Optional comma-separated origins for `clerkMiddleware` `authorizedParties` (recommended on Production after custom-domain cutover; see [`docs/archive/phase-a-auth-cutover-plan.md`](archive/phase-a-auth-cutover-plan.md)) |
    | `CLERK_FRONTEND_API_URL_EXTRA` | Comma-separated extra Clerk Frontend API URLs Convex should accept; use this so a dedicated **CI Clerk dev app** can authenticate against the same Convex deployment |
    | `E2E_CLERK_USER_EMAIL` / `E2E_CLERK_USER_PASSWORD` | Playwright test user (required to run E2E; password ≥ 8 chars) |
    | `E2E_ALLOW_AUTH_DISABLED` | skips the E2E guard that refuses to run with the bypass on |
@@ -317,7 +317,7 @@ Production hosting is **Vercel Hobby** + **Convex Free** + **Clerk development**
 
 ### Auth cutover checklist (remove bypass)
 
-Full step-by-step (Clerk + Convex production research): [`docs/phase-a-auth-cutover-plan.md`](docs/phase-a-auth-cutover-plan.md).
+Full step-by-step (Clerk + Convex production research): [`docs/archive/phase-a-auth-cutover-plan.md`](archive/phase-a-auth-cutover-plan.md).
 
 When a custom domain + Clerk **production** instance are ready:
 
@@ -359,7 +359,7 @@ Make sure the **Convex dev server is running** before starting tests, because th
 
 **Auth verification e2e** requires `NEXT_PUBLIC_AUTH_DISABLED` to be **unset** (not `true`), because these specs assert real Clerk gating. Global setup fails fast if the bypass is on unless `E2E_ALLOW_AUTH_DISABLED=true`.
 
-**CI E2E** uses a dedicated Clerk **development** instance so `setupClerkTestingToken()` can bypass bot detection. The production Convex deployment accepts that CI issuer via `CLERK_FRONTEND_API_URL_EXTRA`. See [`docs/phase-a-auth-cutover-plan.md`](docs/phase-a-auth-cutover-plan.md) for the env matrix.
+**CI E2E** uses a dedicated Clerk **development** instance so `setupClerkTestingToken()` can bypass bot detection. The production Convex deployment accepts that CI issuer via `CLERK_FRONTEND_API_URL_EXTRA`. See [`docs/archive/phase-a-auth-cutover-plan.md`](archive/phase-a-auth-cutover-plan.md) for the env matrix.
 
 | Spec | Asserts |
 |------|---------|
@@ -856,7 +856,7 @@ than around a generic dashboard.
 - [x] Add article pages under `/articles/[slug]`
 - [x] Add token-driven theming system with `/settings/theme`
 - [x] Implement real LLM chat grounded on articles (Kimi Code API, owner-only access)
-- [x] Clerk Billing freemium (Free local / Pro sync) — WP0–WP2 + WP4–WP6; owner cutover still open (`docs/subscription-page-plan.md`)
+- [x] Clerk Billing freemium (Free local / Pro sync) — WP0–WP2 + WP4–WP6; owner cutover still open (`docs/archive/subscription-page-plan.md`)
 - [x] Public `/pricing` + `canPersist` remap to Pro/`sync` (practice + prefs)
 - [x] WP6 — theme/atmosphere/hero Convex sync requires Pro
 - [x] Clerk Billing webhook entitlement mirror (`/api/webhooks/clerk`) — server-side Pro enforcement now accepts JWT claims or DB-mirrored `users.syncEntitled`; manual Dashboard setup remains (`docs/clerk-billing-setup.md`)
@@ -864,9 +864,9 @@ than around a generic dashboard.
 ### Post-v1 follow-ons
 
 The checklist above is the original product scope and is complete. Remaining work
-is planned in [`docs/missing-features-plan.md`](docs/missing-features-plan.md).
+was planned in [`docs/archive/missing-features-plan.md`](archive/missing-features-plan.md).
 Phase A (production auth cutover) detail:
-[`docs/phase-a-auth-cutover-plan.md`](docs/phase-a-auth-cutover-plan.md).
+[`docs/archive/phase-a-auth-cutover-plan.md`](archive/phase-a-auth-cutover-plan.md).
 
 ## License
 

@@ -21,7 +21,7 @@ structure to invent.
 8. Feature section 04 — "A community, not just a toolkit."
 9. Anki decks — two download buttons
 10. Tools grid — twelve cards (four drills, two progress tools, six labs)
-11. Bottom CTA — "Enter the Workshop"
+11. Bottom CTA — "Come on in"
 12. Footer
 
 The hero copy:
@@ -29,7 +29,7 @@ The hero copy:
 > **eyebrow:** a free workshop for self-taught pianists
 > **headline:** Build your own piano practice — or grab a drill and start playing.
 > **subhead:** Snap metronome, timer, and chord blocks together into your own drills, start instantly from a starter template, and share what you build with other self-taught pianists.
-> **CTA:** Enter the Workshop → `/tools/workshop`
+> **CTA:** Come on in → `/start`
 
 ### Four structural problems
 
@@ -39,10 +39,10 @@ fork in a sentence, but the page provides one button. A visitor who wants to
 "grab a drill and start playing" has nowhere to click that does that. The copy
 promises branching; the layout is linear.
 
-**The one button is locked.** `Enter the Workshop` → `/tools/workshop` →
-`proxy.ts` protects `/tools/*` → `/sign-in`. The single most important
-interaction on the site is a sign-up wall. Everything else on this page is
-downstream of that fact.
+**The one button was locked at audit time.** `Come on in` → `/start` →
+`proxy.ts` protected `/tools/*` → `/sign-in`. The single most important
+interaction on the site was a sign-up wall — resolved by Phase 0
+(`04-roadmap.md` 0.2): `/start` and `/tools/workshop` are public routes now.
 
 **The subhead is three claims in one breath.** "Snap blocks together" +
 "start instantly from a template" + "share what you build" — each is a
