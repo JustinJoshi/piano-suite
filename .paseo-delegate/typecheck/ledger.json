@@ -52,5 +52,19 @@
     "event": "scope_note",
     "subject": "fleet ledger writes",
     "detail": "Handoff asked for the same verdict record in .paseo-delegate/fleet-20260916/ledger.json, but that file lives in the main checkout where this phase's mandate forbids writes (concurrent run owns it; the fleet orchestrator recorded the nightly PASS there itself). Recorded here instead; fleet orchestrator to absorb."
+  },
+  {
+    "ts": "2026-09-16T20:59:27-04:00",
+    "event": "delivered",
+    "phase": "typecheck",
+    "branch": "fleet/typecheck",
+    "commits": [
+      "eabfddd",
+      "f65dd6a",
+      "50d6811"
+    ],
+    "pr": "https://github.com/JustinJoshi/piano-suite/pull/95",
+    "fixups": 0,
+    "detail": "Final gate re-run by successor orchestrator on delivery state: lint 0 errors (12 pre-existing warnings), npx tsc --noEmit + npm run typecheck exit 0, test:unit:run 147 files / 1349 tests / 0 failures, build exit 0. Contract files committed (50d6811), branch pushed, PR opened against main. Nothing merged."
   }
 ]
