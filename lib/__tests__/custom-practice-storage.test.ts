@@ -18,6 +18,7 @@ import {
   STORAGE_KEY,
   LEGACY_STORAGE_KEY,
 } from "@/lib/custom-practice-storage";
+import type { PracticePageStore } from "@/lib/custom-practice-storage";
 import type { PracticePage } from "@/lib/feature-blocks/types";
 
 function makePage(overrides: Partial<ReturnType<typeof createEmptyPracticePage>> = {}) {
@@ -123,7 +124,7 @@ describe("custom-practice-storage", () => {
 
     const raw = window.localStorage.getItem(STORAGE_KEY);
     expect(raw).toBeTruthy();
-    expect(JSON.parse(raw).pages[0].title).toBe("Persisted");
+    expect(JSON.parse(raw!).pages[0].title).toBe("Persisted");
   });
 
   describe("page operations", () => {
@@ -153,7 +154,7 @@ describe("custom-practice-storage", () => {
     it("deletePracticePage removes the page and re-targets the active page", () => {
       const a = makePage({ id: "page-a" });
       const b = makePage({ id: "page-b" });
-      const store = { version: 2, pages: [a, b], activePageId: "page-b" } as const;
+      const store: PracticePageStore = { version: 2, pages: [a, b], activePageId: "page-b" };
 
       const next = deletePracticePage(store, "page-b");
       expect(next.pages.map((p) => p.id)).toEqual(["page-a"]);
@@ -162,7 +163,7 @@ describe("custom-practice-storage", () => {
 
     it("deletePracticePage never leaves the store empty", () => {
       const a = makePage({ id: "page-a" });
-      const store = { version: 2, pages: [a], activePageId: "page-a" } as const;
+      const store: PracticePageStore = { version: 2, pages: [a], activePageId: "page-a" };
 
       const next = deletePracticePage(store, "page-a");
       expect(next.pages).toHaveLength(1);
@@ -178,7 +179,7 @@ describe("custom-practice-storage", () => {
           { id: "block-1", type: "metronome", version: 1, config: { bpm: 90 } },
         ],
       });
-      const store = { version: 2, pages: [a], activePageId: "page-a" } as const;
+      const store: PracticePageStore = { version: 2, pages: [a], activePageId: "page-a" };
 
       const next = duplicatePracticePage(store, "page-a");
       expect(next.pages).toHaveLength(2);
@@ -192,7 +193,7 @@ describe("custom-practice-storage", () => {
     it("duplicatePracticePage de-duplicates repeated copy titles", () => {
       const a = makePage({ id: "page-a", title: "Warmup" });
       const b = makePage({ id: "page-b", title: "Warmup (copy)" });
-      const store = { version: 2, pages: [a, b], activePageId: "page-a" } as const;
+      const store: PracticePageStore = { version: 2, pages: [a, b], activePageId: "page-a" };
 
       const next = duplicatePracticePage(store, "page-a");
       expect(next.pages[1].title).toBe("Warmup (copy) 2");
@@ -200,7 +201,7 @@ describe("custom-practice-storage", () => {
 
     it("createPracticePageInStore appends a new page with a unique title", () => {
       const a = makePage({ id: "page-a", title: "My Practice Page" });
-      const store = { version: 2, pages: [a], activePageId: "page-a" } as const;
+      const store: PracticePageStore = { version: 2, pages: [a], activePageId: "page-a" };
 
       const next = createPracticePageInStore(store);
       expect(next.pages).toHaveLength(2);
@@ -210,7 +211,7 @@ describe("custom-practice-storage", () => {
 
     it("setActivePageId ignores unknown ids", () => {
       const a = makePage({ id: "page-a" });
-      const store = { version: 2, pages: [a], activePageId: "page-a" } as const;
+      const store: PracticePageStore = { version: 2, pages: [a], activePageId: "page-a" };
 
       expect(setActivePageId(store, "nope")).toBe(store);
       expect(setActivePageId(store, "page-a").activePageId).toBe("page-a");
@@ -334,5 +335,66 @@ describe("forkPageIntoStore", () => {
       "Warm-up (fork)",
       "Warm-up (fork) 2",
     ]);
+  });
+});
+
+describe("page_created / block_added analytics", () => {
+  beforeEach(() => {
+    delete (window as unknown as Record<string, unknown>).__analyticsEvents;
+  });
+
+  function analyticsLog(): Array<{ name: string; props: unknown }> {
+    return ((window as unknown as Record<string, unknown>).__analyticsEvents ??
+      []) as Array<{ name: string; props: unknown }>;
+  }
+
+  it("fires page_created with origin scratch from createPracticePageInStore", () => {
+    const store = createEmptyPracticePageStore();
+    createPracticePageInStore(store);
+
+    const log = analyticsLog();
+    expect(log).toHaveLength(1);
+    expect(log[0].name).toBe("page_created");
+    expect(log[0].props).toEqual({ origin: "scratch" });
+  });
+
+  it("fires page_created with origin fork from forkPageIntoStore", () => {
+    const store = createEmptyPracticePageStore();
+    forkPageIntoStore(store, {
+      title: "Five-minute warm-up",
+      blocks: [{ id: "s", type: "metronome", version: 1, config: {} }],
+    });
+
+    const log = analyticsLog();
+    expect(log).toHaveLength(1);
+    expect(log[0].name).toBe("page_created");
+    expect(log[0].props).toEqual({ origin: "fork" });
+  });
+
+  it("does not fire page_created when a fork has no surviving blocks", () => {
+    const store = createEmptyPracticePageStore();
+    forkPageIntoStore(store, {
+      title: "Empty",
+      blocks: [{ id: "x", type: "nope", version: 1, config: {} }],
+    });
+
+    expect(analyticsLog()).toHaveLength(0);
+  });
+
+  it("fires block_added with the block type from appendBlockToPage", () => {
+    const page = createEmptyPracticePage("P");
+    appendBlockToPage(page, "metronome");
+
+    const log = analyticsLog();
+    expect(log).toHaveLength(1);
+    expect(log[0].name).toBe("block_added");
+    expect(log[0].props).toEqual({ type: "metronome" });
+  });
+
+  it("does not fire block_added for an unknown block type", () => {
+    const page = createEmptyPracticePage("P");
+    appendBlockToPage(page, "not-a-block");
+
+    expect(analyticsLog()).toHaveLength(0);
   });
 });

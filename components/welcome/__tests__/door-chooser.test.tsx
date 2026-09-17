@@ -1,7 +1,13 @@
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { DoorChooser } from "@/components/welcome/door-chooser";
 import { WelcomeConfigProvider } from "@/components/welcome/welcome-config-provider";
+
+const captureEvent = vi.fn();
+
+vi.mock("@/lib/analytics", () => ({
+  captureEvent: (...args: unknown[]) => captureEvent(...args),
+}));
 
 function renderChooser() {
   return render(
@@ -12,6 +18,22 @@ function renderChooser() {
 }
 
 describe("DoorChooser (three doors)", () => {
+  beforeEach(() => {
+    captureEvent.mockClear();
+  });
+
+  it("emits door_clicked with the door id for a primary door", () => {
+    renderChooser();
+    fireEvent.click(screen.getByTestId("door-play"));
+    expect(captureEvent).toHaveBeenCalledWith("door_clicked", { doorId: "play" });
+  });
+
+  it("emits door_clicked with the door id for the secondary door", () => {
+    renderChooser();
+    fireEvent.click(screen.getByTestId("door-learn"));
+    expect(captureEvent).toHaveBeenCalledWith("door_clicked", { doorId: "learn" });
+  });
+
   it("renders exactly three doors", () => {
     renderChooser();
     for (const id of ["door-play", "door-build", "door-learn"]) {

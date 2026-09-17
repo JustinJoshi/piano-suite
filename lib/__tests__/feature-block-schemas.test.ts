@@ -3,7 +3,17 @@ import {
   normalizeStoredBlock,
   normalizeStoredPage,
 } from "@/lib/feature-blocks/schemas";
+import type { ValidatedBlock } from "@/lib/feature-blocks/schemas";
 import { MAX_GRID_COLUMNS, MAX_HEIGHT, type BlockSize } from "@/lib/workshop-grid";
+
+/**
+ * `normalizeStoredBlock` attaches `size` at runtime (see schemas.ts); the
+ * declared `ValidatedBlock` type now includes it, and this helper keeps the
+ * optional read explicit at assertion sites.
+ */
+function sizeOf(block: ValidatedBlock | null): BlockSize | undefined {
+  return (block as (ValidatedBlock & { size?: BlockSize }) | null)?.size;
+}
 
 describe("normalizeStoredBlock size handling", () => {
   it("keeps a valid size on the block", () => {
@@ -16,7 +26,7 @@ describe("normalizeStoredBlock size handling", () => {
     });
 
     expect(block).not.toBeNull();
-    expect(block?.size).toEqual({ w: 3, h: 2 });
+    expect(sizeOf(block)).toEqual({ w: 3, h: 2 });
   });
 
   it("accepts a drillShortcuts block so the tile persists", () => {
@@ -30,7 +40,7 @@ describe("normalizeStoredBlock size handling", () => {
 
     expect(block).not.toBeNull();
     expect(block?.type).toBe("drillShortcuts");
-    expect(block?.size).toEqual({ w: 4, h: 1 });
+    expect(sizeOf(block)).toEqual({ w: 4, h: 1 });
   });
 
   it("clamps out-of-range sizes instead of dropping the block", () => {
@@ -42,7 +52,7 @@ describe("normalizeStoredBlock size handling", () => {
       size: { w: 999, h: 0 },
     });
 
-    expect(block?.size).toEqual({ w: MAX_GRID_COLUMNS, h: 1 });
+    expect(sizeOf(block)).toEqual({ w: MAX_GRID_COLUMNS, h: 1 });
     expect(MAX_HEIGHT).toBeGreaterThan(1);
   });
 
@@ -85,8 +95,8 @@ describe("normalizeStoredPage size round-trip", () => {
     });
 
     expect(page).not.toBeNull();
-    expect(page?.blocks[0].size).toEqual({ w: 2, h: 1 });
-    expect(page?.blocks[1].size).toEqual({ w: 4, h: 2 });
+    expect(sizeOf(page?.blocks[0] ?? null)).toEqual({ w: 2, h: 1 });
+    expect(sizeOf(page?.blocks[1] ?? null)).toEqual({ w: 4, h: 2 });
   });
 
   it("still validates pages without sizes", () => {

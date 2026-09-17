@@ -61,10 +61,3 @@ npm run build
 
 Paste the real output. Phases that touch a critical or authenticated flow also
 run `npm run test:e2e`; each plan says whether yours does.
-
-## Known pre-existing failure
-
-`e2e/home-mobile.spec.ts` fails on `main` because it looks for an
-"enter the workshop" CTA that does not exist in the codebase. Do not fix it as
-a side effect of your phase, and do not treat it as your regression. Report it
-as pre-existing if it appears.

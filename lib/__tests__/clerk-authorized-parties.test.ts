@@ -56,7 +56,7 @@ describe("getAuthorizedPartiesFromEnv", () => {
     expect(
       getAuthorizedPartiesFromEnv({
         CLERK_AUTHORIZED_PARTIES: "https://a.test,https://b.test",
-      })
+      } as unknown as NodeJS.ProcessEnv)
     ).toEqual(["https://a.test", "https://b.test"]);
   });
 });

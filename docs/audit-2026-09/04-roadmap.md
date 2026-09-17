@@ -180,7 +180,7 @@ sign-in wall, and conclude the copy was wrong.
 | 1.4 | Replace the blocking onboarding with a dismissible strip; move the slides to `/learn/welcome`. | `components/tools/onboarding/*` |
 | 1.5 | Collapse the sidebar to ~9 rows; archive four labs; remove Logo Lab. | Keep the code; change `lib/tools.ts` and the sidebar |
 | 1.6 | Restructure the landing page below the fold per [`03-entry-flow-spec.md`](03-entry-flow-spec.md) §2. | Drop the 12-card tools grid |
-| 1.7 | Add `robots.ts`, `sitemap.ts`, `not-found.tsx`, `title.template`. | Small, and it matters on launch day |
+| 1.7 | Add `robots.ts`, `sitemap.ts`, `not-found.tsx`, `title.template`. | **Status: executed 2026-09-16** (`ff14615`). Small, and it matters on launch day |
 
 **Unblocks:** you can send the link to a stranger without explaining it first.
 **Cost of skipping:** the marketplace gets built behind a door nobody opens.

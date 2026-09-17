@@ -6,6 +6,7 @@ import { Keybed } from "@/components/brand/keybed";
 import { useWelcomeConfig } from "@/hooks/useWelcomeConfig";
 import type { WelcomeDoorItemConfig } from "@/lib/welcome-config";
 import { cn } from "@/lib/utils";
+import { captureEvent } from "@/lib/analytics";
 
 const DOOR_ICONS: Record<WelcomeDoorItemConfig["id"], LucideIcon> = {
   play: Play,
@@ -83,6 +84,7 @@ export function DoorChooser() {
                 href={door.href}
                 data-testid={`door-${door.id}`}
                 data-emphasis="primary"
+                onClick={() => captureEvent("door_clicked", { doorId: door.id })}
                 className="group relative flex flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-surface transition-all hover:-translate-y-1 hover:border-foreground/20 hover:shadow-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
               >
                 <div
@@ -137,6 +139,7 @@ export function DoorChooser() {
               href={door.href}
               data-testid={`door-${door.id}`}
               data-emphasis="secondary"
+              onClick={() => captureEvent("door_clicked", { doorId: door.id })}
               className="group mt-5 flex items-center gap-4 rounded-2xl border border-border bg-card/70 px-5 py-4 shadow-surface transition-all hover:border-foreground/20 hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
             >
               <span
