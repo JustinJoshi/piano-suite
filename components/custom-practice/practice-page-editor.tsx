@@ -36,10 +36,11 @@ import {
   upsertPracticePage,
   deletePracticePage,
   duplicatePracticePage,
-  createPracticePageInStore,
+  createPracticePageInStoreWithEvent,
   isStarterPage,
   generateId,
 } from "@/lib/custom-practice-storage";
+import { capturePending } from "@/lib/analytics";
 
 const BLOCKS_HREF = "/tools/workshop/blocks";
 const STARTER_PICKER_KEY = "piano-suite:starter-picker-dismissed-v1";
@@ -112,7 +113,11 @@ export function PracticePageEditor() {
   }
 
   function createPage() {
-    setPracticePageStore(createPracticePageInStore(store));
+    // Compute outside the setter so StrictMode's double-invoked updaters
+    // can't double-count the event (returned-event pattern).
+    const { result, event } = createPracticePageInStoreWithEvent(store);
+    setPracticePageStore(result);
+    capturePending(event);
   }
 
   function duplicatePage() {

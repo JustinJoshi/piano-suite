@@ -5,7 +5,7 @@ import {
   normalizeStoredBlock,
   type ValidatedBlock,
 } from "@/lib/feature-blocks/schemas";
-import { captureEvent } from "@/lib/analytics";
+import type { PendingAnalyticsEvent } from "@/lib/analytics";
 
 const STORAGE_KEY = "custom-practice-pages-v2";
 const LEGACY_STORAGE_KEY = "custom-practice-pages-v1";
@@ -254,11 +254,21 @@ export function createPracticePageInStore(
   store: PracticePageStore,
   title?: string
 ): PracticePageStore {
+  return createPracticePageInStoreWithEvent(store, title).result;
+}
+
+/** `createPracticePageInStore` plus the `page_created` event to emit once, outside any state updater. */
+export function createPracticePageInStoreWithEvent(
+  store: PracticePageStore,
+  title?: string
+): { result: PracticePageStore; event: PendingAnalyticsEvent | null } {
   const page = createEmptyPracticePage(
     title ?? uniqueTitle(store, "My Practice Page")
   );
-  captureEvent("page_created", { origin: "scratch" });
-  return { ...store, pages: [...store.pages, page], activePageId: page.id };
+  return {
+    result: { ...store, pages: [...store.pages, page], activePageId: page.id },
+    event: { event: "page_created", properties: { origin: "scratch" } },
+  };
 }
 
 function uniqueTitle(store: PracticePageStore, base: string): string {
@@ -279,9 +289,17 @@ function uniqueTitle(store: PracticePageStore, base: string): string {
  * two chord sets are not — see `lib/feature-blocks/target-blocks.ts`).
  */
 export function appendBlockToPage(page: PracticePage, type: string): PracticePage {
+  return appendBlockToPageWithEvent(page, type).result;
+}
+
+/** `appendBlockToPage` plus the `block_added` event; `event` is null for no-ops (unknown type, at limit). */
+export function appendBlockToPageWithEvent(
+  page: PracticePage,
+  type: string
+): { result: PracticePage; event: PendingAnalyticsEvent | null } {
   const def = getFeatureDefinition(type);
-  if (!def) return page;
-  if (isAtBlockLimit(page.blocks, type)) return page;
+  if (!def) return { result: page, event: null };
+  if (isAtBlockLimit(page.blocks, type)) return { result: page, event: null };
 
   const block: FeatureBlock = {
     id: generateId(),
@@ -289,8 +307,10 @@ export function appendBlockToPage(page: PracticePage, type: string): PracticePag
     version: 1,
     config: { ...def.defaultConfig },
   };
-  captureEvent("block_added", { type });
-  return { ...page, blocks: [...page.blocks, block] };
+  return {
+    result: { ...page, blocks: [...page.blocks, block] },
+    event: { event: "block_added", properties: { type } },
+  };
 }
 
 /**
@@ -322,12 +342,21 @@ export function forkPageIntoStore(
   source: { title: string; blocks: unknown[] },
   id?: string
 ): PracticePageStore {
+  return forkPageIntoStoreWithEvent(store, source, id).result;
+}
+
+/** `forkPageIntoStore` plus the `page_created` event; `event` is null when no block survives sanitization. */
+export function forkPageIntoStoreWithEvent(
+  store: PracticePageStore,
+  source: { title: string; blocks: unknown[] },
+  id?: string
+): { result: PracticePageStore; event: PendingAnalyticsEvent | null } {
   const blocks: FeatureBlock[] = source.blocks
     .map((raw) => normalizeStoredBlock(raw))
     .filter((block): block is ValidatedBlock => block !== null)
     .map((block) => ({ ...block, id: generateId() }));
 
-  if (blocks.length === 0) return store;
+  if (blocks.length === 0) return { result: store, event: null };
 
   const page: PracticePage = {
     id: id ?? generateId(),
@@ -336,8 +365,10 @@ export function forkPageIntoStore(
     updatedAt: Date.now(),
   };
 
-  captureEvent("page_created", { origin: "fork" });
-  return { ...store, pages: [...store.pages, page], activePageId: page.id };
+  return {
+    result: { ...store, pages: [...store.pages, page], activePageId: page.id },
+    event: { event: "page_created", properties: { origin: "fork" } },
+  };
 }
 
 export { generateId, DEFAULT_PAGE_ID };

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { StrictMode } from "react";
 import {
   render,
   screen,
@@ -117,6 +118,7 @@ function openPalette() {
 describe("CommandPalette", () => {
   beforeEach(() => {
     resetPracticePageStore();
+    delete (window as unknown as Record<string, unknown>).__analyticsEvents;
     pushMock.mockClear();
     useAuthAccessMock.mockReset();
     useAuthAccessMock.mockReturnValue(SIGNED_OUT_AUTH);
@@ -314,5 +316,33 @@ describe("CommandPalette", () => {
     expect(
       screen.queryByRole("dialog", { name: /keyboard shortcuts/i })
     ).not.toBeInTheDocument();
+  });
+
+  it("fires block_added exactly once per action, even under StrictMode double-invoked updaters", () => {
+    const page = createEmptyPracticePage();
+    seedStore(page);
+    render(
+      <StrictMode>
+        <AudioSettingsProvider>
+          <PracticePageEditor />
+        </AudioSettingsProvider>
+      </StrictMode>
+    );
+
+    openPalette();
+    fireEvent.change(screen.getByLabelText("Search commands"), {
+      target: { value: "metronome" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /^add metronome/i }));
+
+    const blocks = getPracticePageStore().pages[0].blocks;
+    expect(blocks).toHaveLength(1);
+    expect(blocks[0].type).toBe("metronome");
+
+    const log = ((window as unknown as Record<string, unknown>)
+      .__analyticsEvents ?? []) as Array<{ name: string }>;
+    expect(
+      log.filter((entry) => entry.name === "block_added")
+    ).toHaveLength(1);
   });
 });

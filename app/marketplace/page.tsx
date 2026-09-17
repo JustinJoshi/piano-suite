@@ -20,10 +20,11 @@ import { Keybed } from "@/components/brand/keybed";
 import { marketplaceSeeds } from "@/lib/marketplace-seeds";
 import { featureRegistry } from "@/lib/feature-blocks/registry";
 import {
-  forkPageIntoStore,
+  forkPageIntoStoreWithEvent,
   getPracticePageStore,
   setPracticePageStore,
 } from "@/lib/custom-practice-storage";
+import { capturePending } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
 function relativeTime(updatedAt: number): string {
@@ -91,9 +92,13 @@ function SeedCard({
   const [copied, setCopied] = useState(false);
 
   function copyToWorkshop() {
-    setPracticePageStore(
-      forkPageIntoStore(getPracticePageStore(), { title, blocks })
+    // Compute before the setter; the event fires once, outside the updater.
+    const { result, event } = forkPageIntoStoreWithEvent(
+      getPracticePageStore(),
+      { title, blocks }
     );
+    setPracticePageStore(result);
+    capturePending(event);
     setCopied(true);
     router.push("/tools/workshop");
   }

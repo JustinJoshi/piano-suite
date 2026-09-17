@@ -11,10 +11,13 @@ import {
   deletePracticePage,
   duplicatePracticePage,
   createPracticePageInStore,
+  createPracticePageInStoreWithEvent,
   isStarterPage,
   appendBlockToPage,
+  appendBlockToPageWithEvent,
   removeFirstBlockOfType,
   forkPageIntoStore,
+  forkPageIntoStoreWithEvent,
   STORAGE_KEY,
   LEGACY_STORAGE_KEY,
 } from "@/lib/custom-practice-storage";
@@ -339,62 +342,76 @@ describe("forkPageIntoStore", () => {
 });
 
 describe("page_created / block_added analytics", () => {
-  beforeEach(() => {
-    delete (window as unknown as Record<string, unknown>).__analyticsEvents;
+  it("returns a page_created event with origin scratch from createPracticePageInStoreWithEvent", () => {
+    const store = createEmptyPracticePageStore();
+
+    const { result, event } = createPracticePageInStoreWithEvent(store);
+
+    expect(result.pages).toHaveLength(2);
+    expect(event).toEqual({
+      event: "page_created",
+      properties: { origin: "scratch" },
+    });
   });
 
-  function analyticsLog(): Array<{ name: string; props: unknown }> {
-    return ((window as unknown as Record<string, unknown>).__analyticsEvents ??
-      []) as Array<{ name: string; props: unknown }>;
-  }
-
-  it("fires page_created with origin scratch from createPracticePageInStore", () => {
+  it("returns a page_created event with origin fork from forkPageIntoStoreWithEvent", () => {
     const store = createEmptyPracticePageStore();
-    createPracticePageInStore(store);
 
-    const log = analyticsLog();
-    expect(log).toHaveLength(1);
-    expect(log[0].name).toBe("page_created");
-    expect(log[0].props).toEqual({ origin: "scratch" });
-  });
-
-  it("fires page_created with origin fork from forkPageIntoStore", () => {
-    const store = createEmptyPracticePageStore();
-    forkPageIntoStore(store, {
+    const { event } = forkPageIntoStoreWithEvent(store, {
       title: "Five-minute warm-up",
       blocks: [{ id: "s", type: "metronome", version: 1, config: {} }],
     });
 
-    const log = analyticsLog();
-    expect(log).toHaveLength(1);
-    expect(log[0].name).toBe("page_created");
-    expect(log[0].props).toEqual({ origin: "fork" });
+    expect(event).toEqual({
+      event: "page_created",
+      properties: { origin: "fork" },
+    });
   });
 
-  it("does not fire page_created when a fork has no surviving blocks", () => {
+  it("returns a null event when a fork has no surviving blocks", () => {
     const store = createEmptyPracticePageStore();
-    forkPageIntoStore(store, {
+
+    const { result, event } = forkPageIntoStoreWithEvent(store, {
       title: "Empty",
       blocks: [{ id: "x", type: "nope", version: 1, config: {} }],
     });
 
-    expect(analyticsLog()).toHaveLength(0);
+    expect(result).toBe(store);
+    expect(event).toBeNull();
   });
 
-  it("fires block_added with the block type from appendBlockToPage", () => {
+  it("returns a block_added event with the block type from appendBlockToPageWithEvent", () => {
     const page = createEmptyPracticePage("P");
-    appendBlockToPage(page, "metronome");
 
-    const log = analyticsLog();
-    expect(log).toHaveLength(1);
-    expect(log[0].name).toBe("block_added");
-    expect(log[0].props).toEqual({ type: "metronome" });
+    const { result, event } = appendBlockToPageWithEvent(page, "metronome");
+
+    expect(result.blocks).toHaveLength(1);
+    expect(event).toEqual({
+      event: "block_added",
+      properties: { type: "metronome" },
+    });
   });
 
-  it("does not fire block_added for an unknown block type", () => {
+  it("returns a null event for an unknown block type", () => {
     const page = createEmptyPracticePage("P");
-    appendBlockToPage(page, "not-a-block");
 
-    expect(analyticsLog()).toHaveLength(0);
+    const { result, event } = appendBlockToPageWithEvent(page, "not-a-block");
+
+    expect(result).toBe(page);
+    expect(event).toBeNull();
+  });
+
+  it("base store functions keep their signatures (no event channel)", () => {
+    const store = createEmptyPracticePageStore();
+    expect(createPracticePageInStore(store).pages).toHaveLength(2);
+
+    const page = createEmptyPracticePage("P");
+    expect(appendBlockToPage(page, "metronome").blocks).toHaveLength(1);
+
+    const forked = forkPageIntoStore(store, {
+      title: "Warm-up",
+      blocks: [{ id: "s", type: "metronome", version: 1, config: {} }],
+    });
+    expect(forked.pages).toHaveLength(2);
   });
 });
