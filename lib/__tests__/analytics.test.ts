@@ -22,11 +22,14 @@ describe("analytics", () => {
     delete (window as unknown as Record<string, unknown>).__analyticsEvents;
   });
 
-  it("locks the launch event list to exactly three names", () => {
+  it("locks the launch event list to the known set of names", () => {
     expect([...ANALYTICS_EVENTS]).toEqual([
       "drill_started",
       "drill_completed",
       "pro_waitlist_click",
+      "door_clicked",
+      "page_created",
+      "block_added",
     ]);
   });
 
@@ -73,6 +76,33 @@ describe("analytics", () => {
     vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "");
     captureEvent("pro_waitlist_click", {});
     expect(analyticsLog()).toHaveLength(1);
+  });
+
+  it("is a no-op for the new events without a key, but still mirrors them", async () => {
+    vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "");
+    captureEvent("door_clicked", { doorId: "play" });
+    captureEvent("page_created", { origin: "scratch" });
+    captureEvent("block_added", { type: "metronome" });
+    await Promise.resolve();
+
+    expect(mockPosthog.init).not.toHaveBeenCalled();
+    expect(mockPosthog.capture).not.toHaveBeenCalled();
+
+    const log = analyticsLog();
+    expect(log.map((e) => e.name)).toEqual([
+      "door_clicked",
+      "page_created",
+      "block_added",
+    ]);
+  });
+
+  it("captures the new events when a key is present", async () => {
+    vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "phc_test");
+    captureEvent("page_created", { origin: "fork" });
+    await flushAsync();
+    expect(mockPosthog.capture).toHaveBeenCalledWith("page_created", {
+      origin: "fork",
+    });
   });
 });
 

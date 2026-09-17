@@ -5,6 +5,7 @@ import {
   normalizeStoredBlock,
   type ValidatedBlock,
 } from "@/lib/feature-blocks/schemas";
+import { captureEvent } from "@/lib/analytics";
 
 const STORAGE_KEY = "custom-practice-pages-v2";
 const LEGACY_STORAGE_KEY = "custom-practice-pages-v1";
@@ -256,6 +257,7 @@ export function createPracticePageInStore(
   const page = createEmptyPracticePage(
     title ?? uniqueTitle(store, "My Practice Page")
   );
+  captureEvent("page_created", { origin: "scratch" });
   return { ...store, pages: [...store.pages, page], activePageId: page.id };
 }
 
@@ -287,6 +289,7 @@ export function appendBlockToPage(page: PracticePage, type: string): PracticePag
     version: 1,
     config: { ...def.defaultConfig },
   };
+  captureEvent("block_added", { type });
   return { ...page, blocks: [...page.blocks, block] };
 }
 
@@ -333,6 +336,7 @@ export function forkPageIntoStore(
     updatedAt: Date.now(),
   };
 
+  captureEvent("page_created", { origin: "fork" });
   return { ...store, pages: [...store.pages, page], activePageId: page.id };
 }
 

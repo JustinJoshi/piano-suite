@@ -2,6 +2,9 @@ export const ANALYTICS_EVENTS = [
   "drill_started",
   "drill_completed",
   "pro_waitlist_click",
+  "door_clicked",
+  "page_created",
+  "block_added",
 ] as const;
 
 export type AnalyticsEvent = (typeof ANALYTICS_EVENTS)[number];
