@@ -186,9 +186,8 @@ export function normalizeLogoMarkSettings(
  * so Apply/Reset churn does not flip the decision.
  */
 export function isShippingLogoMark(settings: LogoMarkSettings): boolean {
-  const { generation: _generation, ...rest } = settings;
-  const { generation: _defaultGeneration, ...defaultRest } =
-    DEFAULT_LOGO_MARK_SETTINGS;
+  const rest = { ...settings, generation: 0 };
+  const defaultRest = { ...DEFAULT_LOGO_MARK_SETTINGS, generation: 0 };
   return JSON.stringify(rest) === JSON.stringify(defaultRest);
 }
 

@@ -1,5 +1,5 @@
 import type { FieldDescriptor } from "../types";
-import { toEnum, toInt } from "../coerce";
+import { toInt } from "../coerce";
 import { SCALE_IDS } from "../../scales";
 import { ROOTS } from "../../music-theory";
 
