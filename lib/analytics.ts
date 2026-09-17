@@ -72,3 +72,19 @@ function mirrorToWindow(name: AnalyticsEvent, props: AnalyticsProps) {
   log.push({ name, props, ts: Date.now() });
   host.__analyticsEvents = log;
 }
+
+/**
+ * An event to emit later, returned from a pure store function so the caller
+ * can fire it once, outside any React state updater (StrictMode double-invokes
+ * updaters, which would double-count inline events). See `capturePending`.
+ */
+export type PendingAnalyticsEvent = {
+  event: AnalyticsEvent;
+  properties?: Record<string, unknown>;
+};
+
+export function capturePending(
+  pending: PendingAnalyticsEvent | null | undefined
+): void {
+  if (pending) captureEvent(pending.event, pending.properties);
+}
