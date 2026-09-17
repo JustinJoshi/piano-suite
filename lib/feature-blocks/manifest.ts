@@ -748,6 +748,7 @@ export function describeRegistryForAgent(): string {
     accepts: m.accepts,
     outputs: m.outputs,
     requires: m.requires,
+    configSpec: m.configSpec,
     status: m.status,
   }));
 
