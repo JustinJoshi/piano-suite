@@ -66,7 +66,15 @@
       "acceptance_criteria": [
         11
       ],
-      "status": "pending"
+      "status": "passed",
+      "commits": [
+        "5028091",
+        "9bc452a",
+        "f13c3d7"
+      ],
+      "pr": "https://github.com/JustinJoshi/piano-suite/pull/96",
+      "drift": "none",
+      "fixups": 1
     }
   ]
 }

@@ -157,5 +157,43 @@
     "transcript": "/home/justin/.local/state/glm-acp-agent/sessions/ee87ed5b-4992-4803-a5d8-aa7eacd19408.json",
     "mode": "bypass_permissions",
     "provider": "zai/glm-5.3-flash"
+  },
+  {
+    "ts": "2026-09-17T02:22:39Z",
+    "event": "summary",
+    "phase": "finish-gate-and-pr",
+    "worker": "47dcf65b-dddb-4522-bea9-0b14f26d12f6",
+    "commits": [
+      "5028091",
+      "9bc452a"
+    ],
+    "pr": "https://github.com/JustinJoshi/piano-suite/pull/96",
+    "status": "complete",
+    "summary": ".paseo-delegate/agent-surface/summaries/finish-gate-and-pr.md",
+    "gate_self_report": "lint 0 errors; unit 1401/1401; build 0; e2e chat-auth+auth-protection 50 passed (one cold-compile re-run); a11y 4 passed zero serious/critical; HTTP 200 evidence at :3360",
+    "note": "Contract dir tracked as of 9bc452a \u2014 filing the final verdict requires one follow-up bookkeeping commit + push (orchestrator)."
+  },
+  {
+    "ts": "2026-09-17T02:43:47Z",
+    "event": "verdict",
+    "phase": "finish-gate-and-pr",
+    "verdict": "PASS",
+    "drift": "none",
+    "fixups": 0,
+    "next_action": "done",
+    "validator": "d194b7e4-ea1e-43fe-b334-19c4b4f5b065",
+    "artifact": ".paseo-delegate/agent-surface/verdicts/finish-gate-and-pr.json",
+    "note": "Validator independently re-ran gate + both e2e suites + production curl at 9bc452a; F1-F8 all confirmed; 11/11 plan criteria evidenced. Open item routed: README/PROJECT_HISTORY (spec step 7) done by no phase."
+  },
+  {
+    "ts": "2026-09-17T02:43:47Z",
+    "event": "fixup",
+    "phase": "finish-gate-and-pr",
+    "n": 1,
+    "brief": ".paseo-delegate/agent-surface/briefs/fixup-finish-gate-and-pr-1.md",
+    "routed_to": "47dcf65b-dddb-4522-bea9-0b14f26d12f6 (same worker; context retained)",
+    "commit": "f13c3d7",
+    "result": "README.md +1/-1 (beginner-voice bullet: plain-language tile notices + /api/blocks catalogue), docs/PROJECT_HISTORY.md +41 (Stage 2 phase 2.5 record). Pushed.",
+    "validator_confirmation": "confirmed (docs-only, scoped, trailers complete, step 7 satisfied)"
   }
 ]
