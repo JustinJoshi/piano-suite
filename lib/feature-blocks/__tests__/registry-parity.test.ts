@@ -7,6 +7,7 @@ import { KNOWN_BLOCK_TYPES, normalizeStoredBlock } from "@/lib/feature-blocks/sc
 import { blockSize } from "@/lib/workshop-grid";
 import { getManifest, listManifests } from "@/lib/feature-blocks/manifest";
 import type { ComponentManifest } from "@/lib/feature-blocks/manifest-types";
+import type { FeatureDefinition } from "@/lib/feature-blocks/types";
 
 /**
  * The registry (client) and `schemas.ts` (Convex-bundled) keep two hand-written
@@ -128,7 +129,9 @@ describe("manifest parity", () => {
   });
 
   it("manifest outputs match registry provides", () => {
-    for (const def of Object.values(featureRegistry)) {
+    for (const def of Object.values(featureRegistry) as FeatureDefinition<
+      Record<string, unknown>
+    >[]) {
       const manifest = getManifest(def.type);
       if (!manifest) continue;
 
@@ -141,7 +144,9 @@ describe("manifest parity", () => {
   });
 
   it("manifest maxPerPage matches registry maxPerPage", () => {
-    for (const def of Object.values(featureRegistry)) {
+    for (const def of Object.values(featureRegistry) as FeatureDefinition<
+      Record<string, unknown>
+    >[]) {
       const manifest = getManifest(def.type);
       if (!manifest) continue;
 

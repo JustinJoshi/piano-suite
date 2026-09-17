@@ -130,7 +130,7 @@ function createMockAudioContext() {
     state: "running",
     resume: vi.fn(),
     destination: {},
-  } as unknown as BaseAudioContext;
+  } as unknown as BaseAudioContext & { advance(ms: number): void };
 }
 
 describe("createMidiScheduler", () => {

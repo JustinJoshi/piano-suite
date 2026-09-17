@@ -15,6 +15,7 @@ function createRuntime(overrides: Partial<DrillRuntime> = {}): DrillRuntime {
     targetIndex: 0,
     totalTargets: 0,
     misses: 0,
+    stream: [],
     start: vi.fn(),
     reset: vi.fn(),
     setTargets: vi.fn(),

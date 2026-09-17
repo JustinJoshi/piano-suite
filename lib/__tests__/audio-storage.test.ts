@@ -19,8 +19,6 @@ function createFakeIDBDatabase(): IDBDatabase {
           const request = {
             result: undefined,
             error: null,
-            onsuccess: null as (() => void) | null,
-            onerror: null as (() => void) | null,
             set onsuccess(fn: (() => void) | null) {
               if (fn) fn();
             },
@@ -34,8 +32,6 @@ function createFakeIDBDatabase(): IDBDatabase {
           const request = {
             result: store.get(id),
             error: null,
-            onsuccess: null as (() => void) | null,
-            onerror: null as (() => void) | null,
             set onsuccess(fn: (() => void) | null) {
               if (fn) fn();
             },
@@ -50,8 +46,6 @@ function createFakeIDBDatabase(): IDBDatabase {
           const request = {
             result: undefined,
             error: null,
-            onsuccess: null as (() => void) | null,
-            onerror: null as (() => void) | null,
             set onsuccess(fn: (() => void) | null) {
               if (fn) fn();
             },
@@ -65,8 +59,6 @@ function createFakeIDBDatabase(): IDBDatabase {
           const request = {
             result: Array.from(store.values()),
             error: null,
-            onsuccess: null as (() => void) | null,
-            onerror: null as (() => void) | null,
             set onsuccess(fn: (() => void) | null) {
               if (fn) fn();
             },
@@ -93,9 +85,6 @@ beforeEach(() => {
         const request = {
           result: createFakeIDBDatabase(),
           error: null,
-          onsuccess: null as (() => void) | null,
-          onerror: null as (() => void) | null,
-          onupgradeneeded: null as ((event: Event) => void) | null,
           set onsuccess(fn: (() => void) | null) {
             if (fn) fn();
           },

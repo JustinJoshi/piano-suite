@@ -100,13 +100,13 @@ describe("normalizeAudioSettings", () => {
   it("rejects malformed custom kits", () => {
     expect(
       normalizeAudioSettings({
-        customKit: { kind: "sf2", name: "", url: "blob", preset: "" },
+        customKit: { kind: "sf2", name: "", url: "blob", preset: "" } as never,
       }).customKit
     ).toBeNull();
 
     expect(
       normalizeAudioSettings({
-        customKit: { kind: "samples", name: "Kit", map: {} },
+        customKit: { kind: "samples", name: "Kit", map: {} } as never,
       }).customKit
     ).toBeNull();
   });
