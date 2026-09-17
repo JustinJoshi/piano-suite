@@ -3,6 +3,7 @@ import {
   createEmptyPracticePage,
   createEmptyPracticePageStore,
   getPracticePageStore,
+  getServerPracticePageStore,
   setPracticePageStore,
   resetPracticePageStore,
   getActivePage,
@@ -413,5 +414,40 @@ describe("page_created / block_added analytics", () => {
       blocks: [{ id: "s", type: "metronome", version: 1, config: {} }],
     });
     expect(forked.pages).toHaveLength(2);
+  });
+});
+describe("getServerPracticePageStore", () => {
+  it("returns the same object reference on every call", () => {
+    const a = getServerPracticePageStore();
+    const b = getServerPracticePageStore();
+    expect(a).toBe(b);
+  });
+
+  it("returns an empty practice-page store", () => {
+    const snapshot = getServerPracticePageStore();
+    const expected = createEmptyPracticePageStore();
+
+    expect(snapshot.version).toBe(2);
+    expect(snapshot.pages).toHaveLength(1);
+    expect(snapshot.pages[0].blocks).toHaveLength(1);
+    expect(snapshot.pages[0].blocks[0].type).toBe(
+      expected.pages[0].blocks[0].type
+    );
+    expect(snapshot.activePageId).toBe(snapshot.pages[0].id);
+  });
+
+  it("a mutating caller cannot corrupt the snapshot for a later caller", () => {
+    const first = getServerPracticePageStore();
+    try {
+      first.pages[0].title = "corrupted";
+      (first.pages[0].blocks as unknown[]).length = 0;
+    } catch {
+      // Frozen snapshots may reject mutation outright; either way the
+      // snapshot a later caller sees must be intact.
+    }
+
+    const second = getServerPracticePageStore();
+    expect(second.pages[0].title).toBe("My Practice Page");
+    expect(second.pages[0].blocks).toHaveLength(1);
   });
 });
