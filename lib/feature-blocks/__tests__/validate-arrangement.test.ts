@@ -71,3 +71,27 @@ describe("validateArrangement", () => {
     });
   });
 });
+
+describe("unmet-requirement issues carry a structured requirement", () => {
+  // Only `practiceNotes` is producible through the real registry: no shipped
+  // manifest requires "transport" yet, and the blocks requiring "midiInput"
+  // satisfy it themselves (they are note inputs). The other two ids are
+  // pinned at the wiringNotice level in
+  // components/custom-practice/__tests__/wiring-notice.test.tsx.
+  it("tags an unmet practiceNotes issue with requirement: practiceNotes", () => {
+    const result = validateArrangement([block("noteRoll")]);
+    expect(result.status).toBe("invalid");
+    if (result.status !== "invalid") throw new Error("unreachable");
+    expect(result.issues).toHaveLength(1);
+    expect(result.issues[0].issue).toBe("unmet_requirement");
+    expect(result.issues[0].requirement).toBe("practiceNotes");
+  });
+
+  it("leaves the unknown-type issue without a requirement", () => {
+    const result = validateArrangement([block("notARealBlockType")]);
+    expect(result.status).toBe("invalid");
+    if (result.status !== "invalid") throw new Error("unreachable");
+    expect(result.issues).toHaveLength(1);
+    expect(result.issues[0].requirement).toBeUndefined();
+  });
+});

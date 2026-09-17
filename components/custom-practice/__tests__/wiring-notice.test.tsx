@@ -6,6 +6,8 @@ import {
   resetPracticePageStore,
 } from "@/lib/custom-practice-storage";
 import type { PracticePage } from "@/lib/feature-blocks/types";
+import type { WiringIssue } from "@/lib/feature-blocks/manifest-types";
+import { wiringNotice } from "@/components/workshop-grid/workshop-tile";
 
 vi.mock("@/hooks/useAuthAccess", () => ({
   useAuthAccess: vi.fn(() => ({
@@ -61,7 +63,9 @@ function createMockAudioContext() {
   };
 }
 
-// A display with nothing producing practiceNotes: unmet_requirement. (A
+// A display with nothing producing practiceNotes: unmet_requirement. The
+// validator builds each issue with a structured `requirement` field (the
+// plain-language copy maps on it, not on the human-readable `detail`). (A
 // rhythmPattern on the same page would satisfy it — the transform's output
 // counts — so this page stays alone.)
 const UNMET_PAGE: PracticePage = {
@@ -156,6 +160,51 @@ describe("PracticePageEditor wiring notices", () => {
     expect(
       within(container).queryByText(/unmet_requirement|orphan_transform/)
     ).not.toBeInTheDocument();
+  });
+
+  it("maps each requirement id to its notice via the structured field", () => {
+    const base = { issue: "unmet_requirement" as const };
+    expect(
+      wiringNotice({ ...base, blockId: "b", type: "t", requirement: "transport", detail: "Requires: transport" })
+    ).toBe("Add a transport block to set the tempo for this page.");
+    expect(
+      wiringNotice({ ...base, blockId: "b", type: "t", requirement: "practiceNotes", detail: "Requires: practiceNotes" })
+    ).toBe(
+      "Add a source block (like the chord library) so there is something to show here."
+    );
+    expect(
+      wiringNotice({ ...base, blockId: "b", type: "t", requirement: "midiInput", detail: "Requires: midiInput" })
+    ).toBe(
+      "Connect a MIDI keyboard, or add the on-screen keyboard, so this block can hear notes."
+    );
+  });
+
+  it("maps a transport requirement to its notice even when detail was reworded", () => {
+    // The structured `requirement` field is the coupling, not the
+    // human-readable `detail`: rewording the message must not degrade the
+    // notice to the generic fallback.
+    const issue: WiringIssue = {
+      blockId: "clock-1",
+      type: "clock",
+      issue: "unmet_requirement",
+      requirement: "transport",
+      detail: "This block would like a tempo set (reworded copy).",
+    };
+    expect(wiringNotice(issue)).toBe(
+      "Add a transport block to set the tempo for this page."
+    );
+  });
+
+  it("falls back to the generic notice when requirement is absent", () => {
+    const issue: WiringIssue = {
+      blockId: "clock-1",
+      type: "clock",
+      issue: "unmet_requirement",
+      detail: "Requires: transport",
+    };
+    expect(wiringNotice(issue)).toBe(
+      "This block is missing something it needs to run. Check its settings."
+    );
   });
 
   it("a page with no wiring issues shows no notices", () => {
