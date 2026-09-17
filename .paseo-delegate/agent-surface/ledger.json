@@ -195,5 +195,18 @@
     "commit": "f13c3d7",
     "result": "README.md +1/-1 (beginner-voice bullet: plain-language tile notices + /api/blocks catalogue), docs/PROJECT_HISTORY.md +41 (Stage 2 phase 2.5 record). Pushed.",
     "validator_confirmation": "confirmed (docs-only, scoped, trailers complete, step 7 satisfied)"
+  },
+  {
+    "ts": "2026-09-17T02:45:30Z",
+    "event": "archive",
+    "phase": "run closeout",
+    "archived": [
+      "d6d6cf7e-d6cc-40d8-9570-1a275762a3f0 [Worker] blocks-api-route (flash)",
+      "d22e2dfb-d0d9-4c0e-9274-88465240aaf7 [Worker] editor-wiring-notice",
+      "47dcf65b-dddb-4522-bea9-0b14f26d12f6 [Worker] finish-gate-and-pr",
+      "d194b7e4-ea1e-43fe-b334-19c4b4f5b065 [Validator] agent-surface"
+    ],
+    "kept": "758eb98c-a500-4238-9c01-78460033db55 [Planner] agent-surface kept live \u2014 fleet model_swap note directs all orchestrators to re-engage it rather than spawn duplicates",
+    "note": "Stop condition met: all 4 phases PASS, PR #96 open and MERGEABLE, tree clean after this commit."
   }
 ]
