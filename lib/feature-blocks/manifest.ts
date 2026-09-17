@@ -706,6 +706,7 @@ export function validatePageWiring(blocks: FeatureBlock[]): WiringIssue[] {
           blockId: block.id,
           type: block.type,
           issue: "unmet_requirement",
+          requirement: req,
           detail: `Requires: ${req}`,
         });
       }
