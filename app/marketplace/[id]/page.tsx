@@ -11,10 +11,11 @@ import { FeatureRenderer } from "@/components/feature-blocks/feature-renderer";
 import { DrillRuntimeProvider } from "@/components/custom-practice/drill-runtime-provider";
 import { useAuthAccess } from "@/hooks/useAuthAccess";
 import {
-  forkPageIntoStore,
+  forkPageIntoStoreWithEvent,
   getPracticePageStore,
   setPracticePageStore,
 } from "@/lib/custom-practice-storage";
+import { capturePending } from "@/lib/analytics";
 
 type ForkState = "idle" | "forking" | "error";
 
@@ -73,9 +74,14 @@ export default function PublicDrillView() {
         linkedId = result?.clientPageId;
       }
 
-      setPracticePageStore(
-        forkPageIntoStore(getPracticePageStore(), drill, linkedId)
+      // Compute before the setter; the event fires once, outside the updater.
+      const { result, event } = forkPageIntoStoreWithEvent(
+        getPracticePageStore(),
+        drill,
+        linkedId
       );
+      setPracticePageStore(result);
+      capturePending(event);
       router.push("/tools/workshop");
     } catch {
       setForkState("error");

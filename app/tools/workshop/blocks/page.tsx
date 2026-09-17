@@ -15,9 +15,10 @@ import {
   getServerPracticePageStore,
   getActivePage,
   upsertPracticePage,
-  appendBlockToPage,
+  appendBlockToPageWithEvent,
   removeFirstBlockOfType,
 } from "@/lib/custom-practice-storage";
+import { capturePending } from "@/lib/analytics";
 
 export default function WorkshopMarketplacePage() {
   const { canPersist, userReady } = useToolUserReady();
@@ -31,9 +32,10 @@ export default function WorkshopMarketplacePage() {
   const page = useMemo(() => getActivePage(store), [store]);
 
   function addBlock(type: string) {
-    setPracticePageStore(
-      upsertPracticePage(store, appendBlockToPage(page, type))
-    );
+    // Compute before the setter; the event fires once, outside the updater.
+    const { result, event } = appendBlockToPageWithEvent(page, type);
+    setPracticePageStore(upsertPracticePage(store, result));
+    capturePending(event);
   }
 
   function removeBlockType(type: string) {

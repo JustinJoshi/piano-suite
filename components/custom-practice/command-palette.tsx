@@ -5,9 +5,10 @@ import { featureRegistry } from "@/lib/feature-blocks/registry";
 import { OPEN_TILE_SETTINGS_EVENT, WORKSHOP_SHORTCUTS } from "@/lib/keyboard";
 import type { PracticePage } from "@/lib/feature-blocks/types";
 import {
-  appendBlockToPage,
+  appendBlockToPageWithEvent,
   type PracticePageStore,
 } from "@/lib/custom-practice-storage";
+import { capturePending } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
 export type PaletteCommand = {
@@ -56,8 +57,11 @@ export function CommandPalette({
       label: `Add ${def.label}`,
       hint: def.description,
       run: () => {
-        // appendBlockToPage enforces maxPerPage and rejects unknown types.
-        updatePage((prev) => appendBlockToPage(prev, def.type));
+        // appendBlockToPageWithEvent enforces maxPerPage and rejects unknown
+        // types; the event is precomputed so the updater stays pure.
+        const { result, event } = appendBlockToPageWithEvent(page, def.type);
+        updatePage(() => result);
+        capturePending(event);
         onClose();
       },
     }));
