@@ -252,6 +252,7 @@ For Canvas or WebGL visuals that cannot use Tailwind utilities, read the CSS cus
 ## Testing
 
 - Unit tests: `npm run test:unit:run`
+- Typecheck: `npm run typecheck` (`tsc --noEmit`) — Vitest does not typecheck and `next build` skips test files, so this is the only check that catches type drift in `__tests__` files. CI runs it as its own job alongside lint/unit/build.
 - E2E tests: `npm run test:e2e`
 - All new primitives must have unit tests before a tool migration is considered complete.
 
