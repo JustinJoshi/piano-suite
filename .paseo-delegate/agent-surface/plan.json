@@ -1,0 +1,72 @@
+{
+  "source_plan": "/home/justin/piano-suite/.paseo-delegate/fleet-20260916/plans/agent-surface.md",
+  "authoritative_spec": "/home/justin/piano-suite/.worktrees/fleet-agent-surface/docs/stage-2/phase-2.5-agent-surface/PLAN.md",
+  "project": "/home/justin/piano-suite/.worktrees/fleet-agent-surface",
+  "state": "agent-surface",
+  "branch": "fleet/agent-surface",
+  "phases": [
+    {
+      "id": "validate-arrangement",
+      "title": "Promote the validator",
+      "depends_on": [],
+      "thinking": "high",
+      "acceptance_criteria": [
+        4,
+        5,
+        6,
+        7,
+        10
+      ],
+      "status": "passed",
+      "drift": "detected",
+      "fixups": 0
+    },
+    {
+      "id": "blocks-api-route",
+      "title": "The catalogue route",
+      "depends_on": [
+        "validate-arrangement"
+      ],
+      "thinking": "high",
+      "acceptance_criteria": [
+        1,
+        2,
+        3
+      ],
+      "status": "passed",
+      "drift": "detected",
+      "fixups": 0,
+      "commit": "eba02f3"
+    },
+    {
+      "id": "editor-wiring-notice",
+      "title": "Surface issues in the editor",
+      "depends_on": [
+        "validate-arrangement"
+      ],
+      "thinking": "high",
+      "acceptance_criteria": [
+        8,
+        9
+      ],
+      "status": "passed",
+      "drift": "none",
+      "fixups": 0,
+      "commit": "bfe9dfd"
+    },
+    {
+      "id": "finish-gate-and-pr",
+      "title": "Full gate, e2e, docs, PR",
+      "depends_on": [
+        "validate-arrangement",
+        "blocks-api-route",
+        "editor-wiring-notice"
+      ],
+      "thinking": "high",
+      "acceptance_criteria": [
+        11
+      ],
+      "status": "pending"
+    }
+  ]
+}
