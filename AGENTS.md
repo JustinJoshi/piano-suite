@@ -360,8 +360,9 @@ Most new work fits cleanly inside one of these areas. Keep all related changes i
 
 ### Shared resources across worktrees
 
-Worktrees isolate the working directory and Git state, but they do **not** isolate running services. Be aware of the following shared resources:
+A worktree gives you your own working directory, your own `HEAD`, and your own index. It does **not** give you your own repository, and it does not isolate running services. Everything below is shared by every worktree at once:
 
+- **Git refs and repository state:** there is one `.git`. One branch list, one `main`, one reflog, one remote, one registry of which worktrees exist. A branch another agent creates or deletes shows up in your `git branch` immediately. Worktrees protect you when two agents edit *different files*; they give you nothing when your task **is** git administration — merging to `main`, deleting branches, adding or removing worktrees. For those tasks, re-derive state immediately before acting on it rather than trusting a listing from earlier in the phase: a branch list read five minutes ago may name a branch since deleted, or miss one that has since become unmerged. Delete with `git branch -d`, never `-D`, so git itself refuses anything not fully merged.
 - **`npm run dev` port:** Every worktree defaults to Next.js on port `3000`. If another agent already has a dev server running, start yours on a different port:
   ```bash
   PORT=3001 npm run dev
