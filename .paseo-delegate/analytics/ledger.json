@@ -96,5 +96,19 @@
     "branch": "fleet/analytics",
     "pr": "https://github.com/JustinJoshi/piano-suite/pull/93",
     "note": "Contract dir committed (git add -f scoped to .paseo-delegate/analytics/) and pushed, updating PR #93. Final gate evidence: validator's from-scratch re-run on the identical code tree (contract-only commit touches no app/lib code). No merge to main per run protocol."
+  },
+  {
+    "ts": "2026-09-17T00:36:43Z",
+    "event": "archive",
+    "role": "[Worker] analytics",
+    "agentId": "015b522a-8695-4a3d-9156-0808edd6874d",
+    "note": "already archived when the successor attempted it; timestamp from paseo archive error output"
+  },
+  {
+    "ts": "2026-09-17T00:53:44Z",
+    "event": "archive",
+    "role": "[Validator] analytics",
+    "agentId": "b106cdc4-f1ec-4f13-9677-5f1c194da96a",
+    "note": "archived by the successor after verdict collection and filing, per the loop's completion step"
   }
 ]
