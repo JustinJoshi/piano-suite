@@ -26,7 +26,7 @@ The roadmap is organized **Phase by Phase**. Phase 0 (open the drills, wire fork
 
 ## Architecture & Patterns
 
-- [`DESIGN-PRINCIPLES.md`](DESIGN-PRINCIPLES.md) — Visual and interaction conventions
+- [`DESIGN-PRINCIPLES.md`](../DESIGN-PRINCIPLES.md) — Visual and interaction conventions
 - [`custom-drill-builder-plan.md`](custom-drill-builder-plan.md) — Workshop block architecture reference
 - [`clerk-billing-setup.md`](clerk-billing-setup.md) — Billing integration guide
 - [`go-live-runbook.md`](go-live-runbook.md) — Launch checklist and safety gates
