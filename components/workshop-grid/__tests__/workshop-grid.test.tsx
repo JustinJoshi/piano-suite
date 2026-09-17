@@ -172,6 +172,7 @@ describe("WorkshopGrid", () => {
         onResize={onResize}
         onDuplicate={vi.fn()}
         onRemove={vi.fn()}
+        onConfigChange={vi.fn()}
       />
     );
 

@@ -30,6 +30,7 @@ function createRuntime(
     targetIndex: 1,
     totalTargets: 8,
     misses: 0,
+    stream: [],
     start: vi.fn(),
     reset: vi.fn(),
     setTargets: vi.fn(),

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { MidiConnectionBar } from "../midi-connection-bar";
+import type { AudioEngineState } from "@/lib/audio-engine";
 
 const setEnabled = vi.fn();
 const setSustain = vi.fn();
@@ -19,7 +20,7 @@ const mockAudioSettings = {
   setSustain,
   setCustomKit: vi.fn(),
   loaded: true,
-  engineState: "ready" as const,
+  engineState: "ready" as AudioEngineState,
   setEngineState: vi.fn(),
 };
 
