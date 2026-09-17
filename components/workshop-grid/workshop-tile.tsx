@@ -369,19 +369,19 @@ function ToolbarButton({
 /**
  * Plain-language guidance per wiring issue, per the Step-3 mapping. The
  * validator's enum never reaches the user; for an unmet requirement the
- * `detail` ("Requires: transport" etc.) names what to add. Guidance, not
+ * structured `requirement` field names what to add. Guidance, not
  * enforcement — the block still renders.
  */
-function wiringNotice(issue: WiringIssue): string {
+export function wiringNotice(issue: WiringIssue): string {
   if (issue.issue === "orphan_transform") {
     return "This transform has nothing to transform. Add a source above it.";
   }
-  switch (issue.detail) {
-    case "Requires: transport":
+  switch (issue.requirement) {
+    case "transport":
       return "Add a transport block to set the tempo for this page.";
-    case "Requires: practiceNotes":
+    case "practiceNotes":
       return "Add a source block (like the chord library) so there is something to show here.";
-    case "Requires: midiInput":
+    case "midiInput":
       return "Connect a MIDI keyboard, or add the on-screen keyboard, so this block can hear notes.";
     default:
       return "This block is missing something it needs to run. Check its settings.";

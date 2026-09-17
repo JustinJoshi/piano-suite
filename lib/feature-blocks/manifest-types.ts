@@ -79,6 +79,7 @@ export type WiringIssue = {
   blockId: string;
   type: string;
   issue: "unmet_requirement" | "orphan_transform";
+  requirement?: RequirementId;
   detail: string;
 };
 
