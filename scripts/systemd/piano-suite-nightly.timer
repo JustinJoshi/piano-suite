@@ -1,0 +1,13 @@
+[Unit]
+Description=Piano Suite nightly full-e2e schedule (03:30, AC only)
+
+[Timer]
+OnCalendar=*-*-* 03:30:00
+# Run catch-up after suspend/off (missed 03:30 fires on next boot).
+Persistent=true
+# Skip on battery (ThinkPad battery care); next attempt at the following 03:30.
+ConditionACPower=true
+Unit=piano-suite-nightly.service
+
+[Install]
+WantedBy=timers.target
