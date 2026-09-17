@@ -336,3 +336,64 @@ describe("forkPageIntoStore", () => {
     ]);
   });
 });
+
+describe("page_created / block_added analytics", () => {
+  beforeEach(() => {
+    delete (window as unknown as Record<string, unknown>).__analyticsEvents;
+  });
+
+  function analyticsLog(): Array<{ name: string; props: unknown }> {
+    return ((window as unknown as Record<string, unknown>).__analyticsEvents ??
+      []) as Array<{ name: string; props: unknown }>;
+  }
+
+  it("fires page_created with origin scratch from createPracticePageInStore", () => {
+    const store = createEmptyPracticePageStore();
+    createPracticePageInStore(store);
+
+    const log = analyticsLog();
+    expect(log).toHaveLength(1);
+    expect(log[0].name).toBe("page_created");
+    expect(log[0].props).toEqual({ origin: "scratch" });
+  });
+
+  it("fires page_created with origin fork from forkPageIntoStore", () => {
+    const store = createEmptyPracticePageStore();
+    forkPageIntoStore(store, {
+      title: "Five-minute warm-up",
+      blocks: [{ id: "s", type: "metronome", version: 1, config: {} }],
+    });
+
+    const log = analyticsLog();
+    expect(log).toHaveLength(1);
+    expect(log[0].name).toBe("page_created");
+    expect(log[0].props).toEqual({ origin: "fork" });
+  });
+
+  it("does not fire page_created when a fork has no surviving blocks", () => {
+    const store = createEmptyPracticePageStore();
+    forkPageIntoStore(store, {
+      title: "Empty",
+      blocks: [{ id: "x", type: "nope", version: 1, config: {} }],
+    });
+
+    expect(analyticsLog()).toHaveLength(0);
+  });
+
+  it("fires block_added with the block type from appendBlockToPage", () => {
+    const page = createEmptyPracticePage("P");
+    appendBlockToPage(page, "metronome");
+
+    const log = analyticsLog();
+    expect(log).toHaveLength(1);
+    expect(log[0].name).toBe("block_added");
+    expect(log[0].props).toEqual({ type: "metronome" });
+  });
+
+  it("does not fire block_added for an unknown block type", () => {
+    const page = createEmptyPracticePage("P");
+    appendBlockToPage(page, "not-a-block");
+
+    expect(analyticsLog()).toHaveLength(0);
+  });
+});
