@@ -6,7 +6,6 @@ import {
   normalizeStoredPage,
   normalizePageTitle,
   isValidClientPageId,
-  MAX_PAGE_TITLE_LENGTH,
 } from "../lib/feature-blocks/schemas";
 
 const MAX_PAGES_PER_USER = 100;
@@ -184,7 +183,6 @@ export const upsertCustomDrill = mutation({
     }
 
     if (existing) {
-      const doc = { ...existing, isPublic, authorName };
       await ctx.db.patch("customDrills", existing._id, {
         title: page.title,
         blocks: page.blocks,

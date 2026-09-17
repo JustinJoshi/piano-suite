@@ -436,6 +436,11 @@ export function useChordDrill(enabled: boolean): ChordDrillEngine {
     timerRef.current = timer;
   }, [timer]);
 
+  // Stable members of the timer, destructured so the MIDI effect can depend
+  // on them without re-firing every frame (the timer object identity changes
+  // with liveMs during timing).
+  const { phase: timerPhase, arm: timerArm, nextRep: timerNextRep, finishRound: timerFinishRound, markSuccess: timerMarkSuccess } = timer;
+
   // -------------------------------------------------------------------------
   // Settings sync
   // -------------------------------------------------------------------------
@@ -471,138 +476,6 @@ export function useChordDrill(enabled: boolean): ChordDrillEngine {
     settings.newCardRepBoost,
     settings.newCardRepTarget,
     currentCardQueue,
-  ]);
-
-  // -------------------------------------------------------------------------
-  // Anki sync
-  // -------------------------------------------------------------------------
-  const handleAnkiCard = useCallback(
-    (parsed: {
-      card: { cardId: number; deckName: string; question: string };
-      chordSymbol: string | null;
-      rootName: string | null;
-      qualitySuffix: string | null;
-      qualityIdx: number | null;
-      queue: AnkiCardQueue;
-      deckStats: DeckStats;
-    } | null) => {
-      if (!parsed) {
-        setCurrentCardQueue(null);
-        followedCardRef.current = null;
-        return;
-      }
-
-      setCurrentCardQueue(parsed.queue);
-      followedCardRef.current = {
-        cardId: parsed.card.cardId,
-        deckName: parsed.card.deckName,
-      };
-
-      if (parsed.rootName && parsed.qualityIdx !== null) {
-        const parsedRoot = ROOTS.find((r) => r.name === parsed.rootName);
-        if (parsedRoot) {
-          setModeState("single");
-          setRootState(parsedRoot);
-          setQualityIdxState(parsed.qualityIdx);
-          const quality = SINGLE_QUALITIES[parsed.qualityIdx];
-          chordKeyRef.current = `${parsedRoot.name}${quality.suffix}`;
-        }
-      }
-
-      if (autoTimerRef.current && midiConnected) {
-        setActiveCountdownSeconds(settingsRef.current.countdownSeconds);
-        startDrillInternal(true);
-      }
-    },
-    [midiConnected]
-  );
-
-  const handleFirstAnkiConnect = useCallback(() => {
-    if (ankiDefaultsAppliedRef.current) return;
-    ankiDefaultsAppliedRef.current = true;
-    setAutoTimer(true);
-    autoTimerRef.current = true;
-    setHideChordUntilGo(true);
-    setStartCountdownEnabled(false);
-    updateSettings({
-      countdownSeconds: 3,
-      breakSeconds: 5,
-      breakTickSound: false,
-    });
-    setAutoGrade(true);
-    autoGradeRef.current = true;
-  }, [updateSettings]);
-
-  const { status: ankiStatusRaw, parsedCard, deckStats } = useAnkiSync({
-    enabled: ankiFollow,
-    onCard: handleAnkiCard,
-    onFirstConnect: handleFirstAnkiConnect,
-  });
-
-  const ankiStatus = useMemo(() => {
-    if (!ankiFollow) return "Follow off";
-    if (parsedCard?.chordSymbol) return `Following: ${parsedCard.chordSymbol}`;
-    if (ankiStatusRaw === "error") return "Anki not reachable";
-    if (ankiStatusRaw === "no-card") return "No card in review mode";
-    return "Card found, no chord parsed";
-  }, [ankiFollow, parsedCard, ankiStatusRaw]);
-
-  // -------------------------------------------------------------------------
-  // MIDI handling
-  // -------------------------------------------------------------------------
-  // Depend on heldNotes from the MIDI session (updates only on note on/off).
-  // Do not depend on a freshly allocated heldPcs Set — liveMs RAF would
-  // re-fire this effect every frame during timing.
-  useEffect(() => {
-    if (!running) return;
-
-    // Ignore input during countdown / break / finished — reps are done or
-    // the round has not started timing yet.
-    if (
-      timer.phase === "idle" ||
-      timer.phase === "countdown" ||
-      timer.phase === "break-before-grade" ||
-      timer.phase === "finished"
-    ) {
-      return;
-    }
-
-    const pcs = new Set(heldNotes.map((n) => ((n % 12) + 12) % 12));
-
-    if (pcs.size === 0) {
-      if (timer.phase === "armed") {
-        timer.arm();
-      } else if (timer.phase === "success") {
-        // Safety net: if the last-rep finishRound from onSuccess somehow
-        // missed, still complete the round instead of arming another rep.
-        if (repCountRef.current >= currentRepTargetRef.current) {
-          timer.finishRound();
-        } else {
-          timer.nextRep();
-          timer.arm();
-        }
-      }
-      return;
-    }
-
-    if (timer.phase === "timing") {
-      const result = evaluateChordAttempt(targetPcs, pcs, {
-        requireExact: settings.requireExactNotes,
-      });
-      if (result.correct) {
-        timer.markSuccess();
-      }
-    }
-  }, [
-    heldNotes,
-    running,
-    targetPcs,
-    settings.requireExactNotes,
-    timer.phase,
-    timer.arm,
-    timer.nextRep,
-    timer.finishRound,
-    timer.markSuccess,
   ]);
 
   // -------------------------------------------------------------------------
@@ -646,6 +519,138 @@ export function useChordDrill(enabled: boolean): ChordDrillEngine {
   const startDrill = useCallback(() => {
     startDrillInternal(false);
   }, [startDrillInternal]);
+
+  // -------------------------------------------------------------------------
+  // Anki sync
+  // -------------------------------------------------------------------------
+  const handleAnkiCard = useCallback(
+    (parsed: {
+      card: { cardId: number; deckName: string; question: string };
+      chordSymbol: string | null;
+      rootName: string | null;
+      qualitySuffix: string | null;
+      qualityIdx: number | null;
+      queue: AnkiCardQueue;
+      deckStats: DeckStats;
+    } | null) => {
+      if (!parsed) {
+        setCurrentCardQueue(null);
+        followedCardRef.current = null;
+        return;
+      }
+
+      setCurrentCardQueue(parsed.queue);
+      followedCardRef.current = {
+        cardId: parsed.card.cardId,
+        deckName: parsed.card.deckName,
+      };
+
+      if (parsed.rootName && parsed.qualityIdx !== null) {
+        const parsedRoot = ROOTS.find((r) => r.name === parsed.rootName);
+        if (parsedRoot) {
+          setModeState("single");
+          setRootState(parsedRoot);
+          setQualityIdxState(parsed.qualityIdx);
+          const quality = SINGLE_QUALITIES[parsed.qualityIdx];
+          chordKeyRef.current = `${parsedRoot.name}${quality.suffix}`;
+        }
+      }
+
+      if (autoTimerRef.current && midiConnected) {
+        setActiveCountdownSeconds(settingsRef.current.countdownSeconds);
+        startDrillInternal(true);
+      }
+    },
+    [midiConnected, startDrillInternal]
+  );
+
+  const handleFirstAnkiConnect = useCallback(() => {
+    if (ankiDefaultsAppliedRef.current) return;
+    ankiDefaultsAppliedRef.current = true;
+    setAutoTimerState(true);
+    autoTimerRef.current = true;
+    setHideChordUntilGoState(true);
+    setStartCountdownEnabledState(false);
+    updateSettings({
+      countdownSeconds: 3,
+      breakSeconds: 5,
+      breakTickSound: false,
+    });
+    setAutoGradeState(true);
+    autoGradeRef.current = true;
+  }, [updateSettings]);
+
+  const { status: ankiStatusRaw, parsedCard, deckStats } = useAnkiSync({
+    enabled: ankiFollow,
+    onCard: handleAnkiCard,
+    onFirstConnect: handleFirstAnkiConnect,
+  });
+
+  const ankiStatus = useMemo(() => {
+    if (!ankiFollow) return "Follow off";
+    if (parsedCard?.chordSymbol) return `Following: ${parsedCard.chordSymbol}`;
+    if (ankiStatusRaw === "error") return "Anki not reachable";
+    if (ankiStatusRaw === "no-card") return "No card in review mode";
+    return "Card found, no chord parsed";
+  }, [ankiFollow, parsedCard, ankiStatusRaw]);
+
+  // -------------------------------------------------------------------------
+  // MIDI handling
+  // -------------------------------------------------------------------------
+  // Depend on heldNotes from the MIDI session (updates only on note on/off).
+  // Do not depend on a freshly allocated heldPcs Set — liveMs RAF would
+  // re-fire this effect every frame during timing.
+  useEffect(() => {
+    if (!running) return;
+
+    // Ignore input during countdown / break / finished — reps are done or
+    // the round has not started timing yet.
+    if (
+      timerPhase === "idle" ||
+      timerPhase === "countdown" ||
+      timerPhase === "break-before-grade" ||
+      timerPhase === "finished"
+    ) {
+      return;
+    }
+
+    const pcs = new Set(heldNotes.map((n) => ((n % 12) + 12) % 12));
+
+    if (pcs.size === 0) {
+      if (timerPhase === "armed") {
+        timerArm();
+      } else if (timerPhase === "success") {
+        // Safety net: if the last-rep finishRound from onSuccess somehow
+        // missed, still complete the round instead of arming another rep.
+        if (repCountRef.current >= currentRepTargetRef.current) {
+          timerFinishRound();
+        } else {
+          timerNextRep();
+          timerArm();
+        }
+      }
+      return;
+    }
+
+    if (timerPhase === "timing") {
+      const result = evaluateChordAttempt(targetPcs, pcs, {
+        requireExact: settings.requireExactNotes,
+      });
+      if (result.correct) {
+        timerMarkSuccess();
+      }
+    }
+  }, [
+    heldNotes,
+    running,
+    targetPcs,
+    settings.requireExactNotes,
+    timerPhase,
+    timerArm,
+    timerNextRep,
+    timerFinishRound,
+    timerMarkSuccess,
+  ]);
 
   const qualityListLengthRef = useRef(currentQualityList.length);
   useEffect(() => {

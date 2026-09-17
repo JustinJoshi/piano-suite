@@ -1,4 +1,3 @@
-import { DEFAULT_ANKI_CONNECT_URL } from "@/lib/anki";
 
 /**
  * Self-contained setup prompt for the "let your computer assistant do it"
