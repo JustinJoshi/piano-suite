@@ -78,7 +78,7 @@ export type ComponentManifest = {
 export type WiringIssue = {
   blockId: string;
   type: string;
-  issue: "unmet_requirement" | "unconsumed_output" | "orphan_transform";
+  issue: "unmet_requirement" | "orphan_transform";
   detail: string;
 };
 

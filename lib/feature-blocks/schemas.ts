@@ -18,7 +18,7 @@ import { normalizeScaleLibraryConfig } from "./scale-library/config";
 import { normalizeNoteRollConfig } from "./note-roll/config";
 import { normalizePieceLibraryConfig } from "./piece-library/config";
 import { normalizeFreePlayConfig } from "./free-play/config";
-import { normalizeSize } from "../workshop-grid";
+import { normalizeSize, type BlockSize } from "../workshop-grid";
 
 /**
  * Server-safe validation for stored practice pages.
@@ -65,6 +65,8 @@ export type ValidatedBlock = {
   type: string;
   version: number;
   config: Record<string, unknown>;
+  /** Grid span attached by `normalizeSize` when the stored block carries one. */
+  size?: BlockSize;
 };
 
 export type ValidatedPage = {

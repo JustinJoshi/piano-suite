@@ -7,9 +7,9 @@ import type { ValidatedBlock } from "@/lib/feature-blocks/schemas";
 import { MAX_GRID_COLUMNS, MAX_HEIGHT, type BlockSize } from "@/lib/workshop-grid";
 
 /**
- * `normalizeStoredBlock` attaches `size` at runtime (see schemas.ts) but the
- * declared `ValidatedBlock` return type doesn't list it yet, so tests read it
- * through this narrow cast rather than widening the production type.
+ * `normalizeStoredBlock` attaches `size` at runtime (see schemas.ts); the
+ * declared `ValidatedBlock` type now includes it, and this helper keeps the
+ * optional read explicit at assertion sites.
  */
 function sizeOf(block: ValidatedBlock | null): BlockSize | undefined {
   return (block as (ValidatedBlock & { size?: BlockSize }) | null)?.size;
@@ -109,5 +109,22 @@ describe("normalizeStoredPage size round-trip", () => {
 
     expect(page).not.toBeNull();
     expect(page?.blocks).toHaveLength(1);
+  });
+});
+
+// `ValidatedBlock` declares the `size` that `normalizeStoredBlock` attaches
+// at runtime (PR #95 typecheck finding): the typed read below is the point.
+describe("ValidatedBlock declares the runtime size field", () => {
+  it("carries the normalized size as a BlockSize on a known-good input", () => {
+    const block = normalizeStoredBlock({
+      id: "b1",
+      type: "metronome",
+      version: 1,
+      config: {},
+      size: { w: 3, h: 2 },
+    });
+
+    const size: BlockSize | undefined = block?.size;
+    expect(size).toEqual({ w: 3, h: 2 });
   });
 });

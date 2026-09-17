@@ -13,6 +13,7 @@ import {
 import { SortableContext, rectSortingStrategy, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { cn } from "@/lib/utils";
 import type { FeatureBlock } from "@/lib/feature-blocks/types";
+import type { WiringIssue } from "@/lib/feature-blocks/manifest-types";
 import { MAX_GRID_COLUMNS, ROW_UNIT_PX, reorderBlocks } from "@/lib/workshop-grid";
 import { WorkshopTile } from "./workshop-tile";
 
@@ -25,6 +26,8 @@ type GridCallbacks = {
 
 type GridBodyProps = GridCallbacks & {
   blocks: FeatureBlock[];
+  /** Wiring issues per block id, keyed once so props stay flat. */
+  issuesByBlockId?: Map<string, WiringIssue[]>;
   /** True while a drag is in progress; reveals the grid chrome. */
   gridActive: boolean;
   /** Force the grid guides on (empty workshop shows the canvas). */
@@ -39,6 +42,7 @@ type GridBodyProps = GridCallbacks & {
  */
 export function GridBody({
   blocks,
+  issuesByBlockId,
   gridActive,
   showGuides = false,
   fill = false,
@@ -85,6 +89,7 @@ export function GridBody({
           <WorkshopTile
             key={block.id}
             block={block}
+            issues={issuesByBlockId?.get(block.id)}
             onResize={onResize}
             onDuplicate={onDuplicate}
             onRemove={onRemove}
@@ -98,6 +103,8 @@ export function GridBody({
 
 type WorkshopGridProps = GridCallbacks & {
   blocks: FeatureBlock[];
+  /** Wiring issues per block id, keyed once so props stay flat. */
+  issuesByBlockId?: Map<string, WiringIssue[]>;
   onReorder: (blocks: FeatureBlock[]) => void;
   /** Force the grid guides on (empty workshop shows the canvas). */
   showGuides?: boolean;
@@ -111,6 +118,7 @@ type WorkshopGridProps = GridCallbacks & {
  */
 export function WorkshopGrid({
   blocks,
+  issuesByBlockId,
   onReorder,
   onResize,
   onDuplicate,
@@ -152,6 +160,7 @@ export function WorkshopGrid({
     >
       <GridBody
         blocks={blocks}
+        issuesByBlockId={issuesByBlockId}
         gridActive={gridActive}
         showGuides={showGuides}
         fill={fill}

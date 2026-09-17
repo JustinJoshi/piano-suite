@@ -129,6 +129,9 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `lib/feature-blocks/keyboard-display/*` | On-screen keyboard block: config (low note, octaves, note names, computer keys) + pure key geometry (`buildKeyboardLayout`, home-row A W S E D… mapping) |
 | `components/feature-blocks/keyboard-display-block.tsx` | Click/touch/QWERTY piano that injects notes via `pressVirtualNote`; `MidiConnectionBar` embeds it whenever no hardware is connected so every drill works without a controller |
 | `lib/marketplace-seeds.ts` | Featured pages that ship with the app so `/marketplace` is never empty; first-person author notes, registry-valid blocks |
+| `lib/feature-blocks/validate-arrangement.ts` | Pure `validateArrangement(blocks)` → `ArrangementResult`; discriminate on `status` (`"valid"` / `"invalid"` carrying `WiringIssue[]`), never `issues.length` |
+| `app/api/blocks/route.ts` | Public `GET /api/blocks` — the Workshop block catalogue (`describeRegistryForAgent()`); deploy-time-static, `cache-control: public, max-age=3600, stale-while-revalidate=86400`; authorizes itself via `auth()` + `authorizeBlocksApiAccess` despite being public |
+| `lib/blocks-api-auth.ts` | `authorizeBlocksApiAccess` — explicit public-policy decision for `/api/blocks`, shape parity with `authorizeChatAccess`; the route still calls `auth()` so the policy is enforced, not inherited |
 
 ## Welcome / onboarding conventions
 
@@ -157,6 +160,7 @@ The block library is the bottleneck (audit `04-roadmap.md`), so adding a block s
 6. **Scoring is per target block.** `requireExact` defaults to `true` for single-note targets (a scale step) and `false` for chords; reuse `scoringFields` from `lib/feature-blocks/coerce.ts` so the settings read the same everywhere.
 7. **Known limitation:** the runtime scores pitch classes, so octave, voicing, fingering, and hand separation are *not* verified. Chord inversions can be prompted but not graded until `ChordTarget` grows an optional voicing-aware field.
 8. **Displays read the stream, not fixtures.** A block that renders content calls `useNoteStream()`; `buildStream` (source generators in page order, transforms in page order) composes it and the runtime context carries it. `previewNotes` is for library previews only, where no page context exists. `PracticeNote` lives in `lib/practice-note.ts`; `build-stream.ts` and its dispatch maps live outside the Convex bundle. Manifest `status` must stay truthful: `stable` only if the block reads or writes the runtime (registry parity enforces it; shipped page chrome is the only exemption).
+9. **Wiring problems are guidance, not enforcement.** `PracticePageEditor` memoises `validateArrangement` and passes `issuesByBlockId: Map<blockId, WiringIssue[]>` once through `WorkshopGrid` to `WorkshopTile`, which renders a muted plain-language notice mapped over the two-member `WiringIssue` union (`unmet_requirement`, `orphan_transform`). A tile with issues still renders and the page still saves — the notice explains, it never blocks.
 
 ## Keyboard conventions (Workshop-first)
 

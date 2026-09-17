@@ -837,6 +837,47 @@ than around a generic dashboard.
   preserved; `e2e/theme.spec.ts` gained the Ivory entry and the new
   primary hexes.
 
+## Stage 2, phase 2.5 — expose the registry to agents (2026-09)
+
+Phase 2.5
+([`docs/stage-2/phase-2.5-agent-surface/PLAN.md`](stage-2/phase-2.5-agent-surface/PLAN.md))
+shipped the agent-surface substrate: the registry became machine-readable
+over HTTP and wiring problems became visible in the editor. Substrate only —
+no model call, no prompt, no tool loop; the arranging agent itself stays in
+Audit Phase 5.
+
+- **One gate for arrangements.** `validateArrangement(blocks)`
+  (`lib/feature-blocks/validate-arrangement.ts`) wraps `validatePageWiring`
+  in a discriminated result (`"valid"`, or `"invalid"` carrying
+  `WiringIssue[]`) instead of an empty-array check; it is pure, React-free,
+  and safe to call from both a route handler and a component. The dead
+  `"unconsumed_output"` variant was removed from the `WiringIssue` union —
+  the shipped union is `"unmet_requirement" | "orphan_transform"` (the
+  plan's prose still sketches a third member; the code is authoritative).
+- **The catalogue is public, on purpose.** `GET /api/blocks` serves
+  `describeRegistryForAgent()` — all twenty blocks with kind, accepts,
+  outputs, requires, and configSpec — under deploy-time-static cache headers
+  (`public, max-age=3600, stale-while-revalidate=86400`). The route states
+  its public policy in the doc comment and still authorizes itself through
+  `auth()` + `authorizeBlocksApiAccess` (`lib/blocks-api-auth.ts`, shaped
+  after `lib/chat-auth.ts`) so the policy is enforced, not inherited
+  (AGENTS.md requires every API handler to authorize itself). Nothing in
+  the editor fetches it.
+- **Wiring problems speak plainly.** The practice-page editor memoises
+  `validateArrangement` and passes one `Map<blockId, WiringIssue[]>` through
+  `WorkshopGrid` to `WorkshopTile`, which renders a muted plain-language
+  notice per affected tile. Guidance, not enforcement: the tile still
+  renders and the page still saves.
+- **Type fix (operator-ordered).** `ValidatedBlock` now declares the
+  `size?: BlockSize` that `normalizeSize` already attaches at runtime,
+  closing the PR #95 typecheck finding.
+
+Verification: full gate at final HEAD (`npm run lint` 0 errors,
+`npm run test:unit:run` 1401 passed, `npm run build` exit 0), the
+API-boundary e2e specs (50 passed), the axe a11y spec (zero serious/critical
+on the Workshop), and a production-build `curl` of `/api/blocks` (HTTP 200
+with the catalogue body).
+
 ## Roadmap
 
 - [x] Scaffold Next.js + Tailwind + shadcn/ui
