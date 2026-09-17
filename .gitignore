@@ -82,3 +82,4 @@ skills-lock.json
 
 # demo video (repo bloat; keep local only)
 /public/demo-web.mp4
+# paseo-delegate run artefacts — local-only, like .ideas/
