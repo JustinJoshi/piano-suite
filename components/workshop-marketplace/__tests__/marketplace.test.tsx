@@ -104,7 +104,7 @@ describe("Marketplace", () => {
     vi.unstubAllGlobals();
   });
 
-  it("renders the two tiers: 16 interactive cards and 4 quiet rows", () => {
+  it("renders the two tiers: 16 interactive cards and 5 quiet rows", () => {
     renderMarketplace();
 
     // Interactive tier: exactly the 16 interactive cards.
@@ -121,7 +121,7 @@ describe("Marketplace", () => {
     expect(screen.queryAllByTestId(/marketplace-row-/).map((el) => el.getAttribute("data-testid"))).toEqual(
       expect.arrayContaining(rowIds)
     );
-    expect(screen.getAllByTestId(/marketplace-row-/)).toHaveLength(4);
+    expect(screen.getAllByTestId(/marketplace-row-/)).toHaveLength(5);
   });
 
   it("mounts 16 live previews (cards only) and no secondary previews", () => {

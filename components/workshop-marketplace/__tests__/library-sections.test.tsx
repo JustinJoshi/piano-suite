@@ -25,7 +25,7 @@ vi.mock("@/convex/_generated/api", () => ({
 }));
 
 // Pinned by type to the manifest distribution: 16 interactive cards,
-// 3 sources + 1 transform.
+// 3 sources + 2 transforms.
 const INTERACTIVE_TYPES = [
   "metronome",
   "drillTimer",
@@ -50,6 +50,7 @@ const SECONDARY_TYPES = [
   "scaleLibrary",
   "pieceLibrary",
   "rhythmPattern",
+  "sectionLoop",
 ];
 
 function blockOf(type: string): FeatureBlock {
@@ -110,7 +111,7 @@ describe("LibrarySections", () => {
     renderLibrary();
 
     expect(screen.getByTestId("library-result-count")).toHaveTextContent(
-      "Showing all 20 blocks"
+      "Showing all 21 blocks"
     );
     expect(screen.getByTestId("supplementary-toggle")).toHaveAttribute(
       "aria-expanded",
@@ -140,14 +141,14 @@ describe("LibrarySections", () => {
     expect(screen.getByTestId("bpm-display")).toHaveTextContent("120 BPM");
   });
 
-  it("renders exactly the 4 supplementary rows without any preview surface", () => {
+  it("renders exactly the 5 supplementary rows without any preview surface", () => {
     const { container } = renderLibrary();
     expandSecondarySection();
 
     const rowTestIds = screen
       .getAllByTestId(/marketplace-row-/)
       .map((el) => el.getAttribute("data-testid"));
-    expect(rowTestIds).toHaveLength(4);
+    expect(rowTestIds).toHaveLength(5);
     expect(rowTestIds).toEqual(
       expect.arrayContaining(
         SECONDARY_TYPES.map((type) => `marketplace-row-${type}`)
@@ -220,7 +221,7 @@ describe("LibrarySections", () => {
       "true"
     );
     expect(screen.getByTestId("library-result-count")).toHaveTextContent(
-      "Showing 1 of 20 blocks"
+      "Showing 1 of 21 blocks"
     );
     expect(container.querySelectorAll("[data-testid^='marketplace-preview-']")).toHaveLength(0);
   });
@@ -235,7 +236,7 @@ describe("LibrarySections", () => {
     expandSecondarySection();
 
     // Category "rhythm": metronome, midi connection, rest timer, transport
-    // cards + the rhythm pattern row.
+    // cards + the rhythm pattern and section loop rows.
     expect(screen.getByTestId("marketplace-card-metronome")).toBeInTheDocument();
     expect(screen.getByTestId("marketplace-card-midiConnectionBar")).toBeInTheDocument();
     expect(screen.getByTestId("marketplace-card-restTimer")).toBeInTheDocument();
@@ -243,7 +244,7 @@ describe("LibrarySections", () => {
     expect(screen.queryByTestId("marketplace-card-drillTimer")).not.toBeInTheDocument();
     expect(screen.getByTestId("marketplace-row-rhythmPattern")).toBeInTheDocument();
     expect(screen.getByTestId("library-result-count")).toHaveTextContent(
-      "Showing 5 of 20 blocks"
+      "Showing 6 of 21 blocks"
     );
     expect(container.querySelectorAll("[data-testid^='marketplace-preview-']")).toHaveLength(4);
   });
@@ -263,7 +264,7 @@ describe("LibrarySections", () => {
     expect(screen.getByTestId("marketplace-row-pieceLibrary")).toBeInTheDocument();
     expect(screen.queryByTestId("marketplace-row-rhythmPattern")).not.toBeInTheDocument();
     expect(screen.getByTestId("library-result-count")).toHaveTextContent(
-      "Showing 3 of 20 blocks"
+      "Showing 3 of 21 blocks"
     );
     expect(container.querySelectorAll("[data-testid^='marketplace-preview-']")).toHaveLength(0);
   });
