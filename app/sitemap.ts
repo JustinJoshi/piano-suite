@@ -20,6 +20,7 @@ const routes: Array<{
   { path: "/marketplace", changeFrequency: "weekly", priority: 0.8 },
   { path: "/routes", changeFrequency: "monthly", priority: 0.7 },
   { path: "/pricing", changeFrequency: "monthly", priority: 0.7 },
+  { path: "/articles", changeFrequency: "monthly", priority: 0.6 },
   { path: "/terms", changeFrequency: "yearly", priority: 0.3 },
   { path: "/privacy", changeFrequency: "yearly", priority: 0.3 },
 ];
