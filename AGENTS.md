@@ -69,7 +69,7 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `lib/ambient-effects.ts` | Per-route ambient backgrounds + float panel settings, soft viz defaults |
 | `hooks/useAmbientEffects.ts` | `AmbientEffectsProvider` + hook; localStorage always; Convex when `canPersist` |
 | `components/ambient/*` | Root ambient host, renderer, background, float panel |
-| `hooks/useAuthAccess.ts` | Shared Clerk gate: `canAccess` / `canPersist` (Pro `sync` or `AUTH_DISABLED`) |
+| `hooks/useAuthAccess.ts` | Shared Clerk gate: `canAccess` / `canPersist` (Pro `sync` or `AUTH_DISABLED`). `canPersist` gates sync, prefs and history — **not publishing**: `publishCustomDrill` / `unpublishCustomDrill` / `reportPublicDrill` in `convex/workshop.ts` use plain sign-in gates (`ensureUserId` / anonymous-allowed) |
 | `hooks/useToolUserReady.ts` | Ensures Convex user row when signed in; ready immediately when auth is disabled |
 | `components/ensure-signed-in-user.tsx` | Bootstraps Convex `users` row on Clerk sign-in (homepage settings before tools) |
 | `lib/auth-disabled.ts` | Opt-in bypass: `isAuthDisabled()` (`=== "true"` only) for client UI; `isAuthBypassEffective()` for server gates — never true when `VERCEL_ENV === "production"`. Hobby Vercel may set temporarily (see README Deploy) |
@@ -187,8 +187,9 @@ Auth helpers live in `convex/lib/auth.ts`. Do not re-implement a local `currentU
 2. **Mutations use `ensureUserId(ctx)`.** It creates the `users` row on first write, so a write can never lose a race with the client-side bootstrap. Use `requireUserId(ctx)` only when creating the row would be wrong.
 3. **Never throw into a root provider.** `AmbientEffectsProvider` and the theme hooks query Convex from the root layout, so a thrown query error unmounts the entire app. This is exactly what caused the post-login blank page on preview deploys.
 4. **Add `returns` validators** to new public queries and mutations.
-5. **Cover auth edge cases with `convex-test`.** See `convex/__tests__/settings-auth.test.ts` for the no-identity / no-user-row / first-write cases.
-6. **CI uses a separate Clerk development instance.** `convex/auth.config.js` reads `CLERK_FRONTEND_API_URL_EXTRA` as a comma-separated list of additional Clerk issuers so the CI test user can authenticate against the same Convex deployment. Production traffic should use the primary `CLERK_FRONTEND_API_URL`.
+5. **Publishing is free for signed-in users.** `publishCustomDrill`, `unpublishCustomDrill`, and `reportPublicDrill` in `convex/workshop.ts` use `ensureUserId` (or none, for the anonymous-allowed report); `ensureUserIdWithSync` stays on `upsertCustomDrill` / `deleteCustomDrill` because cross-device sync is Pro. `canPersist` gates sync, prefs and history — never publishing. Report hiding: `reportPublicDrill` auto-hides a page at `REPORT_HIDE_THRESHOLD = 3`; republishing does not un-hide it.
+6. **Cover auth edge cases with `convex-test`.** See `convex/__tests__/settings-auth.test.ts` for the no-identity / no-user-row / first-write cases.
+7. **CI uses a separate Clerk development instance.** `convex/auth.config.js` reads `CLERK_FRONTEND_API_URL_EXTRA` as a comma-separated list of additional Clerk issuers so the CI test user can authenticate against the same Convex deployment. Production traffic should use the primary `CLERK_FRONTEND_API_URL`.
 
 ## Naming conventions
 
