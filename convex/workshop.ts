@@ -536,13 +536,13 @@ export const reportPublicDrill = mutation({
     const reportCount = (row.reportCount ?? 0) + 1;
     const hidden = reportCount >= REPORT_HIDE_THRESHOLD;
 
+    // `reason` is accepted and capped by the validator boundary but not
+    // persisted — no moderation storage is authorized yet.
+    void args.reason?.slice(0, MAX_REPORT_REASON_LENGTH);
+
     await ctx.db.patch("customDrills", args.drillId, {
       reportCount,
       hidden,
-      // Reason is stored truncated; it informs human moderation later.
-      ...(args.reason !== undefined
-        ? { reason: args.reason.slice(0, MAX_REPORT_REASON_LENGTH) }
-        : {}),
     });
 
     return { reportCount, hidden };

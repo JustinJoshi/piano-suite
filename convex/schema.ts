@@ -102,8 +102,6 @@ export default defineSchema({
     // page auto-hides from the marketplace (convex/workshop.ts).
     reportCount: v.optional(v.number()),
     hidden: v.optional(v.boolean()),
-    // Free-text context attached to the latest report (truncated to 300).
-    reason: v.optional(v.string()),
     forkedFrom: v.optional(v.id("customDrills")),
     authorName: v.optional(v.string()),
     createdAt: v.number(),
