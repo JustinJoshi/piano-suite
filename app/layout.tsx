@@ -59,6 +59,7 @@ export const metadata: Metadata = {
       "A free workshop for building your own piano practice. Start with a ready-made drill, or snap components together into the session you need today.",
     url: "/",
     siteName: "Piano Suite",
+    images: ["/opengraph-image"],
     type: "website",
   },
   twitter: {

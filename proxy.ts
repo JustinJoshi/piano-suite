@@ -61,6 +61,7 @@ export default clerkMiddleware(
 
     const isPublicRoute =
       pathname === "/" ||
+      pathname === "/opengraph-image" || // Link-preview image must be fetchable by social crawlers
       pathname === "/pricing" ||
       pathname === "/tools/chladni" ||
       publicDrillRoutes.includes(pathname) ||
