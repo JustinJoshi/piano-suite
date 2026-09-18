@@ -30,6 +30,7 @@ describe("analytics", () => {
       "door_clicked",
       "page_created",
       "block_added",
+      "page_published",
     ]);
   });
 

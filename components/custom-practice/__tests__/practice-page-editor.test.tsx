@@ -469,11 +469,12 @@ describe("PracticePageEditor", () => {
       </AudioSettingsProvider>
     );
 
-    expect(screen.queryByText(/Upgrade to Pro to publish/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/to publish this page to the community/i)).not.toBeInTheDocument();
 
     openPagesMenu();
     fireEvent.click(screen.getByRole("button", { name: /share page/i }));
 
-    expect(screen.getByText(/Upgrade to Pro to publish/i)).toBeInTheDocument();
+    expect(screen.getByText(/to publish this page to the community/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Upgrade to Pro/i)).not.toBeInTheDocument();
   });
 });
