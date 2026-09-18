@@ -125,6 +125,61 @@ describe("WorkshopTile", () => {
     expect(bpmIds[0]).toContain("tile-a");
     expect(bpmIds[1]).toContain("tile-b");
   });
+  it("emits onResize once when two pointer moves land on the same grid size", () => {
+    const onResize = vi.fn();
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
+      width: 400,
+      height: 160,
+      top: 0,
+      left: 0,
+      bottom: 160,
+      right: 400,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    } as DOMRect);
+
+    renderTile(tileBlock("tile-1", { w: 2, h: 1 }), { onResize });
+
+    fireEvent.pointerDown(screen.getByLabelText("Resize tile"), {
+      clientX: 0,
+      clientY: 0,
+    });
+    // matchMedia reports no match → 1 active column → cell width 400px.
+    fireEvent.pointerMove(window, { clientX: 410, clientY: 0 });
+    expect(onResize).toHaveBeenCalledTimes(1);
+    expect(onResize).toHaveBeenCalledWith("tile-1", { w: 3, h: 1 });
+
+    fireEvent.pointerMove(window, { clientX: 500, clientY: 0 });
+    expect(onResize).toHaveBeenCalledTimes(1);
+  });
+
+  it("ends the resize on pointercancel so later moves do not fire onResize", () => {
+    const onResize = vi.fn();
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
+      width: 400,
+      height: 160,
+      top: 0,
+      left: 0,
+      bottom: 160,
+      right: 400,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    } as DOMRect);
+
+    renderTile(tileBlock("tile-1", { w: 2, h: 1 }), { onResize });
+
+    fireEvent.pointerDown(screen.getByLabelText("Resize tile"), {
+      clientX: 0,
+      clientY: 0,
+    });
+    fireEvent(window, new Event("pointercancel"));
+    fireEvent.pointerMove(window, { clientX: 410, clientY: 0 });
+
+    expect(onResize).not.toHaveBeenCalled();
+  });
+
   it("resizes from the keyboard via gear-panel width and height fields", () => {
     const onResize = vi.fn();
     renderTile(tileBlock("tile-1", { w: 2, h: 1 }), { onResize });
