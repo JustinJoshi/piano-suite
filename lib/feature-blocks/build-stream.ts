@@ -31,8 +31,9 @@ type TransformFn = (
 const SOURCES: Record<string, SourceFn> = {
   chordLibrary: (raw) => generateChords(normalizeChordLibraryConfig(raw)),
   scaleLibrary: (raw) => generateScale(normalizeScaleLibraryConfig(raw)),
-  // pieceLibrary adapts an uploaded MIDI file, which lives outside block
-  // config, so it cannot contribute notes to a pure compose.
+  // pieceLibrary has no entry here on purpose: its notes come from an uploaded
+  // MIDI file, which lives outside block config. It contributes through the
+  // runtime source channel instead — see `runtimeNotes` in `composeSources`.
 };
 
 const TRANSFORMS: Record<string, TransformFn> = {
@@ -41,28 +42,59 @@ const TRANSFORMS: Record<string, TransformFn> = {
 };
 
 /**
+ * Walk the page's source blocks in page order and concatenate their notes.
+ * A runtime source block (one with no config-only generator) contributes the
+ * notes registered for its block id in `runtimeNotes`; if nothing is
+ * registered it contributes nothing, exactly as today.
+ */
+export function composeSources(
+  blocks: StreamBlock[],
+  runtimeNotes?: ReadonlyMap<string, PracticeNote[]>
+): PracticeNote[] {
+  const notes: PracticeNote[] = [];
+  for (const block of blocks) {
+    if (getManifest(block.type)?.kind !== "source") continue;
+    const runtime = runtimeNotes?.get(block.id);
+    if (runtime) {
+      notes.push(...runtime);
+      continue;
+    }
+    const generate = SOURCES[block.type];
+    if (generate) notes.push(...generate(block.config));
+  }
+  return notes;
+}
+
+/**
+ * Apply the page's transform blocks in page order to an already-composed
+ * stream. Pure; a transport block's bpm drives transform timing.
+ */
+export function applyTransforms(
+  notes: PracticeNote[],
+  blocks: StreamBlock[],
+  bpm: number
+): PracticeNote[] {
+  let stream = notes;
+  for (const block of blocks) {
+    const apply = TRANSFORMS[block.type];
+    if (apply) stream = apply(stream, block.config, bpm);
+  }
+  return stream;
+}
+
+/**
  * Compose the page's practice stream: every source block's output,
  * concatenated in page order, with every transform block applied in page
  * order. Returns [] when the page has no composable source.
  */
 export function buildStream(
   blocks: StreamBlock[],
-  bpm?: number
+  bpm?: number,
+  runtimeNotes?: ReadonlyMap<string, PracticeNote[]>
 ): PracticeNote[] {
-  const tempo = bpm ?? DEFAULT_BPM;
-
-  const notes: PracticeNote[] = [];
-  for (const block of blocks) {
-    if (getManifest(block.type)?.kind !== "source") continue;
-    const generate = SOURCES[block.type];
-    if (generate) notes.push(...generate(block.config));
-  }
-
-  let stream = notes;
-  for (const block of blocks) {
-    const apply = TRANSFORMS[block.type];
-    if (apply) stream = apply(stream, block.config, tempo);
-  }
-
-  return stream;
+  return applyTransforms(
+    composeSources(blocks, runtimeNotes),
+    blocks,
+    bpm ?? DEFAULT_BPM
+  );
 }

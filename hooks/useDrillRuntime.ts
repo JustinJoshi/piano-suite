@@ -15,7 +15,12 @@ import {
 import { captureEvent } from "@/lib/analytics";
 import { buildStream } from "@/lib/feature-blocks/build-stream";
 import { beatsToMs } from "@/lib/feature-blocks/transport/clock";
-import type { ChordTarget, DrillPhase, DrillRuntimeConfig } from "@/lib/drill-runtime";
+import type {
+  ChordTarget,
+  DrillPhase,
+  DrillRuntimeConfig,
+} from "@/lib/drill-runtime";
+import type { PracticeNote } from "@/lib/practice-note";
 
 function emitAnalytics(name: "drill_started" | "drill_completed", pageId: string) {
   captureEvent(name, pageId ? { pageId } : {});
@@ -46,6 +51,12 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
   // Ordered list of mounted target blocks. The head owns `setTargets`; see
   // `lib/feature-blocks/target-blocks.ts` for why a page has only one owner.
   const [targetSources, setTargetSources] = useState<string[]>([]);
+  // Runtime source blocks' notes by block id: the uploaded-piece channel into
+  // the composed stream. Reference-compared on write so re-registering the
+  // same notes never loops.
+  const [runtimeNotes, setRuntimeNotes] = useState<
+    ReadonlyMap<string, PracticeNote[]>
+  >(new Map());
   const [targetIndex, setTargetIndex] = useState(0);
   const [misses, setMisses] = useState(0);
   const missReportedRef = useRef(false);
@@ -187,6 +198,27 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
 
   const activeTargetSource = targetSources[0] ?? null;
 
+  const setRuntimeSourceNotes = useCallback(
+    (blockId: string, notes: PracticeNote[]) => {
+      setRuntimeNotes((prev) => {
+        if (prev.get(blockId) === notes) return prev;
+        const next = new Map(prev);
+        next.set(blockId, notes);
+        return next;
+      });
+    },
+    []
+  );
+
+  const clearRuntimeSourceNotes = useCallback((blockId: string) => {
+    setRuntimeNotes((prev) => {
+      if (!prev.has(blockId)) return prev;
+      const next = new Map(prev);
+      next.delete(blockId);
+      return next;
+    });
+  }, []);
+
   const start = useCallback(() => {
     setTargetIndex(0);
     setMisses(0);
@@ -216,8 +248,8 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
   // runtimeOptionsFromBlocks memoises the config. A transport block's tempo
   // drives transform timing; pages without one use the composer's default.
   const stream = useMemo(
-    () => buildStream(blocks ?? [], clock?.bpm),
-    [blocks, clock?.bpm]
+    () => buildStream(blocks ?? [], clock?.bpm, runtimeNotes),
+    [blocks, clock?.bpm, runtimeNotes]
   );
 
   useEffect(() => {
@@ -312,6 +344,8 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
       skipTarget,
       registerTargetSource,
       activeTargetSource,
+      setRuntimeSourceNotes,
+      clearRuntimeSourceNotes,
     }),
     [
       timer.phase,
@@ -330,6 +364,8 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
       pageId,
       registerTargetSource,
       activeTargetSource,
+      setRuntimeSourceNotes,
+      clearRuntimeSourceNotes,
     ]
   );
 }

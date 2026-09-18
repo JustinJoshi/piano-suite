@@ -11,15 +11,25 @@ import {
   notesFromParsedMidi,
   streamDurationMs,
 } from "@/lib/feature-blocks/piece-library/adapt";
+import { useRuntimeSource } from "@/hooks/useRuntimeSource";
 import { parseMidiFile, type ParsedMidi } from "@/lib/music-player";
 
 /**
  * Piece library block: source UI. Upload a MIDI file and the block adapts
- * it into the page stream. The file lives in component state — block config
- * is JSON-only, so audio data never serializes into a page.
+ * it into the page stream via `useRuntimeSource`. The file lives in component
+ * state — block config is JSON-only, so audio data never serializes into a
+ * page.
  */
-export function PieceLibraryBlock(raw: Record<string, unknown>) {
-  const config: PieceLibraryConfig = normalizePieceLibraryConfig(raw);
+export function PieceLibraryBlock(
+  raw: Record<string, unknown> & { blockId?: string }
+) {
+  // Memoised on the raw props object: a fresh config object every render
+  // would invalidate the notes memo, and through useRuntimeSource that would
+  // re-compose the page's stream on every render.
+  const config: PieceLibraryConfig = useMemo(
+    () => normalizePieceLibraryConfig(raw),
+    [raw]
+  );
   const [parsed, setParsed] = useState<ParsedMidi | null>(null);
   const [fileName, setFileName] = useState("");
   const [error, setError] = useState("");
@@ -29,6 +39,8 @@ export function PieceLibraryBlock(raw: Record<string, unknown>) {
     () => (parsed ? notesFromParsedMidi(parsed, config) : []),
     [parsed, config]
   );
+
+  const { hasRuntime } = useRuntimeSource(raw.blockId ?? "", notes);
 
   async function onFile(file: File) {
     setError("");
@@ -85,8 +97,10 @@ export function PieceLibraryBlock(raw: Record<string, unknown>) {
       {parsed ? (
         <p className="text-xs text-muted-foreground" data-testid="piece-summary">
           {fileName}: {notes.length} note{notes.length === 1 ? "" : "s"}
-          {seconds > 0 ? `, about ${seconds}s` : ""}. Feed a note roll or
-          target display to practice it.
+          {seconds > 0 ? `, about ${seconds}s` : ""}
+          {hasRuntime
+            ? ". Playing in the page stream below."
+            : ". Feed a note roll or target display to practice it."}
         </p>
       ) : (
         <p className="text-xs text-muted-foreground">
