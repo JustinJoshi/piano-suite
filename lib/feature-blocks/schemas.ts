@@ -19,6 +19,7 @@ import { normalizeNoteRollConfig } from "./note-roll/config";
 import { normalizePieceLibraryConfig } from "./piece-library/config";
 import { normalizeFreePlayConfig } from "./free-play/config";
 import { normalizeSize, type BlockSize } from "../workshop-grid";
+import { getBlockConfigVersion } from "./versions";
 
 /**
  * Server-safe validation for stored practice pages.
@@ -33,6 +34,17 @@ export const MAX_BLOCKS_PER_PAGE = 30;
 export const MAX_BLOCK_CONFIG_BYTES = 8 * 1024;
 
 type BlockNormalizer = (raw: unknown) => Record<string, unknown>;
+
+/**
+ * Migrates one stored block config from `from` to `from + 1`. Chains run on
+ * read in `normalizeStoredBlock` until the config reaches the registered
+ * `configVersion`. Starts empty: add an entry when a block's config shape
+ * changes, keyed by block type, mapping each source version to its step.
+ */
+export const blockMigrators: Record<
+  string,
+  Record<number, (config: Record<string, unknown>) => Record<string, unknown>>
+> = {};
 
 const blockNormalizers: Record<string, BlockNormalizer> = {
   metronome: normalizeMetronomeConfig as BlockNormalizer,
@@ -115,6 +127,8 @@ export function normalizeStoredBlock(raw: unknown): ValidatedBlock | null {
   const normalize = blockNormalizers[type];
   if (!normalize) return null;
 
+  const currentVersion = getBlockConfigVersion(type);
+
   try {
     const serialized = JSON.stringify(block.config ?? {});
     if (serialized.length > MAX_BLOCK_CONFIG_BYTES) return null;
@@ -122,14 +136,32 @@ export function normalizeStoredBlock(raw: unknown): ValidatedBlock | null {
     return null;
   }
 
-  const version = block.version;
   const size = normalizeSize(block.size);
+
+  // Stored versions above the registered current version (written by a newer
+  // build) are retained untouched — dropping the block would lose the user's
+  // tile. Version 1 is the implicit default for legacy blocks missing one.
+  let version = isFiniteInt(block.version, 1, 1000) ? block.version : 1;
+  let config = block.config as Record<string, unknown> | null;
+  if (version < currentVersion) {
+    const steps = blockMigrators[type] ?? {};
+    while (version < currentVersion && steps[version]) {
+      try {
+        config = steps[version](config ?? {});
+        version += 1;
+      } catch {
+        break;
+      }
+    }
+    // No (or a partial) migration chain: fall back to per-block defaults via
+    // the normalizer, keeping the block rather than dropping it.
+  }
 
   return {
     id,
     type,
-    version: isFiniteInt(version, 1, 1000) ? version : 1,
-    config: normalize(block.config),
+    version: version >= currentVersion ? version : currentVersion,
+    config: normalize(config),
     ...(size ? { size } : {}),
   };
 }
