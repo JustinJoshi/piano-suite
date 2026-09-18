@@ -82,3 +82,18 @@ export function beatInBar(beatPosition: number, beatsPerBar: number): number {
 export function barNumber(beatPosition: number, beatsPerBar: number): number {
   return Math.floor(beatPosition / beatsPerBar);
 }
+
+/**
+ * Effective bpm after `repsCompleted` reps of a tempo ramp from `startBpm`
+ * toward `targetBpm`, spanning `rampOverReps` reps (default 8). Linear, and
+ * clamped to the target — never past it, never back toward the start.
+ */
+export function rampedBpm(
+  startBpm: number,
+  targetBpm: number,
+  repsCompleted: number,
+  rampOverReps = 8
+): number {
+  if (targetBpm === startBpm) return startBpm;
+  return rampTempo(startBpm, targetBpm, repsCompleted / rampOverReps);
+}

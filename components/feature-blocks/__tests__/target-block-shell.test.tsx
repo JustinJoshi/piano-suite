@@ -34,6 +34,8 @@ function createRuntime(overrides: Partial<DrillRuntime> = {}): DrillRuntime {
     setTargets: () => {},
     skipTarget: () => {},
     registerTargetSource: () => () => {},
+    setRuntimeSourceNotes: () => {},
+    clearRuntimeSourceNotes: () => {},
     activeTargetSource: "chordSet",
     ...overrides,
   };

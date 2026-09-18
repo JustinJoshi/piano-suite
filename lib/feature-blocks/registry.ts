@@ -13,12 +13,14 @@ import {
   Coffee,
   Gauge,
   Music4,
+  Repeat,
   Crosshair,
   Layers,
   Activity,
   Disc3,
   Film,
   Waves,
+  PlayCircle,
 } from "lucide-react";
 import { MetronomeBlock } from "@/components/feature-blocks/metronome-block";
 import { DrillTimerBlock } from "@/components/feature-blocks/drill-timer-block";
@@ -102,8 +104,14 @@ import {
   normalizeRhythmPatternConfig,
   rhythmPatternFields,
 } from "@/lib/feature-blocks/rhythm-pattern/config";
+import {
+  sectionLoopDefaultConfig,
+  normalizeSectionLoopConfig,
+  sectionLoopFields,
+} from "@/lib/feature-blocks/section-loop/config";
 import { TransportBlock } from "@/components/feature-blocks/transport-block";
 import { RhythmPatternBlock } from "@/components/feature-blocks/rhythm-pattern-block";
+import { SectionLoopBlock } from "@/components/feature-blocks/section-loop-block";
 import {
   targetDisplayDefaultConfig,
   normalizeTargetDisplayConfig,
@@ -140,6 +148,12 @@ import {
   freePlayFields,
 } from "@/lib/feature-blocks/free-play/config";
 import { FreePlayBlock } from "@/components/feature-blocks/free-play-block";
+import { SongPlayerBlock } from "@/components/feature-blocks/song-player-block";
+import {
+  songPlayerDefaultConfig,
+  normalizeSongPlayerConfig,
+  songPlayerFields,
+} from "@/lib/feature-blocks/song-player/config";
 import type { ComponentType } from "react";
 import type { FeatureDefinition } from "@/lib/feature-blocks/types";
 import { blockConfigVersions } from "@/lib/feature-blocks/versions";
@@ -329,6 +343,18 @@ export const featureRegistry = {
     normalizeConfig: normalizeRhythmPatternConfig,
     component: RhythmPatternBlock as ComponentType<Record<string, unknown>>,
   } satisfies FeatureDefinition<Record<string, unknown>>,
+  sectionLoop: {
+    type: "sectionLoop",
+    category: "rhythm",
+    label: "Section loop",
+    description:
+      "Practise bars N–M of the incoming stream, repeated — one section at a time.",
+    icon: Repeat,
+    fields: sectionLoopFields,
+    defaultConfig: sectionLoopDefaultConfig,
+    normalizeConfig: normalizeSectionLoopConfig,
+    component: SectionLoopBlock as ComponentType<Record<string, unknown>>,
+  } satisfies FeatureDefinition<Record<string, unknown>>,
   targetDisplay: {
     type: "targetDisplay",
     category: "technique",
@@ -405,6 +431,19 @@ export const featureRegistry = {
     defaultConfig: freePlayDefaultConfig,
     normalizeConfig: normalizeFreePlayConfig,
     component: FreePlayBlock as ComponentType<Record<string, unknown>>,
+  } satisfies FeatureDefinition<Record<string, unknown>>,
+
+  songPlayer: {
+    type: "songPlayer",
+    category: "technique",
+    label: "Song player",
+    description:
+      "Upload a MIDI or audio file and play it back through the piano sound while you follow along.",
+    icon: PlayCircle,
+    fields: songPlayerFields,
+    defaultConfig: songPlayerDefaultConfig,
+    normalizeConfig: normalizeSongPlayerConfig,
+    component: SongPlayerBlock as ComponentType<Record<string, unknown>>,
   } satisfies FeatureDefinition<Record<string, unknown>>,
 };
 

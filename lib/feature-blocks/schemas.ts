@@ -12,12 +12,14 @@ import { normalizeSessionStatsConfig } from "./session-stats/config";
 import { normalizeRestTimerConfig } from "./rest-timer/config";
 import { normalizeTransportConfig } from "./transport/config";
 import { normalizeRhythmPatternConfig } from "./rhythm-pattern/config";
+import { normalizeSectionLoopConfig } from "./section-loop/config";
 import { normalizeTargetDisplayConfig } from "./target-display/config";
 import { normalizeChordLibraryConfig } from "./chord-library/config";
 import { normalizeScaleLibraryConfig } from "./scale-library/config";
 import { normalizeNoteRollConfig } from "./note-roll/config";
 import { normalizePieceLibraryConfig } from "./piece-library/config";
 import { normalizeFreePlayConfig } from "./free-play/config";
+import { normalizeSongPlayerConfig } from "./song-player/config";
 import { normalizeSize, type BlockSize } from "../workshop-grid";
 import { getBlockConfigVersion } from "./versions";
 
@@ -61,12 +63,14 @@ const blockNormalizers: Record<string, BlockNormalizer> = {
   restTimer: normalizeRestTimerConfig as BlockNormalizer,
   transport: normalizeTransportConfig as BlockNormalizer,
   rhythmPattern: normalizeRhythmPatternConfig as BlockNormalizer,
+  sectionLoop: normalizeSectionLoopConfig as BlockNormalizer,
   targetDisplay: normalizeTargetDisplayConfig as BlockNormalizer,
   chordLibrary: normalizeChordLibraryConfig as BlockNormalizer,
   scaleLibrary: normalizeScaleLibraryConfig as BlockNormalizer,
   noteRoll: normalizeNoteRollConfig as BlockNormalizer,
   pieceLibrary: normalizePieceLibraryConfig as BlockNormalizer,
   freePlay: normalizeFreePlayConfig as BlockNormalizer,
+  songPlayer: normalizeSongPlayerConfig as BlockNormalizer,
 };
 
 /** The block types `normalizeStoredBlock` will accept. */

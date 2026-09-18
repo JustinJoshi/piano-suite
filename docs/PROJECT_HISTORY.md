@@ -900,6 +900,36 @@ beyond `lib/marketplace-seeds.ts`.
   Justin may want to tune the threshold and add moderation before launch.
 - **Docs, not behaviour.** Pricing, AGENTS.md, and the README marketplace
   description were corrected to match; `BILLING_ENABLED` is untouched.
+## Batch C — songs: an uploaded piece becomes a practice page (2026-09)
+
+Roadmap Batch C set one goal: make a real piece practisable. Five phases on
+`fleet/songs` delivered it, and the featured marketplace page **"Learn a piece,
+one section at a time"** (`piece-trainer` in `lib/marketplace-seeds.ts`)
+assembles the whole workflow — the demo that explains the product.
+
+The beginner workflow is now: open the Workshop, fork the piece-trainer page,
+upload any MIDI file into the Piece library block, and practice. Bars 1–4 loop
+four times while the Transport's tempo ramp climbs from 60 toward 84 BPM run by
+run; the Note roll shows what is falling toward the hit line and the on-screen
+keyboard rings what you play — no MIDI controller required.
+
+Under the hood, four capabilities shipped across the phase:
+
+- **Runtime source channel** — `buildStream(blocks, bpm, runtimeNotes)`
+  splits into pure `composeSources` + `applyTransforms`; a source block can
+  register notes at runtime (`useRuntimeSource`), so an uploaded piece's notes
+  finally reach every display block instead of dying in component state.
+- **`sectionLoop` transform** — keeps notes whose onset falls in a bar window,
+  rebases to zero, and repeats the window; practise bars N–M of anything.
+- **A tempo ramp that ramps** — `rampedBpm` in `lib/feature-blocks/transport/clock.ts`
+  makes the Transport's ramp settings drive the clock window and the stream;
+  previously they were editable but inert.
+- **`songPlayer` block** — the existing music player demoted into a Workshop
+  tile (no second `MusicPlayerProvider`).
+
+Verification: `npm run lint`, `npm run typecheck`, `npm run test:unit:run`,
+`npm run build` green at final HEAD, plus
+`e2e/workshop-marketplace.spec.ts` per phase.
 
 ## Roadmap
 

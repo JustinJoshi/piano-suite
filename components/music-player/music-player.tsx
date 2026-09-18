@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -24,7 +24,17 @@ function formatTime(seconds: number): string {
   return `${m}:${rem.toString().padStart(2, "0")}`;
 }
 
-export function MusicPlayer({ className }: { className?: string }) {
+export function MusicPlayer({
+  className,
+  showUpload = true,
+  autoPlayOnLoad = false,
+}: {
+  className?: string;
+  /** Show the upload / replace controls. */
+  showUpload?: boolean;
+  /** Start playing as soon as a newly loaded file is ready. */
+  autoPlayOnLoad?: boolean;
+}) {
   const {
     file,
     state,
@@ -44,6 +54,24 @@ export function MusicPlayer({ className }: { className?: string }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const readyOrPlaying = state === "ready" || state === "playing" || state === "paused";
+
+  // Auto-play once the provider finishes loading the file. The provider owns
+  // the load lifecycle (async parse), so this fires on its `ready` state
+  // rather than racing `loadFile`.
+  const autoPlayRef = useRef(false);
+  useEffect(() => {
+    if (state === "loading") {
+      autoPlayRef.current = true;
+      return;
+    }
+    if (state === "ready" && autoPlayRef.current && autoPlayOnLoad) {
+      autoPlayRef.current = false;
+      play();
+    }
+    if (state !== "ready") {
+      autoPlayRef.current = false;
+    }
+  }, [state, autoPlayOnLoad, play]);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const uploaded = e.target.files?.[0];
@@ -74,16 +102,18 @@ export function MusicPlayer({ className }: { className?: string }) {
         />
 
         {!file ? (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => inputRef.current?.click()}
-            data-testid="music-upload-btn"
-          >
-            <Upload className="mr-1.5 h-3.5 w-3.5" />
-            Upload MIDI / audio
-          </Button>
+          showUpload && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => inputRef.current?.click()}
+              data-testid="music-upload-btn"
+            >
+              <Upload className="mr-1.5 h-3.5 w-3.5" />
+              Upload MIDI / audio
+            </Button>
+          )
         ) : (
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-sm">
@@ -138,15 +168,17 @@ export function MusicPlayer({ className }: { className?: string }) {
               >
                 <Square className="h-4 w-4" />
               </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => inputRef.current?.click()}
-              >
-                <Upload className="mr-1.5 h-3.5 w-3.5" />
-                Replace
-              </Button>
+              {showUpload && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => inputRef.current?.click()}
+                >
+                  <Upload className="mr-1.5 h-3.5 w-3.5" />
+                  Replace
+                </Button>
+              )}
             </div>
 
             <label className="flex items-center gap-2 text-sm text-foreground">

@@ -9,6 +9,7 @@ export type TransportConfig = {
   loopEndBar: number;
   rampEnabled: boolean;
   rampTargetBpm: number;
+  rampOverReps: number;
 };
 
 function clamp(n: number, min: number, max: number): number {
@@ -36,6 +37,7 @@ export const transportDefaultConfig: TransportConfig = {
   loopEndBar: 8,
   rampEnabled: false,
   rampTargetBpm: 140,
+  rampOverReps: 8,
 };
 
 export function normalizeTransportConfig(raw: unknown): TransportConfig {
@@ -74,6 +76,11 @@ export function normalizeTransportConfig(raw: unknown): TransportConfig {
       toInt(r.rampTargetBpm, transportDefaultConfig.rampTargetBpm),
       30,
       300
+    ),
+    rampOverReps: clamp(
+      toInt(r.rampOverReps, transportDefaultConfig.rampOverReps),
+      1,
+      64
     ),
   };
 }
@@ -149,5 +156,14 @@ export const transportFields: FieldDescriptor[] = [
     max: 300,
     step: 1,
     helperText: "BPM to reach by the end of the ramp",
+  },
+  {
+    kind: "range",
+    key: "rampOverReps",
+    label: "Ramp length",
+    min: 1,
+    max: 64,
+    step: 1,
+    helperText: "Reps to reach the target tempo",
   },
 ];

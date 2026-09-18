@@ -6,6 +6,7 @@ import {
   rampTempo,
   beatInBar,
   barNumber,
+  rampedBpm,
 } from "../clock";
 
 describe("transport clock math", () => {
@@ -48,5 +49,32 @@ describe("transport clock math", () => {
     expect(beatInBar(5, 4)).toBe(1);
     expect(barNumber(5, 4)).toBe(1);
     expect(barNumber(0, 4)).toBe(0);
+  });
+});
+
+describe("rampedBpm", () => {
+  it("starts at the start bpm before any reps complete", () => {
+    expect(rampedBpm(60, 120, 0)).toBe(60);
+  });
+
+  it("interpolates linearly over the default 8 reps", () => {
+    expect(rampedBpm(60, 100, 4)).toBe(80);
+  });
+
+  it("clamps to the target past the end of the ramp", () => {
+    expect(rampedBpm(60, 100, 8)).toBe(100);
+    expect(rampedBpm(60, 100, 50)).toBe(100);
+  });
+
+  it("ramps down without dropping below the target", () => {
+    expect(rampedBpm(120, 90, 0)).toBe(120);
+    expect(rampedBpm(120, 90, 4)).toBe(105);
+    expect(rampedBpm(120, 90, 8)).toBe(90);
+    expect(rampedBpm(120, 90, 20)).toBe(90);
+  });
+
+  it("honours rampOverReps of 1", () => {
+    expect(rampedBpm(60, 120, 0, 1)).toBe(60);
+    expect(rampedBpm(60, 120, 1, 1)).toBe(120);
   });
 });
