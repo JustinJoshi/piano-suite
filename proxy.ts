@@ -62,6 +62,7 @@ export default clerkMiddleware(
     const isPublicRoute =
       pathname === "/" ||
       pathname === "/opengraph-image" || // Link-preview image must be fetchable by social crawlers
+      pathname === "/sitemap.xml" || // Search engines must read the sitemap without a session
       pathname === "/pricing" ||
       pathname === "/tools/chladni" ||
       publicDrillRoutes.includes(pathname) ||
