@@ -62,6 +62,13 @@ export type FeatureCategory =
 export type FeatureDefinition<C extends Record<string, unknown>> = {
   type: string;
   category: FeatureCategory;
+  /**
+   * Config schema version this definition produces. Stored blocks below it
+   * run through the block's migration chain on read (`lib/feature-blocks/
+   * schemas.ts`); blocks above it are retained as-is. Bump when renaming or
+   * re-shaping a config field, and add a migrator for the old version.
+   */
+  configVersion: number;
   label: string;
   description: string;
   icon: LucideIcon;

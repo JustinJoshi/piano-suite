@@ -1,5 +1,6 @@
 import type { PracticePage, FeatureBlock } from "@/lib/feature-blocks/types";
 import { getFeatureDefinition, isAtBlockLimit } from "@/lib/feature-blocks/registry";
+import { getBlockConfigVersion } from "@/lib/feature-blocks/versions";
 import {
   normalizePageTitle,
   normalizeStoredBlock,
@@ -45,7 +46,7 @@ export function createEmptyPracticePage(title = "My Practice Page"): PracticePag
 export function createEmptyPracticePageStore(): PracticePageStore {
   const page = createEmptyPracticePage();
   page.blocks = [
-    { id: generateId(), type: STARTER_TILE_TYPE, version: 1, config: {} },
+    { id: generateId(), type: STARTER_TILE_TYPE, version: getBlockConfigVersion(STARTER_TILE_TYPE), config: {} },
   ];
   return {
     version: 2,
@@ -325,7 +326,7 @@ export function appendBlockToPageWithEvent(
   const block: FeatureBlock = {
     id: generateId(),
     type,
-    version: 1,
+    version: getBlockConfigVersion(type),
     config: { ...def.defaultConfig },
   };
   return {

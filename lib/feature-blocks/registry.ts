@@ -142,11 +142,13 @@ import {
 import { FreePlayBlock } from "@/components/feature-blocks/free-play-block";
 import type { ComponentType } from "react";
 import type { FeatureDefinition } from "@/lib/feature-blocks/types";
+import { blockConfigVersions } from "@/lib/feature-blocks/versions";
 
 export const featureRegistry = {
   metronome: {
     type: "metronome",
     category: "rhythm",
+    configVersion: blockConfigVersions.metronome,
     label: "Metronome",
     description: "Keep a steady beat while you practice.",
     icon: Timer,
@@ -158,6 +160,7 @@ export const featureRegistry = {
   drillTimer: {
     type: "drillTimer",
     category: "technique",
+    configVersion: blockConfigVersions.drillTimer,
     label: "Drill timer",
     description: "Countdown, live timing, and break between rounds.",
     icon: Hourglass,
@@ -169,6 +172,7 @@ export const featureRegistry = {
   chordSet: {
     type: "chordSet",
     category: "theory",
+    configVersion: blockConfigVersions.chordSet,
     label: "Chord set",
     description: "Practice a set of chords in order or at random.",
     icon: Music,
@@ -182,6 +186,7 @@ export const featureRegistry = {
   textBlock: {
     type: "textBlock",
     category: "technique",
+    configVersion: blockConfigVersions.textBlock,
     label: "Instructions",
     description: "Add text instructions or notes to your practice page.",
     icon: Type,
@@ -193,6 +198,7 @@ export const featureRegistry = {
   midiConnectionBar: {
     type: "midiConnectionBar",
     category: "rhythm",
+    configVersion: blockConfigVersions.midiConnectionBar,
     label: "MIDI connection",
     description: "Show a MIDI keyboard connection status bar.",
     icon: Cable,
@@ -204,6 +210,7 @@ export const featureRegistry = {
   drillShortcuts: {
     type: "drillShortcuts",
     category: "technique",
+    configVersion: blockConfigVersions.drillShortcuts,
     label: "Ready-made drills",
     description: "Jump straight into a guided drill from your page.",
     icon: Zap,
@@ -215,6 +222,7 @@ export const featureRegistry = {
   keyboardDisplay: {
     type: "keyboardDisplay",
     category: "technique",
+    configVersion: blockConfigVersions.keyboardDisplay,
     label: "On-screen keyboard",
     description:
       "Play with clicks, touches, or your computer keys — no MIDI controller needed.",
@@ -227,6 +235,7 @@ export const featureRegistry = {
   scaleRunner: {
     type: "scaleRunner",
     category: "technique",
+    configVersion: blockConfigVersions.scaleRunner,
     label: "Scale run",
     description:
       "Scales, modes, and five-finger patterns as a timed run of single notes.",
@@ -241,6 +250,7 @@ export const featureRegistry = {
   rootCycle: {
     type: "rootCycle",
     category: "theory",
+    configVersion: blockConfigVersions.rootCycle,
     label: "Key cycle",
     description:
       "Take one chord shape around the circle of fourths, fifths, or all twelve keys.",
@@ -255,6 +265,7 @@ export const featureRegistry = {
   progression: {
     type: "progression",
     category: "theory",
+    configVersion: blockConfigVersions.progression,
     label: "Progression",
     description:
       "ii-V-I, 12-bar blues, a pop loop, or your own roman numerals — in one key or every key.",
@@ -269,6 +280,7 @@ export const featureRegistry = {
   sessionStats: {
     type: "sessionStats",
     category: "progress",
+    configVersion: blockConfigVersions.sessionStats,
     label: "Practice report",
     description: "Reps, speed, grade split, and days practiced for this page.",
     icon: BarChart3,
@@ -281,6 +293,7 @@ export const featureRegistry = {
   restTimer: {
     type: "restTimer",
     category: "rhythm",
+    configVersion: blockConfigVersions.restTimer,
     label: "Rest timer",
     description: "Count down a rest between sets so a session stays time-boxed.",
     icon: Coffee,
@@ -292,6 +305,7 @@ export const featureRegistry = {
   transport: {
     type: "transport",
     category: "rhythm",
+    configVersion: blockConfigVersions.transport,
     label: "Transport",
     description:
       "The page clock: tempo, meter, count-in, loop, and a tempo ramp with an audible tick.",
@@ -305,6 +319,7 @@ export const featureRegistry = {
   rhythmPattern: {
     type: "rhythmPattern",
     category: "rhythm",
+    configVersion: blockConfigVersions.rhythmPattern,
     label: "Rhythm pattern",
     description:
       "Place incoming notes on a per-hand onset grid and shape articulation.",
@@ -317,6 +332,7 @@ export const featureRegistry = {
   targetDisplay: {
     type: "targetDisplay",
     category: "technique",
+    configVersion: blockConfigVersions.targetDisplay,
     label: "Target display",
     description: "Show the chords or notes to play now, as symbols or a keys diagram.",
     icon: Crosshair,
@@ -328,6 +344,7 @@ export const featureRegistry = {
   chordLibrary: {
     type: "chordLibrary",
     category: "theory",
+    configVersion: blockConfigVersions.chordLibrary,
     label: "Chord library",
     description:
       "A chord stream from symbols or roman numerals, in closed or rootless voicings.",
@@ -340,6 +357,7 @@ export const featureRegistry = {
   scaleLibrary: {
     type: "scaleLibrary",
     category: "technique",
+    configVersion: blockConfigVersions.scaleLibrary,
     label: "Scale library",
     description:
       "Scale runs in any key, span, and direction — plus custom Hanon-style cells.",
@@ -352,6 +370,7 @@ export const featureRegistry = {
   noteRoll: {
     type: "noteRoll",
     category: "visualization",
+    configVersion: blockConfigVersions.noteRoll,
     label: "Note roll",
     description:
       "Falling notes over a hit line — practice a piece or rhythm in time.",
@@ -364,6 +383,7 @@ export const featureRegistry = {
   pieceLibrary: {
     type: "pieceLibrary",
     category: "technique",
+    configVersion: blockConfigVersions.pieceLibrary,
     label: "Piece library",
     description:
       "Upload a MIDI file and practice it with hand filters and transpose.",
@@ -376,6 +396,7 @@ export const featureRegistry = {
   freePlay: {
     type: "freePlay",
     category: "visualization",
+    configVersion: blockConfigVersions.freePlay,
     label: "Free play scope",
     description:
       "No targets, no grading — a live readout of what you play against a scale.",
