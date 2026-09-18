@@ -115,8 +115,8 @@ export const marketplaceSeeds: MarketplaceSeed[] = [
         qualityGroups: ["7th"],
         order: "random",
         requireExact: false,
-        goodThreshold: 0,
-        hardThreshold: 2,
+        goodThreshold: 1,
+        hardThreshold: 3,
       }),
       block("keyboardDisplay", {
         lowNote: 48,

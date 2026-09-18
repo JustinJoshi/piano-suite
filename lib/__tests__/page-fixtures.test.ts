@@ -3,6 +3,7 @@ import { buildStream } from "@/lib/feature-blocks/build-stream";
 import { getManifest, validatePageWiring } from "@/lib/feature-blocks/manifest";
 import { normalizeStoredBlock } from "@/lib/feature-blocks/schemas";
 import type { FeatureBlock } from "@/lib/feature-blocks/types";
+import type { PracticeNote } from "@/lib/practice-note";
 import { marketplaceSeeds } from "@/lib/marketplace-seeds";
 import { starterTemplates } from "@/lib/starter-templates";
 
@@ -78,7 +79,17 @@ describe("page fixtures", () => {
 
       it("composes a non-empty stream when the page declares a source", () => {
         if (!hasSourceBlock(fixture.blocks)) return;
-        const stream = buildStream(fixture.blocks);
+        // Runtime sources (pieceLibrary) contribute through the runtimeNotes
+        // map, so a fixture holding one gets a synthetic entry per block id.
+        const runtimeNotes = new Map<string, PracticeNote[]>();
+        for (const block of fixture.blocks) {
+          if (block.type === "pieceLibrary") {
+            runtimeNotes.set(block.id, [
+              { midi: [60], pcs: new Set([0]), symbol: "test", onsetMs: 0 },
+            ]);
+          }
+        }
+        const stream = buildStream(fixture.blocks, undefined, runtimeNotes);
         expect(
           stream.length,
           `${fixture.source}/${fixture.id} declares a source but composes an empty stream`
@@ -87,15 +98,17 @@ describe("page fixtures", () => {
     });
   }
 
-  describe("pieceLibrary exclusion", () => {
-    // build-stream.ts:31-36 has no pieceLibrary entry in its SOURCES dispatch
-    // — its notes come from an uploaded MIDI file outside block config, so a
-    // page whose only source is pieceLibrary composes to an empty stream.
-    // Shipping that as a template or seed would be a broken demo. The
-    // exclusion stays pinned here until the operator decides buildStream
-    // should learn about uploaded-MIDI state.
-    it("appears in no starter template or marketplace seed", () => {
-      for (const fixture of pageFixtures) {
+  describe("pieceLibrary placement", () => {
+    // The runtime-source channel (phase `runtime-source-channel`, commit
+    // 4f9584e) decided how uploaded pieces compose: pieceLibrary's notes
+    // arrive via the runtimeNotes map, not block config, so a seed carrying
+    // it is a valid demo. What stays pinned: starter templates carry none
+    // (a template cannot hold an upload), and exactly one seed — the
+    // piece-trainer demo — does.
+    it("appears in no starter template", () => {
+      for (const fixture of pageFixtures.filter(
+        (f) => f.source === "starterTemplates"
+      )) {
         for (const block of fixture.blocks) {
           expect(
             block.type,
@@ -103,6 +116,13 @@ describe("page fixtures", () => {
           ).not.toBe("pieceLibrary");
         }
       }
+    });
+
+    it("appears in exactly the piece-trainer marketplace seed", () => {
+      const ids = marketplaceSeeds
+        .filter((s) => s.blocks.some((b) => b.type === "pieceLibrary"))
+        .map((s) => s.id);
+      expect(ids).toEqual(["piece-trainer"]);
     });
   });
 });
