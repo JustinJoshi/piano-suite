@@ -81,7 +81,9 @@ export const listPublicDrills = query({
       .take(limit);
 
     return rows
-      .filter((row) => !(row.deleted ?? false))
+      .filter(
+        (row) => !(row.deleted ?? false) && row.hidden !== true
+      )
       .map((row) => ({
         _id: row._id,
         title: row.title,
@@ -103,7 +105,12 @@ export const getPublicDrill = query({
   returns: v.union(publicDrillValidator, v.null()),
   handler: async (ctx, args) => {
     const row = await ctx.db.get("customDrills", args.drillId);
-    if (!row || row.isPublic !== true || (row.deleted ?? false)) {
+    if (
+      !row ||
+      row.isPublic !== true ||
+      (row.deleted ?? false) ||
+      row.hidden === true
+    ) {
       return null;
     }
 
@@ -498,5 +505,46 @@ export const getPublishState = query({
     }
 
     return { isPublic: true, drillId: existing._id };
+  },
+});
+
+// ── Community report path ─────────────────────────────────────────────────
+
+const MAX_REPORT_REASON_LENGTH = 300;
+const REPORT_HIDE_THRESHOLD = 3;
+
+/**
+ * Flag a public practice page. Anonymous by design — no sign-in wall in
+ * front of flagging. The report count accumulates on the row; at three
+ * reports the page is hidden from the marketplace.
+ */
+export const reportPublicDrill = mutation({
+  args: {
+    drillId: v.id("customDrills"),
+    reason: v.optional(v.string()),
+  },
+  returns: v.object({
+    reportCount: v.number(),
+    hidden: v.boolean(),
+  }),
+  handler: async (ctx, args) => {
+    const row = await ctx.db.get("customDrills", args.drillId);
+    if (!row || row.isPublic !== true || (row.deleted ?? false)) {
+      throw new Error("Practice page not found");
+    }
+
+    const reportCount = (row.reportCount ?? 0) + 1;
+    const hidden = reportCount >= REPORT_HIDE_THRESHOLD;
+
+    await ctx.db.patch("customDrills", args.drillId, {
+      reportCount,
+      hidden,
+      // Reason is stored truncated; it informs human moderation later.
+      ...(args.reason !== undefined
+        ? { reason: args.reason.slice(0, MAX_REPORT_REASON_LENGTH) }
+        : {}),
+    });
+
+    return { reportCount, hidden };
   },
 });

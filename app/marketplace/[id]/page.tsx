@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Blocks, Copy, GitFork } from "lucide-react";
+import { ArrowLeft, Blocks, Copy, Flag, GitFork } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { FeatureRenderer } from "@/components/feature-blocks/feature-renderer";
@@ -27,9 +27,12 @@ export default function PublicDrillView() {
 
   const drill = useQuery(api.workshop.getPublicDrill, { drillId: drillId as never });
   const forkDrill = useMutation(api.workshop.forkCustomDrill);
+  const reportDrill = useMutation(api.workshop.reportPublicDrill);
 
   const [forkState, setForkState] = useState<ForkState>("idle");
   const [copied, setCopied] = useState(false);
+  const [reported, setReported] = useState(false);
+  const [reportError, setReportError] = useState(false);
 
   if (drill === undefined) {
     return (
@@ -94,6 +97,16 @@ export default function PublicDrillView() {
     setTimeout(() => setCopied(false), 2000);
   }
 
+  async function handleReport() {
+    if (!drill || reported) return;
+    try {
+      await reportDrill({ drillId: drillId as never });
+      setReported(true);
+    } catch {
+      setReportError(true);
+    }
+  }
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
       <Link
@@ -123,6 +136,22 @@ export default function PublicDrillView() {
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
+          {reported ? (
+            <span className="text-sm text-muted-foreground">
+              Thanks &mdash; we&apos;ll take a look.
+            </span>
+          ) : (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => void handleReport()}
+              disabled={reportError}
+              aria-label="Report this page"
+            >
+              <Flag className="h-3.5 w-3.5" />
+              Report
+            </Button>
+          )}
           <Button size="sm" variant="outline" onClick={handleCopyLink}>
             {copied ? (
               <Copy className="h-3.5 w-3.5 text-success" />
