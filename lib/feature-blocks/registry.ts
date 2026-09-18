@@ -13,6 +13,7 @@ import {
   Coffee,
   Gauge,
   Music4,
+  Repeat,
   Crosshair,
   Layers,
   Activity,
@@ -102,8 +103,14 @@ import {
   normalizeRhythmPatternConfig,
   rhythmPatternFields,
 } from "@/lib/feature-blocks/rhythm-pattern/config";
+import {
+  sectionLoopDefaultConfig,
+  normalizeSectionLoopConfig,
+  sectionLoopFields,
+} from "@/lib/feature-blocks/section-loop/config";
 import { TransportBlock } from "@/components/feature-blocks/transport-block";
 import { RhythmPatternBlock } from "@/components/feature-blocks/rhythm-pattern-block";
+import { SectionLoopBlock } from "@/components/feature-blocks/section-loop-block";
 import {
   targetDisplayDefaultConfig,
   normalizeTargetDisplayConfig,
@@ -313,6 +320,18 @@ export const featureRegistry = {
     defaultConfig: rhythmPatternDefaultConfig,
     normalizeConfig: normalizeRhythmPatternConfig,
     component: RhythmPatternBlock as ComponentType<Record<string, unknown>>,
+  } satisfies FeatureDefinition<Record<string, unknown>>,
+  sectionLoop: {
+    type: "sectionLoop",
+    category: "rhythm",
+    label: "Section loop",
+    description:
+      "Practise bars N–M of the incoming stream, repeated — one section at a time.",
+    icon: Repeat,
+    fields: sectionLoopFields,
+    defaultConfig: sectionLoopDefaultConfig,
+    normalizeConfig: normalizeSectionLoopConfig,
+    component: SectionLoopBlock as ComponentType<Record<string, unknown>>,
   } satisfies FeatureDefinition<Record<string, unknown>>,
   targetDisplay: {
     type: "targetDisplay",

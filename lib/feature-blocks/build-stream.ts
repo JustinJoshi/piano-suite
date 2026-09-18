@@ -14,6 +14,8 @@ import { normalizeScaleLibraryConfig } from "./scale-library/config";
 import { generateScale } from "./scale-library/generate";
 import { normalizeRhythmPatternConfig } from "./rhythm-pattern/config";
 import { transform as rhythmPatternTransform } from "./rhythm-pattern/transform";
+import { normalizeSectionLoopConfig } from "./section-loop/config";
+import { transform as sectionLoopTransform } from "./section-loop/transform";
 
 export type StreamBlock = { id: string; type: string; config: unknown };
 
@@ -39,6 +41,8 @@ const SOURCES: Record<string, SourceFn> = {
 const TRANSFORMS: Record<string, TransformFn> = {
   rhythmPattern: (notes, raw, bpm) =>
     rhythmPatternTransform(notes, normalizeRhythmPatternConfig(raw), bpm),
+  sectionLoop: (notes, raw, bpm) =>
+    sectionLoopTransform(notes, normalizeSectionLoopConfig(raw), bpm),
 };
 
 /**

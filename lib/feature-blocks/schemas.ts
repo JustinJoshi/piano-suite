@@ -12,6 +12,7 @@ import { normalizeSessionStatsConfig } from "./session-stats/config";
 import { normalizeRestTimerConfig } from "./rest-timer/config";
 import { normalizeTransportConfig } from "./transport/config";
 import { normalizeRhythmPatternConfig } from "./rhythm-pattern/config";
+import { normalizeSectionLoopConfig } from "./section-loop/config";
 import { normalizeTargetDisplayConfig } from "./target-display/config";
 import { normalizeChordLibraryConfig } from "./chord-library/config";
 import { normalizeScaleLibraryConfig } from "./scale-library/config";
@@ -49,6 +50,7 @@ const blockNormalizers: Record<string, BlockNormalizer> = {
   restTimer: normalizeRestTimerConfig as BlockNormalizer,
   transport: normalizeTransportConfig as BlockNormalizer,
   rhythmPattern: normalizeRhythmPatternConfig as BlockNormalizer,
+  sectionLoop: normalizeSectionLoopConfig as BlockNormalizer,
   targetDisplay: normalizeTargetDisplayConfig as BlockNormalizer,
   chordLibrary: normalizeChordLibraryConfig as BlockNormalizer,
   scaleLibrary: normalizeScaleLibraryConfig as BlockNormalizer,

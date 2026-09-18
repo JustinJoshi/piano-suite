@@ -186,6 +186,7 @@ Components are registered in two places:
 | `pieceLibrary` | Source | Piece library | Experimental |
 | `scaleLibrary` | Source | Scale library | Experimental |
 | `rhythmPattern` | Transform | Rhythm pattern | Experimental |
+| `sectionLoop` | Transform | Section loop | Experimental |
 <!-- GENERATED TABLE: END -->
 
 The list is generated from `listManifests()` and sorted by kind, then label. Do not edit it by hand — the parity test fails if the committed table drifts from the manifest.

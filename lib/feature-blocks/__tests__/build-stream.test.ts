@@ -129,6 +129,25 @@ describe("runtime source channel", () => {
     expect(buildStream(blocks)).toEqual(buildStream(blocks, 120, new Map()));
   });
 
+  it("sectionLoop over a pieceLibrary runtime source returns only the looped window", () => {
+    // Bars 0, 1, 2 at 120bpm 4/4 = 0ms, 2000ms, 4000ms. The loop keeps bar 1
+    // only ([2000, 4000)) and plays it twice, rebased so it starts at 0.
+    const piece: PracticeNote[] = [
+      { midi: [60], pcs: new Set([0]), symbol: "bar0", onsetMs: 0 },
+      { midi: [62], pcs: new Set([2]), symbol: "bar1", onsetMs: 2000 },
+      { midi: [64], pcs: new Set([4]), symbol: "bar2", onsetMs: 4000 },
+    ];
+    const blocks = [
+      block("pieceLibrary"),
+      { id: "id-sectionLoop", type: "sectionLoop", config: { startBar: 1, endBar: 2, repeats: 2 } },
+    ];
+    const runtimeNotes = new Map([["id-pieceLibrary", piece]]);
+
+    const stream = buildStream(blocks, 120, runtimeNotes);
+    expect(stream.map((n) => n.symbol)).toEqual(["bar1", "bar1"]);
+    expect(stream.map((n) => n.onsetMs)).toEqual([0, 2000]);
+  });
+
   it("keeps composeSources and applyTransforms composable", () => {
     const blocks = [
       block("pieceLibrary"),
