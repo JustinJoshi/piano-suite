@@ -52,7 +52,21 @@ export const metadata: Metadata = {
     default: "Piano Suite",
   },
   description:
-    "A piano practice suite that connects Anki reviews to a MIDI keyboard so you drill chords with spaced repetition.",
+    "A free workshop for building your own piano practice. Start with a ready-made drill, or snap components together into the session you need today.",
+  openGraph: {
+    title: "Piano Suite",
+    description:
+      "A free workshop for building your own piano practice. Start with a ready-made drill, or snap components together into the session you need today.",
+    url: "/",
+    siteName: "Piano Suite",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Piano Suite",
+    description:
+      "A free workshop for building your own piano practice. Start with a ready-made drill, or snap components together into the session you need today.",
+  },
 };
 
 export default function RootLayout({
