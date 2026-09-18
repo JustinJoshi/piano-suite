@@ -346,6 +346,7 @@ export const featureRegistry = {
   sectionLoop: {
     type: "sectionLoop",
     category: "rhythm",
+    configVersion: blockConfigVersions.sectionLoop,
     label: "Section loop",
     description:
       "Practise bars N–M of the incoming stream, repeated — one section at a time.",
@@ -436,6 +437,7 @@ export const featureRegistry = {
   songPlayer: {
     type: "songPlayer",
     category: "technique",
+    configVersion: blockConfigVersions.songPlayer,
     label: "Song player",
     description:
       "Upload a MIDI or audio file and play it back through the piano sound while you follow along.",

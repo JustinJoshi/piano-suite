@@ -32,6 +32,8 @@ export const blockConfigVersions: Record<string, number> = {
   noteRoll: 1,
   pieceLibrary: 1,
   freePlay: 1,
+  sectionLoop: 1,
+  songPlayer: 1,
 };
 
 export function getBlockConfigVersion(type: string): number {
