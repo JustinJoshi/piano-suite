@@ -3,7 +3,12 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { featureRegistry, featureCategories } from "@/lib/feature-blocks/registry";
-import { KNOWN_BLOCK_TYPES, normalizeStoredBlock } from "@/lib/feature-blocks/schemas";
+import {
+  KNOWN_BLOCK_TYPES,
+  normalizeStoredBlock,
+  blockMigrators,
+} from "@/lib/feature-blocks/schemas";
+import { blockConfigVersions } from "@/lib/feature-blocks/versions";
 import { blockSize } from "@/lib/workshop-grid";
 import { getManifest, listManifests } from "@/lib/feature-blocks/manifest";
 import type { ComponentManifest } from "@/lib/feature-blocks/manifest-types";
@@ -89,6 +94,39 @@ describe("block registry / schema parity", () => {
       expect(size.w).toBeGreaterThanOrEqual(1);
       expect(size.w).toBeLessThanOrEqual(4);
       expect(size.h).toBeGreaterThanOrEqual(1);
+    }
+  });
+});
+
+describe("config version / migrator parity", () => {
+  it("registers an unbroken migration chain for every block above version 1", () => {
+    for (const [type, version] of Object.entries(blockConfigVersions)) {
+      if (version <= 1) continue;
+
+      const steps = blockMigrators[type] ?? {};
+      // The runtime chain stops at the first missing step and silently falls
+      // back to normalizer defaults — a gap must fail here, not just a missing
+      // final step. So: every integer from 1 through version - 1 must exist.
+      for (let source = 1; source < version; source += 1) {
+        const step = steps[source];
+        expect(
+          step,
+          `${type} declares configVersion ${version} but blockMigrators has no step for source version ${source}; stored configs at that version would silently reset to defaults`
+        ).toBeTypeOf("function");
+        expect(step({})).toBeTypeOf("object");
+      }
+    }
+  });
+
+  it("has no migrator step at or above a block's current configVersion", () => {
+    for (const [type, steps] of Object.entries(blockMigrators)) {
+      const version = blockConfigVersions[type];
+      for (const source of Object.keys(steps)) {
+        expect(
+          Number(source),
+          `${type} has a migrator for source version ${source} but its configVersion is ${version}; the step can never run`
+        ).toBeLessThan(version);
+      }
     }
   });
 });
