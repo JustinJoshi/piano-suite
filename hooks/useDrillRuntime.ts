@@ -14,12 +14,16 @@ import {
 } from "@/lib/local-practice-history";
 import { captureEvent } from "@/lib/analytics";
 import { buildStream } from "@/lib/feature-blocks/build-stream";
-import { beatsToMs } from "@/lib/feature-blocks/transport/clock";
+import {
+  beatsToMs,
+  rampedBpm,
+} from "@/lib/feature-blocks/transport/clock";
 import type {
   ChordTarget,
   DrillPhase,
   DrillRuntimeConfig,
 } from "@/lib/drill-runtime";
+import type { TransportConfig } from "@/lib/feature-blocks/transport/config";
 import type { PracticeNote } from "@/lib/practice-note";
 
 function emitAnalytics(name: "drill_started" | "drill_completed", pageId: string) {
@@ -31,6 +35,18 @@ export type DrillRuntimeOptions = {
   /** Page blocks; their sources compose the runtime's stream. */
   blocks?: Array<{ id: string; type: string; config: unknown }>;
 } & Partial<DrillRuntimeConfig>;
+
+type RampSettings = {
+  enabled: boolean;
+  targetBpm: number;
+  overReps: number;
+};
+
+const NO_RAMP: RampSettings = {
+  enabled: false,
+  targetBpm: 0,
+  overReps: 8,
+};
 
 const DEFAULT_GRADE_THRESHOLDS = { good: 0, hard: 2 };
 
@@ -46,6 +62,20 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
     goodThreshold = DEFAULT_GRADE_THRESHOLDS.good,
     hardThreshold = DEFAULT_GRADE_THRESHOLDS.hard,
   } = options;
+
+  // The transport block's ramp settings, resolved once per options change.
+  // Ramping derives the effective bpm from the runtime's completed reps
+  // (`targetIndex`, reset on start/reset) rather than widening DrillClock.
+  const ramp = useMemo<RampSettings>(() => {
+    const transportBlock = blocks?.find((b) => b.type === "transport");
+    if (!transportBlock) return NO_RAMP;
+    const config = transportBlock.config as Partial<TransportConfig> | null;
+    return {
+      enabled: config?.rampEnabled === true,
+      targetBpm: typeof config?.rampTargetBpm === "number" ? config.rampTargetBpm : 0,
+      overReps: typeof config?.rampOverReps === "number" ? config.rampOverReps : 8,
+    };
+  }, [blocks]);
 
   const [targets, setTargetsState] = useState<ChordTarget[]>([]);
   // Ordered list of mounted target blocks. The head owns `setTargets`; see
@@ -244,12 +274,19 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
 
   const currentTarget = targets[targetIndex] ?? null;
 
+  // The effective tempo: the configured bpm while the ramp is off, otherwise
+  // ramped from it toward the target over completed reps (targetIndex resets
+  // on start/reset). Both timing consumers below use this one value.
+  const effectiveBpm = ramp.enabled && clock
+    ? rampedBpm(clock.bpm, ramp.targetBpm, targetIndex, ramp.overReps)
+    : clock?.bpm;
+
   // The page's composed stream, memoised on the blocks array the same way
   // runtimeOptionsFromBlocks memoises the config. A transport block's tempo
   // drives transform timing; pages without one use the composer's default.
   const stream = useMemo(
-    () => buildStream(blocks ?? [], clock?.bpm, runtimeNotes),
-    [blocks, clock?.bpm, runtimeNotes]
+    () => buildStream(blocks ?? [], effectiveBpm, runtimeNotes),
+    [blocks, effectiveBpm, runtimeNotes]
   );
 
   useEffect(() => {
@@ -297,7 +334,7 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
   useEffect(() => {
     if (!clock || timer.phase !== "timing") return;
 
-    const windowMs = beatsToMs(clock.beatsPerBar, clock.bpm);
+    const windowMs = beatsToMs(clock.beatsPerBar, effectiveBpm ?? clock.bpm);
     const interval = setInterval(() => {
       const target = currentTargetRef.current;
 
@@ -314,7 +351,7 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
     }, windowMs);
 
     return () => clearInterval(interval);
-  }, [clock, timer.phase, targetIndex, logMiss]);
+  }, [clock, effectiveBpm, timer.phase, targetIndex, logMiss]);
 
   // useDrillTimer requires an explicit arm() call to leave "armed" (see its
   // header comment: "the consumer is responsible for ... calling arm() (hands
