@@ -98,6 +98,10 @@ export default defineSchema({
     blocks: v.array(v.any()), // envelope-validated in convex/workshop.ts
     deleted: v.optional(v.boolean()),
     isPublic: v.optional(v.boolean()),
+    // Community report path: reports accumulate anonymously; at three the
+    // page auto-hides from the marketplace (convex/workshop.ts).
+    reportCount: v.optional(v.number()),
+    hidden: v.optional(v.boolean()),
     forkedFrom: v.optional(v.id("customDrills")),
     authorName: v.optional(v.string()),
     createdAt: v.number(),

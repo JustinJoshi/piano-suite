@@ -48,6 +48,7 @@ const COL_SPAN_CLASSES: Record<number, string> = {
 
 type ResizeStart = {
   size: BlockSize;
+  last: BlockSize;
   x: number;
   y: number;
   colWidthPx: number;
@@ -114,11 +115,17 @@ export function WorkshopTile({
 
     resizeStartRef.current = {
       size,
+      last: size,
       x: e.clientX,
       y: e.clientY,
       colWidthPx,
       rowHeightPx: ROW_UNIT_PX + GAP_PX,
     };
+    // Capture the pointer so pointermove keeps delivering even when a fast
+    // drag leaves the window; jsdom and older browsers may lack the API.
+    if (typeof e.currentTarget.setPointerCapture === "function") {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    }
     setResizing(true);
     e.preventDefault();
   }
@@ -137,7 +144,8 @@ export function WorkshopTile({
         start.colWidthPx,
         start.rowHeightPx
       );
-      if (next.w !== start.size.w || next.h !== start.size.h) {
+      if (next.w !== start.last.w || next.h !== start.last.h) {
+        start.last = next;
         onResize(block.id, next);
       }
     }
@@ -149,9 +157,11 @@ export function WorkshopTile({
 
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
     return () => {
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
     };
   }, [resizing, block.id, onResize]);
 

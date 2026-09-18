@@ -88,6 +88,12 @@ Notes on how to test this component. Mention any fixtures or preview data.
 `stable` or `experimental`. Experimental components may change or be removed.
 ```
 
+## Config versions and migrations
+
+Every block config carries a `configVersion` (`lib/feature-blocks/versions.ts` is the single source of truth). Bump it **only when a stored config's field names or semantics change** in a way that would silently reset users' saved pages — adding a brand-new field the normalizer defaults does not need a bump. When you bump, register a migration step for each old version in `blockMigrators` (`lib/feature-blocks/schemas.ts`), keyed by block type and source version; each step maps the old-shape config to the next version's shape. `normalizeStoredBlock` chains the steps on read and stamps the registered version.
+
+The runtime chain stops at the first missing step and falls back to normalizer defaults, so a gap fails silently — `registry-parity.test.ts` enforces instead: for every block above version 1 it requires a migrator step for *every* integer version from 1 up to `configVersion - 1`, and fails on any stray step at or above the current version. Bump the version and the migration in the same commit; CI will not let one ship without the other.
+
 ## The manifest and registry
 
 Components are registered in two places:
@@ -180,12 +186,14 @@ Components are registered in two places:
 | `drillShortcuts` | Interactive | Ready-made drills | Stable |
 | `restTimer` | Interactive | Rest timer | Stable |
 | `scaleRunner` | Interactive | Scale run | Stable |
+| `songPlayer` | Interactive | Song player | Experimental |
 | `targetDisplay` | Interactive | Target display | Experimental |
 | `transport` | Interactive | Transport | Experimental |
 | `chordLibrary` | Source | Chord library | Experimental |
 | `pieceLibrary` | Source | Piece library | Experimental |
 | `scaleLibrary` | Source | Scale library | Experimental |
 | `rhythmPattern` | Transform | Rhythm pattern | Experimental |
+| `sectionLoop` | Transform | Section loop | Experimental |
 <!-- GENERATED TABLE: END -->
 
 The list is generated from `listManifests()` and sorted by kind, then label. Do not edit it by hand — the parity test fails if the committed table drifts from the manifest.

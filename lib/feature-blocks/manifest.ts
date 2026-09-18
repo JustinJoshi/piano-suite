@@ -15,8 +15,10 @@ import type {
 } from "./manifest-types";
 import { transportManifest } from "./transport/manifest";
 import { rhythmPatternManifest } from "./rhythm-pattern/manifest";
+import { sectionLoopManifest } from "./section-loop/manifest";
 import { SCALE_IDS } from "../scales";
 import { freePlayManifest } from "./free-play/manifest";
+import { songPlayerManifest } from "./song-player/manifest";
 import { ROOTS } from "../music-theory";
 
 /**
@@ -626,12 +628,14 @@ const ALL_MANIFESTS: Record<string, ComponentManifest> = {
   ...EXISTING_BLOCK_MANIFESTS,
   transport: transportManifest,
   rhythmPattern: rhythmPatternManifest,
+  sectionLoop: sectionLoopManifest,
   targetDisplay: targetDisplayManifest,
   chordLibrary: chordLibraryManifest,
   scaleLibrary: scaleLibraryManifest,
   noteRoll: noteRollManifest,
   pieceLibrary: pieceLibraryManifest,
   freePlay: freePlayManifest,
+  songPlayer: songPlayerManifest,
 };
 
 /**

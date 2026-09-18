@@ -66,6 +66,14 @@ export type DrillRuntime = {
   registerTargetSource: (ownerKey: string) => () => void;
   /** Owner key currently allowed to call `setTargets`, or null. */
   activeTargetSource: string | null;
+
+  /**
+   * Register a runtime source block's notes: the block id in the page stream
+   * maps to notes the block produced outside config (an uploaded MIDI piece).
+   * Blocks go through `hooks/useRuntimeSource.ts` rather than calling this.
+   */
+  setRuntimeSourceNotes: (blockId: string, notes: PracticeNote[]) => void;
+  clearRuntimeSourceNotes: (blockId: string) => void;
 };
 
 const DrillRuntimeContext = createContext<DrillRuntime | null>(null);

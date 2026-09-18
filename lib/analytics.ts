@@ -5,6 +5,7 @@ export const ANALYTICS_EVENTS = [
   "door_clicked",
   "page_created",
   "block_added",
+  "page_published",
 ] as const;
 
 export type AnalyticsEvent = (typeof ANALYTICS_EVENTS)[number];

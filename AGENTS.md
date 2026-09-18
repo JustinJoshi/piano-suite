@@ -69,7 +69,7 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `lib/ambient-effects.ts` | Per-route ambient backgrounds + float panel settings, soft viz defaults |
 | `hooks/useAmbientEffects.ts` | `AmbientEffectsProvider` + hook; localStorage always; Convex when `canPersist` |
 | `components/ambient/*` | Root ambient host, renderer, background, float panel |
-| `hooks/useAuthAccess.ts` | Shared Clerk gate: `canAccess` / `canPersist` (Pro `sync` or `AUTH_DISABLED`) |
+| `hooks/useAuthAccess.ts` | Shared Clerk gate: `canAccess` / `canPersist` (Pro `sync` or `AUTH_DISABLED`). `canPersist` gates sync, prefs and history — **not publishing**: `publishCustomDrill` / `unpublishCustomDrill` / `reportPublicDrill` in `convex/workshop.ts` use plain sign-in gates (`ensureUserId` / anonymous-allowed) |
 | `hooks/useToolUserReady.ts` | Ensures Convex user row when signed in; ready immediately when auth is disabled |
 | `components/ensure-signed-in-user.tsx` | Bootstraps Convex `users` row on Clerk sign-in (homepage settings before tools) |
 | `lib/auth-disabled.ts` | Opt-in bypass: `isAuthDisabled()` (`=== "true"` only) for client UI; `isAuthBypassEffective()` for server gates — never true when `VERCEL_ENV === "production"`. Hobby Vercel may set temporarily (see README Deploy) |
@@ -111,7 +111,7 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `hooks/useNoteStream.ts` | The page's composed stream from the drill runtime context; returns `[]` outside a `DrillRuntimeProvider`. Display blocks read this, not `previewNotes` |
 | `components/feature-blocks/*` | Feature-block render components (metronome, drill timer, chord set) |
 | `lib/workshop-grid.ts` | Pure Workshop grid layout math: canonical 4-column span model, size normalization/clamping, resize deltas, dnd-kit reorder |
-| `components/workshop-grid/*` | Draggable/resizable grid for the Workshop editor; fills the page via `fill` (`data-grid-full`); grid chrome (guides) visible only while dragging (or when empty via `showGuides`); tiles persist `size` spans and open settings behind a per-tile gear |
+| `components/workshop-grid/*` | Draggable/resizable grid for the Workshop editor; drags use a static `DragOverlay` preview (no dnd-kit rect transforms, so siblings never move mid-drag); fills the page via `fill` (`data-grid-full`); grid chrome (guides) visible only while dragging (or when empty via `showGuides`); resize captures the pointer and tiles persist `size` spans and open settings behind a per-tile gear |
 | `components/workshop-marketplace/*` | Block library view for the Workshop, tiered by manifest kind: interactive blocks get live previews with plus/check add-remove buttons; sources and transforms get quiet single-line rows with note samples; every entry has an About panel whose requirement lines resolve against the current page (`requirementLinesFor` → `validatePageWiring`); route at `/tools/workshop/blocks` (renamed from `/tools/workshop/marketplace` — see audit Phase 0.3) |
 | `components/custom-practice/*` | Workshop practice-page editor: full-width grid page, pages dropdown menu (`PagesMenu`, incl. share), `DrillRuntimeProvider`, shared `FieldInput` settings renderer |
 | `lib/custom-practice-storage.ts` | `localStorage` persistence for custom practice pages (Free tier); fresh stores seed a `drillShortcuts` starter tile; `isStarterPage` gates onboarding; `forkPageIntoStore` sanitizes and copies a public/featured page into the store (used by the marketplace fork button) |
@@ -162,6 +162,8 @@ The block library is the bottleneck (audit `04-roadmap.md`), so adding a block s
 8. **Displays read the stream, not fixtures.** A block that renders content calls `useNoteStream()`; `buildStream` (source generators in page order, transforms in page order) composes it and the runtime context carries it. `previewNotes` is for library previews only, where no page context exists. `PracticeNote` lives in `lib/practice-note.ts`; `build-stream.ts` and its dispatch maps live outside the Convex bundle. Manifest `status` must stay truthful: `stable` only if the block reads or writes the runtime (registry parity enforces it; shipped page chrome is the only exemption).
 9. **Wiring problems are guidance, not enforcement.** `PracticePageEditor` memoises `validateArrangement` and passes `issuesByBlockId: Map<blockId, WiringIssue[]>` once through `WorkshopGrid` to `WorkshopTile`, which renders a muted plain-language notice mapped over the two-member `WiringIssue` union (`unmet_requirement`, `orphan_transform`). A tile with issues still renders and the page still saves — the notice explains, it never blocks.
 
+10. **A `configVersion` bump ships with its migration.** Bumping a block's entry in `lib/feature-blocks/versions.ts` without registering a `blockMigrators` step (`schemas.ts`) for the old version silently resets stored configs to defaults — the runtime chain stops at the first missing step. `registry-parity.test.ts` enforces the pair: every integer version from 1 up to `configVersion - 1` needs a step, and steps at or above the current version fail. See `docs/components/README.md` → "Config versions and migrations".
+
 ## Keyboard conventions (Workshop-first)
 
 1. **Unmodified letters are piano notes.** `keyboard-display-block.tsx` binds A W S E D… as a QWERTY piano. Every global shortcut must use a modifier (Ctrl/Cmd+K) or a non-letter key (`?`, `/`, Escape), and every shortcut handler must bail on editable targets through the shared `isEditableTarget` in `lib/keyboard.ts` — no third inline copy.
@@ -187,8 +189,9 @@ Auth helpers live in `convex/lib/auth.ts`. Do not re-implement a local `currentU
 2. **Mutations use `ensureUserId(ctx)`.** It creates the `users` row on first write, so a write can never lose a race with the client-side bootstrap. Use `requireUserId(ctx)` only when creating the row would be wrong.
 3. **Never throw into a root provider.** `AmbientEffectsProvider` and the theme hooks query Convex from the root layout, so a thrown query error unmounts the entire app. This is exactly what caused the post-login blank page on preview deploys.
 4. **Add `returns` validators** to new public queries and mutations.
-5. **Cover auth edge cases with `convex-test`.** See `convex/__tests__/settings-auth.test.ts` for the no-identity / no-user-row / first-write cases.
-6. **CI uses a separate Clerk development instance.** `convex/auth.config.js` reads `CLERK_FRONTEND_API_URL_EXTRA` as a comma-separated list of additional Clerk issuers so the CI test user can authenticate against the same Convex deployment. Production traffic should use the primary `CLERK_FRONTEND_API_URL`.
+5. **Publishing is free for signed-in users.** `publishCustomDrill`, `unpublishCustomDrill`, and `reportPublicDrill` in `convex/workshop.ts` use `ensureUserId` (or none, for the anonymous-allowed report); `ensureUserIdWithSync` stays on `upsertCustomDrill` / `deleteCustomDrill` because cross-device sync is Pro. `canPersist` gates sync, prefs and history — never publishing. Report hiding: `reportPublicDrill` auto-hides a page at `REPORT_HIDE_THRESHOLD = 3`; republishing does not un-hide it.
+6. **Cover auth edge cases with `convex-test`.** See `convex/__tests__/settings-auth.test.ts` for the no-identity / no-user-row / first-write cases.
+7. **CI uses a separate Clerk development instance.** `convex/auth.config.js` reads `CLERK_FRONTEND_API_URL_EXTRA` as a comma-separated list of additional Clerk issuers so the CI test user can authenticate against the same Convex deployment. Production traffic should use the primary `CLERK_FRONTEND_API_URL`.
 
 ## Naming conventions
 

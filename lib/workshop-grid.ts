@@ -67,12 +67,14 @@ const TYPE_DEFAULT_SIZES: Record<string, BlockSize> = {
   restTimer: { w: 2, h: 1 },
   transport: { w: 4, h: 2 },
   rhythmPattern: { w: 2, h: 2 },
+  sectionLoop: { w: 2, h: 2 },
   targetDisplay: { w: 2, h: 2 },
   chordLibrary: { w: 2, h: 2 },
   scaleLibrary: { w: 2, h: 2 },
   noteRoll: { w: 4, h: 3 },
   pieceLibrary: { w: 2, h: 2 },
   freePlay: { w: 2, h: 2 },
+  songPlayer: { w: 2, h: 2 },
 };
 
 function clamp(n: number, min: number, max: number): number {

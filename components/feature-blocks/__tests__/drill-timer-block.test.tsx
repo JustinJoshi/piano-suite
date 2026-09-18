@@ -21,6 +21,8 @@ function createRuntime(overrides: Partial<DrillRuntime> = {}): DrillRuntime {
     setTargets: vi.fn(),
     skipTarget: vi.fn(),
     registerTargetSource: vi.fn(() => vi.fn()),
+    setRuntimeSourceNotes: vi.fn(),
+    clearRuntimeSourceNotes: vi.fn(),
     activeTargetSource: null,
     ...overrides,
   };

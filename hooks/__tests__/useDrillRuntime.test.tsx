@@ -519,3 +519,148 @@ describe("useDrillRuntimeProvider", () => {
     );
   });
 });
+
+describe("useDrillRuntimeProvider tempo ramp", () => {
+  beforeEach(() => {
+    mockPhase = "idle";
+    mockHeldPcs = new Set();
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const rampBlock = (enabled: boolean) => ({
+    id: "t1",
+    type: "transport",
+    config: {
+      bpm: 60,
+      beatsPerBar: 4,
+      rampEnabled: enabled,
+      rampTargetBpm: 84,
+      rampOverReps: 2,
+    },
+  });
+
+  // A source + transform pair whose onsets depend on the bpm the runtime
+  // composes the stream at (see the buildStream wiring test above).
+  const sourceBlocks = [
+    { id: "b1", type: "chordLibrary", config: { chords: "Cmaj7, Dm7" } },
+    { id: "b2", type: "rhythmPattern", config: {} },
+  ];
+
+  it("raises the effective bpm across completed reps toward the target", () => {
+    const blocks = [rampBlock(true), ...sourceBlocks];
+
+    const { result, rerender } = renderHook(() =>
+      useDrillRuntimeProvider({ pageId: "page-1", clock: { bpm: 60, beatsPerBar: 4 }, blocks })
+    );
+
+    act(() => {
+      result.current.setTargets([
+        { id: "a", symbol: "C", notes: ["C"], pcs: new Set([0]) },
+        { id: "b", symbol: "D", notes: ["D"], pcs: new Set([2]) },
+        { id: "c", symbol: "E", notes: ["E"], pcs: new Set([4]) },
+        { id: "d", symbol: "F", notes: ["F"], pcs: new Set([5]) },
+      ]);
+    });
+
+    expect(result.current.stream.map((n) => n.onsetMs)).toEqual(
+      buildStream(blocks, 60).map((n) => n.onsetMs)
+    );
+
+    act(() => {
+      result.current.skipTarget();
+    });
+    rerender();
+    const atOneRep = result.current.stream.map((n) => n.onsetMs);
+    expect(atOneRep).toEqual(buildStream(blocks, 72).map((n) => n.onsetMs));
+
+    act(() => {
+      result.current.skipTarget();
+    });
+    rerender();
+    const atTwoReps = result.current.stream.map((n) => n.onsetMs);
+    expect(atTwoReps).toEqual(buildStream(blocks, 84).map((n) => n.onsetMs));
+
+    act(() => {
+      result.current.skipTarget();
+    });
+    rerender();
+    // Clamped at the target — a third rep adds nothing.
+    expect(result.current.stream.map((n) => n.onsetMs)).toEqual(atTwoReps);
+
+    // The ramp actually moved the tempo: each onset shifted by the rep.
+    expect(atOneRep).not.toEqual(atTwoReps);
+  });
+
+  it("keeps the configured bpm constant across reps when the ramp is off", () => {
+    const blocks = [rampBlock(false), ...sourceBlocks];
+
+    const { result, rerender } = renderHook(() =>
+      useDrillRuntimeProvider({ pageId: "page-1", clock: { bpm: 60, beatsPerBar: 4 }, blocks })
+    );
+
+    act(() => {
+      result.current.setTargets([
+        { id: "a", symbol: "C", notes: ["C"], pcs: new Set([0]) },
+        { id: "b", symbol: "D", notes: ["D"], pcs: new Set([2]) },
+        { id: "c", symbol: "E", notes: ["E"], pcs: new Set([4]) },
+      ]);
+    });
+
+    const initial = result.current.stream.map((n) => n.onsetMs);
+    expect(initial).toEqual(buildStream(blocks, 60).map((n) => n.onsetMs));
+
+    act(() => {
+      result.current.skipTarget();
+    });
+    rerender();
+    expect(result.current.stream.map((n) => n.onsetMs)).toEqual(initial);
+
+    act(() => {
+      result.current.skipTarget();
+    });
+    rerender();
+    expect(result.current.stream.map((n) => n.onsetMs)).toEqual(initial);
+  });
+
+  it("times the clock-advanced window with the ramped bpm", () => {
+    vi.useFakeTimers();
+    try {
+      mockPhase = "timing";
+      const blocks = [rampBlock(true)];
+
+      const { result } = renderHook(() =>
+        useDrillRuntimeProvider({ pageId: "page-1", clock: { bpm: 60, beatsPerBar: 4 }, blocks })
+      );
+
+      act(() => {
+        result.current.setTargets([
+          { id: "a", symbol: "C", notes: ["C"], pcs: new Set([0]) },
+          { id: "b", symbol: "D", notes: ["D"], pcs: new Set([2]) },
+        ]);
+      });
+
+      // Rep 0: 60bpm, 4/4 → 4000ms window.
+      act(() => {
+        vi.advanceTimersByTime(3999);
+      });
+      expect(result.current.targetIndex).toBe(0);
+
+      act(() => {
+        vi.advanceTimersByTime(1);
+      });
+      expect(result.current.targetIndex).toBe(1);
+
+      // Rep 1: ramped to 72bpm → ~3333ms window, less than a full 4000ms bar.
+      act(() => {
+        vi.advanceTimersByTime(4000);
+      });
+      expect(finishNow).toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});

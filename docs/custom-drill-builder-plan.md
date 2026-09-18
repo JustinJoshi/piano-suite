@@ -102,9 +102,11 @@ later phase gated on evidence that people build drills at all.
 
 In rough order of fit with the current Free/Pro (Clerk Billing) setup:
 
-1. **Keep the current freemium gate**: builder usage free (localStorage), cloud sync +
-   publishing to the gallery Pro-only. Lowest risk, uses existing `canPersist`
+1. **Keep the current freemium gate**: builder usage free (localStorage), cloud sync
+   Pro-only. Lowest risk, uses existing `canPersist`
    plumbing. This is the learnchess.ai tier shape ($0 / ~$5 / ~$12).
+   *(Update 2026-09: publishing to the gallery became free for signed-in users —
+   only sync is Pro — see `docs/PROJECT_HISTORY.md`, "Making publishing free".)*
 2. **Marketplace rev-share (Chessable model)** — only viable after the gallery has
    proven supply and demand; requires payment rails for authors (Stripe Connect or
    similar) and curation. Phase 5+, not a starting point.
