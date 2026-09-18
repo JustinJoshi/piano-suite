@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, within } from "@testing-library/react";
 import { LibrarySections } from "@/components/workshop-marketplace/library-sections";
 import { AudioSettingsProvider } from "@/hooks/useAudioSettings";
+import { MusicPlayerProvider } from "@/hooks/useMusicPlayer";
 import type { FeatureBlock } from "@/lib/feature-blocks/types";
 
 vi.mock("@/hooks/useAuthAccess", () => ({
@@ -24,7 +25,7 @@ vi.mock("@/convex/_generated/api", () => ({
   },
 }));
 
-// Pinned by type to the manifest distribution: 16 interactive cards,
+// Pinned by type to the manifest distribution: 17 interactive cards,
 // 3 sources + 2 transforms.
 const INTERACTIVE_TYPES = [
   "metronome",
@@ -43,6 +44,7 @@ const INTERACTIVE_TYPES = [
   "targetDisplay",
   "noteRoll",
   "freePlay",
+  "songPlayer",
 ];
 
 const SECONDARY_TYPES = [
@@ -59,13 +61,15 @@ function blockOf(type: string): FeatureBlock {
 
 function renderLibrary(pageBlocks: FeatureBlock[] = []) {
   return render(
-    <AudioSettingsProvider>
+    <MusicPlayerProvider>
+        <AudioSettingsProvider>
       <LibrarySections
         pageBlocks={pageBlocks}
         onAddBlock={vi.fn()}
         onRemoveBlockType={vi.fn()}
       />
     </AudioSettingsProvider>
+        </MusicPlayerProvider>
   );
 }
 
@@ -111,7 +115,7 @@ describe("LibrarySections", () => {
     renderLibrary();
 
     expect(screen.getByTestId("library-result-count")).toHaveTextContent(
-      "Showing all 21 blocks"
+      "Showing all 22 blocks"
     );
     expect(screen.getByTestId("supplementary-toggle")).toHaveAttribute(
       "aria-expanded",
@@ -120,13 +124,13 @@ describe("LibrarySections", () => {
     expect(screen.queryByTestId("supplementary-list")).not.toBeInTheDocument();
   });
 
-  it("renders exactly the 16 interactive cards with live previews", () => {
+  it("renders exactly the 17 interactive cards with live previews", () => {
     const { container } = renderLibrary();
 
     const cardTestIds = screen
       .getAllByTestId(/marketplace-card-/)
       .map((el) => el.getAttribute("data-testid"));
-    expect(cardTestIds).toHaveLength(16);
+    expect(cardTestIds).toHaveLength(17);
     expect(cardTestIds).toEqual(
       expect.arrayContaining(
         INTERACTIVE_TYPES.map((type) => `marketplace-card-${type}`)
@@ -136,7 +140,7 @@ describe("LibrarySections", () => {
     const previewWrappers = container.querySelectorAll(
       "[data-testid^='marketplace-preview-']"
     );
-    expect(previewWrappers).toHaveLength(16);
+    expect(previewWrappers).toHaveLength(17);
     // One real preview string so a wall of fallbacks would be caught.
     expect(screen.getByTestId("bpm-display")).toHaveTextContent("120 BPM");
   });
@@ -157,7 +161,7 @@ describe("LibrarySections", () => {
 
     // No FeatureRenderer output in the rows: no card previews, and the
     // chord library preview is not mounted anywhere.
-    expect(container.querySelectorAll("[data-testid^='marketplace-preview-']")).toHaveLength(16);
+    expect(container.querySelectorAll("[data-testid^='marketplace-preview-']")).toHaveLength(17);
     expect(screen.queryByTestId("chord-stream")).not.toBeInTheDocument();
     expect(screen.queryByTestId("scale-stream")).not.toBeInTheDocument();
   });
@@ -221,7 +225,7 @@ describe("LibrarySections", () => {
       "true"
     );
     expect(screen.getByTestId("library-result-count")).toHaveTextContent(
-      "Showing 1 of 21 blocks"
+      "Showing 1 of 22 blocks"
     );
     expect(container.querySelectorAll("[data-testid^='marketplace-preview-']")).toHaveLength(0);
   });
@@ -244,7 +248,7 @@ describe("LibrarySections", () => {
     expect(screen.queryByTestId("marketplace-card-drillTimer")).not.toBeInTheDocument();
     expect(screen.getByTestId("marketplace-row-rhythmPattern")).toBeInTheDocument();
     expect(screen.getByTestId("library-result-count")).toHaveTextContent(
-      "Showing 6 of 21 blocks"
+      "Showing 6 of 22 blocks"
     );
     expect(container.querySelectorAll("[data-testid^='marketplace-preview-']")).toHaveLength(4);
   });
@@ -264,7 +268,7 @@ describe("LibrarySections", () => {
     expect(screen.getByTestId("marketplace-row-pieceLibrary")).toBeInTheDocument();
     expect(screen.queryByTestId("marketplace-row-rhythmPattern")).not.toBeInTheDocument();
     expect(screen.getByTestId("library-result-count")).toHaveTextContent(
-      "Showing 3 of 21 blocks"
+      "Showing 3 of 22 blocks"
     );
     expect(container.querySelectorAll("[data-testid^='marketplace-preview-']")).toHaveLength(0);
   });

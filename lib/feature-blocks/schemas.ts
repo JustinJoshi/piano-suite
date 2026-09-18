@@ -19,6 +19,7 @@ import { normalizeScaleLibraryConfig } from "./scale-library/config";
 import { normalizeNoteRollConfig } from "./note-roll/config";
 import { normalizePieceLibraryConfig } from "./piece-library/config";
 import { normalizeFreePlayConfig } from "./free-play/config";
+import { normalizeSongPlayerConfig } from "./song-player/config";
 import { normalizeSize, type BlockSize } from "../workshop-grid";
 
 /**
@@ -57,6 +58,7 @@ const blockNormalizers: Record<string, BlockNormalizer> = {
   noteRoll: normalizeNoteRollConfig as BlockNormalizer,
   pieceLibrary: normalizePieceLibraryConfig as BlockNormalizer,
   freePlay: normalizeFreePlayConfig as BlockNormalizer,
+  songPlayer: normalizeSongPlayerConfig as BlockNormalizer,
 };
 
 /** The block types `normalizeStoredBlock` will accept. */

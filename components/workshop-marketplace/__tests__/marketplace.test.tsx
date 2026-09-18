@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, within } from "@testing-library/react";
 import { Marketplace } from "@/components/workshop-marketplace/marketplace";
 import { AudioSettingsProvider } from "@/hooks/useAudioSettings";
+import { MusicPlayerProvider } from "@/hooks/useMusicPlayer";
 import type { FeatureBlock } from "@/lib/feature-blocks/types";
 
 vi.mock("@/hooks/useAuthAccess", () => ({
@@ -42,6 +43,7 @@ const INTERACTIVE_TYPES = [
   "targetDisplay",
   "noteRoll",
   "freePlay",
+  "songPlayer",
 ];
 
 const SECONDARY_TYPES = ["chordLibrary", "scaleLibrary", "pieceLibrary", "rhythmPattern"];
@@ -56,13 +58,15 @@ function renderMarketplace(
   onRemove = vi.fn()
 ) {
   return render(
-    <AudioSettingsProvider>
+    <MusicPlayerProvider>
+        <AudioSettingsProvider>
       <Marketplace
         pageBlocks={blocks}
         onAddBlock={onAdd}
         onRemoveBlockType={onRemove}
       />
     </AudioSettingsProvider>
+        </MusicPlayerProvider>
   );
 }
 
@@ -104,7 +108,7 @@ describe("Marketplace", () => {
     vi.unstubAllGlobals();
   });
 
-  it("renders the two tiers: 16 interactive cards and 5 quiet rows", () => {
+  it("renders the two tiers: 17 interactive cards and 5 quiet rows", () => {
     renderMarketplace();
 
     // Interactive tier: exactly the 16 interactive cards.
@@ -112,7 +116,7 @@ describe("Marketplace", () => {
     expect(screen.queryAllByTestId(/marketplace-card-/).map((el) => el.getAttribute("data-testid"))).toEqual(
       expect.arrayContaining(cardIds)
     );
-    expect(screen.getAllByTestId(/marketplace-card-/)).toHaveLength(16);
+    expect(screen.getAllByTestId(/marketplace-card-/)).toHaveLength(17);
 
     // Secondary tier: collapsed until expanded, then exactly 4 rows.
     expect(screen.queryByTestId("marketplace-row-chordLibrary")).not.toBeInTheDocument();
@@ -124,12 +128,12 @@ describe("Marketplace", () => {
     expect(screen.getAllByTestId(/marketplace-row-/)).toHaveLength(5);
   });
 
-  it("mounts 16 live previews (cards only) and no secondary previews", () => {
+  it("mounts 17 live previews (cards only) and no secondary previews", () => {
     const { container } = renderMarketplace();
 
     // One live preview per interactive card, none for the rows.
     const previewWrappers = container.querySelectorAll("[data-testid^='marketplace-preview-']");
-    expect(previewWrappers).toHaveLength(16);
+    expect(previewWrappers).toHaveLength(17);
     expect(
       container.querySelector("[data-testid='marketplace-preview-chordLibrary']")
     ).toBeNull();

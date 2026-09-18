@@ -20,6 +20,7 @@ import {
   Disc3,
   Film,
   Waves,
+  PlayCircle,
 } from "lucide-react";
 import { MetronomeBlock } from "@/components/feature-blocks/metronome-block";
 import { DrillTimerBlock } from "@/components/feature-blocks/drill-timer-block";
@@ -147,6 +148,12 @@ import {
   freePlayFields,
 } from "@/lib/feature-blocks/free-play/config";
 import { FreePlayBlock } from "@/components/feature-blocks/free-play-block";
+import { SongPlayerBlock } from "@/components/feature-blocks/song-player-block";
+import {
+  songPlayerDefaultConfig,
+  normalizeSongPlayerConfig,
+  songPlayerFields,
+} from "@/lib/feature-blocks/song-player/config";
 import type { ComponentType } from "react";
 import type { FeatureDefinition } from "@/lib/feature-blocks/types";
 
@@ -403,6 +410,19 @@ export const featureRegistry = {
     defaultConfig: freePlayDefaultConfig,
     normalizeConfig: normalizeFreePlayConfig,
     component: FreePlayBlock as ComponentType<Record<string, unknown>>,
+  } satisfies FeatureDefinition<Record<string, unknown>>,
+
+  songPlayer: {
+    type: "songPlayer",
+    category: "technique",
+    label: "Song player",
+    description:
+      "Upload a MIDI or audio file and play it back through the piano sound while you follow along.",
+    icon: PlayCircle,
+    fields: songPlayerFields,
+    defaultConfig: songPlayerDefaultConfig,
+    normalizeConfig: normalizeSongPlayerConfig,
+    component: SongPlayerBlock as ComponentType<Record<string, unknown>>,
   } satisfies FeatureDefinition<Record<string, unknown>>,
 };
 

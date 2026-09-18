@@ -180,6 +180,7 @@ Components are registered in two places:
 | `drillShortcuts` | Interactive | Ready-made drills | Stable |
 | `restTimer` | Interactive | Rest timer | Stable |
 | `scaleRunner` | Interactive | Scale run | Stable |
+| `songPlayer` | Interactive | Song player | Experimental |
 | `targetDisplay` | Interactive | Target display | Experimental |
 | `transport` | Interactive | Transport | Experimental |
 | `chordLibrary` | Source | Chord library | Experimental |
