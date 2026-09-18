@@ -7,7 +7,29 @@ moment; remove it once it's fixed, with the PR/commit that closed it.
 
 ## Open
 
-(nothing — all clear)
+### Verify the grid drag/resize fix by hand — owner: Justin
+
+**Added:** 2026-09-17. Blocks merging `fix/workshop-grid-drag`.
+
+The fix below is verified *mechanically* only: the sorting strategy is
+swapped, the resize gesture is hardened, unit tests, lint, typecheck, build
+and `e2e/workshop-grid.spec.ts` + `e2e/a11y.spec.ts` all pass. **Nothing in
+that chain proves tiles visually stopped warping** — no automated check in
+this repo watches sibling tiles during a drag.
+
+Two things need a human on `/tools/workshop` before this merges:
+
+1. **Drag a tile between others** and confirm siblings stay put instead of
+   jumping, overlapping or resizing mid-drag. Use a page with mixed spans —
+   a 4-wide `keyboardDisplay` or `noteRoll` next to 2-wide tiles — since
+   uniform tiles would have hidden the original bug too.
+2. **Judge the new drag preview.** Losing `rectSortingStrategy` also loses
+   dnd-kit's "make room" animation: tiles now hold still and a static
+   `DragOverlay` placeholder follows the cursor, with the reorder landing on
+   drop. That is a deliberate UX change, not a side effect — it needs to
+   feel right to you, or the approach needs revisiting.
+
+Remove this entry once checked.
 
 ## Closed
 
