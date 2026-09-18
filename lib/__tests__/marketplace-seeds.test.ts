@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { marketplaceSeeds } from "@/lib/marketplace-seeds";
 import { normalizeStoredBlock } from "@/lib/feature-blocks/schemas";
+import { validateArrangement } from "@/lib/feature-blocks/validate-arrangement";
 
 describe("marketplace seeds", () => {
   it("ships at least five featured pages", () => {
@@ -64,5 +65,35 @@ describe("marketplace seeds", () => {
       expect(seed?.authorNote.length).toBeGreaterThan(0);
       expect(seed?.authorNote).toMatch(/\b(I|my)\b/i);
     }
+  });
+
+  it("the piece trainer seed assembles the five-block piece workflow and validates", () => {
+    const seed = marketplaceSeeds.find((s) => s.id === "piece-trainer");
+    expect(seed).toBeDefined();
+
+    // Exactly the plan's five blocks, in the plan's runtime order: source,
+    // transport (ramp on), loop transform, falling-note display, keyboard.
+    expect(seed!.blocks.map((b) => b.type)).toEqual([
+      "pieceLibrary",
+      "transport",
+      "sectionLoop",
+      "noteRoll",
+      "keyboardDisplay",
+    ]);
+
+    const transport = seed!.blocks.find((b) => b.type === "transport");
+    expect(transport?.config).toMatchObject({
+      rampEnabled: true,
+      rampTargetBpm: 84,
+    });
+
+    const sectionLoop = seed!.blocks.find((b) => b.type === "sectionLoop");
+    expect(sectionLoop?.config).toMatchObject({
+      startBar: 0,
+      endBar: 4,
+      repeats: 4,
+    });
+
+    expect(validateArrangement(seed!.blocks)).toEqual({ status: "valid" });
   });
 });
