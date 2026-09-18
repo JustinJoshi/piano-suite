@@ -163,7 +163,7 @@ Setting `NEXT_PUBLIC_AUTH_DISABLED=true` makes the proxy skip protection for **e
 | Flag | Meaning |
 |------|---------|
 | `canAccess` | May the tool UI render? True when signed in **or** when the bypass is on |
-| `canPersist` | May we write practice history **and** theme/atmosphere prefs to Convex? True for **Pro** (`has({ feature: "sync" })` / `has({ plan: "pro" })`) **or** when `NEXT_PUBLIC_AUTH_DISABLED=true`. Signed-in Free users keep durable **browser** history and prefs; Convex practice/settings mutations reject Free JWTs (`ensureUserIdWithSync`). Upgrade → upload local history from the Tracking/Technique import panels. |
+| `canPersist` | May we write practice history **and** theme/atmosphere prefs to Convex? True for **Pro** (`has({ feature: "sync" })` / `has({ plan: "pro" })`) **or** when `NEXT_PUBLIC_AUTH_DISABLED=true`. Signed-in Free users keep durable **browser** history and prefs; Convex practice/settings mutations reject Free JWTs (`ensureUserIdWithSync`). Upgrade → upload local history from the Tracking/Technique import panels. Publishing to the marketplace is **not** gated by `canPersist` — it is free for any signed-in user (2026-09). |
 | `canUseFloatPanel` | May we show the ambient float / pop-out resonance panel? Same Pro entitlement as `canPersist` for v1. Free users can still explore Ripple Lab and set full-page ambient backgrounds. |
 
 `hooks/useToolUserReady.ts` additionally waits for the Convex `users` row on tool pages, and `components/ensure-signed-in-user.tsx` (mounted inside `ConvexClientProvider`) creates that row as soon as Clerk reports a session, so homepage theme and atmosphere queries do not race it.
@@ -877,6 +877,29 @@ Verification: full gate at final HEAD (`npm run lint` 0 errors,
 API-boundary e2e specs (50 passed), the axe a11y spec (zero serious/critical
 on the Workshop), and a production-build `curl` of `/api/blocks` (HTTP 200
 with the catalogue body).
+
+## Making publishing free (2026-09)
+
+`fleet/free-publishing` split publishing from the Pro sync entitlement, because
+`BILLING_ENABLED` is `false` and Pro cannot be bought — gating the
+marketplace's only supply path behind it meant the gallery could never grow
+beyond `lib/marketplace-seeds.ts`.
+
+- **Free/Pro split, restated.** Publishing to `/marketplace` is free for any
+  signed-in user: `publishCustomDrill` / `unpublishCustomDrill`
+  (`convex/workshop.ts`) gate on `ensureUserId` (capped at
+  `MAX_PUBLISHED_PER_USER = 25` published pages per owner), and the Workshop
+  share menu offers working publish/unpublish controls to everyone. Cross-device
+  sync, prefs, and history remain Pro: `upsertCustomDrill` / `deleteCustomDrill`
+  still use `ensureUserIdWithSync`, and `canPersist` still gates Convex
+  writes — it does not gate publishing. `forkCustomDrill` was already free.
+- **Report path.** `reportPublicDrill` is anonymous-allowed (reason is
+  validated and discarded); a hard-coded `REPORT_HIDE_THRESHOLD = 3` reports
+  auto-hide a page from `listPublicDrills` / `getPublicDrill`, and
+  republishing a hidden page does not un-hide it — there is no un-hide path.
+  Justin may want to tune the threshold and add moderation before launch.
+- **Docs, not behaviour.** Pricing, AGENTS.md, and the README marketplace
+  description were corrected to match; `BILLING_ENABLED` is untouched.
 
 ## Roadmap
 

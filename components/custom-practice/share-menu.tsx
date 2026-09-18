@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
+import Link from "next/link";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Globe, Link as LinkIcon, Check, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthAccess } from "@/hooks/useAuthAccess";
+import { captureEvent } from "@/lib/analytics";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type ShareMenuProps = {
@@ -21,37 +23,29 @@ export function ShareMenu({
   blocks,
   updatedAt,
 }: ShareMenuProps) {
-  const { canPersist } = useAuthAccess();
-  const upsertDrill = useMutation(api.workshop.upsertCustomDrill);
-  const drills = useQuery(
-    api.workshop.listCustomDrills,
-    canPersist ? {} : "skip"
+  // canPersist gates Convex sync/prefs, not publishing — publishing is free
+  // for any signed-in user; only the signed-in distinction matters here.
+  const { isSignedIn } = useAuthAccess();
+  const publishDrill = useMutation(api.workshop.publishCustomDrill);
+  const unpublishDrill = useMutation(api.workshop.unpublishCustomDrill);
+  const publishState = useQuery(
+    api.workshop.getPublishState,
+    isSignedIn ? { clientPageId } : "skip"
   );
 
-  const ownDrill = useMemo(
-    () => drills?.find((d) => d.clientPageId === clientPageId && !d.deleted),
-    [drills, clientPageId]
-  );
-
-  const isPublic = ownDrill?.isPublic ?? false;
-  const drillId = ownDrill?._id;
+  const isPublic = publishState?.isPublic ?? false;
+  const drillId = publishState?.drillId;
 
   const [publishing, setPublishing] = useState(false);
   const [copied, setCopied] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
 
   const handlePublish = useCallback(async () => {
-    if (!canPersist) return;
     setPublishing(true);
     setPublishError(null);
     try {
-      await upsertDrill({
-        clientPageId,
-        title,
-        blocks,
-        updatedAt,
-        isPublic: true,
-      });
+      await publishDrill({ clientPageId, title, blocks, updatedAt });
+      captureEvent("page_published", { pageId: clientPageId });
     } catch (err) {
       setPublishError(
         err instanceof Error ? err.message : "Failed to publish"
@@ -59,20 +53,13 @@ export function ShareMenu({
     } finally {
       setPublishing(false);
     }
-  }, [canPersist, upsertDrill, clientPageId, title, blocks, updatedAt]);
+  }, [publishDrill, clientPageId, title, blocks, updatedAt]);
 
   const handleUnpublish = useCallback(async () => {
-    if (!canPersist) return;
     setPublishing(true);
     setPublishError(null);
     try {
-      await upsertDrill({
-        clientPageId,
-        title,
-        blocks,
-        updatedAt,
-        isPublic: false,
-      });
+      await unpublishDrill({ clientPageId });
     } catch (err) {
       setPublishError(
         err instanceof Error ? err.message : "Failed to unpublish"
@@ -80,7 +67,7 @@ export function ShareMenu({
     } finally {
       setPublishing(false);
     }
-  }, [canPersist, upsertDrill, clientPageId, title, blocks, updatedAt]);
+  }, [unpublishDrill, clientPageId]);
 
   const handleCopyLink = useCallback(() => {
     if (!drillId) return;
@@ -103,9 +90,12 @@ export function ShareMenu({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {!canPersist ? (
+        {!isSignedIn ? (
           <p className="text-sm text-muted-foreground">
-            Upgrade to Pro to publish practice pages to the community gallery.
+            <Link href="/sign-in" className="underline hover:text-foreground">
+              Sign in
+            </Link>{" "}
+            to publish this page to the community.
           </p>
         ) : isPublic ? (
           <>

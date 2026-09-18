@@ -81,7 +81,9 @@ export const listPublicDrills = query({
       .take(limit);
 
     return rows
-      .filter((row) => !(row.deleted ?? false))
+      .filter(
+        (row) => !(row.deleted ?? false) && row.hidden !== true
+      )
       .map((row) => ({
         _id: row._id,
         title: row.title,
@@ -103,7 +105,12 @@ export const getPublicDrill = query({
   returns: v.union(publicDrillValidator, v.null()),
   handler: async (ctx, args) => {
     const row = await ctx.db.get("customDrills", args.drillId);
-    if (!row || row.isPublic !== true || (row.deleted ?? false)) {
+    if (
+      !row ||
+      row.isPublic !== true ||
+      (row.deleted ?? false) ||
+      row.hidden === true
+    ) {
       return null;
     }
 
@@ -329,5 +336,215 @@ export const forkCustomDrill = mutation({
       blocks: source.blocks,
       authorName,
     };
+  },
+});
+
+// ── Free publishing ───────────────────────────────────────────────────────
+
+const MAX_PUBLISHED_PER_USER = 25;
+
+/**
+ * Publish (or re-publish) a page to the marketplace. Works for any
+ * signed-in user — publishing is free; only cross-device sync is Pro.
+ * Upserts the row for `(ownerId, clientPageId)` exactly as
+ * `upsertCustomDrill` does, then flips it public.
+ */
+export const publishCustomDrill = mutation({
+  args: {
+    clientPageId: v.string(),
+    title: v.string(),
+    blocks: v.array(v.any()),
+    updatedAt: v.number(),
+  },
+  returns: v.object({
+    _id: v.id("customDrills"),
+    updatedAt: v.number(),
+  }),
+  handler: async (ctx, args) => {
+    const userId = await ensureUserId(ctx);
+
+    if (!isValidClientPageId(args.clientPageId)) {
+      throw new Error("Invalid page id");
+    }
+
+    const page = normalizeStoredPage({
+      clientPageId: args.clientPageId,
+      title: args.title,
+      blocks: args.blocks,
+      updatedAt: args.updatedAt,
+    });
+    if (!page) {
+      throw new Error("Invalid practice page");
+    }
+
+    const existing = await ctx.db
+      .query("customDrills")
+      .withIndex("by_owner_client_id", (q) =>
+        q.eq("ownerId", userId).eq("clientPageId", page.clientPageId)
+      )
+      .unique();
+
+    if (existing?.isPublic !== true) {
+      const rows = await ctx.db
+        .query("customDrills")
+        .withIndex("by_owner", (q) => q.eq("ownerId", userId))
+        .take(1000);
+      if (rows.length >= MAX_PAGES_PER_USER) {
+        throw new Error(
+          `Workshop page limit reached (${MAX_PAGES_PER_USER}). Delete a page to add another.`
+        );
+      }
+      const publishedCount = rows.filter((row) => row.isPublic === true).length;
+      if (publishedCount >= MAX_PUBLISHED_PER_USER) {
+        throw new Error(
+          `Published page limit reached (${MAX_PUBLISHED_PER_USER}). Unpublish a page to publish another.`
+        );
+      }
+    }
+
+    const user = await ctx.db.get("users", userId);
+    const authorName =
+      existing?.authorName ||
+      user?.name ||
+      user?.email ||
+      "Anonymous pianist";
+
+    if (existing) {
+      await ctx.db.patch("customDrills", existing._id, {
+        title: page.title,
+        blocks: page.blocks,
+        deleted: false,
+        isPublic: true,
+        authorName,
+        updatedAt: page.updatedAt,
+      });
+      return { _id: existing._id, updatedAt: page.updatedAt };
+    }
+
+    const now = Date.now();
+    const _id = await ctx.db.insert("customDrills", {
+      ownerId: userId,
+      clientPageId: page.clientPageId,
+      title: page.title,
+      blocks: page.blocks,
+      deleted: false,
+      isPublic: true,
+      authorName,
+      createdAt: now,
+      updatedAt: page.updatedAt,
+    });
+    return { _id, updatedAt: page.updatedAt };
+  },
+});
+
+/**
+ * Unpublish the caller's own page (the row is kept, just made private).
+ * Returns `{ unpublished: false }` when there is nothing to unpublish and
+ * never touches another user's row.
+ */
+export const unpublishCustomDrill = mutation({
+  args: { clientPageId: v.string() },
+  returns: v.object({ unpublished: v.boolean() }),
+  handler: async (ctx, args) => {
+    const userId = await ensureUserId(ctx);
+
+    if (!isValidClientPageId(args.clientPageId)) {
+      throw new Error("Invalid page id");
+    }
+
+    const existing = await ctx.db
+      .query("customDrills")
+      .withIndex("by_owner_client_id", (q) =>
+        q.eq("ownerId", userId).eq("clientPageId", args.clientPageId)
+      )
+      .unique();
+
+    if (!existing) {
+      return { unpublished: false };
+    }
+
+    if (existing.isPublic !== true) {
+      return { unpublished: false };
+    }
+
+    await ctx.db.patch("customDrills", existing._id, {
+      isPublic: false,
+    });
+    return { unpublished: true };
+  },
+});
+
+/**
+ * Publish state for the caller's page. Never throws: returns the neutral
+ * value when signed out, when the user row is missing, or when the page
+ * does not exist / is not public.
+ */
+export const getPublishState = query({
+  args: { clientPageId: v.string() },
+  returns: v.object({
+    isPublic: v.boolean(),
+    drillId: v.union(v.id("customDrills"), v.null()),
+  }),
+  handler: async (ctx, args) => {
+    const neutral = { isPublic: false, drillId: null };
+
+    const userId = await optionalUserId(ctx);
+    if (!userId) {
+      return neutral;
+    }
+
+    const existing = await ctx.db
+      .query("customDrills")
+      .withIndex("by_owner_client_id", (q) =>
+        q.eq("ownerId", userId).eq("clientPageId", args.clientPageId)
+      )
+      .unique();
+
+    if (!existing || existing.isPublic !== true || (existing.deleted ?? false)) {
+      return neutral;
+    }
+
+    return { isPublic: true, drillId: existing._id };
+  },
+});
+
+// ── Community report path ─────────────────────────────────────────────────
+
+const MAX_REPORT_REASON_LENGTH = 300;
+const REPORT_HIDE_THRESHOLD = 3;
+
+/**
+ * Flag a public practice page. Anonymous by design — no sign-in wall in
+ * front of flagging. The report count accumulates on the row; at three
+ * reports the page is hidden from the marketplace.
+ */
+export const reportPublicDrill = mutation({
+  args: {
+    drillId: v.id("customDrills"),
+    reason: v.optional(v.string()),
+  },
+  returns: v.object({
+    reportCount: v.number(),
+    hidden: v.boolean(),
+  }),
+  handler: async (ctx, args) => {
+    const row = await ctx.db.get("customDrills", args.drillId);
+    if (!row || row.isPublic !== true || (row.deleted ?? false)) {
+      throw new Error("Practice page not found");
+    }
+
+    const reportCount = (row.reportCount ?? 0) + 1;
+    const hidden = reportCount >= REPORT_HIDE_THRESHOLD;
+
+    // `reason` is accepted and capped by the validator boundary but not
+    // persisted — no moderation storage is authorized yet.
+    void args.reason?.slice(0, MAX_REPORT_REASON_LENGTH);
+
+    await ctx.db.patch("customDrills", args.drillId, {
+      reportCount,
+      hidden,
+    });
+
+    return { reportCount, hidden };
   },
 });
