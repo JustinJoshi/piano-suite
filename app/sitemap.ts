@@ -1,7 +1,9 @@
 import type { MetadataRoute } from "next";
+import { resolveSiteUrl } from "@/lib/site-url";
+import { getAllArticles } from "@/lib/articles";
+import { learningRoutes } from "@/lib/routes";
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const siteUrl = resolveSiteUrl();
 
 // Public routes per proxy.ts's allowlist (audit 2026-09, Phase 1.7).
 const routes: Array<{
@@ -27,10 +29,32 @@ const routes: Array<{
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();
-  return routes.map(({ path, changeFrequency, priority }) => ({
+
+  const staticEntries = routes.map(({ path, changeFrequency, priority }) => ({
     url: `${siteUrl}${path}`,
     lastModified,
     changeFrequency,
     priority,
   }));
+
+  const articleEntries: MetadataRoute.Sitemap = getAllArticles().map(
+    (article) => {
+      const parsed = new Date(article.publishedAt);
+      return {
+        url: `${siteUrl}/articles/${article.slug}`,
+        lastModified: Number.isNaN(parsed.getTime()) ? lastModified : parsed,
+        changeFrequency: "yearly" as const,
+        priority: 0.5,
+      };
+    },
+  );
+
+  const routeEntries: MetadataRoute.Sitemap = learningRoutes.map((route) => ({
+    url: `${siteUrl}/routes/${route.id}`,
+    lastModified,
+    changeFrequency: "monthly" as const,
+    priority: 0.6,
+  }));
+
+  return [...staticEntries, ...articleEntries, ...routeEntries];
 }
