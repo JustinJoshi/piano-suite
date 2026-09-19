@@ -6,10 +6,6 @@ import {
   ArrowRightLeft,
   Timer,
   Waves,
-  Sparkles,
-  Infinity,
-  Hexagon,
-  LayoutGrid,
   Activity,
   Wrench,
   LucideIcon,
@@ -93,6 +89,11 @@ export const insightTools: ToolDef[] = [
   },
 ];
 
+// Demoted to two entries by the September 2026 audit (Phase 1.5): Julia,
+// Lissajous, Quasiperiodic and Multigrid left the registry. Chladni and
+// Chladni Ripple stay — they power the ambient/hero and MIDI-reactive
+// visual layer. The four removed labs' routes still exist and render by
+// direct URL; only their navigation rows are gone.
 export const labTools: ToolDef[] = [
   {
     title: "Chladni Lab",
@@ -108,38 +109,6 @@ export const labTools: ToolDef[] = [
       "Watch your playing become light — every note you press ripples across the screen.",
     icon: Activity,
     href: "/tools/chladni-ripple",
-    category: "lab",
-  },
-  {
-    title: "Julia Lab",
-    description:
-      "Wander through swirling fractal worlds that morph as you explore.",
-    icon: Sparkles,
-    href: "/tools/julia",
-    category: "lab",
-  },
-  {
-    title: "Lissajous Lab",
-    description:
-      "See what musical intervals look like — elegant curves drawn from harmony itself.",
-    icon: Infinity,
-    href: "/tools/lissajous",
-    category: "lab",
-  },
-  {
-    title: "Quasiperiodic Lab",
-    description:
-      "Mix overlapping waves into dreamy patterns, then set your favorite as the homepage mood.",
-    icon: Hexagon,
-    href: "/tools/quasiperiodic",
-    category: "lab",
-  },
-  {
-    title: "Multigrid Lab",
-    description:
-      "Tinker with kaleidoscopic tilings — crisp grids that bloom into colored mosaics.",
-    icon: LayoutGrid,
-    href: "/tools/multigrid",
     category: "lab",
   },
 ];
