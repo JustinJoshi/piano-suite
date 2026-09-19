@@ -139,6 +139,7 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 2. **Mobile-first layout.** Hero feature cards, pillar slides, and tool grids must reflow for narrow viewports. Avoid fixed-height containers that clip content on small screens.
 3. **Wrap onboarding in `WelcomeConfigProvider`.** `DashboardShell` already wraps `<Onboarding />` with the provider; new onboarding entry points should do the same.
 4. **Dev lab is reachable everywhere, linked nowhere in production.** `/dev/welcome-lab` stays public so styling can be iterated from any deployment, but the floating entry link (`isDevToolsVisible()`) only renders outside production — dev tooling must not appear on public pages (audit Phase 0.4). Use `lib/dev-tools.ts` helpers rather than inlining `NODE_ENV` checks.
+5. **No blocking onboarding overlay on first visit.** `/tools/*` must never mount a blocking overlay for a first-time visitor — the page renders immediately with the dismissible in-flow `OnboardingStrip`, and the six-slide tour opens only via the strip's Take-the-tour button. The check is `e2e/first-visit.spec.ts`.
 
 ## Rules for tool pages
 
