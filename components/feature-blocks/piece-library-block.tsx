@@ -68,7 +68,7 @@ export function PieceLibraryBlock(
         </span>
         {parsed && (
           <span className="text-xs text-muted-foreground">
-            {config.role === "graded" ? "Graded" : "Accompaniment"}
+            {config.role === "graded" ? "Practice part" : "Backing track"}
           </span>
         )}
       </div>
