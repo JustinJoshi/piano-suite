@@ -134,6 +134,35 @@ describe("Progression analytics", () => {
     });
   });
 
+  it("fires drill_completed again after a re-arm resets the loop count", () => {
+    mockDrill({ running: true, phase: "timing", loopCount: 0 });
+    const { rerender } = render(<Progression />);
+    vi.mocked(captureEvent).mockClear();
+
+    // First session: one loop completes.
+    mockDrill({ running: true, phase: "armed", loopCount: 1 });
+    rerender(<Progression />);
+    expect(captureEvent).toHaveBeenCalledTimes(1);
+    expect(captureEvent).toHaveBeenCalledWith("drill_completed", {
+      drill: "progression",
+    });
+    vi.mocked(captureEvent).mockClear();
+
+    // Re-arm: startDrill resets loopCount to 0 — nothing may fire.
+    mockDrill({ running: true, phase: "timing", loopCount: 0 });
+    rerender(<Progression />);
+    rerender(<Progression />);
+    expect(captureEvent).not.toHaveBeenCalled();
+
+    // The next finished loop of the new session emits again.
+    mockDrill({ running: true, phase: "armed", loopCount: 1 });
+    rerender(<Progression />);
+    expect(captureEvent).toHaveBeenCalledTimes(1);
+    expect(captureEvent).toHaveBeenCalledWith("drill_completed", {
+      drill: "progression",
+    });
+  });
+
   it("does not fire anything while idle", () => {
     render(<Progression />);
     expect(captureEvent).not.toHaveBeenCalled();

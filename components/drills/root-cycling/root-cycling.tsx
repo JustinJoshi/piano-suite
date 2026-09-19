@@ -94,7 +94,11 @@ export function RootCycling() {
 
   const completedRef = useRef(0);
   useEffect(() => {
-    if (repCount > completedRef.current) {
+    // Re-arm resets the counter to 0: track the new baseline silently so the
+    // next finished round emits again instead of being swallowed.
+    if (repCount < completedRef.current) {
+      completedRef.current = repCount;
+    } else if (repCount > completedRef.current) {
       completedRef.current = repCount;
       captureEvent("drill_completed", { drill: "root-cycling" });
     }

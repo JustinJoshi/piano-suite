@@ -159,6 +159,36 @@ describe("Arpeggios analytics", () => {
     });
   });
 
+  it("fires drill_completed again after a re-arm resets the lap count", () => {
+    mockDrill({ phase: "sequence", lapCount: 0 });
+    const { rerender } = render(<Arpeggios />);
+    vi.mocked(captureEvent).mockClear();
+
+    // First lap completes.
+    mockDrill({ phase: "complete", lapCount: 1 });
+    rerender(<Arpeggios />);
+    expect(captureEvent).toHaveBeenCalledTimes(1);
+    expect(captureEvent).toHaveBeenCalledWith("drill_completed", {
+      drill: "arpeggios",
+    });
+    vi.mocked(captureEvent).mockClear();
+
+    // Re-arm (armChord runs on every chord change / Anki card flip):
+    // lapCount resets to 0 — nothing may fire.
+    mockDrill({ phase: "awaiting-root", lapCount: 0 });
+    rerender(<Arpeggios />);
+    rerender(<Arpeggios />);
+    expect(captureEvent).not.toHaveBeenCalled();
+
+    // The next finished lap emits again.
+    mockDrill({ phase: "complete", lapCount: 1 });
+    rerender(<Arpeggios />);
+    expect(captureEvent).toHaveBeenCalledTimes(1);
+    expect(captureEvent).toHaveBeenCalledWith("drill_completed", {
+      drill: "arpeggios",
+    });
+  });
+
   it("does not fire anything while idle", () => {
     render(<Arpeggios />);
     expect(captureEvent).not.toHaveBeenCalled();

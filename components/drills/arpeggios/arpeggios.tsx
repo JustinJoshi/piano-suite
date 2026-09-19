@@ -165,7 +165,11 @@ export function Arpeggios() {
 
   const completedRef = useRef(0);
   useEffect(() => {
-    if (lapCount > completedRef.current) {
+    // Re-arm resets the counter to 0: track the new baseline silently so the
+    // next finished round emits again instead of being swallowed.
+    if (lapCount < completedRef.current) {
+      completedRef.current = lapCount;
+    } else if (lapCount > completedRef.current) {
       completedRef.current = lapCount;
       captureEvent("drill_completed", { drill: "arpeggios" });
     }

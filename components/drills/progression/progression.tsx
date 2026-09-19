@@ -122,7 +122,11 @@ export function Progression() {
 
   const completedRef = useRef(0);
   useEffect(() => {
-    if (loopCount > completedRef.current) {
+    // Re-arm resets the counter to 0: track the new baseline silently so the
+    // next finished round emits again instead of being swallowed.
+    if (loopCount < completedRef.current) {
+      completedRef.current = loopCount;
+    } else if (loopCount > completedRef.current) {
       completedRef.current = loopCount;
       captureEvent("drill_completed", { drill: "progression" });
     }

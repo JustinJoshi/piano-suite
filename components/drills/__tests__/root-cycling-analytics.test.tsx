@@ -122,6 +122,35 @@ describe("RootCycling analytics", () => {
     });
   });
 
+  it("fires drill_completed again after a re-arm resets the rep count", () => {
+    mockDrill({ running: true, phase: "timing", repCount: 0 });
+    const { rerender } = render(<RootCycling />);
+    vi.mocked(captureEvent).mockClear();
+
+    // First session: one rep completes.
+    mockDrill({ running: true, phase: "success", repCount: 1 });
+    rerender(<RootCycling />);
+    expect(captureEvent).toHaveBeenCalledTimes(1);
+    expect(captureEvent).toHaveBeenCalledWith("drill_completed", {
+      drill: "root-cycling",
+    });
+    vi.mocked(captureEvent).mockClear();
+
+    // Re-arm: startDrill resets repCount to 0 — nothing may fire.
+    mockDrill({ running: true, phase: "timing", repCount: 0 });
+    rerender(<RootCycling />);
+    rerender(<RootCycling />);
+    expect(captureEvent).not.toHaveBeenCalled();
+
+    // The next finished rep of the new session emits again.
+    mockDrill({ running: true, phase: "success", repCount: 1 });
+    rerender(<RootCycling />);
+    expect(captureEvent).toHaveBeenCalledTimes(1);
+    expect(captureEvent).toHaveBeenCalledWith("drill_completed", {
+      drill: "root-cycling",
+    });
+  });
+
   it("does not fire anything while idle", () => {
     render(<RootCycling />);
     expect(captureEvent).not.toHaveBeenCalled();
