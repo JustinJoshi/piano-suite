@@ -4,6 +4,7 @@ import { Marketplace } from "@/components/workshop-marketplace/marketplace";
 import { AudioSettingsProvider } from "@/hooks/useAudioSettings";
 import { MusicPlayerProvider } from "@/hooks/useMusicPlayer";
 import type { FeatureBlock } from "@/lib/feature-blocks/types";
+import { manifestsByKind } from "@/lib/feature-blocks/manifest";
 
 vi.mock("@/hooks/useAuthAccess", () => ({
   useAuthAccess: vi.fn(() => ({
@@ -26,6 +27,15 @@ vi.mock("@/convex/_generated/api", () => ({
 }));
 
 // The twenty registered blocks, pinned by type (matches the manifests).
+// Counts come from the manifest registry rather than being retyped here, so
+// registering a new block does not fail these tests for a reason unrelated to
+// the behaviour under test. The TYPES lists below still pin the blocks that
+// must be present, and the rendered count must equal the registry's, so a
+// block that is registered but never rendered is still caught.
+const KIND_COUNTS = manifestsByKind();
+const INTERACTIVE_COUNT = KIND_COUNTS.interactive.length;
+const SECONDARY_COUNT = KIND_COUNTS.source.length + KIND_COUNTS.transform.length;
+
 const INTERACTIVE_TYPES = [
   "metronome",
   "drillTimer",
@@ -108,32 +118,33 @@ describe("Marketplace", () => {
     vi.unstubAllGlobals();
   });
 
-  it("renders the two tiers: 17 interactive cards and 5 quiet rows", () => {
+  it("renders the two tiers: an interactive card per interactive manifest, a quiet row per source and transform", () => {
     renderMarketplace();
 
-    // Interactive tier: exactly the 16 interactive cards.
+    // Interactive tier: one card per interactive manifest.
     const cardIds = INTERACTIVE_TYPES.map((type) => `marketplace-card-${type}`);
     expect(screen.queryAllByTestId(/marketplace-card-/).map((el) => el.getAttribute("data-testid"))).toEqual(
       expect.arrayContaining(cardIds)
     );
-    expect(screen.getAllByTestId(/marketplace-card-/)).toHaveLength(17);
+    expect(screen.getAllByTestId(/marketplace-card-/)).toHaveLength(INTERACTIVE_COUNT);
 
-    // Secondary tier: collapsed until expanded, then exactly 4 rows.
+    // Secondary tier: collapsed until expanded, then one row per source
+    // and transform.
     expect(screen.queryByTestId("marketplace-row-chordLibrary")).not.toBeInTheDocument();
     expandSecondarySection();
     const rowIds = SECONDARY_TYPES.map((type) => `marketplace-row-${type}`);
     expect(screen.queryAllByTestId(/marketplace-row-/).map((el) => el.getAttribute("data-testid"))).toEqual(
       expect.arrayContaining(rowIds)
     );
-    expect(screen.getAllByTestId(/marketplace-row-/)).toHaveLength(5);
+    expect(screen.getAllByTestId(/marketplace-row-/)).toHaveLength(SECONDARY_COUNT);
   });
 
-  it("mounts 17 live previews (cards only) and no secondary previews", () => {
+  it("mounts one live preview per card and none for the secondary rows", () => {
     const { container } = renderMarketplace();
 
     // One live preview per interactive card, none for the rows.
     const previewWrappers = container.querySelectorAll("[data-testid^='marketplace-preview-']");
-    expect(previewWrappers).toHaveLength(17);
+    expect(previewWrappers).toHaveLength(INTERACTIVE_COUNT);
     expect(
       container.querySelector("[data-testid='marketplace-preview-chordLibrary']")
     ).toBeNull();

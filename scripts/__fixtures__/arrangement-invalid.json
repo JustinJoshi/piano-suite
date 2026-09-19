@@ -1,0 +1,7 @@
+{
+  "name": "Orphan transform and a display with no source",
+  "blocks": [
+    { "id": "disp-1", "type": "noteRoll", "config": {} },
+    { "id": "xf-1", "type": "rhythmPattern", "config": {} }
+  ]
+}
