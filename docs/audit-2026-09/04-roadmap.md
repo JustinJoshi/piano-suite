@@ -177,7 +177,7 @@ sign-in wall, and conclude the copy was wrong.
 | 1.1 | Rewrite the hero: new headline, new subhead, three door cards. | Copy lives in `lib/welcome-config.ts` — this is where that pattern pays off |
 | 1.2 | Build `/play`. Two columns: with a MIDI keyboard, without one. | The second column is thin until Phase 2's `keyboardDisplay` |
 | 1.3 | Build `/learn`. Merge articles + guided routes + the three pillars. | Mostly re-routing existing content |
-| 1.4 | Replace the blocking onboarding with a dismissible strip; move the slides to `/learn/welcome`. | `components/tools/onboarding/*` |
+| 1.4 | Replace the blocking onboarding with a dismissible strip; move the slides to `/learn/welcome`. | **Status: executed 2026-09-19** — strip shipped; the slides stayed put rather than moving to `/learn/welcome` because `/learn` does not exist yet (roadmap 1.3, unbuilt); the tour remains reachable from the strip's Take-the-tour button and the settings-page Replay control |
 | 1.5 | Collapse the sidebar to ~9 rows; archive four labs; remove Logo Lab. | Keep the code; change `lib/tools.ts` and the sidebar |
 | 1.6 | Restructure the landing page below the fold per [`03-entry-flow-spec.md`](03-entry-flow-spec.md) §2. | **Status: executed 2026-09-19**. Only the grid removal landed: the twelve-card tools grid is gone and its `toolsGrid` config member retired. The rest of the §2 below-the-fold restructure — "Why I built this", the annotated Workshop screenshot, live gallery cards — is still outstanding because it needs Justin's words and images |
 | 1.7 | Add `robots.ts`, `sitemap.ts`, `not-found.tsx`, `title.template`. | **Status: executed 2026-09-16** (`ff14615`). Small, and it matters on launch day |

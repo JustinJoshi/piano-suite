@@ -20,10 +20,6 @@ test.describe("workshop anonymous (signed out)", () => {
     await page.goto("/tools/workshop");
     await expect(page).toHaveURL(/\/tools\/workshop$/);
 
-    // A fresh browser also triggers the first-visit onboarding overlay;
-    // it releases the dashboard with one click (never blocks).
-    await page.getByRole("button", { name: /skip/i }).click();
-
     await expect(
       page.getByRole("link", { name: /open the block library/i })
     ).toBeVisible();

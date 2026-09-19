@@ -1,15 +1,10 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { DashboardShell } from "@/components/tools/dashboard-shell";
+import { ONBOARDING_STORAGE_KEY } from "@/lib/onboarding";
 
-vi.mock("@/hooks/useOnboarding", () => ({
-  useOnboarding: () => ({
-    isCompleted: true,
-    markComplete: vi.fn(),
-    reset: vi.fn(),
-    isInstant: false,
-    mounted: true,
-  }),
+vi.mock("@/hooks/usePrefersReducedMotion", () => ({
+  prefersReducedMotion: () => false,
 }));
 
 vi.mock("@clerk/nextjs", () => ({
@@ -55,8 +50,15 @@ vi.mock("@/components/app-user-button", () => ({
 }));
 
 describe("DashboardShell", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    window.history.replaceState({}, "", "/?onboarding=instant");
+  });
+
   afterEach(() => {
     cleanup();
+    localStorage.clear();
+    window.history.replaceState({}, "", "/");
   });
 
   it("renders the skip link as the first focusable element", () => {
@@ -88,5 +90,32 @@ describe("DashboardShell", () => {
     expect(main).not.toBeNull();
     expect(main?.tagName).toBe("MAIN");
     expect(main).toHaveAttribute("tabindex", "-1");
+  });
+});
+
+describe("DashboardShell onboarding strip", () => {
+  it("renders children and the onboarding strip, but not the overlay, on first visit", () => {
+    render(
+      <DashboardShell>
+        <p>content</p>
+      </DashboardShell>
+    );
+
+    expect(screen.getByText("content")).toBeInTheDocument();
+    expect(screen.getByTestId("onboarding-strip")).toBeInTheDocument();
+    expect(screen.queryByTestId("onboarding-shell")).not.toBeInTheDocument();
+  });
+
+  it("renders neither the strip nor the overlay once the tour is completed", () => {
+    localStorage.setItem(ONBOARDING_STORAGE_KEY, "true");
+    render(
+      <DashboardShell>
+        <p>content</p>
+      </DashboardShell>
+    );
+
+    expect(screen.getByText("content")).toBeInTheDocument();
+    expect(screen.queryByTestId("onboarding-strip")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("onboarding-shell")).not.toBeInTheDocument();
   });
 });

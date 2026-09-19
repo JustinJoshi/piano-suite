@@ -80,16 +80,10 @@ test.describe("workshop a11y (signed out)", () => {
     await expect(page).toHaveURL(/\/tools\/workshop$/, { timeout: 15_000 });
     await page.emulateMedia({ reducedMotion: "reduce" });
 
-    // A fresh signed-out browser gets the onboarding overlay first; the
-    // first-visit demo-intro overlay mounts right after onboarding is
-    // completed, then the starter picker. Axe on an overlay-dimmed DOM
-    // reports focus traps. Dismiss all three in order so the scan sees
-    // the real dashboard.
-    await page.getByRole("button", { name: /skip/i }).click();
-    const demoIntroOverlay = page.getByTestId("demo-intro-overlay");
-    await demoIntroOverlay.waitFor({ state: "visible", timeout: 10_000 });
-    await page.getByTestId("demo-intro-cta").click();
-    await demoIntroOverlay.waitFor({ state: "detached", timeout: 10_000 });
+    // The in-flow onboarding strip never blocks the dashboard (phase 1 of
+    // open-door), and the demo-intro overlay only appears after a tour
+    // has been taken — neither mounts on this scan. Dismiss only the
+    // starter picker so the scan sees the real dashboard.
     await expect(
       page.getByRole("link", { name: /open the block library/i })
     ).toBeVisible({ timeout: 15_000 });
