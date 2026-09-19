@@ -58,14 +58,30 @@ export function captureEvent(name: AnalyticsEvent, props: AnalyticsProps = {}) {
   });
 }
 
-function mirrorToWindow(name: AnalyticsEvent, props: AnalyticsProps) {
+export function capturePageview(path: string): void {
+  // usePathname() never includes a query, but strip one defensively so Clerk
+  // or onboarding parameters can never reach PostHog via a caller mistake.
+  const $current_url = path.split("?")[0];
+  mirrorToWindow("$pageview", { $current_url });
+
+  const key = posthogKey();
+  if (!key || typeof window === "undefined") {
+    return;
+  }
+
+  void loadPosthog().then((posthog) => {
+    posthog.capture("$pageview", { $current_url });
+  });
+}
+
+function mirrorToWindow(name: string, props: AnalyticsProps) {
   if (typeof window === "undefined") {
     return;
   }
 
   const host = window as unknown as Record<string, unknown>;
   const log = (host.__analyticsEvents ?? []) as Array<{
-    name: AnalyticsEvent;
+    name: string;
     props: AnalyticsProps;
     ts: number;
   }>;

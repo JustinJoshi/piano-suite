@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ANALYTICS_EVENTS,
   captureEvent,
+  capturePageview,
   initAnalytics,
 } from "@/lib/analytics";
 import posthog from "posthog-js";
@@ -121,3 +122,52 @@ function flushAsync(ticks = 3): Promise<void> {
   }
   return p;
 }
+
+describe("capturePageview", () => {
+  beforeEach(() => {
+    vi.unstubAllEnvs();
+    vi.clearAllMocks();
+    delete (window as unknown as Record<string, unknown>).__analyticsEvents;
+  });
+
+  it("mirrors $pageview to window.__analyticsEvents for e2e", async () => {
+    vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "phc_test");
+    initAnalytics();
+    capturePageview("/tools/workshop");
+    await flushAsync();
+
+    const log = analyticsLog();
+    expect(log).toHaveLength(1);
+    expect(log[0].name).toBe("$pageview");
+    expect(log[0].props).toEqual({ $current_url: "/tools/workshop" });
+    expect(mockPosthog.capture).toHaveBeenCalledWith("$pageview", {
+      $current_url: "/tools/workshop",
+    });
+  });
+
+  it("does not emit to posthog when the PostHog key is absent", async () => {
+    vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "");
+    capturePageview("/tools/workshop");
+    await Promise.resolve();
+
+    expect(mockPosthog.init).not.toHaveBeenCalled();
+    expect(mockPosthog.capture).not.toHaveBeenCalled();
+  });
+
+  it("still drops $pageview passed through captureEvent's unknown-name guard", async () => {
+    vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "phc_test");
+    captureEvent("$pageview" as never, {});
+    await flushAsync();
+
+    expect(mockPosthog.capture).not.toHaveBeenCalled();
+    expect(analyticsLog()).toHaveLength(0);
+  });
+
+  it("records the path only, never a query string", () => {
+    capturePageview("/tools/workshop?invite=abc&next=%2Fsettings");
+    const log = analyticsLog();
+    const props = log[0].props as Record<string, unknown>;
+    expect(props.$current_url).toBe("/tools/workshop");
+    expect(String(props.$current_url)).not.toContain("?");
+  });
+});
