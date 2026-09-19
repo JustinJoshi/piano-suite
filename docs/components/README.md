@@ -109,6 +109,33 @@ Components are registered in two places:
 * `configSpec` and `fields` describe different keys.
 * `maxPerPage` values disagree.
 
+## Scaffolding a component
+
+`npm run make:block` does every step in the three sections below except the
+behaviour itself — the config, the manifest, the component, the docs stub, all
+five registrations, and the generated table in this file:
+
+```bash
+npm run make:block -- intervalTrainer --category theory --icon Crosshair
+npm run make:block -- arpeggioRun --targets          # a target block
+npm run make:block -- somethingNew --dry-run         # print the plan only
+```
+
+It refuses to run if the type is already registered, and it aborts before
+writing anything if an anchor it edits has moved, so a block is never left
+half-registered across five files. What it leaves for you is the component's
+behaviour, the target builder in `lib/drill-targets.ts` if it is a target
+block, unit tests, and honest prose in the manifest and the docs stub.
+
+To check a page's wiring without a browser:
+
+```bash
+npm run check:arrangement -- scripts/__fixtures__/arrangement-valid.json
+```
+
+The steps below are what the scaffolder does, kept here because you still need
+to know the shape when you edit a block by hand.
+
 ## Building a new interactive component
 
 1. Create `lib/feature-blocks/<type>/config.ts` with:
