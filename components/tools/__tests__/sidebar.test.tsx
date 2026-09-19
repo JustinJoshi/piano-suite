@@ -117,11 +117,31 @@ describe("Sidebar navigation sections", () => {
     expect(toggle).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByRole("link", { name: "Chladni Lab" })).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Logo Lab" })
-    ).toBeInTheDocument();
+      screen.queryByRole("link", { name: "Logo Lab" })
+    ).not.toBeInTheDocument();
     // Experimental labs stay hidden unless the flag is on.
     expect(
       screen.queryByRole("link", { name: "Multigrid Lab" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("lists only the demoted labs' navigation rows once Labs is open", async () => {
+    render(<Sidebar />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Labs" }));
+
+    expect(screen.getByRole("link", { name: "Chladni Lab" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Chladni Ripple" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Julia Lab" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Lissajous Lab" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Quasiperiodic Lab" })
     ).not.toBeInTheDocument();
   });
 });

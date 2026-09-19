@@ -13,6 +13,7 @@ import { ExperimentalFeaturesProvider } from "@/hooks/useExperimentalFeatures";
 import { MusicPlayerProvider } from "@/hooks/useMusicPlayer";
 import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
 import { defaultTheme, themeIds } from "@/lib/themes";
+import { resolveSiteUrl } from "@/lib/site-url";
 import "./globals.css";
 
 const inter = Inter({
@@ -35,10 +36,9 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Canonical origin for metadata (OG, canonical URLs). Set
-// NEXT_PUBLIC_SITE_URL to the production domain in Vercel; the localhost
-// fallback keeps dev builds honest instead of emitting a wrong canonical.
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+// Canonical origin for metadata (OG, canonical URLs). Prefers
+// the explicit site URL env var, then Vercel's deployment origin, then localhost.
+const siteUrl = resolveSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

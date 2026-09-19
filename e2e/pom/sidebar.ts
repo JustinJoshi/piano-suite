@@ -10,11 +10,6 @@ const LINK_NAME_TO_TEST_ID: Record<string, string> = {
   Tracking: "sidebar-link-tracking",
   "Chladni Lab": "sidebar-link-chladni-lab",
   "Chladni Ripple": "sidebar-link-chladni-ripple",
-  "Julia Lab": "sidebar-link-julia-lab",
-  "Lissajous Lab": "sidebar-link-lissajous-lab",
-  "Quasiperiodic Lab": "sidebar-link-quasiperiodic-lab",
-  "Multigrid Lab": "sidebar-link-multigrid-lab",
-  "Logo Lab": "sidebar-link-logo-lab",
   Theme: "sidebar-link-theme",
   Atmosphere: "sidebar-link-atmosphere",
   Audio: "sidebar-link-audio",
@@ -25,11 +20,6 @@ const LINK_NAME_TO_TEST_ID: Record<string, string> = {
 const LAB_LINKS = new Set([
   "Chladni Lab",
   "Chladni Ripple",
-  "Julia Lab",
-  "Lissajous Lab",
-  "Quasiperiodic Lab",
-  "Multigrid Lab",
-  "Logo Lab",
 ]);
 
 /**
