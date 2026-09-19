@@ -1,107 +1,92 @@
 import { test, expect } from "@playwright/test";
 import { signInAsTestUser } from "./auth-helper";
+import { ONBOARDING_STORAGE_KEY } from "@/lib/onboarding";
 
 const ONBOARDING_RESET_URL = "/tools?onboarding=reset";
 
+// signInAsTestUser marks onboarding completed (the shared helper cannot
+// know which spec wants a first visit), so tests that exercise the
+// first-visit strip remove the flag on every load.
+function forgetOnboarding(page: import("@playwright/test").Page) {
+  return page.addInitScript((key) => {
+    localStorage.removeItem(key);
+  }, ONBOARDING_STORAGE_KEY);
+}
+
 test.describe("/tools onboarding", () => {
-  test("shows the onboarding flow on first visit", async ({ page }) => {
+  test("first visit shows the in-flow strip, not the overlay", async ({
+    page,
+  }) => {
     await signInAsTestUser(page);
-    await page.goto(ONBOARDING_RESET_URL);
+    forgetOnboarding(page);
+    await page.goto("/tools/workshop");
+
+    await expect(page.getByTestId("onboarding-strip")).toBeVisible();
+    await expect(page.getByTestId("onboarding-shell")).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "Workshop" })).toBeVisible();
+  });
+
+  test("take the tour opens the six-slide overlay from the strip", async ({
+    page,
+  }) => {
+    await signInAsTestUser(page);
+    forgetOnboarding(page);
+    await page.goto("/tools/workshop");
+
+    await page
+      .getByTestId("onboarding-strip")
+      .getByRole("button", { name: /take the tour/i })
+      .click();
 
     const shell = page.getByTestId("onboarding-shell");
     await expect(shell.getByText("Hi", { exact: true })).toBeVisible();
     await expect(shell.getByText("welcome to piano suite")).toBeVisible();
-  });
 
-  test("advances through all slides and releases the dashboard", async ({
-    page,
-  }) => {
-    await signInAsTestUser(page);
-    await page.goto(ONBOARDING_RESET_URL);
-
-    const shell = page.getByTestId("onboarding-shell");
-
-    await shell.getByRole("button", { name: /next/i }).first().click();
-    await expect(
-      shell.getByText(/three most important pillars/i)
-    ).toBeVisible();
-
-    await shell.getByRole("button", { name: /next/i }).first().click();
-    await expect(
-      shell.getByText("Active recall & spaced repetition")
-    ).toBeVisible();
-    await expect(shell.getByRole("link", { name: /Anki/i }).first()).toBeVisible();
-
-    await shell.getByRole("button", { name: /next/i }).first().click();
-    await expect(shell.getByText("Take care of yourself")).toBeVisible();
-
-    await shell.getByRole("button", { name: /next/i }).first().click();
-    await expect(shell.getByText("Manage your frustrations")).toBeVisible();
-
-    await shell.getByRole("button", { name: /next/i }).first().click();
-    await expect(
-      shell.getByText("Happy playing — we're rooting for you")
-    ).toBeVisible();
-
-    await shell.getByRole("button", { name: /let's practice/i }).click();
-    await expect(page.getByRole("heading", { name: "Workshop" })).toBeVisible();
-  });
-
-  test("skipping the flow releases the dashboard and persists completion", async ({
-    page,
-  }) => {
-    await signInAsTestUser(page);
-    await page.goto(ONBOARDING_RESET_URL);
-
-    const shell = page.getByTestId("onboarding-shell");
-    await shell.getByRole("button", { name: /skip/i }).click();
-    await expect(page.getByRole("heading", { name: "Workshop" })).toBeVisible();
-
-    // Revisit without reset: onboarding should not appear.
-    await page.goto("/tools");
-    await expect(page.getByTestId("onboarding-shell")).not.toBeVisible();
-  });
-
-  test("does not show onboarding after it has been completed", async ({
-    page,
-  }) => {
-    await signInAsTestUser(page);
-    await page.goto(ONBOARDING_RESET_URL);
-
-    const shell = page.getByTestId("onboarding-shell");
-
-    // Advance through all slides and complete the flow.
-    for (let i = 0; i < 5; i++) {
+    // All six slides stay reachable, ending on the closing slide.
+    for (const slide of [
+      /three most important pillars/i,
+      "Active recall & spaced repetition",
+      "Take care of yourself",
+      "Manage your frustrations",
+      "Happy playing — we're rooting for you",
+    ]) {
       await shell.getByRole("button", { name: /next/i }).first().click();
+      await expect(shell.getByText(slide).first()).toBeVisible();
     }
     await shell.getByRole("button", { name: /let's practice/i }).click();
-
-    await page.goto("/tools");
-    await expect(page.getByTestId("onboarding-shell")).not.toBeVisible();
-    await expect(page.getByRole("heading", { name: "Workshop" })).toBeVisible();
+    await expect(page.getByTestId("onboarding-shell")).toHaveCount(0);
   });
 
-  test("shows onboarding when deep-linking to a tool for the first time", async ({
+  test("dismissing the strip keeps the dashboard usable", async ({ page }) => {
+    await signInAsTestUser(page);
+    forgetOnboarding(page);
+    await page.goto("/tools/workshop");
+
+    await page
+      .getByTestId("onboarding-strip")
+      .getByRole("button", { name: /dismiss/i })
+      .click();
+    await expect(page.getByTestId("onboarding-strip")).toHaveCount(0);
+    await expect(page.getByTestId("onboarding-shell")).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "Workshop" })).toBeVisible();
+
+    // Dismissal persists: a plain revisit shows neither strip nor overlay.
+    await page.goto("/tools/workshop");
+    await expect(page.getByTestId("onboarding-strip")).toHaveCount(0);
+  });
+
+  test("?onboarding=reset still opens the overlay directly", async ({
     page,
   }) => {
     await signInAsTestUser(page);
-    await page.goto("/tools/chord-drill?onboarding=reset");
+    await page.goto(ONBOARDING_RESET_URL);
 
     const shell = page.getByTestId("onboarding-shell");
     await expect(shell.getByText("Hi", { exact: true })).toBeVisible();
     await expect(shell.getByText("welcome to piano suite")).toBeVisible();
-
-    await shell.getByRole("button", { name: /skip/i }).click();
-
-    // After skipping, the underlying tool page should be visible.
-    await expect(page.getByRole("heading", { name: "Chord Drill" })).toBeVisible();
-
-    // Revisiting the same tool should not show onboarding again.
-    await page.goto("/tools/chord-drill");
-    await expect(page.getByTestId("onboarding-shell")).not.toBeVisible();
   });
 
-  test("goes back to the previous slide", async ({ page }) => {
+  test("goes back to the previous slide after a reset", async ({ page }) => {
     await signInAsTestUser(page);
     await page.goto(ONBOARDING_RESET_URL);
 
