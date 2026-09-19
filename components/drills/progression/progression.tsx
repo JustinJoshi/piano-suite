@@ -13,6 +13,8 @@ import { useProgression } from "@/hooks/useProgression";
 import { useAuthAccess } from "@/hooks/useAuthAccess";
 import { PROGRESSION_KEYS, PROGRESSION_TYPES, chordSymbol } from "@/lib/progression";
 import { cn } from "@/lib/utils";
+import { useEffect, useRef } from "react";
+import { captureEvent } from "@/lib/analytics";
 import { RotateCcw } from "lucide-react";
 
 function ToggleGroup({
@@ -106,6 +108,29 @@ export function Progression() {
 
     ankiStatus,
   } = drill;
+
+  const startedRef = useRef(false);
+  useEffect(() => {
+    if (running && !startedRef.current) {
+      startedRef.current = true;
+      captureEvent("drill_started", { drill: "progression" });
+    }
+    if (!running && startedRef.current) {
+      startedRef.current = false;
+    }
+  }, [running]);
+
+  const completedRef = useRef(0);
+  useEffect(() => {
+    // Re-arm resets the counter to 0: track the new baseline silently so the
+    // next finished round emits again instead of being swallowed.
+    if (loopCount < completedRef.current) {
+      completedRef.current = loopCount;
+    } else if (loopCount > completedRef.current) {
+      completedRef.current = loopCount;
+      captureEvent("drill_completed", { drill: "progression" });
+    }
+  }, [loopCount]);
 
   const phaseLabel =
     phase === "idle"
