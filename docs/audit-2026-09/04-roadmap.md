@@ -131,7 +131,7 @@ Grouped by theme, unordered within group. Sequencing is Part 3.
 - Reopen the COPPA age gate decision; counsel review
 - Re-run the music rights audit before announcing
 - `robots.ts`, `sitemap.ts`, `not-found.tsx`, `title.template`
-- Activation and retention analytics beyond the current three events
+- Activation and retention analytics (pageviews plus `drill_started`/`drill_completed` on the four ready-made drills landed 2026-09-19; still missing: the first-session funnel definition, a week-two retention cohort, server-side events)
 - Clerk production keys, custom domain, `NEXT_PUBLIC_AUTH_DISABLED` unset
 
 ---
