@@ -2,15 +2,28 @@ import { test, expect } from "@playwright/test";
 import { signInAsTestUser } from "./auth-helper";
 import { ONBOARDING_STORAGE_KEY } from "@/lib/onboarding";
 
-const ONBOARDING_RESET_URL = "/tools?onboarding=reset";
+const ONBOARDING_RESET_URL = "/tools/workshop?onboarding=reset";
 
 // signInAsTestUser marks onboarding completed (the shared helper cannot
-// know which spec wants a first visit), so tests that exercise the
-// first-visit strip remove the flag on every load.
-function forgetOnboarding(page: import("@playwright/test").Page) {
+// know which spec wants a first visit), so these tests clear the flag.
+// The one-shot variant only clears the first load, so a Dismiss in the
+// middle of a test can persist across later navigations.
+function forgetOnboardingOnce(page: import("@playwright/test").Page) {
   return page.addInitScript((key) => {
-    localStorage.removeItem(key);
+    const w = window as unknown as { __e2eOnboardingCleared?: boolean };
+    if (!w.__e2eOnboardingCleared) {
+      localStorage.removeItem(key);
+      w.__e2eOnboardingCleared = true;
+    }
   }, ONBOARDING_STORAGE_KEY);
+}
+
+async function openTour(page: import("@playwright/test").Page) {
+  await page
+    .getByTestId("onboarding-strip")
+    .getByRole("button", { name: /take the tour/i })
+    .click();
+  return page.getByTestId("onboarding-shell");
 }
 
 test.describe("/tools onboarding", () => {
@@ -18,7 +31,7 @@ test.describe("/tools onboarding", () => {
     page,
   }) => {
     await signInAsTestUser(page);
-    forgetOnboarding(page);
+    forgetOnboardingOnce(page);
     await page.goto("/tools/workshop");
 
     await expect(page.getByTestId("onboarding-strip")).toBeVisible();
@@ -30,15 +43,10 @@ test.describe("/tools onboarding", () => {
     page,
   }) => {
     await signInAsTestUser(page);
-    forgetOnboarding(page);
+    forgetOnboardingOnce(page);
     await page.goto("/tools/workshop");
 
-    await page
-      .getByTestId("onboarding-strip")
-      .getByRole("button", { name: /take the tour/i })
-      .click();
-
-    const shell = page.getByTestId("onboarding-shell");
+    const shell = await openTour(page);
     await expect(shell.getByText("Hi", { exact: true })).toBeVisible();
     await expect(shell.getByText("welcome to piano suite")).toBeVisible();
 
@@ -57,9 +65,11 @@ test.describe("/tools onboarding", () => {
     await expect(page.getByTestId("onboarding-shell")).toHaveCount(0);
   });
 
-  test("dismissing the strip keeps the dashboard usable", async ({ page }) => {
+  test("dismissing the strip keeps the dashboard usable and persists", async ({
+    page,
+  }) => {
     await signInAsTestUser(page);
-    forgetOnboarding(page);
+    forgetOnboardingOnce(page);
     await page.goto("/tools/workshop");
 
     await page
@@ -75,22 +85,31 @@ test.describe("/tools onboarding", () => {
     await expect(page.getByTestId("onboarding-strip")).toHaveCount(0);
   });
 
-  test("?onboarding=reset still opens the overlay directly", async ({
+  test("?onboarding=reset clears completion so the strip returns", async ({
     page,
   }) => {
     await signInAsTestUser(page);
-    await page.goto(ONBOARDING_RESET_URL);
+    await page.goto("/tools/workshop");
 
-    const shell = page.getByTestId("onboarding-shell");
+    // A completed first visit: no strip, no overlay.
+    await expect(page.getByTestId("onboarding-strip")).toHaveCount(0);
+
+    // The reset parameter clears completion: the strip is back (in flow,
+    // not the overlay) and the tour can be taken again.
+    await page.goto(ONBOARDING_RESET_URL);
+    await expect(page.getByTestId("onboarding-strip")).toBeVisible();
+    await expect(page.getByTestId("onboarding-shell")).toHaveCount(0);
+
+    const shell = await openTour(page);
     await expect(shell.getByText("Hi", { exact: true })).toBeVisible();
-    await expect(shell.getByText("welcome to piano suite")).toBeVisible();
   });
 
-  test("goes back to the previous slide after a reset", async ({ page }) => {
+  test("goes back to the previous slide", async ({ page }) => {
     await signInAsTestUser(page);
-    await page.goto(ONBOARDING_RESET_URL);
+    forgetOnboardingOnce(page);
+    await page.goto("/tools/workshop");
 
-    const shell = page.getByTestId("onboarding-shell");
+    const shell = await openTour(page);
 
     await shell.getByRole("button", { name: /next/i }).first().click();
     await expect(
@@ -107,9 +126,10 @@ test.describe("/tools onboarding", () => {
   }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await signInAsTestUser(page);
-    await page.goto(ONBOARDING_RESET_URL);
+    forgetOnboardingOnce(page);
+    await page.goto("/tools/workshop");
 
-    const shell = page.getByTestId("onboarding-shell");
+    const shell = await openTour(page);
 
     await expect(shell.getByText("Hi", { exact: true })).toBeVisible();
     await shell.getByRole("button", { name: /next/i }).first().click();
