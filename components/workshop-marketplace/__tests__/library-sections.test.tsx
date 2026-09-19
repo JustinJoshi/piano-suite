@@ -4,6 +4,7 @@ import { LibrarySections } from "@/components/workshop-marketplace/library-secti
 import { AudioSettingsProvider } from "@/hooks/useAudioSettings";
 import { MusicPlayerProvider } from "@/hooks/useMusicPlayer";
 import type { FeatureBlock } from "@/lib/feature-blocks/types";
+import { listManifests, manifestsByKind } from "@/lib/feature-blocks/manifest";
 
 vi.mock("@/hooks/useAuthAccess", () => ({
   useAuthAccess: vi.fn(() => ({
@@ -25,8 +26,16 @@ vi.mock("@/convex/_generated/api", () => ({
   },
 }));
 
-// Pinned by type to the manifest distribution: 17 interactive cards,
-// 3 sources + 2 transforms.
+// Counts come from the manifest registry rather than being retyped here, so
+// registering a new block does not fail these tests for a reason unrelated to
+// the behaviour under test. The TYPES lists below still pin the blocks that
+// must be present, and the rendered count must equal the registry's, so a
+// block that is registered but never rendered is still caught.
+const KIND_COUNTS = manifestsByKind();
+const INTERACTIVE_COUNT = KIND_COUNTS.interactive.length;
+const SECONDARY_COUNT = KIND_COUNTS.source.length + KIND_COUNTS.transform.length;
+const TOTAL_COUNT = listManifests().length;
+
 const INTERACTIVE_TYPES = [
   "metronome",
   "drillTimer",
@@ -115,7 +124,7 @@ describe("LibrarySections", () => {
     renderLibrary();
 
     expect(screen.getByTestId("library-result-count")).toHaveTextContent(
-      "Showing all 22 blocks"
+      `Showing all ${TOTAL_COUNT} blocks`
     );
     expect(screen.getByTestId("supplementary-toggle")).toHaveAttribute(
       "aria-expanded",
@@ -124,13 +133,13 @@ describe("LibrarySections", () => {
     expect(screen.queryByTestId("supplementary-list")).not.toBeInTheDocument();
   });
 
-  it("renders exactly the 17 interactive cards with live previews", () => {
+  it("renders an interactive card with a live preview for every interactive manifest", () => {
     const { container } = renderLibrary();
 
     const cardTestIds = screen
       .getAllByTestId(/marketplace-card-/)
       .map((el) => el.getAttribute("data-testid"));
-    expect(cardTestIds).toHaveLength(17);
+    expect(cardTestIds).toHaveLength(INTERACTIVE_COUNT);
     expect(cardTestIds).toEqual(
       expect.arrayContaining(
         INTERACTIVE_TYPES.map((type) => `marketplace-card-${type}`)
@@ -140,19 +149,19 @@ describe("LibrarySections", () => {
     const previewWrappers = container.querySelectorAll(
       "[data-testid^='marketplace-preview-']"
     );
-    expect(previewWrappers).toHaveLength(17);
+    expect(previewWrappers).toHaveLength(INTERACTIVE_COUNT);
     // One real preview string so a wall of fallbacks would be caught.
     expect(screen.getByTestId("bpm-display")).toHaveTextContent("120 BPM");
   });
 
-  it("renders exactly the 5 supplementary rows without any preview surface", () => {
+  it("renders a supplementary row without a preview for every source and transform", () => {
     const { container } = renderLibrary();
     expandSecondarySection();
 
     const rowTestIds = screen
       .getAllByTestId(/marketplace-row-/)
       .map((el) => el.getAttribute("data-testid"));
-    expect(rowTestIds).toHaveLength(5);
+    expect(rowTestIds).toHaveLength(SECONDARY_COUNT);
     expect(rowTestIds).toEqual(
       expect.arrayContaining(
         SECONDARY_TYPES.map((type) => `marketplace-row-${type}`)
@@ -161,7 +170,7 @@ describe("LibrarySections", () => {
 
     // No FeatureRenderer output in the rows: no card previews, and the
     // chord library preview is not mounted anywhere.
-    expect(container.querySelectorAll("[data-testid^='marketplace-preview-']")).toHaveLength(17);
+    expect(container.querySelectorAll("[data-testid^='marketplace-preview-']")).toHaveLength(INTERACTIVE_COUNT);
     expect(screen.queryByTestId("chord-stream")).not.toBeInTheDocument();
     expect(screen.queryByTestId("scale-stream")).not.toBeInTheDocument();
   });
@@ -225,7 +234,7 @@ describe("LibrarySections", () => {
       "true"
     );
     expect(screen.getByTestId("library-result-count")).toHaveTextContent(
-      "Showing 1 of 22 blocks"
+      `Showing 1 of ${TOTAL_COUNT} blocks`
     );
     expect(container.querySelectorAll("[data-testid^='marketplace-preview-']")).toHaveLength(0);
   });
@@ -248,7 +257,7 @@ describe("LibrarySections", () => {
     expect(screen.queryByTestId("marketplace-card-drillTimer")).not.toBeInTheDocument();
     expect(screen.getByTestId("marketplace-row-rhythmPattern")).toBeInTheDocument();
     expect(screen.getByTestId("library-result-count")).toHaveTextContent(
-      "Showing 6 of 22 blocks"
+      `Showing 6 of ${TOTAL_COUNT} blocks`
     );
     expect(container.querySelectorAll("[data-testid^='marketplace-preview-']")).toHaveLength(4);
   });
@@ -268,7 +277,7 @@ describe("LibrarySections", () => {
     expect(screen.getByTestId("marketplace-row-pieceLibrary")).toBeInTheDocument();
     expect(screen.queryByTestId("marketplace-row-rhythmPattern")).not.toBeInTheDocument();
     expect(screen.getByTestId("library-result-count")).toHaveTextContent(
-      "Showing 3 of 22 blocks"
+      `Showing 3 of ${TOTAL_COUNT} blocks`
     );
     expect(container.querySelectorAll("[data-testid^='marketplace-preview-']")).toHaveLength(0);
   });
