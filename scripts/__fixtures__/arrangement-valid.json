@@ -1,0 +1,7 @@
+{
+  "name": "Chord reading — valid wiring",
+  "blocks": [
+    { "id": "src-1", "type": "chordLibrary", "config": {} },
+    { "id": "disp-1", "type": "noteRoll", "config": {} }
+  ]
+}
