@@ -455,37 +455,6 @@ function DeckControls() {
   );
 }
 
-function ToolsGridControls() {
-  const { config, updateConfig } = useWelcomeConfig();
-  const { toolsGrid } = config;
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="font-heading text-base">Tools grid</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <TextField
-          label="Eyebrow"
-          value={toolsGrid.eyebrow}
-          onChange={(eyebrow) => updateConfig({ toolsGrid: { ...toolsGrid, eyebrow } })}
-        />
-        <TextField
-          label="Title"
-          value={toolsGrid.title}
-          onChange={(title) => updateConfig({ toolsGrid: { ...toolsGrid, title } })}
-        />
-        <TextAreaField
-          label="Subtitle"
-          value={toolsGrid.subtitle}
-          onChange={(subtitle) => updateConfig({ toolsGrid: { ...toolsGrid, subtitle } })}
-          rows={2}
-        />
-      </CardContent>
-    </Card>
-  );
-}
-
 function OnboardingControls() {
   const { config, updateConfig } = useWelcomeConfig();
   const { onboarding } = config;
@@ -595,7 +564,6 @@ function LabControls() {
       <FeatureControls />
       <FlowControls />
       <DeckControls />
-      <ToolsGridControls />
       <OnboardingControls />
     </div>
   );
