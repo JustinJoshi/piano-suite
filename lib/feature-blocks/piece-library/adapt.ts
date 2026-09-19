@@ -36,7 +36,7 @@ export function notesFromParsedMidi(
     .sort((a, b) => (a.onsetMs ?? 0) - (b.onsetMs ?? 0));
 
   if (config.role === "accompaniment") {
-    // The backing track is context, not content: nothing downstream grades it.
+    // Nothing downstream grades either role today; the distinction is only the symbol.
     return notes.map((note) => ({ ...note, symbol: "acc" }));
   }
   return notes;

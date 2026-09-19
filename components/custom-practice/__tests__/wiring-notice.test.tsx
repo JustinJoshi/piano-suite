@@ -83,13 +83,17 @@ const ORPHAN_PAGE: PracticePage = {
   updatedAt: 1001,
 };
 
-// A source plus its transform: fully wired, so the validator must stay quiet.
+// A source, its transform, and a target block: fully wired, so the validator
+// must stay quiet. (The target block is what keeps the page out of the
+// page-level unscored_page notice — source + transform alone shows notes
+// nothing scores.)
 const WIRED_PAGE: PracticePage = {
   id: "page-wired",
   title: "Wired page",
   blocks: [
     { id: "src-1", type: "chordLibrary", version: 1, config: {} },
     { id: "xform-1", type: "rhythmPattern", version: 1, config: {} },
+    { id: "target-1", type: "chordSet", version: 1, config: {} },
   ],
   updatedAt: 1002,
 };
@@ -192,6 +196,18 @@ describe("PracticePageEditor wiring notices", () => {
     };
     expect(wiringNotice(issue)).toBe(
       "Add a transport block to set the tempo for this page."
+    );
+  });
+
+  it("maps unscored_page to its plain-language notice", () => {
+    const issue: WiringIssue = {
+      blockId: "display-1",
+      type: "targetDisplay",
+      issue: "unscored_page",
+      detail: "No target block on this page, so nothing will be scored.",
+    };
+    expect(wiringNotice(issue)).toBe(
+      "This page shows notes but won't score them. Add a chord set, scale runner, root cycle or progression block to practice against."
     );
   });
 

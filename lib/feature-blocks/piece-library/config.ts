@@ -45,10 +45,11 @@ export const pieceLibraryFields: FieldDescriptor[] = [
     key: "role",
     label: "Role",
     options: [
-      { label: "Graded (your part)", value: "graded" },
-      { label: "Accompaniment (backing)", value: "accompaniment" },
+      { label: "Practice part", value: "graded" },
+      { label: "Backing track", value: "accompaniment" },
     ],
-    helperText: "Graded notes are scored; accompaniment plays along",
+    helperText:
+      "The practice part is what this page's displays show; the backing track is context. Neither is graded unless the page also has a target block.",
   },
   {
     kind: "range",

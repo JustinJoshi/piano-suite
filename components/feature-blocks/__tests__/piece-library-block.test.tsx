@@ -96,6 +96,28 @@ describe("PieceLibraryBlock runtime source", () => {
     );
   });
 
+  it("labels the default role as Practice part (never Graded)", () => {
+    render(
+      <DrillRuntimeProvider
+        pageId="page-1"
+        blocks={[{ id: "piece-1", type: "pieceLibrary", config: {} }]}
+      >
+        <PieceLibraryBlock blockId="piece-1" />
+      </DrillRuntimeProvider>
+    );
+
+    const input = screen.getByTestId("piece-file-input");
+    const file = new File([new Uint8Array([0])], "sonata.mid", {
+      type: "audio/midi",
+    });
+    fireEvent.change(input, { target: { files: [file] } });
+
+    return waitFor(() => {
+      expect(screen.getByText("Practice part")).toBeInTheDocument();
+      expect(screen.queryByText("Graded")).not.toBeInTheDocument();
+    });
+  });
+
   it("renders as today (no stream contribution) outside a runtime", async () => {
     render(<PieceLibraryBlock blockId="piece-1" />);
 

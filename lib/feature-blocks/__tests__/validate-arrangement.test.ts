@@ -9,9 +9,28 @@ function block(type: string): FeatureBlock {
 }
 
 describe("validateArrangement", () => {
-  it("returns status: valid with no issues field for a well-wired page", () => {
+  it("reports only unscored_page for a wired display page with no target block", () => {
+    // pieceLibrary feeds the noteRoll, so the wiring is complete — but the
+    // page still scores nothing, and the validator must say so.
+    const result = validateArrangement([
+      block("noteRoll"),
+      block("pieceLibrary"),
+    ]);
+
+    expect(result.status).toBe("invalid");
+    if (result.status === "invalid") {
+      expect(result.issues).toHaveLength(1);
+      expect(result.issues[0].issue).toBe("unscored_page");
+    }
+  });
+
+  it("returns status: valid for a display page with a target block present", () => {
     expect(
-      validateArrangement([block("noteRoll"), block("pieceLibrary")])
+      validateArrangement([
+        block("noteRoll"),
+        block("pieceLibrary"),
+        block("chordSet"),
+      ])
     ).toEqual({ status: "valid" });
   });
 
@@ -31,9 +50,12 @@ describe("validateArrangement", () => {
 
     expect(result.status).toBe("invalid");
     if (result.status === "invalid") {
-      expect(result.issues).toHaveLength(1);
       expect(result.issues[0].issue).toBe("orphan_transform");
       expect(result.issues[0].type).toBe("rhythmPattern");
+      // The transform accepts practiceNotes, so the page-level unscored_page
+      // guidance rides along too.
+      expect(result.issues).toHaveLength(2);
+      expect(result.issues[1].issue).toBe("unscored_page");
     }
   });
 
@@ -42,9 +64,12 @@ describe("validateArrangement", () => {
 
     expect(result.status).toBe("invalid");
     if (result.status === "invalid") {
-      expect(result.issues).toHaveLength(1);
       expect(result.issues[0].issue).toBe("unmet_requirement");
       expect(result.issues[0].type).toBe("noteRoll");
+      // The page-level unscored_page guidance rides along: the lone display
+      // has no target block to score against.
+      expect(result.issues).toHaveLength(2);
+      expect(result.issues[1].issue).toBe("unscored_page");
     }
   });
 
@@ -57,18 +82,37 @@ describe("validateArrangement", () => {
     });
   });
 
+  // Shipped templates and seeds must have no wiring problems other than
+  // unscored_page: display-only pages (Hanon cell, rootless ii-V-I,
+  // piece-trainer) are legitimately ungraded and now carry exactly that one
+  // guidance issue. Pages with no display blocks at all (daily hub,
+  // metronome basics) must stay fully clean.
+  function expectNoWiringProblems(blocks: FeatureBlock[]) {
+    const result = validateArrangement(blocks);
+    if (result.status === "valid") return;
+    expect(
+      result.issues.filter((issue) => issue.issue !== "unscored_page")
+    ).toEqual([]);
+  }
+
   describe.each(starterTemplates)("starter template $id", (template) => {
-    it("validates as status: valid", () => {
-      expect(validateArrangement(template.blocks)).toEqual({
-        status: "valid",
-      });
+    it("carries no wiring problems beyond unscored_page", () => {
+      expectNoWiringProblems(template.blocks);
     });
   });
 
   describe.each(marketplaceSeeds)("marketplace seed $id", (seed) => {
-    it("validates as status: valid", () => {
-      expect(validateArrangement(seed.blocks)).toEqual({ status: "valid" });
+    it("carries no wiring problems beyond unscored_page", () => {
+      expectNoWiringProblems(seed.blocks);
     });
+  });
+
+  it("keeps the daily-hub and metronome-basics seeds fully clean", () => {
+    // They have no display blocks, so not even unscored_page applies.
+    for (const seed of marketplaceSeeds) {
+      if (seed.id !== "daily-hub" && seed.id !== "metronome-basics") continue;
+      expect(validateArrangement(seed.blocks)).toEqual({ status: "valid" });
+    }
   });
 });
 
@@ -82,9 +126,10 @@ describe("unmet-requirement issues carry a structured requirement", () => {
     const result = validateArrangement([block("noteRoll")]);
     expect(result.status).toBe("invalid");
     if (result.status !== "invalid") throw new Error("unreachable");
-    expect(result.issues).toHaveLength(1);
     expect(result.issues[0].issue).toBe("unmet_requirement");
     expect(result.issues[0].requirement).toBe("practiceNotes");
+    expect(result.issues).toHaveLength(2);
+    expect(result.issues[1].issue).toBe("unscored_page");
   });
 
   it("leaves the unknown-type issue without a requirement", () => {
