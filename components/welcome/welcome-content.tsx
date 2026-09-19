@@ -5,7 +5,6 @@ import { FeatureSection } from "./feature-section";
 import { FlowSection } from "./flow-section";
 import { DeckSection } from "./deck-section";
 import { CtaSection } from "./cta-section";
-import { ToolsGridSection } from "./tools-grid-section";
 import { WorkshopHowItWorks } from "./workshop-how-it-works";
 import { StarterTemplatesSection } from "./starter-templates-section";
 import { DemoVideoSection } from "./demo-video-section";
@@ -74,8 +73,6 @@ export function WelcomeContent() {
       </section>
 
       <DemoVideoSection />
-
-      <ToolsGridSection />
 
       <CtaSection />
 
