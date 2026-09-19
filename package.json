@@ -12,7 +12,9 @@
     "test:e2e": "playwright test",
     "test:unit": "vitest",
     "test:unit:run": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "check:arrangement": "node scripts/check-arrangement.mjs",
+    "make:block": "node scripts/make-block.mjs"
   },
   "engines": {
     "node": ">=22"
