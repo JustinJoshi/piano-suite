@@ -37,7 +37,7 @@ const geistMono = Geist_Mono({
 });
 
 // Canonical origin for metadata (OG, canonical URLs). Prefers
-// NEXT_PUBLIC_SITE_URL, then Vercel's deployment origin, then localhost.
+// the explicit site URL env var, then Vercel's deployment origin, then localhost.
 const siteUrl = resolveSiteUrl();
 
 export const metadata: Metadata = {
