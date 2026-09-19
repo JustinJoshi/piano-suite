@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
+import { resolveSiteUrl } from "@/lib/site-url";
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const siteUrl = resolveSiteUrl();
 
 // Public routes per proxy.ts's allowlist (audit 2026-09, Phase 1.7).
 const routes: Array<{
