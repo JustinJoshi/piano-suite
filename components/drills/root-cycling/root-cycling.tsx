@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,6 +14,7 @@ import { useRootCycling } from "@/hooks/useRootCycling";
 import { useAuthAccess } from "@/hooks/useAuthAccess";
 import { ROOTS, SINGLE_QUALITIES } from "@/lib/music-theory";
 import { cn } from "@/lib/utils";
+import { captureEvent } from "@/lib/analytics";
 import { RotateCcw } from "lucide-react";
 
 function SettingRow({
@@ -79,6 +80,25 @@ export function RootCycling() {
     sequenceDegrees,
     sequenceTargetIdx,
   } = drill;
+
+  const startedRef = useRef(false);
+  useEffect(() => {
+    if (running && !startedRef.current) {
+      startedRef.current = true;
+      captureEvent("drill_started", { drill: "root-cycling" });
+    }
+    if (!running && startedRef.current) {
+      startedRef.current = false;
+    }
+  }, [running]);
+
+  const completedRef = useRef(0);
+  useEffect(() => {
+    if (repCount > completedRef.current) {
+      completedRef.current = repCount;
+      captureEvent("drill_completed", { drill: "root-cycling" });
+    }
+  }, [repCount]);
 
   return (
     <div className="space-y-6" data-testid="root-cycling-drill">

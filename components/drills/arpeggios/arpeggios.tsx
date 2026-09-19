@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,6 +15,7 @@ import { useAuthAccess } from "@/hooks/useAuthAccess";
 import { cn } from "@/lib/utils";
 import { SHARP_NAMES } from "@/lib/music-theory";
 import { autoFilteredPcs } from "@/lib/arpeggios";
+import { captureEvent } from "@/lib/analytics";
 import { ChevronUp, ChevronDown, RotateCcw } from "lucide-react";
 
 const GRADE_COLORS = {
@@ -150,6 +151,25 @@ export function Arpeggios() {
     gradeStatus,
     lastGradeResult,
   } = drill;
+
+  const startedRef = useRef(false);
+  useEffect(() => {
+    if (phase !== "idle" && !startedRef.current) {
+      startedRef.current = true;
+      captureEvent("drill_started", { drill: "arpeggios" });
+    }
+    if (phase === "idle" && startedRef.current) {
+      startedRef.current = false;
+    }
+  }, [phase]);
+
+  const completedRef = useRef(0);
+  useEffect(() => {
+    if (lapCount > completedRef.current) {
+      completedRef.current = lapCount;
+      captureEvent("drill_completed", { drill: "arpeggios" });
+    }
+  }, [lapCount]);
 
   const masked = hideChordUntilGo && phase === "countdown" && ankiFollow;
 
