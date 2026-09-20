@@ -167,6 +167,8 @@ The block library is the bottleneck (audit `04-roadmap.md`), so adding a block s
 
 10. **A `configVersion` bump ships with its migration.** Bumping a block's entry in `lib/feature-blocks/versions.ts` without registering a `blockMigrators` step (`schemas.ts`) for the old version silently resets stored configs to defaults — the runtime chain stops at the first missing step. `registry-parity.test.ts` enforces the pair: every integer version from 1 up to `configVersion - 1` needs a step, and steps at or above the current version fail. See `docs/components/README.md` → "Config versions and migrations".
 
+11. **Tempo-sensitive transforms select in source coordinates.** `sectionLoop` picks bars through the meter map (`lib/midi-musical-time.ts`) when a note carries `PracticeNote.source` (ticks/PPQ from `lib/music-player.ts` via the piece adapter); practice BPM then only scales onsets/durations. Streams without `source` keep the legacy onsetMs path — do not re-introduce bar windows computed from practice tempo.
+
 ## Keyboard conventions (Workshop-first)
 
 1. **Unmodified letters are piano notes.** `keyboard-display-block.tsx` binds A W S E D… as a QWERTY piano. Every global shortcut must use a modifier (Ctrl/Cmd+K) or a non-letter key (`?`, `/`, Escape), and every shortcut handler must bail on editable targets through the shared `isEditableTarget` in `lib/keyboard.ts` — no third inline copy.

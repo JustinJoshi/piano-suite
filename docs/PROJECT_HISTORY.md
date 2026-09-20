@@ -931,6 +931,29 @@ Verification: `npm run lint`, `npm run typecheck`, `npm run test:unit:run`,
 `npm run build` green at final HEAD, plus
 `e2e/workshop-marketplace.spec.ts` per phase.
 
+## Tempo-invariant section selection (2026-09-20)
+
+The sectionLoop bug: practice tempo changed the *music*, not just the speed.
+The transform filtered a bar window in seconds computed from practice BPM, so
+the same `startBar=0/endBar=4` loop selected four bars of an uploaded piece at
+120 BPM and twice as much at 60 BPM — "slow down" silently stretched the
+section. Persisted streams could never survive a tempo ramp faithfully.
+
+The fix keeps the piece's own coordinates alive end to end. MIDI parsing now
+carries PPQ, ticks, durationTicks, and the header's tempo/meter maps
+(`lib/music-player.ts` + `SourceTiming`); the piece adapter passes per-note
+source tick and bar/beat positions (`adapt` → `PracticeNote.source`); and
+`sectionLoop` selects source bars through the meter map *before* retiming to
+practice BPM (`lib/feature-blocks/section-loop/transform.ts`, helpers in
+`lib/midi-musical-time.ts`). Selected pitches are now identical at 120 and
+60 BPM — only onsets and durations scale. Streams without timing metadata
+(generated or hand-built) keep the legacy onsetMs path, and global song
+playback seconds are untouched.
+
+Verification: `npm run typecheck`, `npm run lint`, `npm run test:unit:run`
+(178 files / 1604 tests), `npm run build` (45 static pages), and
+`e2e/marketplace-seed-detail.spec.ts` green at final HEAD.
+
 ## Roadmap
 
 - [x] Scaffold Next.js + Tailwind + shadcn/ui
