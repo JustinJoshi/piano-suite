@@ -100,10 +100,9 @@ export function lerpComplex(a: Complex, b: Complex, t: number): Complex {
 export function randomC(radius = 1.2): Complex {
   const r = Math.sqrt(0.3 + Math.random() * 0.7) * radius;
   const theta = Math.random() * Math.PI * 2;
-  return [
-    Math.round(r * Math.cos(theta) * 1000) / 1000,
-    Math.round(r * Math.sin(theta) * 1000) / 1000,
-  ];
+  // Full precision: rounding here could push a near-boundary sample outside
+  // the requested disk. Callers treat the pair as numbers, not display text.
+  return [r * Math.cos(theta), r * Math.sin(theta)];
 }
 
 /** Clamp a complex pair component-wise into [min, max]. */
