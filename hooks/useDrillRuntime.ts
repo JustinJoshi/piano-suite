@@ -284,9 +284,15 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
   // The page's composed stream, memoised on the blocks array the same way
   // runtimeOptionsFromBlocks memoises the config. A transport block's tempo
   // drives transform timing; pages without one use the composer's default.
+  const beatsPerBar = clock?.beatsPerBar ?? 4;
+
+  // The page's composed stream, memoised on the blocks array the same way
+  // runtimeOptionsFromBlocks memoises the config. A transport block's tempo
+  // and meter drive transform timing; pages without one use the composer's
+  // defaults.
   const stream = useMemo(
-    () => buildStream(blocks ?? [], effectiveBpm, runtimeNotes),
-    [blocks, effectiveBpm, runtimeNotes]
+    () => buildStream(blocks ?? [], effectiveBpm, runtimeNotes, beatsPerBar),
+    [blocks, effectiveBpm, runtimeNotes, beatsPerBar]
   );
 
   useEffect(() => {

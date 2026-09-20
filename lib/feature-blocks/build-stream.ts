@@ -20,12 +20,14 @@ import { transform as sectionLoopTransform } from "./section-loop/transform";
 export type StreamBlock = { id: string; type: string; config: unknown };
 
 const DEFAULT_BPM = 120;
+const DEFAULT_BEATS_PER_BAR = 4;
 
 type SourceFn = (config: unknown) => PracticeNote[];
 type TransformFn = (
   notes: PracticeNote[],
   config: unknown,
-  bpm: number
+  bpm: number,
+  beatsPerBar: number
 ) => PracticeNote[];
 
 // Dispatch by block type. The manifest only *classifies* a block (source vs
@@ -39,10 +41,20 @@ const SOURCES: Record<string, SourceFn> = {
 };
 
 const TRANSFORMS: Record<string, TransformFn> = {
-  rhythmPattern: (notes, raw, bpm) =>
-    rhythmPatternTransform(notes, normalizeRhythmPatternConfig(raw), bpm),
-  sectionLoop: (notes, raw, bpm) =>
-    sectionLoopTransform(notes, normalizeSectionLoopConfig(raw), bpm),
+  rhythmPattern: (notes, raw, bpm, beatsPerBar) =>
+    rhythmPatternTransform(
+      notes,
+      normalizeRhythmPatternConfig(raw),
+      bpm,
+      beatsPerBar
+    ),
+  sectionLoop: (notes, raw, bpm, beatsPerBar) =>
+    sectionLoopTransform(
+      notes,
+      normalizeSectionLoopConfig(raw),
+      bpm,
+      beatsPerBar
+    ),
 };
 
 /**
@@ -71,17 +83,18 @@ export function composeSources(
 
 /**
  * Apply the page's transform blocks in page order to an already-composed
- * stream. Pure; a transport block's bpm drives transform timing.
+ * stream. Pure; a transport block's bpm and meter drive transform timing.
  */
 export function applyTransforms(
   notes: PracticeNote[],
   blocks: StreamBlock[],
-  bpm: number
+  bpm: number,
+  beatsPerBar: number = DEFAULT_BEATS_PER_BAR
 ): PracticeNote[] {
   let stream = notes;
   for (const block of blocks) {
     const apply = TRANSFORMS[block.type];
-    if (apply) stream = apply(stream, block.config, bpm);
+    if (apply) stream = apply(stream, block.config, bpm, beatsPerBar);
   }
   return stream;
 }
@@ -94,11 +107,13 @@ export function applyTransforms(
 export function buildStream(
   blocks: StreamBlock[],
   bpm?: number,
-  runtimeNotes?: ReadonlyMap<string, PracticeNote[]>
+  runtimeNotes?: ReadonlyMap<string, PracticeNote[]>,
+  beatsPerBar?: number
 ): PracticeNote[] {
   return applyTransforms(
     composeSources(blocks, runtimeNotes),
     blocks,
-    bpm ?? DEFAULT_BPM
+    bpm ?? DEFAULT_BPM,
+    beatsPerBar ?? DEFAULT_BEATS_PER_BAR
   );
 }
