@@ -82,8 +82,8 @@ export default function PublicDrillView() {
 
         {!isSignedIn && (
           <p className="mt-3 text-sm text-muted-foreground">
-            Forking copies this page into this browser. Sign in afterwards to
-            open it in your workshop.
+            Forking copies this page into this browser and opens it in your
+            workshop. No account needed.
           </p>
         )}
         {forkState === "error" && (
@@ -151,7 +151,7 @@ export default function PublicDrillView() {
     try {
       // Signed in: the mutation records lineage (forkedFrom) and returns the
       // Convex clientPageId so the local copy syncs later. Signed out: the
-      // fork lands in localStorage and opens after sign-in.
+      // fork lands in localStorage and the workshop opens it right away.
       let linkedId: string | undefined;
       if (canAccess) {
         const result = await forkDrill({ drillId: drillId as never });
@@ -254,8 +254,8 @@ export default function PublicDrillView() {
 
       {!isSignedIn && (
         <p className="mt-3 text-sm text-muted-foreground">
-          Forking copies this page into this browser. Sign in afterwards to
-          open it in your workshop.
+          Forking copies this page into this browser and opens it in your
+          workshop. No account needed.
         </p>
       )}
       {forkState === "error" && (
