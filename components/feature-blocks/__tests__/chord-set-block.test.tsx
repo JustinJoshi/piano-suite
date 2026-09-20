@@ -19,6 +19,7 @@ function createRuntime(overrides: Partial<DrillRuntime> = {}): DrillRuntime {
     countdownValue: 0,
     breakRemaining: 0,
     currentTarget: cMajor7,
+    targets: [cMajor7],
     targetIndex: 0,
     totalTargets: 3,
     misses: 0,

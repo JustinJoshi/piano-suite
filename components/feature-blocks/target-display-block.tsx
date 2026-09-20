@@ -7,6 +7,27 @@ import {
 import type { TargetDisplayConfig } from "@/lib/feature-blocks/target-display/config";
 import { useDrillRuntime } from "@/lib/drill-runtime";
 import { useNoteStream } from "@/hooks/useNoteStream";
+import type { ChordTarget } from "@/lib/drill-runtime";
+import type { PracticeNote } from "@/lib/practice-note";
+
+/**
+ * The view model the display reads: when the runtime grades grouped targets
+ * (an explicit target block or the source-practice fallback), those are the
+ * truth — the raw stream's per-note rows would misstate position. Stream-only
+ * preview pages fall back to per-note rows.
+ */
+type DisplayRow = {
+  symbol: string;
+  pcs: Set<number>;
+};
+
+function rowsFromTargets(targets: ChordTarget[]): DisplayRow[] {
+  return targets.map((t) => ({ symbol: t.symbol, pcs: t.pcs }));
+}
+
+function rowsFromStream(notes: PracticeNote[]): DisplayRow[] {
+  return notes.map((n) => ({ symbol: n.symbol, pcs: n.pcs }));
+}
 
 export function TargetDisplayBlock(config: TargetDisplayConfig) {
   const runtime = useDrillRuntime();
@@ -14,8 +35,14 @@ export function TargetDisplayBlock(config: TargetDisplayConfig) {
 
   // The runtime owns progression; there is no local auto-advance.
   const currentIndex = runtime?.targetIndex ?? 0;
+  const totalTargets = runtime?.totalTargets ?? 0;
 
-  if (notes.length === 0) {
+  const rows: DisplayRow[] =
+    runtime && totalTargets > 0
+      ? rowsFromTargets(runtime.targets)
+      : rowsFromStream(notes);
+
+  if (rows.length === 0) {
     return (
       <div className="rounded-lg border border-dashed border-border bg-muted/30 p-6 text-center text-sm text-muted-foreground">
         Target display (connect a source)
@@ -24,7 +51,7 @@ export function TargetDisplayBlock(config: TargetDisplayConfig) {
   }
 
   if (config.view === "symbols") {
-    const view = buildSymbolView(notes, currentIndex, {
+    const view = buildSymbolView(rows as unknown as PracticeNote[], currentIndex, {
       showNext: config.showNext,
       showPosition: config.showPosition,
     });
@@ -63,7 +90,7 @@ export function TargetDisplayBlock(config: TargetDisplayConfig) {
   }
 
   // keysDiagram view
-  const view = buildKeysDiagramView(notes, currentIndex, {
+  const view = buildKeysDiagramView(rows as unknown as PracticeNote[], currentIndex, {
     showNext: config.showNext,
     showPosition: config.showPosition,
   });

@@ -23,6 +23,11 @@ import type {
   DrillPhase,
   DrillRuntimeConfig,
 } from "@/lib/drill-runtime";
+import { sourcePracticeCapable } from "@/lib/stream-practice";
+import {
+  streamTargetsIdentity,
+  targetsFromStream,
+} from "@/lib/stream-targets";
 import type { TransportConfig } from "@/lib/feature-blocks/transport/config";
 import type { PracticeNote } from "@/lib/practice-note";
 
@@ -292,6 +297,35 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
     [blocks, effectiveBpm, runtimeNotes, beatsPerBar]
   );
 
+  // Source-only practice: a page with a display/timer/transport but no
+  // explicit target block grades itself against the stream. The transport's
+  // tempo ramp rebuilds `stream` on every rep, so application is keyed on the
+  // targets' logical identity — pitch classes and labels only — never on the
+  // array itself; a re-timing alone must not reset targetIndex or misses.
+  const fallbackCapable = sourcePracticeCapable(blocks ?? [], pageId);
+  const appliedFallbackIdentityRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!fallbackCapable) {
+      if (appliedFallbackIdentityRef.current !== null) {
+        appliedFallbackIdentityRef.current = null;
+        setTargetsState([]);
+        setTargetIndex(0);
+        setMisses(0);
+        missReportedRef.current = false;
+      }
+      return;
+    }
+
+    const nextTargets = targetsFromStream(stream);
+    const identity = streamTargetsIdentity(nextTargets);
+    if (identity === appliedFallbackIdentityRef.current) return;
+    appliedFallbackIdentityRef.current = identity;
+    setTargetsState(nextTargets);
+    setTargetIndex(0);
+    setMisses(0);
+    missReportedRef.current = false;
+  }, [fallbackCapable, stream]);
+
   useEffect(() => {
     currentTargetRef.current = currentTarget;
   }, [currentTarget]);
@@ -376,6 +410,7 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
       countdownValue: timer.countdownValue,
       breakRemaining: timer.breakRemaining,
       currentTarget,
+      targets,
       targetIndex,
       totalTargets: targets.length,
       misses,
@@ -395,8 +430,8 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
       timer.countdownValue,
       timer.breakRemaining,
       currentTarget,
+      targets,
       targetIndex,
-      targets.length,
       misses,
       stream,
       start,
