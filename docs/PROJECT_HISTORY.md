@@ -931,6 +931,28 @@ Verification: `npm run lint`, `npm run typecheck`, `npm run test:unit:run`,
 `npm run build` green at final HEAD, plus
 `e2e/workshop-marketplace.spec.ts` per phase.
 
+## Piece library: explicit left/right track assignment (2026-09-20)
+
+The Piece library block's hand filter previously relied on the note stream
+carrying usable hand information; an uploaded MIDI file with both hands on one
+track silently produced a misleading stream. Two changes, delivered on
+`fix/audit-midi-hand-filter-20260920`:
+
+- `parseMidiFile` (`lib/music-player.ts`) retains each track's original index
+  and name as optional parsed-file metadata; `notesFromParsedMidi` takes an
+  optional third argument — an explicit left/right track assignment — and
+  annotates matching notes with `hand`. Hands are never inferred from pitch.
+- The Piece library block (`components/feature-blocks/piece-library-block.tsx`,
+  `lib/feature-blocks/piece-library/adapt.ts`) gains labeled left/right track
+  selectors derived from the retained track metadata (empty tracks excluded).
+  A hand with no matching assignment shows an honest "assign" prompt and an
+  empty stream; the same track cannot go to both hands; assignments reset when
+  the file is replaced. Config shape and `configVersion` are untouched, as are
+  section-loop, runtime transport, NoteRoll, and schemas.
+
+Verification: typecheck, lint, full unit suite, production build, plus
+`e2e/a11y.spec.ts` and `e2e/marketplace-seed-detail.spec.ts` on this branch.
+
 ## Roadmap
 
 - [x] Scaffold Next.js + Tailwind + shadcn/ui
