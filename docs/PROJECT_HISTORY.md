@@ -931,6 +931,47 @@ Verification: `npm run lint`, `npm run typecheck`, `npm run test:unit:run`,
 `npm run build` green at final HEAD, plus
 `e2e/workshop-marketplace.spec.ts` per phase.
 
+## Source-only practice pages now grade themselves (2026-09)
+
+The September audit found a gap: a page built from a source (chord library,
+piece section) plus a Target display and a drill timer or transport — the
+natural "practice this" page — initialized with empty targets and never
+advanced or logged anything, because only explicit target blocks (chord set,
+scale run, key cycle, progression) ever registered targets. Two phases on
+`fix/audit-source-targets-20260920` closed it:
+
+- **`lib/stream-targets.ts` (pure adapter)** — converts the composed
+  `PracticeNote[]` stream into `ChordTarget[]` fallback targets: untimed
+  entries stay distinct, same-onset timed notes merge into one chord,
+  restarted timelines break merging, and accompaniment markers and empty
+  pitch sets are skipped. `streamTargetsIdentity` hashes ordered pitch
+  classes + labels but excludes absolute milliseconds, so a Transport
+  tempo ramp — which rebuilds the stream array every rep — keeps the
+  logical identity stable and never resets target progress.
+- **Runtime wiring** — `sourcePracticeCapable`
+  (`lib/stream-practice.ts`) gates eligibility: preview pages (empty
+  `pageId`) and pages whose targets an explicit target block owns are
+  excluded; freePlay-only pages stay ungraded. `useDrillRuntime` applies
+  `targetsFromStream` only when the identity changes, and clears or
+  rebuilds the fallback safely when a source is removed or replaced.
+  `TargetDisplayBlock` renders the runtime's grouped targets when they
+  exist, falling back to per-note stream rows for stream-only previews.
+  `chordSet`'s manifest justification and the `unscored_page` wiring
+  guidance were made truthful.
+
+Explicit target blocks keep their authoritative registration path;
+scoring stays pitch-class only (octave, voicing, fingering, and hand
+separation remain unverified — the pre-existing runtime limitation).
+
+Verification: `npm run typecheck` and `npm run lint` exit 0; unit suite
+176 files / 1588 tests pass (including the new
+`lib/__tests__/stream-targets.test.ts`,
+`hooks/__tests__/useDrillRuntime-source-targets.test.tsx`, and
+`components/feature-blocks/__tests__/source-practice.test.tsx`);
+`npm run build` compiles successfully (45/45 static pages); and the named
+E2E specs (`a11y`, `marketplace-seed-detail`, `workshop-anonymous`) pass
+on port 3453.
+
 ## Roadmap
 
 - [x] Scaffold Next.js + Tailwind + shadcn/ui
