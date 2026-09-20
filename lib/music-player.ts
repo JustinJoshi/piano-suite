@@ -31,6 +31,8 @@ export type MusicPlayerNote = {
   velocity: number;
   time: number;
   duration: number;
+  /** Index of the original MIDI track this note came from. */
+  trackIndex?: number;
 };
 
 export type MusicPlayerState =
@@ -41,10 +43,19 @@ export type MusicPlayerState =
   | "paused"
   | "error";
 
+export type ParsedMidiTrack = {
+  /** Index of the track in the original MIDI file (empty tracks keep theirs). */
+  index: number;
+  /** Track name from the MIDI file, when present. */
+  name?: string;
+};
+
 export type ParsedMidi = {
   kind: "midi";
   duration: number;
   notes: MusicPlayerNote[];
+  /** Original tracks in file order, identified for explicit hand assignment. */
+  tracks?: ParsedMidiTrack[];
 };
 
 export type ParsedAudio = {
@@ -91,7 +102,19 @@ function normalizeVelocity(velocity: number): number {
  */
 export function parseMidiFile(arrayBuffer: ArrayBuffer): ParsedMidi {
   const midi = new Midi(arrayBuffer);
-  const rawNotes = midi.tracks.flatMap((track) => track.notes);
+  const rawNotes = midi.tracks.flatMap((track, trackIndex) =>
+    track.notes.map((n) => ({
+      midi: n.midi,
+      velocity: n.velocity,
+      time: n.time,
+      duration: n.duration,
+      trackIndex,
+    }))
+  );
+  const tracks: ParsedMidiTrack[] = midi.tracks.map((track, index) => ({
+    index,
+    ...(track.name ? { name: track.name } : {}),
+  }));
   const notes: MusicPlayerNote[] = rawNotes
     .map((n) => ({
       note: n.midi,
@@ -99,6 +122,7 @@ export function parseMidiFile(arrayBuffer: ArrayBuffer): ParsedMidi {
       velocity: normalizeVelocity(n.velocity),
       time: n.time,
       duration: n.duration,
+      trackIndex: n.trackIndex,
     }))
     .sort((a, b) => a.time - b.time);
 
@@ -107,7 +131,7 @@ export function parseMidiFile(arrayBuffer: ArrayBuffer): ParsedMidi {
       ? 0
       : Math.max(...notes.map((n) => n.time + n.duration));
 
-  return { kind: "midi", duration, notes };
+  return { kind: "midi", duration, notes, tracks };
 }
 
 export function detectFileKind(file: File): MusicPlayerFileKind {
