@@ -139,9 +139,9 @@ function SeedCard({
         <div className="mt-5 flex w-full gap-2">
           <Link
             href={`/marketplace/${id}`}
-            aria-label={`Try ${title}`}
+            aria-label={`Try it: ${title}`}
             className={cn(
-              buttonVariants({ size: "sm", variant: "brand" }),
+              buttonVariants({ size: "sm" }),
               "flex-1"
             )}
           >
