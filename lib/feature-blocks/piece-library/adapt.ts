@@ -4,22 +4,51 @@
  * module is an adapter, not a parser — no new MIDI decoding happens here.
  */
 
+import { tickToBarBeat } from "../../midi-musical-time";
 import type { MusicPlayerNote, ParsedMidi } from "../../music-player";
-import type { PracticeNote } from "../../practice-note";
+import type { PracticeNote, SourceTiming } from "../../practice-note";
 import type { PieceLibraryConfig } from "./config";
 
 const MS_PER_SECOND = 1000;
 
 /** Convert one music-player note into a PracticeNote. */
-export function adaptNote(note: MusicPlayerNote, transpose: number): PracticeNote {
+export function adaptNote(
+  note: MusicPlayerNote,
+  transpose: number,
+  timing?: SourceTiming
+): PracticeNote {
   const midi = note.note + transpose;
-  return {
+  const adapted: PracticeNote = {
     midi: [midi],
     pcs: new Set([((midi % 12) + 12) % 12]),
     symbol: "",
     onsetMs: note.time * MS_PER_SECOND,
     durationMs: note.duration * MS_PER_SECOND,
     velocity: note.velocity,
+  };
+
+  if (
+    !timing ||
+    typeof note.ticks !== "number" ||
+    typeof note.durationTicks !== "number"
+  ) {
+    return adapted;
+  }
+
+  // Source musical coordinates share one piece-wide timing object; never
+  // mutate it or the parsed source notes.
+  const position = tickToBarBeat(timing, note.ticks);
+  if (!position) return adapted;
+
+  return {
+    ...adapted,
+    source: {
+      tick: note.ticks,
+      durationTicks: note.durationTicks,
+      bar: position.bar,
+      beat: position.beat,
+      timing,
+    },
   };
 }
 
@@ -32,7 +61,7 @@ export function notesFromParsedMidi(
   config: PieceLibraryConfig
 ): PracticeNote[] {
   const notes = parsed.notes
-    .map((note) => adaptNote(note, config.transpose))
+    .map((note) => adaptNote(note, config.transpose, parsed.timing))
     .sort((a, b) => (a.onsetMs ?? 0) - (b.onsetMs ?? 0));
 
   if (config.role === "accompaniment") {
