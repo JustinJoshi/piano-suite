@@ -11,6 +11,7 @@ import {
   Copy,
   Hammer,
   LayoutGrid,
+  Play,
   Sparkles,
   Users,
 } from "lucide-react";
@@ -135,19 +136,32 @@ function SeedCard({
           <BlockChips labels={blockLabels(blocks)} />
         </div>
 
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={copyToWorkshop}
-          className="mt-5 w-full"
-        >
-          {copied ? (
-            <Check className="h-3.5 w-3.5 text-success" />
-          ) : (
-            <Copy className="h-3.5 w-3.5" />
-          )}
-          Copy to my workshop
-        </Button>
+        <div className="mt-5 flex w-full gap-2">
+          <Link
+            href={`/marketplace/${id}`}
+            aria-label={`Try it: ${title}`}
+            className={cn(
+              buttonVariants({ size: "sm" }),
+              "flex-1"
+            )}
+          >
+            <Play className="h-3.5 w-3.5" />
+            Try it
+          </Link>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={copyToWorkshop}
+            className="flex-1"
+          >
+            {copied ? (
+              <Check className="h-3.5 w-3.5 text-success" />
+            ) : (
+              <Copy className="h-3.5 w-3.5" />
+            )}
+            Copy to my workshop
+          </Button>
+        </div>
       </div>
     </article>
   );
