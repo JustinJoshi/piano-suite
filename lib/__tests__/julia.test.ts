@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { afterEach, describe, it, expect, vi } from "vitest";
 import {
   JULIA_PRESETS,
   complexMod2,
@@ -101,6 +101,31 @@ describe("randomC", () => {
       expect(Number.isFinite(c[1])).toBe(true);
       expect(Math.hypot(c[0], c[1])).toBeLessThanOrEqual(1.2 + 1e-9);
     }
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("keeps a near-boundary sample inside the disk after rounding", () => {
+    // radial sample 0.999999 → r ≈ 0.9999997·1.2; angular sample 0.125 → 45°,
+    // so the exact point sits just inside the disk but its coordinates rounded
+    // to 0.001 push the norm to ≈1.2002.
+    vi.spyOn(Math, "random")
+      .mockReturnValueOnce(0.999999)
+      .mockReturnValueOnce(0.125);
+    const c = randomC(1.2);
+    expect(Number.isFinite(c[0])).toBe(true);
+    expect(Number.isFinite(c[1])).toBe(true);
+    expect(Math.hypot(c[0], c[1])).toBeLessThanOrEqual(1.2 + 1e-9);
+  });
+
+  it("returns a bounded pair for radius 0 and finite pairs for a larger radius", () => {
+    expect(Math.hypot(randomC(0)[0], randomC(0)[1])).toBe(0);
+    const c = randomC(2);
+    expect(Number.isFinite(c[0])).toBe(true);
+    expect(Number.isFinite(c[1])).toBe(true);
+    expect(Math.hypot(c[0], c[1])).toBeLessThanOrEqual(2 + 1e-9);
   });
 });
 
