@@ -91,6 +91,23 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
   const [misses, setMisses] = useState(0);
   const missReportedRef = useRef(false);
 
+  // Live transport tempo override (BPM) from the Transport UI. Only the
+  // user's chosen base lives here — transient ramp ticks are derived, never
+  // stored. A saved-config tempo change or transport-block removal clears it
+  // (adjust-during-render, so the cleared value applies to the same render).
+  const savedTransportBpm = clock?.bpm ?? null;
+  const hasTransport = clock !== null;
+  const transportKey = `${savedTransportBpm}:${hasTransport}`;
+  const [transportState, setTransportState] = useState({
+    key: transportKey,
+    override: null as number | null,
+  });
+  if (transportState.key !== transportKey) {
+    setTransportState({ key: transportKey, override: null });
+  }
+  const transportBpmOverride =
+    transportState.key === transportKey ? transportState.override : null;
+
   const targetIndexRef = useRef(targetIndex);
   const targetsLengthRef = useRef(targets.length);
   const timerRef = useRef<ReturnType<typeof useDrillTimer> | null>(null);
@@ -272,14 +289,28 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
     setTargetIndex((prev) => prev + 1);
   }, [targetIndex, targets.length, timer]);
 
+  // Clamp to the transport config's BPM bounds (normalizeTransportConfig:
+  // 30..300). Effective only on transport pages; null restores saved tempo.
+  const setTransportBpm = useCallback((bpm: number | null) => {
+    if (bpm === null) {
+      setTransportState((prev) => ({ ...prev, override: null }));
+      return;
+    }
+    if (!Number.isFinite(bpm)) return;
+    const clamped = Math.max(30, Math.min(300, Math.floor(bpm)));
+    setTransportState((prev) => ({ ...prev, override: clamped }));
+  }, []);
+
   const currentTarget = targets[targetIndex] ?? null;
 
-  // The effective tempo: the configured bpm while the ramp is off, otherwise
-  // ramped from it toward the target over completed reps (targetIndex resets
-  // on start/reset). Both timing consumers below use this one value.
+  // The effective tempo: the live override when set, else the configured
+  // bpm — ramped toward the target over completed reps when the ramp is on
+  // (targetIndex resets on start/reset). Both timing consumers below use
+  // this one value.
+  const baseBpm = transportBpmOverride ?? clock?.bpm;
   const effectiveBpm = ramp.enabled && clock
-    ? rampedBpm(clock.bpm, ramp.targetBpm, targetIndex, ramp.overReps)
-    : clock?.bpm;
+    ? rampedBpm(baseBpm ?? clock.bpm, ramp.targetBpm, targetIndex, ramp.overReps)
+    : baseBpm;
 
   const beatsPerBar = clock?.beatsPerBar ?? 4;
 
@@ -384,6 +415,7 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
       reset,
       setTargets,
       skipTarget,
+      setTransportBpm,
       registerTargetSource,
       activeTargetSource,
       setRuntimeSourceNotes,
@@ -403,6 +435,7 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
       reset,
       setTargets,
       skipTarget,
+      setTransportBpm,
       pageId,
       registerTargetSource,
       activeTargetSource,
