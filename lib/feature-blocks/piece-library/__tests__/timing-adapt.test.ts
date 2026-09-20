@@ -16,7 +16,7 @@ const TIMING: SourceTiming = Object.freeze({
 
 function noteWith(
   tick: number,
-  opts: { time: number; duration: number; durationTicks: number; note: number } 
+  opts: { time: number; duration: number; durationTicks: number; note: number }
 ): MusicPlayerNote {
   return {
     note: opts.note,
