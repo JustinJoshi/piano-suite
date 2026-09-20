@@ -2,9 +2,14 @@ import { test, expect } from "@playwright/test";
 
 // Signed-out journey from a featured marketplace card to its playable seed
 // detail route. Uses the shipped seed fixtures only — no stored page may be
-// created just by visiting. Runs with an explicit empty storageState (see the
-// derived config used to launch it) so it never inherits authenticated state.
+// created just by visiting. The explicit empty storageState override below
+// keeps this spec signed out under any config, including the committed
+// playwright.config.ts whose chromium project carries authenticated state.
 test.describe("/marketplace featured Try-it links", () => {
+  test.use({
+    storageState: { cookies: [] as never[], origins: [] as never[] },
+  });
+
   test("first featured card links to its playable seed detail", async ({
     page,
   }) => {
