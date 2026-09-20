@@ -281,9 +281,6 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
     ? rampedBpm(clock.bpm, ramp.targetBpm, targetIndex, ramp.overReps)
     : clock?.bpm;
 
-  // The page's composed stream, memoised on the blocks array the same way
-  // runtimeOptionsFromBlocks memoises the config. A transport block's tempo
-  // drives transform timing; pages without one use the composer's default.
   const beatsPerBar = clock?.beatsPerBar ?? 4;
 
   // The page's composed stream, memoised on the blocks array the same way
