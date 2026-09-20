@@ -5,6 +5,8 @@ import { DrillTimerBlock } from "@/components/feature-blocks/drill-timer-block";
 import { ChordLibraryBlock } from "@/components/feature-blocks/chord-library-block";
 import { ChordSetBlock } from "@/components/feature-blocks/chord-set-block";
 import { DrillRuntimeProvider } from "@/components/custom-practice/drill-runtime-provider";
+import type { TargetDisplayConfig } from "@/lib/feature-blocks/target-display/config";
+import type { DrillTimerConfig } from "@/lib/feature-blocks/drill-timer/config";
 import {
   pressVirtualNote,
   releaseAllVirtualNotes,
@@ -70,6 +72,19 @@ const SEED_BLOCKS = [
     } },
 ];
 
+const DISPLAY_CONFIG: TargetDisplayConfig = {
+  view: "symbols",
+  showNext: true,
+  showPosition: true,
+};
+
+const TIMER_CONFIG: DrillTimerConfig = {
+  countdownSeconds: 0,
+  breakSeconds: 0,
+  multiRep: true,
+  showLiveTimer: true,
+};
+
 function page(blocks: object[]) {
   return blocks as Array<{ id: string; type: string; config: unknown }>;
 }
@@ -96,8 +111,8 @@ describe("source practice (wire-source-practice)", () => {
   it("the rootless seed page arms through DrillTimerBlock and shows grouped targets", () => {
     render(
       <DrillRuntimeProvider pageId="seed-rootless" blocks={page(SEED_BLOCKS)}>
-        <TargetDisplayBlock {...SEED_BLOCKS[1].config} />
-        <DrillTimerBlock {...SEED_BLOCKS[2].config} />
+        <TargetDisplayBlock {...DISPLAY_CONFIG} />
+        <DrillTimerBlock {...TIMER_CONFIG} />
       </DrillRuntimeProvider>
     );
 
@@ -115,8 +130,8 @@ describe("source practice (wire-source-practice)", () => {
   it("playing the current grouped target advances the display and logs one success", async () => {
     render(
       <DrillRuntimeProvider pageId="seed-rootless" blocks={page(SEED_BLOCKS)}>
-        <TargetDisplayBlock {...SEED_BLOCKS[1].config} />
-        <DrillTimerBlock {...SEED_BLOCKS[2].config} />
+        <TargetDisplayBlock {...DISPLAY_CONFIG} />
+        <DrillTimerBlock {...TIMER_CONFIG} />
       </DrillRuntimeProvider>
     );
 
@@ -151,8 +166,8 @@ describe("source practice (wire-source-practice)", () => {
   it("a wrong chord logs a miss before the right one succeeds", async () => {
     render(
       <DrillRuntimeProvider pageId="seed-rootless" blocks={page(SEED_BLOCKS)}>
-        <TargetDisplayBlock {...SEED_BLOCKS[1].config} />
-        <DrillTimerBlock {...SEED_BLOCKS[2].config} />
+        <TargetDisplayBlock {...DISPLAY_CONFIG} />
+        <DrillTimerBlock {...TIMER_CONFIG} />
       </DrillRuntimeProvider>
     );
 
@@ -194,9 +209,9 @@ describe("source practice (wire-source-practice)", () => {
 
     const { unmount } = render(
       <DrillRuntimeProvider pageId="seed-explicit" blocks={page(blocks)}>
-        <ChordSetBlock {...{ roots: ["F"], qualityGroups: ["7th"], order: "sequential" }} />
-        <TargetDisplayBlock {...SEED_BLOCKS[1].config} />
-        <DrillTimerBlock {...SEED_BLOCKS[2].config} />
+        <ChordSetBlock {...{ roots: ["F"], qualityGroups: ["7th"], order: "sequential", requireExact: false, goodThreshold: 0, hardThreshold: 2 }} />
+        <TargetDisplayBlock {...DISPLAY_CONFIG} />
+        <DrillTimerBlock {...TIMER_CONFIG} />
       </DrillRuntimeProvider>
     );
 
@@ -238,7 +253,7 @@ describe("source practice (wire-source-practice)", () => {
 
     render(
       <DrillRuntimeProvider pageId="seed-freeplay" blocks={page(blocks)}>
-        <TargetDisplayBlock {...SEED_BLOCKS[1].config} />
+        <TargetDisplayBlock {...DISPLAY_CONFIG} />
       </DrillRuntimeProvider>
     );
 
