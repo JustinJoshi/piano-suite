@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor, within, act } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { DrillRuntimeProvider } from "@/components/custom-practice/drill-runtime-provider";
 import { PieceLibraryBlock } from "@/components/feature-blocks/piece-library-block";
 import { useNoteStream } from "@/hooks/useNoteStream";
@@ -266,10 +266,14 @@ describe("PieceLibraryBlock hand assignment", () => {
     await screen.findByTestId("piece-file-input");
     uploadMidi();
 
+    // Wait for BOTH commits to settle: the summary is component state from
+    // the first commit, while the page stream propagates later (runtime
+    // registration → buildStream). Gating on the stream count alongside the
+    // summary keeps waitFor from resolving between the two commits (the
+    // conductor-first test uses the same wait-on-stream pattern).
     await waitFor(() => {
-      expect(screen.getByTestId("piece-summary")).toHaveTextContent(
-        "1 note"
-      );
+      expect(screen.getByTestId("piece-summary")).toHaveTextContent("1 note");
+      expect(screen.getByTestId("stream").dataset.count).toBe("1");
     });
     // One track cannot be split between hands; selectors stay hidden.
     expect(screen.queryByTestId("left-track-select")).not.toBeInTheDocument();
