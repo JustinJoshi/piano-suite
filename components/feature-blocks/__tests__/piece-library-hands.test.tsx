@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, within, act } from "@testing-library/react";
 import { DrillRuntimeProvider } from "@/components/custom-practice/drill-runtime-provider";
 import { PieceLibraryBlock } from "@/components/feature-blocks/piece-library-block";
 import { useNoteStream } from "@/hooks/useNoteStream";
@@ -105,7 +105,7 @@ const defaultParsed = () => {
 describe("PieceLibraryBlock hand assignment", () => {
   beforeEach(() => {
     window.localStorage.clear();
-    vi.clearAllMocks();
+    vi.mocked(parseMidiFile).mockReset();
     vi.mocked(parseMidiFile).mockImplementation(() => defaultParsed());
   });
 
@@ -218,7 +218,13 @@ describe("PieceLibraryBlock hand assignment", () => {
     renderBlock();
     uploadMidi();
 
-    await screen.findByTestId("left-track-select");
+    // Confirm the FIRST parse landed (its summary names the file) before
+    // firing the replacement upload; otherwise the two async parses race.
+    await waitFor(() => {
+      expect(screen.getByTestId("piece-summary")).toHaveTextContent(
+        "sonata.mid"
+      );
+    });
     fireEvent.change(screen.getByTestId("left-track-select"), {
       target: { value: "0" },
     });
@@ -269,5 +275,55 @@ describe("PieceLibraryBlock hand assignment", () => {
     expect(screen.queryByTestId("left-track-select")).not.toBeInTheDocument();
     expect(screen.queryByTestId("right-track-select")).not.toBeInTheDocument();
     expect(screen.getByTestId("stream").dataset.count).toBe("1");
+  });
+
+  it("enumerates real track indices for conductor-first files", async () => {
+    // Real files often carry an empty conductor track at index 0 with the
+    // notes on later tracks; the retained metadata must drive the options.
+    vi.mocked(parseMidiFile).mockImplementationOnce(() => ({
+      kind: "midi" as const,
+      duration: 2,
+      notes: [
+        { note: 60, pc: 0, velocity: 100, time: 0, duration: 0.5, trackIndex: 1 },
+        { note: 64, pc: 4, velocity: 100, time: 0.5, duration: 0.5, trackIndex: 1 },
+        { note: 67, pc: 7, velocity: 100, time: 1, duration: 0.5, trackIndex: 2 },
+        { note: 72, pc: 0, velocity: 100, time: 1.5, duration: 0.5, trackIndex: 2 },
+      ],
+      tracks: [
+        { index: 0 },
+        { index: 1, name: "Left hand" },
+        { index: 2, name: "Right hand" },
+      ],
+    }));
+
+    renderBlock();
+    uploadMidi();
+
+    await screen.findByTestId("left-track-select");
+
+    // No phantom "Track 0" option; both real tracks are offered (in both
+    // selectors, so scope the checks to one).
+    const leftSel = screen.getByTestId("left-track-select");
+    expect(within(leftSel).queryByRole("option", { name: "Track 0" })).toBeNull();
+    expect(
+      within(leftSel).getByRole("option", { name: "Left hand" })
+    ).toBeInTheDocument();
+    expect(
+      within(leftSel).getByRole("option", { name: "Right hand" })
+    ).toBeInTheDocument();
+
+    // Assigning track 2 (not 1) to a hand yields the correct subset and
+    // hand annotation in the page stream.
+    fireEvent.change(screen.getByTestId("right-track-select"), {
+      target: { value: "2" },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId("stream").dataset.hands).toBe(
+        "-,-,right,right"
+      );
+    });
+    expect(screen.getByTestId("stream").dataset.count).toBe("4");
+    expect(screen.getByTestId("stream")).toHaveTextContent("60,64,67,72");
   });
 });

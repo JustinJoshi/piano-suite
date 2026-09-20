@@ -25,14 +25,6 @@ import { parseMidiFile, type ParsedMidi } from "@/lib/music-player";
 
 const UNASSIGNED = "__none__";
 
-function trackOption(
-  parsed: ParsedMidi | null,
-  index: number
-): { value: string; label: string } {
-  const track = parsed?.tracks?.find((t) => t.index === index);
-  return { value: String(index), label: track?.name ?? `Track ${index}` };
-}
-
 export function PieceLibraryBlock(
   raw: Record<string, unknown> & { blockId?: string }
 ) {
@@ -89,6 +81,18 @@ export function PieceLibraryBlock(
   const trackCount = parsed?.notes.length
     ? new Set(parsed.notes.map((n) => n.trackIndex)).size
     : 0;
+  // One option per retained track that actually contains notes, at its
+  // original index — real files can have empty (e.g. conductor) tracks, so
+  // indices are not contiguous and empty tracks cannot be assigned a hand.
+  const noteTrackIndexes = new Set(
+    (parsed?.notes ?? []).map((n) => n.trackIndex)
+  );
+  const trackOptions = (parsed?.tracks ?? [])
+    .filter((t) => noteTrackIndexes.has(t.index))
+    .map((t) => ({
+      value: String(t.index),
+      label: t.name ?? `Track ${t.index}`,
+    }));
   const handFiltered =
     config.handFilter !== "both" &&
     assignment[config.handFilter === "left" ? "leftTrack" : "rightTrack"] ===
@@ -175,9 +179,7 @@ export function PieceLibraryBlock(
                   }}
                 >
                   <option value={UNASSIGNED}>Unassigned</option>
-                  {Array.from({ length: trackCount }, (_, i) =>
-                    trackOption(parsed, i)
-                  ).map((opt) => (
+                  {trackOptions.map((opt) => (
                     <option
                       key={opt.value}
                       value={opt.value}
@@ -215,9 +217,7 @@ export function PieceLibraryBlock(
                   }}
                 >
                   <option value={UNASSIGNED}>Unassigned</option>
-                  {Array.from({ length: trackCount }, (_, i) =>
-                    trackOption(parsed, i)
-                  ).map((opt) => (
+                  {trackOptions.map((opt) => (
                     <option
                       key={opt.value}
                       value={opt.value}
