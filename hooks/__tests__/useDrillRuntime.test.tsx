@@ -432,6 +432,65 @@ describe("useDrillRuntimeProvider", () => {
     }
   });
 
+  it("a transport page with no target block keeps timing past one bar", () => {
+    vi.useFakeTimers();
+    try {
+      mockPhase = "timing";
+      const blocks = [
+        { id: "t1", type: "transport", config: { bpm: 60, beatsPerBar: 4 } },
+      ];
+
+      const { result } = renderHook(() =>
+        useDrillRuntimeProvider({ pageId: "page-1", clock: { bpm: 60, beatsPerBar: 4 }, blocks })
+      );
+
+      // No target block on the page — the stream feeds displays only, so
+      // setTargets is never called and targets stays empty.
+      act(() => {
+        vi.advanceTimersByTime(4000);
+      });
+
+      expect(result.current.phase).toBe("timing");
+      expect(finishNow).not.toHaveBeenCalled();
+      expect(logMissEvent).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("a transport page with targets still advances and misses on the clock", () => {
+    vi.useFakeTimers();
+    try {
+      mockPhase = "timing";
+      const blocks = [
+        { id: "t1", type: "transport", config: { bpm: 60, beatsPerBar: 4 } },
+      ];
+
+      const { result } = renderHook(() =>
+        useDrillRuntimeProvider({ pageId: "page-1", clock: { bpm: 60, beatsPerBar: 4 }, blocks })
+      );
+
+      act(() => {
+        result.current.setTargets([
+          { id: "Cmaj7", symbol: "Cmaj7", notes: ["C", "E", "G", "B"], pcs: new Set([0, 4, 7, 11]) },
+          { id: "G7", symbol: "G7", notes: ["G", "B", "D", "F"], pcs: new Set([7, 11, 2, 5]) },
+        ]);
+      });
+
+      act(() => {
+        vi.advanceTimersByTime(4000);
+      });
+
+      expect(result.current.targetIndex).toBe(1);
+      expect(result.current.misses).toBe(1);
+      expect(logMissEvent).toHaveBeenCalledWith(
+        expect.objectContaining({ chord: "Cmaj7", played: "" })
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("a page without a transport never advances on the clock", () => {
     vi.useFakeTimers();
     try {

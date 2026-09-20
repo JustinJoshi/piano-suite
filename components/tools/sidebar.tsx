@@ -8,7 +8,6 @@ import {
   Aperture,
   ChevronDown,
   CreditCard,
-  Fingerprint,
   Palette,
   Volume2,
   X,
@@ -60,13 +59,6 @@ function subscribeToLabsNav(callback: () => void) {
 }
 
 type NavLinkDef = { title: string; href: string; icon: LucideIcon };
-
-/** Logo Lab is a branding utility, not a practice tool — sidebar only. */
-const logoLabLink: NavLinkDef = {
-  title: "Logo Lab",
-  href: "/tools/logo-lab",
-  icon: Fingerprint,
-};
 
 const settingsLinks: NavLinkDef[] = [
   { title: "Theme", href: "/settings/theme", icon: Palette },
@@ -171,7 +163,6 @@ function LabsSection({ onNavigate }: { onNavigate: () => void }) {
 
   const labs: NavLinkDef[] = [
     ...labTools,
-    logoLabLink,
   ].filter((lab) => experimentalEnabled || !isExperimentalToolHref(lab.href));
   const activeLab = labs.some((lab) => lab.href === pathname);
 

@@ -8,7 +8,7 @@ import { useWelcomeConfig } from "@/hooks/useWelcomeConfig";
 import { OnboardingShell } from "./onboarding-shell";
 import { OnboardingContent } from "./onboarding-content";
 
-export function Onboarding() {
+export function Onboarding({ open }: { open?: boolean } = {}) {
   const { config } = useWelcomeConfig();
   const { isCompleted, markComplete, isInstant, mounted } = useOnboarding();
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -43,7 +43,9 @@ export function Onboarding() {
     scrollRef.current?.scrollTo?.({ top: 0, behavior: "smooth" });
   }, [currentSlide]);
 
-  if (!mounted || isCompleted) {
+  const isVisible = open !== undefined ? open : !isCompleted;
+
+  if (!mounted || !isVisible) {
     return null;
   }
 

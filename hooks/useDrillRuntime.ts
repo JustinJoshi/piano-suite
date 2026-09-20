@@ -330,9 +330,11 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
   // Clock-advanced pages: the transport owns progression. Each target gets
   // one bar; when the bar closes on an unmet target, the late (or absent)
   // note counts as a miss and the clock moves on. Pages without a transport
-  // never enter this effect — their path is unchanged.
+  // never enter this effect — their path is unchanged. Neither do pages
+  // without targets: there is nothing to advance and nothing to miss, so the
+  // clock must not run the page out to finishNow().
   useEffect(() => {
-    if (!clock || timer.phase !== "timing") return;
+    if (!clock || timer.phase !== "timing" || targets.length === 0) return;
 
     const windowMs = beatsToMs(clock.beatsPerBar, effectiveBpm ?? clock.bpm);
     const interval = setInterval(() => {
@@ -351,7 +353,7 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
     }, windowMs);
 
     return () => clearInterval(interval);
-  }, [clock, effectiveBpm, timer.phase, targetIndex, logMiss]);
+  }, [clock, effectiveBpm, timer.phase, targetIndex, targets.length, logMiss]);
 
   // useDrillTimer requires an explicit arm() call to leave "armed" (see its
   // header comment: "the consumer is responsible for ... calling arm() (hands

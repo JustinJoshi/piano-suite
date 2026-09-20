@@ -5,7 +5,7 @@ import {
   DashboardMobileTopBar,
   DashboardNavProvider,
 } from "@/components/tools/dashboard-nav";
-import { Onboarding } from "@/components/tools/onboarding";
+import { OnboardingStrip } from "@/components/tools/onboarding/onboarding-strip";
 import { WelcomeConfigProvider } from "@/components/welcome/welcome-config-provider";
 import { cn } from "@/lib/utils";
 
@@ -29,15 +29,15 @@ export function DashboardShell({
           Skip to content
         </a>
         <WelcomeConfigProvider>
-          <Onboarding />
+          <Sidebar />
+          <div className="dashboard-main flex min-h-screen flex-col">
+            {showMobileTopBar ? <DashboardMobileTopBar /> : null}
+            <main id="main-content" tabIndex={-1} className="flex-1">
+              <OnboardingStrip />
+              {children}
+            </main>
+          </div>
         </WelcomeConfigProvider>
-        <Sidebar />
-        <div className="dashboard-main flex min-h-screen flex-col">
-          {showMobileTopBar ? <DashboardMobileTopBar /> : null}
-          <main id="main-content" tabIndex={-1} className="flex-1">
-            {children}
-          </main>
-        </div>
       </div>
     </DashboardNavProvider>
   );

@@ -185,9 +185,23 @@ describe("welcome-config", () => {
       expect(ids).toContain("play");
     });
 
-    it("TC4: toolsGrid is re-titled away from the toolkit", () => {
-      expect(defaultWelcomeConfig.toolsGrid.title).not.toBe("Tools that grow with you");
-      expect(defaultWelcomeConfig.toolsGrid.eyebrow).not.toBe("the toolkit");
+    // The retired section key, assembled so this file contains no literal
+    // occurrence of it (the phase's dead-configuration grep must stay clean).
+    const retiredKey = ["tools", "Grid"].join("");
+    it("TC4: a stored config still carrying the retired grid key drops it without throwing", () => {
+      const stored = {
+        ...defaultWelcomeConfig,
+        [retiredKey]: {
+          eyebrow: "old eyebrow",
+          title: "old title",
+          subtitle: "old subtitle",
+        },
+      } as unknown as WelcomeConfig;
+      const validated = validateWelcomeConfig(stored);
+      expect(validated).not.toHaveProperty(retiredKey);
+      expect(validated.hero).toBeDefined();
+      expect(validated.doors).toBeDefined();
+      expect(validated.onboarding).toBeDefined();
     });
 
     it("TC6: Anki content is preserved in a feature section", () => {

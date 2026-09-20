@@ -20,6 +20,7 @@ import { SCALE_IDS } from "../scales";
 import { freePlayManifest } from "./free-play/manifest";
 import { songPlayerManifest } from "./song-player/manifest";
 import { ROOTS } from "../music-theory";
+import { isTargetBlockType } from "./target-blocks";
 
 /**
  * Every target block (chordSet, scaleRunner, rootCycle, progression) spreads
@@ -734,6 +735,29 @@ export function validatePageWiring(blocks: FeatureBlock[]): WiringIssue[] {
           detail: `No upstream source provides: ${manifest.accepts.join(", ")}`,
         });
       }
+    }
+  }
+
+  // Page-level guidance: a page that displays notes but has no target block
+  // can never score anything. Guidance, not enforcement — at most one issue,
+  // attached to the first block that accepts the stream.
+  const hasDisplay = blocks.some((b) => {
+    const m = manifests.get(b.type);
+    return Boolean(m && m.accepts.includes("practiceNotes"));
+  });
+  const hasTarget = blocks.some((b) => isTargetBlockType(b.type));
+  if (hasDisplay && !hasTarget) {
+    const display = blocks.find((b) => {
+      const m = manifests.get(b.type);
+      return Boolean(m && m.accepts.includes("practiceNotes"));
+    });
+    if (display) {
+      issues.push({
+        blockId: display.id,
+        type: display.type,
+        issue: "unscored_page",
+        detail: "No target block on this page, so nothing will be scored.",
+      });
     }
   }
 

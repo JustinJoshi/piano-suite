@@ -94,6 +94,13 @@ describe("marketplace seeds", () => {
       repeats: 4,
     });
 
-    expect(validateArrangement(seed!.blocks)).toEqual({ status: "valid" });
+    // The seed is a display-only page (no target block), so the validator
+    // carries exactly the single page-level unscored_page guidance issue.
+    const result = validateArrangement(seed!.blocks);
+    expect(result.status).toBe("invalid");
+    if (result.status === "invalid") {
+      expect(result.issues).toHaveLength(1);
+      expect(result.issues[0].issue).toBe("unscored_page");
+    }
   });
 });

@@ -105,11 +105,6 @@ export interface WelcomeConfig {
     items: WelcomeDeckConfig[];
     variant: "outline" | "solid" | "ghost";
   };
-  toolsGrid: {
-    eyebrow: string;
-    title: string;
-    subtitle: string;
-  };
   howItWorks: {
     eyebrow: string;
     title: string;
@@ -275,12 +270,6 @@ export const defaultWelcomeConfig: WelcomeConfig = {
       },
     ],
     variant: "outline",
-  },
-  toolsGrid: {
-    eyebrow: "free, and included",
-    title: "A whole shelf of drills and playful labs.",
-    subtitle:
-      "The Workshop is the heart of it all, and these friends come built in — ready-made drills, progress trackers, and labs that turn your playing into light. Use them as-is or pull their blocks into your own pages.",
   },
   howItWorks: {
     eyebrow: "how the Workshop works",
@@ -621,13 +610,6 @@ export function validateWelcomeConfig(
     ),
   };
 
-  const toolsGridInput = isObject(input.toolsGrid) ? input.toolsGrid : {};
-  const toolsGrid: WelcomeConfig["toolsGrid"] = {
-    eyebrow: clampString(toolsGridInput.eyebrow, base.toolsGrid.eyebrow),
-    title: clampString(toolsGridInput.title, base.toolsGrid.title),
-    subtitle: clampString(toolsGridInput.subtitle, base.toolsGrid.subtitle),
-  };
-
   const howItWorksInput = isObject(input.howItWorks) ? input.howItWorks : {};
   const howItWorks: WelcomeConfig["howItWorks"] = {
     eyebrow: clampString(howItWorksInput.eyebrow, base.howItWorks.eyebrow),
@@ -738,7 +720,6 @@ export function validateWelcomeConfig(
     features,
     flow,
     decks,
-    toolsGrid,
     howItWorks,
     templateStrip,
     demoVideo,

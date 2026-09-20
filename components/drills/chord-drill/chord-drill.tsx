@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { MidiConnectionBar } from "@/components/drills/midi-connection-bar";
 import { useChordDrill } from "@/hooks/useChordDrill";
+import { captureEvent } from "@/lib/analytics";
 import { useAuthAccess } from "@/hooks/useAuthAccess";
 import { floatPanelUpgradeCopy } from "@/lib/billing";
 import {
@@ -298,6 +299,28 @@ export function ChordDrill() {
     confettiKey,
     shuffleChord,
   } = drill;
+
+  const startedRef = useRef(false);
+  useEffect(() => {
+    if (running && !startedRef.current) {
+      startedRef.current = true;
+      captureEvent("drill_started", { drill: "chord-drill" });
+    }
+    if (!running && startedRef.current) {
+      startedRef.current = false;
+    }
+  }, [running]);
+
+  const completedRef = useRef(false);
+  useEffect(() => {
+    if (phase === "finished" && !completedRef.current) {
+      completedRef.current = true;
+      captureEvent("drill_completed", { drill: "chord-drill" });
+    }
+    if (phase !== "finished" && completedRef.current) {
+      completedRef.current = false;
+    }
+  }, [phase]);
 
   const stats = history[symbol];
 
