@@ -73,6 +73,43 @@ describe("validatePageWiring", () => {
     );
   });
 
+  it("a page with a target block and no drill timer is unstartable", () => {
+    const issues = validatePageWiring([block("chordSet")]);
+
+    expect(issues.filter((issue) => issue.issue === "unstartable_page")).toHaveLength(1);
+    expect(issues.find((issue) => issue.issue === "unstartable_page")?.blockId).toBe(
+      "id-chordSet"
+    );
+  });
+
+  it("a page with a target block and a drill timer is not unstartable", () => {
+    expect(
+      validatePageWiring([block("chordSet"), block("drillTimer")]).filter(
+        (issue) => issue.issue === "unstartable_page"
+      )
+    ).toEqual([]);
+  });
+
+  it("a page with no target block is not unstartable", () => {
+    expect(
+      validatePageWiring([block("metronome")]).filter(
+        (issue) => issue.issue === "unstartable_page"
+      )
+    ).toEqual([]);
+  });
+
+  it("only the first target block carries the unstartable notice", () => {
+    const issues = validatePageWiring([
+      block("chordSet"),
+      block("rootCycle"),
+    ]);
+
+    expect(issues.filter((issue) => issue.issue === "unstartable_page")).toHaveLength(1);
+    expect(issues.find((issue) => issue.issue === "unstartable_page")?.blockId).toBe(
+      "id-chordSet"
+    );
+  });
+
   it("advertises a transport output a requirement can match", () => {
     // No shipped block requires ["transport"] yet, so the contract is
     // checked on the manifest: the clock must not advertise an empty output.

@@ -52,7 +52,7 @@ export const starterTemplates: StarterTemplate[] = [
       block("first-chords-timer", "drillTimer", {
         countdownSeconds: 3,
         breakSeconds: 5,
-        multiRep: false,
+        multiRep: true,
         showLiveTimer: true,
       }),
       block("first-chords-midi", "midiConnectionBar", { compact: false }),
@@ -104,7 +104,7 @@ export const starterTemplates: StarterTemplate[] = [
       block("qualities-timer", "drillTimer", {
         countdownSeconds: 3,
         breakSeconds: 5,
-        multiRep: false,
+        multiRep: true,
         showLiveTimer: true,
       }),
     ],
@@ -180,7 +180,7 @@ export const starterTemplates: StarterTemplate[] = [
       block("rhythm-timer", "drillTimer", {
         countdownSeconds: 3,
         breakSeconds: 5,
-        multiRep: false,
+        multiRep: true,
         showLiveTimer: true,
       }),
     ],
@@ -245,7 +245,7 @@ export const starterTemplates: StarterTemplate[] = [
       block("theory-starter-timer", "drillTimer", {
         countdownSeconds: 3,
         breakSeconds: 5,
-        multiRep: false,
+        multiRep: true,
         showLiveTimer: true,
       }),
       block("theory-starter-midi", "midiConnectionBar", { compact: false }),
@@ -305,6 +305,12 @@ export const starterTemplates: StarterTemplate[] = [
         requireExact: true,
         goodThreshold: 0,
         hardThreshold: 3,
+      }),
+      block("warmup-timer", "drillTimer", {
+        countdownSeconds: 3,
+        breakSeconds: 5,
+        multiRep: true,
+        showLiveTimer: true,
       }),
       block("warmup-metronome", "metronome", {
         bpm: 60,
@@ -389,6 +395,12 @@ export const starterTemplates: StarterTemplate[] = [
         goodThreshold: 0,
         hardThreshold: 4,
       }),
+      block("five-finger-timer", "drillTimer", {
+        countdownSeconds: 3,
+        breakSeconds: 5,
+        multiRep: true,
+        showLiveTimer: true,
+      }),
     ],
   },
   {
@@ -448,6 +460,12 @@ export const starterTemplates: StarterTemplate[] = [
         goodThreshold: 0,
         hardThreshold: 4,
       }),
+      block("ii-v-i-all-timer", "drillTimer", {
+        countdownSeconds: 3,
+        breakSeconds: 5,
+        multiRep: true,
+        showLiveTimer: true,
+      }),
       block("ii-v-i-all-metronome", "metronome", {
         bpm: 60,
         beatsPerBar: 4,
@@ -483,6 +501,12 @@ export const starterTemplates: StarterTemplate[] = [
         goodThreshold: 0,
         hardThreshold: 4,
       }),
+      block("blues-timer", "drillTimer", {
+        countdownSeconds: 3,
+        breakSeconds: 5,
+        multiRep: true,
+        showLiveTimer: true,
+      }),
       block("blues-metronome", "metronome", {
         bpm: 80,
         beatsPerBar: 4,
@@ -517,6 +541,12 @@ export const starterTemplates: StarterTemplate[] = [
         requireExact: false,
         goodThreshold: 0,
         hardThreshold: 3,
+      }),
+      block("pop-timer", "drillTimer", {
+        countdownSeconds: 3,
+        breakSeconds: 5,
+        multiRep: true,
+        showLiveTimer: true,
       }),
       block("pop-keyboard", "keyboardDisplay", {
         lowNote: 48,
@@ -581,6 +611,12 @@ export const starterTemplates: StarterTemplate[] = [
         requireExact: true,
         goodThreshold: 0,
         hardThreshold: 3,
+      }),
+      block("modes-timer", "drillTimer", {
+        countdownSeconds: 3,
+        breakSeconds: 5,
+        multiRep: true,
+        showLiveTimer: true,
       }),
       block("modes-stats", "sessionStats", {
         windowDays: 30,

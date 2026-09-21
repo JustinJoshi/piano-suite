@@ -386,12 +386,13 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
       return;
     }
 
-    if (heldPcs.size > 0 && !missReportedRef.current) {
+    // Notes arrive one at a time, so a chord under construction is not an
+    // attempt — only a held set at least as large as the target counts as a
+    // miss. Mirrors the same guard in hooks/useRootCycling.ts.
+    if (heldPcs.size >= currentTarget.pcs.size && !missReportedRef.current) {
       missReportedRef.current = true;
       setMisses((prev) => prev + 1);
-      if (currentTarget) {
-        logMiss(currentTarget, heldPcs);
-      }
+      logMiss(currentTarget, heldPcs);
     }
   }, [heldPcs, currentTarget, timer, requireExact, logMiss]);
 

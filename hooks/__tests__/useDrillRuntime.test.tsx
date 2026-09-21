@@ -156,7 +156,7 @@ describe("useDrillRuntimeProvider", () => {
 
   it("logs misses to Convex when Pro", () => {
     mockPhase = "timing";
-    mockHeldPcs = new Set([1, 5, 8]); // wrong notes
+    mockHeldPcs = new Set([1, 5, 8, 10]); // wrong notes
 
     const { result } = renderHook(() => useDrillRuntimeProvider({ pageId: "page-1" }));
 
@@ -170,7 +170,7 @@ describe("useDrillRuntimeProvider", () => {
       expect.objectContaining({
         tool: "workshop",
         chord: "Cmaj7",
-        played: "1,5,8",
+        played: "1,5,8,10",
         pageId: "page-1",
       })
     );
@@ -361,7 +361,7 @@ describe("useDrillRuntimeProvider", () => {
 
     mockPhase = "timing";
     // First render: wrong notes → one miss on the target.
-    mockHeldPcs = new Set([1, 5, 8]);
+    mockHeldPcs = new Set([1, 5, 8, 10]);
 
     const { result, rerender } = renderHook(() =>
       useDrillRuntimeProvider({
@@ -557,7 +557,7 @@ describe("useDrillRuntimeProvider", () => {
 
   it("a miss beyond the good threshold grades Hard by default", () => {
     mockPhase = "timing";
-    mockHeldPcs = new Set([1, 5, 8]);
+    mockHeldPcs = new Set([1, 5, 8, 10]);
 
     const { result, rerender } = renderHook(() =>
       useDrillRuntimeProvider({ pageId: "page-1" })
@@ -576,6 +576,95 @@ describe("useDrillRuntimeProvider", () => {
     expect(logPracticeEvent).toHaveBeenCalledWith(
       expect.objectContaining({ grade: "Hard" })
     );
+  });
+
+  it("a chord built one note at a time records no miss", () => {
+    mockPhase = "timing";
+
+    const { result, rerender } = renderHook(() =>
+      useDrillRuntimeProvider({ pageId: "page-1", requireExact: false })
+    );
+
+    act(() => {
+      result.current.setTargets([
+        { id: "Cmaj7", symbol: "Cmaj7", notes: ["C", "E", "G", "B"], pcs: new Set([0, 4, 7, 11]) },
+      ]);
+    });
+
+    for (const held of [new Set([0]), new Set([0, 4]), new Set([0, 4, 7]), new Set([0, 4, 7, 11])]) {
+      mockHeldPcs = held;
+      rerender();
+    }
+
+    expect(logMissEvent).not.toHaveBeenCalled();
+    expect(result.current.misses).toBe(0);
+  });
+
+  it("a first-try correct chord grades Good", () => {
+    mockPhase = "timing";
+
+    const { result, rerender } = renderHook(() =>
+      useDrillRuntimeProvider({ pageId: "page-1" })
+    );
+
+    act(() => {
+      result.current.setTargets([
+        { id: "Cmaj7", symbol: "Cmaj7", notes: ["C", "E", "G", "B"], pcs: new Set([0, 4, 7, 11]) },
+      ]);
+    });
+
+    mockHeldPcs = new Set([0, 4, 7, 11]);
+    rerender();
+
+    // Default thresholds put Good at zero misses — only reachable when the
+    // chord-under-construction rule is in place.
+    expect(logPracticeEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ chord: "Cmaj7", grade: "Good" })
+    );
+  });
+
+  it("a full wrong chord still counts a miss", () => {
+    mockPhase = "timing";
+    mockHeldPcs = new Set([1, 5, 8, 10]);
+
+    const { result } = renderHook(() =>
+      useDrillRuntimeProvider({ pageId: "page-1" })
+    );
+
+    act(() => {
+      result.current.setTargets([
+        { id: "Cmaj7", symbol: "Cmaj7", notes: ["C", "E", "G", "B"], pcs: new Set([0, 4, 7, 11]) },
+      ]);
+    });
+
+    expect(logMissEvent).toHaveBeenCalledTimes(1);
+    expect(result.current.misses).toBe(1);
+  });
+
+  it("a two-note target still misses on one wrong note", () => {
+    mockPhase = "timing";
+
+    const { result, rerender } = renderHook(() =>
+      useDrillRuntimeProvider({ pageId: "page-1", requireExact: false })
+    );
+
+    act(() => {
+      result.current.setTargets([
+        { id: "P5", symbol: "P5", notes: ["C", "G"], pcs: new Set([0, 7]) },
+      ]);
+    });
+
+    mockHeldPcs = new Set([1]);
+    rerender();
+
+    expect(logMissEvent).not.toHaveBeenCalled();
+    expect(result.current.misses).toBe(0);
+
+    mockHeldPcs = new Set([1, 6]);
+    rerender();
+
+    expect(logMissEvent).toHaveBeenCalledTimes(1);
+    expect(result.current.misses).toBe(1);
   });
 });
 

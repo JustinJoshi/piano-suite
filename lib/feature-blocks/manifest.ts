@@ -762,6 +762,20 @@ export function validatePageWiring(blocks: FeatureBlock[]): WiringIssue[] {
     }
   }
 
+  // Page-level guidance, mirrored: a page with a target block but no drill
+  // timer can never be started — the drill timer is the only Start button in
+  // the library. Guidance, not enforcement — at most one issue, attached to
+  // the first target block in page order.
+  const firstTarget = blocks.find((b) => isTargetBlockType(b.type));
+  if (firstTarget && !blocks.some((b) => b.type === "drillTimer")) {
+    issues.push({
+      blockId: firstTarget.id,
+      type: firstTarget.type,
+      issue: "unstartable_page",
+      detail: "No drill timer on this page, so the drill can never start.",
+    });
+  }
+
   return issues;
 }
 
