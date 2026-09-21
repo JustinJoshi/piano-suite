@@ -7,6 +7,7 @@ import {
 import { buildStream } from "@/lib/feature-blocks/build-stream";
 import { validatePageWiring } from "@/lib/feature-blocks/manifest";
 import { isTargetBlockType } from "@/lib/feature-blocks/target-blocks";
+import { normalizeDrillTimerConfig } from "@/lib/feature-blocks/drill-timer/config";
 
 describe("starter templates", () => {
   it("ships a valid set of starter practice pages", () => {
@@ -34,6 +35,18 @@ describe("starter templates", () => {
         isTargetBlockType(b.type)
       );
       expect(targets.length).toBeLessThanOrEqual(1);
+    }
+  });
+
+  it("no starter template ends after one rep", () => {
+    for (const template of starterTemplates) {
+      const hasTarget = template.blocks.some((b) => isTargetBlockType(b.type));
+      const timer = template.blocks.find((b) => b.type === "drillTimer");
+      if (!hasTarget || !timer) continue;
+      expect(
+        normalizeDrillTimerConfig(timer.config).multiRep,
+        `template ${template.id} timer must run every target`
+      ).toBe(true);
     }
   });
 

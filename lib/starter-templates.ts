@@ -52,7 +52,7 @@ export const starterTemplates: StarterTemplate[] = [
       block("first-chords-timer", "drillTimer", {
         countdownSeconds: 3,
         breakSeconds: 5,
-        multiRep: false,
+        multiRep: true,
         showLiveTimer: true,
       }),
       block("first-chords-midi", "midiConnectionBar", { compact: false }),
@@ -104,7 +104,7 @@ export const starterTemplates: StarterTemplate[] = [
       block("qualities-timer", "drillTimer", {
         countdownSeconds: 3,
         breakSeconds: 5,
-        multiRep: false,
+        multiRep: true,
         showLiveTimer: true,
       }),
     ],
@@ -180,7 +180,7 @@ export const starterTemplates: StarterTemplate[] = [
       block("rhythm-timer", "drillTimer", {
         countdownSeconds: 3,
         breakSeconds: 5,
-        multiRep: false,
+        multiRep: true,
         showLiveTimer: true,
       }),
     ],
@@ -245,7 +245,7 @@ export const starterTemplates: StarterTemplate[] = [
       block("theory-starter-timer", "drillTimer", {
         countdownSeconds: 3,
         breakSeconds: 5,
-        multiRep: false,
+        multiRep: true,
         showLiveTimer: true,
       }),
       block("theory-starter-midi", "midiConnectionBar", { compact: false }),

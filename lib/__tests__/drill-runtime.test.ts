@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { runtimeOptionsFromBlocks } from "@/lib/drill-runtime";
+import { normalizeDrillTimerConfig } from "@/lib/feature-blocks/drill-timer/config";
 
 describe("runtimeOptionsFromBlocks", () => {
   it("returns legacy defaults when the page has no timer or chord blocks", () => {
@@ -90,9 +91,21 @@ describe("runtimeOptionsFromBlocks", () => {
       // 999 clamps to the drillTimer field max of 30; "yes" is not a
       // recognized truthy string, so multiRep fails closed to the default.
       countdownSeconds: 30,
-      multiRep: false,
+      multiRep: true,
       goodThreshold: 0,
       hardThreshold: 99,
+    });
+  });
+
+  it("a drill timer block with no multiRep key defaults to multi-rep", () => {
+    expect(normalizeDrillTimerConfig({ countdownSeconds: 3 })).toMatchObject({
+      multiRep: true,
+    });
+  });
+
+  it("an explicit multiRep false is still honoured", () => {
+    expect(normalizeDrillTimerConfig({ multiRep: false })).toMatchObject({
+      multiRep: false,
     });
   });
 });

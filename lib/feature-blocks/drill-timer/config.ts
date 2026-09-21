@@ -26,7 +26,7 @@ function toBool(n: unknown, fallback: boolean): boolean {
 export const drillTimerDefaultConfig: DrillTimerConfig = {
   countdownSeconds: 3,
   breakSeconds: 5,
-  multiRep: false,
+  multiRep: true,
   showLiveTimer: true,
 };
 
