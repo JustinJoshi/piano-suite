@@ -27,6 +27,17 @@ Every timed practice page needs a single master clock, and a clock needs control
 - Hanon No. 10: Transport (ramp 60→120) + Note roll + Practice report
 - Daily sight-reading: Transport (count-in, continuous) + Target display
 
+## Live vs saved tempo
+
+On a real practice page the block's controls drive the shared drill runtime rather than local state:
+
+- **Start / Stop** start and reset the drill round (`runtime.start` / `runtime.reset`) and own the audible tick. A reset that comes from elsewhere — a separate DrillTimer's stop, the editor's reset — ends the tick too.
+- **The tempo slider** writes the runtime's live tempo override (`runtime.setTransportBpm`), clamped to 30–300 BPM. It never rewrites the page's saved config: the saved `bpm` only changes through the settings editor, and a saved-BPM change clears the live override.
+- **The displayed BPM and the audible tick** both follow the runtime's ramped effective tempo, so the number shown is always the number played. The override is also the base the ramp derives from.
+- The live override exists for the current session only — it is not persisted anywhere, including ramp ticks.
+
+In the standalone library preview (no runtime, or an empty page id) the block keeps its own local metronome, the slider only changes the preview tempo, and no drill analytics are emitted. Count-in bars and looping are display-only; neither is implemented as audible or playback behavior.
+
 ## Testing notes
 
 - Pure clock math (`lib/feature-blocks/transport/clock.ts`) is unit tested: `beatsToMs`, `msToBeat`, `sectionRange`, `rampTempo`, `beatInBar`, `barNumber`.

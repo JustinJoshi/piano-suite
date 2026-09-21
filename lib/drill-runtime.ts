@@ -43,6 +43,8 @@ export type DrillRuntime = {
   breakRemaining: number;
 
   currentTarget: ChordTarget | null;
+  /** The full ordered target list the runtime grades (explicit or fallback). */
+  targets: ChordTarget[];
   targetIndex: number;
   totalTargets: number;
   misses: number;
@@ -57,6 +59,14 @@ export type DrillRuntime = {
   reset: () => void;
   setTargets: (targets: ChordTarget[]) => void;
   skipTarget: () => void;
+
+  /**
+   * Live tempo override from the Transport UI, in BPM; null restores the
+   * saved config tempo. Clamped to the transport config's bounds and only
+   * effective on pages carrying a transport block: it drives both the
+   * clock-advanced window and the composed stream.
+   */
+  setTransportBpm?: (bpm: number | null) => void;
 
   /**
    * Claim the runtime's target list for a block type. Returns an unregister

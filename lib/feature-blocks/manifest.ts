@@ -155,7 +155,7 @@ const EXISTING_BLOCK_MANIFESTS: Record<string, ComponentManifest> = {
     label: "Chord set",
     summary: "Display and drill a set of chords.",
     justification:
-      "Historical: first target block. Replaced by Target display and Chord library.",
+      "Historical: first target block. Superseded by Chord library plus Target display (or any other source), but still functional and still a first-class target owner.",
     category: "theory",
     accepts: [],
     outputs: ["practiceNotes"],
@@ -756,7 +756,8 @@ export function validatePageWiring(blocks: FeatureBlock[]): WiringIssue[] {
         blockId: display.id,
         type: display.type,
         issue: "unscored_page",
-        detail: "No target block on this page, so nothing will be scored.",
+        detail:
+          "No target block, so this page grades itself against the source stream — add a target block (chord set, scale run, key cycle, progression) to grade specific targets instead.",
       });
     }
   }
