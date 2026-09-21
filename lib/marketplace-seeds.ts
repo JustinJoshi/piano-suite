@@ -66,6 +66,12 @@ export const marketplaceSeeds: MarketplaceSeed[] = [
         goodThreshold: 0,
         hardThreshold: 2,
       }),
+      block("drillTimer", {
+        countdownSeconds: 3,
+        breakSeconds: 5,
+        multiRep: true,
+        showLiveTimer: true,
+      }),
     ],
   },
   {
@@ -212,6 +218,12 @@ export const marketplaceSeeds: MarketplaceSeed[] = [
         goodThreshold: 0,
         hardThreshold: 3,
       }),
+      block("drillTimer", {
+        countdownSeconds: 3,
+        breakSeconds: 5,
+        multiRep: true,
+        showLiveTimer: true,
+      }),
       block("metronome", {
         bpm: 60,
         beatsPerBar: 4,
@@ -253,6 +265,12 @@ export const marketplaceSeeds: MarketplaceSeed[] = [
         goodThreshold: 0,
         hardThreshold: 4,
       }),
+      block("drillTimer", {
+        countdownSeconds: 3,
+        breakSeconds: 5,
+        multiRep: true,
+        showLiveTimer: true,
+      }),
     ],
   },
   {
@@ -270,6 +288,12 @@ export const marketplaceSeeds: MarketplaceSeed[] = [
         requireExact: false,
         goodThreshold: 0,
         hardThreshold: 3,
+      }),
+      block("drillTimer", {
+        countdownSeconds: 3,
+        breakSeconds: 5,
+        multiRep: true,
+        showLiveTimer: true,
       }),
       block("metronome", {
         bpm: 60,
@@ -303,6 +327,12 @@ export const marketplaceSeeds: MarketplaceSeed[] = [
         goodThreshold: 0,
         hardThreshold: 4,
       }),
+      block("drillTimer", {
+        countdownSeconds: 3,
+        breakSeconds: 5,
+        multiRep: true,
+        showLiveTimer: true,
+      }),
       block("metronome", {
         bpm: 60,
         beatsPerBar: 4,
@@ -334,6 +364,12 @@ export const marketplaceSeeds: MarketplaceSeed[] = [
         requireExact: false,
         goodThreshold: 0,
         hardThreshold: 3,
+      }),
+      block("drillTimer", {
+        countdownSeconds: 3,
+        breakSeconds: 5,
+        multiRep: true,
+        showLiveTimer: true,
       }),
       block("keyboardDisplay", {
         lowNote: 48,

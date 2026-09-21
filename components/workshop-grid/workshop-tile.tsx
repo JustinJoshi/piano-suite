@@ -386,6 +386,9 @@ export function wiringNotice(issue: WiringIssue): string {
   if (issue.issue === "unscored_page") {
     return "This page shows notes but won't score them. Add a chord set, scale runner, root cycle or progression block to practice against.";
   }
+  if (issue.issue === "unstartable_page") {
+    return "This page won't start. Add a drill timer block so there is something to press Start on.";
+  }
   if (issue.issue === "orphan_transform") {
     return "This transform has nothing to transform. Add a source above it.";
   }

@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { marketplaceSeeds } from "@/lib/marketplace-seeds";
 import { normalizeStoredBlock } from "@/lib/feature-blocks/schemas";
 import { validateArrangement } from "@/lib/feature-blocks/validate-arrangement";
+import { isTargetBlockType } from "@/lib/feature-blocks/target-blocks";
 
 describe("marketplace seeds", () => {
   it("ships at least five featured pages", () => {
@@ -101,6 +102,18 @@ describe("marketplace seeds", () => {
     if (result.status === "invalid") {
       expect(result.issues).toHaveLength(1);
       expect(result.issues[0].issue).toBe("unscored_page");
+    }
+  });
+
+  it("every seed with a target block also has a drill timer", () => {
+    for (const seed of marketplaceSeeds) {
+      if (!seed.blocks.some((b) => isTargetBlockType(b.type))) continue;
+      const result = validateArrangement(seed.blocks);
+      const unstartable =
+        result.status === "invalid"
+          ? result.issues.filter((issue) => issue.issue === "unstartable_page")
+          : [];
+      expect(unstartable, `seed ${seed.id} cannot start its drill`).toEqual([]);
     }
   });
 });

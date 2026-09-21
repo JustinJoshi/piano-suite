@@ -30,6 +30,7 @@ describe("validateArrangement", () => {
         block("noteRoll"),
         block("pieceLibrary"),
         block("chordSet"),
+        block("drillTimer"),
       ])
     ).toEqual({ status: "valid" });
   });

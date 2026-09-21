@@ -37,7 +37,6 @@ describe("starter templates", () => {
       expect(targets.length).toBeLessThanOrEqual(1);
     }
   });
-
   it("no starter template ends after one rep", () => {
     for (const template of starterTemplates) {
       const hasTarget = template.blocks.some((b) => isTargetBlockType(b.type));
@@ -47,6 +46,16 @@ describe("starter templates", () => {
         normalizeDrillTimerConfig(timer.config).multiRep,
         `template ${template.id} timer must run every target`
       ).toBe(true);
+    }
+  });
+
+  it("every starter template with a target block also has a drill timer", () => {
+    for (const template of starterTemplates) {
+      if (!template.blocks.some((b) => isTargetBlockType(b.type))) continue;
+      const issues = validatePageWiring(template.blocks).filter(
+        (issue) => issue.issue === "unstartable_page"
+      );
+      expect(issues, `template ${template.id} cannot start its drill`).toEqual([]);
     }
   });
 

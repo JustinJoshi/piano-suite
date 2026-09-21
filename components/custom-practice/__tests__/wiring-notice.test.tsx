@@ -94,6 +94,7 @@ const WIRED_PAGE: PracticePage = {
     { id: "src-1", type: "chordLibrary", version: 1, config: {} },
     { id: "xform-1", type: "rhythmPattern", version: 1, config: {} },
     { id: "target-1", type: "chordSet", version: 1, config: {} },
+    { id: "timer-1", type: "drillTimer", version: 1, config: {} },
   ],
   updatedAt: 1002,
 };
@@ -209,6 +210,19 @@ describe("PracticePageEditor wiring notices", () => {
     expect(wiringNotice(issue)).toBe(
       "This page shows notes but won't score them. Add a chord set, scale runner, root cycle or progression block to practice against."
     );
+  });
+
+  it("maps unstartable_page to its plain-language notice", () => {
+    const issue: WiringIssue = {
+      blockId: "chord-set-1",
+      type: "chordSet",
+      issue: "unstartable_page",
+      detail: "No drill timer on this page, so the drill can never start.",
+    };
+    expect(wiringNotice(issue)).toBe(
+      "This page won't start. Add a drill timer block so there is something to press Start on."
+    );
+    expect(wiringNotice(issue)).not.toContain("unstartable_page");
   });
 
   it("falls back to the generic notice when requirement is absent", () => {
