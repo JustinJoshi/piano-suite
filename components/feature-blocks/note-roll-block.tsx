@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
+import { useNoteRollClock } from "@/hooks/useNoteRollClock";
 import { normalizeNoteRollConfig } from "@/lib/feature-blocks/note-roll/config";
 import {
   visibleNotes,
@@ -50,29 +51,27 @@ export function NoteRollBlock(raw: Record<string, unknown>) {
     [isPreview, stream, config.handFilter]
   );
 
-  const [nowMs, setNowMs] = useState(0);
-  const frame = useRef<number>(0);
   const [paused, setPaused] = useState(false);
   const prefersReducedMotion = usePrefersReducedMotion();
   const animationSuppressed = prefersReducedMotion || paused;
 
-  // Continuous rAF loop: WCAG 2.2.2 requires a pause control, and the OS
-  // reduced-motion preference must suppress it entirely (render the static
-  // initial frame).
-  useEffect(() => {
-    if (animationSuppressed) return;
+  // Serialised musical content (which notes sound, in order). A tempo
+  // update re-times the same notes, so onsets stay out — a reroll of the
+  // stream keeps a running roll running instead of re-arming the latch.
+  const contentKey = useMemo(
+    () => notes.map((n) => `${n.symbol}:${n.midi.join(",")}`).join("|"),
+    [notes]
+  );
 
-    let start = 0;
-    const total = notes.reduce((max, n) => Math.max(max, n.onsetMs + (n.durationMs ?? 300)), 0) + 500;
-    const tick = (t: number) => {
-      if (start === 0) start = t;
-      const elapsed = t - start;
-      setNowMs(elapsed % total);
-      frame.current = requestAnimationFrame(tick);
-    };
-    frame.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame.current);
-  }, [notes, animationSuppressed]);
+  // First-note wait latch: real pages only — the library (pageId "") and
+  // everything without runtime context demo the fixture immediately.
+  const { nowMs, waiting } = useNoteRollClock({
+    notes,
+    suppressed: animationSuppressed,
+    wait: config.waitMode && !isPreview,
+    contentKey,
+    rearmKey: runtime?.pageId ?? "",
+  });
 
   const span = useMemo(() => {
     const all = notes.flatMap((n) => n.midi);
@@ -107,6 +106,14 @@ export function NoteRollBlock(raw: Record<string, unknown>) {
         <span className="text-xs text-muted-foreground">
           {config.handFilter === "both" ? "Both hands" : `${config.handFilter} hand`}
         </span>
+        {waiting ? (
+          <span
+            data-testid="note-roll-waiting"
+            className="text-xs text-muted-foreground"
+          >
+            Play a note to start
+          </span>
+        ) : null}
         <button
           type="button"
           data-paused={paused ? "true" : "false"}

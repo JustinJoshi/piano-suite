@@ -931,7 +931,33 @@ Verification: `npm run lint`, `npm run typecheck`, `npm run test:unit:run`,
 `npm run build` green at final HEAD, plus
 `e2e/workshop-marketplace.spec.ts` per phase.
 
+## Note roll first-note wait latch (2026-09-20)
+
+Workshop audit finding: the Note roll block started scrolling the moment a page
+armed, so the visual head start was over before the player's hands reached the
+keys. The roll now waits for the first note.
+
+Implementation (commit `7c30eee` on `fix/audit-note-roll-wait-20260920`): the
+block's inline rAF loop moved into `hooks/useNoteRollClock.ts`, which (1) holds
+elapsed roll time at zero until a fresh `midi-note-on` window event — hardware
+or `pressVirtualNote`; song playback (`music-note-on`) and keys held before
+arming never trigger it — and shows a "Play a note to start" hint while
+latched; (2) accumulates active time only, so pause/resume never rewinds;
+(3) re-arms on content replacement, page change, or waitMode being enabled,
+while identity-only reloads and tempo re-timings of the same notes never reset
+a running roll; (4) keeps reduced-motion suppression and the pause button.
+
+- Provenance: partial audit fix for the 2026-09 audit; phase `first-note-latch`
+  implemented, phase `verify-and-publish` gated and published.
+- Tests: 28 targeted vitest (13 hook, 9 integration, pre-existing note-roll
+  suite unmodified), full unit suite and production build green at HEAD, plus
+  named E2E (`e2e/a11y.spec.ts`, `e2e/marketplace-seed-detail.spec.ts`) on port
+  3492 — 6 passed.
+- Known limitation unchanged: the roll starts on the first MIDI event it can
+  see; page wiring must give it MIDI or keyboard content.
+
 ## Piece library: explicit left/right track assignment (2026-09-20)
+
 The Piece library block's hand filter previously relied on the note stream
 carrying usable hand information; an uploaded MIDI file with both hands on one
 track silently produced a misleading stream. Two changes, delivered on
