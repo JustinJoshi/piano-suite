@@ -931,6 +931,31 @@ Verification: `npm run lint`, `npm run typecheck`, `npm run test:unit:run`,
 `npm run build` green at final HEAD, plus
 `e2e/workshop-marketplace.spec.ts` per phase.
 
+## Transport controls drive the live runtime tempo (2026-09)
+
+The September 2026 audit run `audit-transport-controls-20260920` (two commits on
+`fix/audit-transport-controls-20260920`, pinned base 99b1038) made the
+Transport block's controls live against the drill runtime instead of a local
+metronome only:
+
+- **Runtime tempo override** — `DrillRuntime` gained an optional
+  `setTransportBpm` override (`lib/drill-runtime.ts`, `hooks/useDrillRuntime.ts`)
+  that re-times both the clock-advanced target window and the composed stream,
+  clamped to the transport config's 30–300 BPM bounds. Changing or removing the
+  saved transport BPM clears the override; the tempo ramp derives from the
+  override base so the user's live choice is respected.
+- **The block is the transport** — on a practice page, Start/Stop drive
+  `runtime.start`/`reset` plus the audible tick (StrictMode-safe single
+  `drill_started` analytics event), the BPM slider writes the runtime override
+  without touching saved config, and the label/tick read the runtime's ramped
+  effective BPM. External resets stop the tick. Preview mode (block library)
+  keeps its local metronome behavior and stays analytics-free.
+- Documented live vs saved tempo in `docs/components/transport.md`.
+
+Verification: `npm run typecheck`, `npm run lint`, `npm run test:unit:run`,
+`npm run build`, and `e2e/a11y.spec.ts` + `e2e/workshop-anonymous.spec.ts`
+green at final HEAD (see the run's evidence file).
+
 ## Roadmap
 
 - [x] Scaffold Next.js + Tailwind + shadcn/ui
