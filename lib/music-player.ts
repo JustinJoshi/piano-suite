@@ -13,6 +13,8 @@
 import { Midi } from "@tonejs/midi";
 import { YIN } from "pitchfinder";
 import { Scheduler } from "smplr";
+import type { SourceTiming } from "./practice-note";
+export type { SourceTiming } from "./practice-note";
 
 export type MusicPlayerFileKind = "midi" | "audio";
 
@@ -31,6 +33,10 @@ export type MusicPlayerNote = {
   velocity: number;
   time: number;
   duration: number;
+  /** Source ticks; present for MIDI notes only. */
+  ticks?: number;
+  /** Source note length in ticks; present for MIDI notes only. */
+  durationTicks?: number;
   /** Index of the original MIDI track this note came from. */
   trackIndex?: number;
 };
@@ -54,6 +60,11 @@ export type ParsedMidi = {
   kind: "midi";
   duration: number;
   notes: MusicPlayerNote[];
+  /**
+   * Source musical coordinate system (ticks, PPQ, meter and tempo maps).
+   * Optional so legacy / hand-built fixtures stay valid.
+   */
+  timing?: SourceTiming;
   /** Original tracks in file order, identified for explicit hand assignment. */
   tracks?: ParsedMidiTrack[];
 };
@@ -98,6 +109,32 @@ function normalizeVelocity(velocity: number): number {
 }
 
 /**
+ * Extract the source musical coordinate system from a parsed MIDI header.
+ * Meter changes are placed at their own tick; the pure helpers in
+ * `lib/midi-musical-time.ts` apply them at bar boundaries.
+ */
+function readSourceTiming(midi: Midi): SourceTiming {
+  return Object.freeze({
+    ppq: midi.header.ppq,
+    totalTicks: midi.durationTicks,
+    tempos: Object.freeze(
+      midi.header.tempos
+        .map((tempo) => ({ tick: tempo.ticks, bpm: tempo.bpm }))
+        .sort((a, b) => a.tick - b.tick)
+    ),
+    meters: Object.freeze(
+      midi.header.timeSignatures
+        .map((event) => ({
+          tick: event.ticks,
+          numerator: event.timeSignature[0] ?? 4,
+          denominator: event.timeSignature[1] ?? 4,
+        }))
+        .sort((a, b) => a.tick - b.tick)
+    ),
+  });
+}
+
+/**
  * Parse a MIDI ArrayBuffer into scheduled note events.
  */
 export function parseMidiFile(arrayBuffer: ArrayBuffer): ParsedMidi {
@@ -108,6 +145,8 @@ export function parseMidiFile(arrayBuffer: ArrayBuffer): ParsedMidi {
       velocity: n.velocity,
       time: n.time,
       duration: n.duration,
+      ticks: n.ticks,
+      durationTicks: n.durationTicks,
       trackIndex,
     }))
   );
@@ -122,6 +161,8 @@ export function parseMidiFile(arrayBuffer: ArrayBuffer): ParsedMidi {
       velocity: normalizeVelocity(n.velocity),
       time: n.time,
       duration: n.duration,
+      ticks: n.ticks,
+      durationTicks: n.durationTicks,
       trackIndex: n.trackIndex,
     }))
     .sort((a, b) => a.time - b.time);
@@ -131,7 +172,13 @@ export function parseMidiFile(arrayBuffer: ArrayBuffer): ParsedMidi {
       ? 0
       : Math.max(...notes.map((n) => n.time + n.duration));
 
-  return { kind: "midi", duration, notes, tracks };
+  return {
+    kind: "midi",
+    duration,
+    notes,
+    timing: readSourceTiming(midi),
+    tracks,
+  };
 }
 
 export function detectFileKind(file: File): MusicPlayerFileKind {

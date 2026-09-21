@@ -27,5 +27,6 @@ Length is a property of the stream, not the source. Looping a window of bars ove
 ## Testing notes
 
 - `lib/feature-blocks/section-loop/transform.ts` is pure and unit tested: window selection at a boundary onset (start inclusive, end exclusive), rebasing to zero, repeated copies with correct offsets, an empty window returning `[]`, and `repeats: 1` as a plain slice.
-- The bar window comes from `sectionRange` in `lib/feature-blocks/transport/clock.ts` — one source of truth for bar maths.
+- The bar window comes from `sectionRange` in `lib/feature-blocks/transport/clock.ts` — one source of truth for bar maths on the legacy time-only path.
+- Streams carrying source musical metadata (parsed MIDI) select the window in *source* bars via `lib/midi-musical-time.ts` and are retimed to the practice BPM afterwards, so changing practice speed never changes which musical bars are selected. Practice-BPM selection only applies to legacy streams without metadata.
 - Notes with no `onsetMs` pass through untouched at the front, in order.
