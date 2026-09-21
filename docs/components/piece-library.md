@@ -22,6 +22,8 @@ Practicing real repertoire needs the piece's exact pitches and timing. This comp
 
 - The MIDI file is uploaded through the block and stays in component state; block config is JSON-only, so audio data never serializes into a saved page.
 - Notes are adapted with `onsetMs`/`durationMs` from the file's timing, sorted by onset.
+- **Hand assignment:** for files with two or more tracks the tile shows "Left hand track" / "Right hand track" selectors. Assignment is explicit user action — hands are never guessed from pitch. Selectors disable the track already claimed by the other hand, so a conflicting selection cannot be made. Assignments reset when a different file is uploaded and are never stored in the page config.
+- When the page's `handFilter` targets a hand with no assigned track, the stream is empty and the tile shows an assignment prompt instead of implying filtering happened.
 
 ## Example pages
 
