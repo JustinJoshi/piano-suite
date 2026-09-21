@@ -27,6 +27,7 @@ function createRuntime(
     countdownValue: 0,
     breakRemaining: 0,
     currentTarget: dTarget,
+    targets: [dTarget],
     targetIndex: 1,
     totalTargets: 8,
     misses: 0,

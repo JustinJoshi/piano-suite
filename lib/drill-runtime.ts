@@ -43,6 +43,8 @@ export type DrillRuntime = {
   breakRemaining: number;
 
   currentTarget: ChordTarget | null;
+  /** The full ordered target list the runtime grades (explicit or fallback). */
+  targets: ChordTarget[];
   targetIndex: number;
   totalTargets: number;
   misses: number;
