@@ -954,6 +954,119 @@ Verification: `npm run typecheck`, `npm run lint`, `npm run test:unit:run`
 (178 files / 1604 tests), `npm run build` (45 static pages), and
 `e2e/marketplace-seed-detail.spec.ts` green at final HEAD.
 
+## Note roll first-note wait latch (2026-09-20)
+
+Workshop audit finding: the Note roll block started scrolling the moment a page
+armed, so the visual head start was over before the player's hands reached the
+keys. The roll now waits for the first note.
+
+Implementation (commit `7c30eee` on `fix/audit-note-roll-wait-20260920`): the
+block's inline rAF loop moved into `hooks/useNoteRollClock.ts`, which (1) holds
+elapsed roll time at zero until a fresh `midi-note-on` window event — hardware
+or `pressVirtualNote`; song playback (`music-note-on`) and keys held before
+arming never trigger it — and shows a "Play a note to start" hint while
+latched; (2) accumulates active time only, so pause/resume never rewinds;
+(3) re-arms on content replacement, page change, or waitMode being enabled,
+while identity-only reloads and tempo re-timings of the same notes never reset
+a running roll; (4) keeps reduced-motion suppression and the pause button.
+
+- Provenance: partial audit fix for the 2026-09 audit; phase `first-note-latch`
+  implemented, phase `verify-and-publish` gated and published.
+- Tests: 28 targeted vitest (13 hook, 9 integration, pre-existing note-roll
+  suite unmodified), full unit suite and production build green at HEAD, plus
+  named E2E (`e2e/a11y.spec.ts`, `e2e/marketplace-seed-detail.spec.ts`) on port
+  3492 — 6 passed.
+- Known limitation unchanged: the roll starts on the first MIDI event it can
+  see; page wiring must give it MIDI or keyboard content.
+
+## Piece library: explicit left/right track assignment (2026-09-20)
+
+The Piece library block's hand filter previously relied on the note stream
+carrying usable hand information; an uploaded MIDI file with both hands on one
+track silently produced a misleading stream. Two changes, delivered on
+`fix/audit-midi-hand-filter-20260920`:
+
+- `parseMidiFile` (`lib/music-player.ts`) retains each track's original index
+  and name as optional parsed-file metadata; `notesFromParsedMidi` takes an
+  optional third argument — an explicit left/right track assignment — and
+  annotates matching notes with `hand`. Hands are never inferred from pitch.
+- The Piece library block (`components/feature-blocks/piece-library-block.tsx`,
+  `lib/feature-blocks/piece-library/adapt.ts`) gains labeled left/right track
+  selectors derived from the retained track metadata (empty tracks excluded).
+  A hand with no matching assignment shows an honest "assign" prompt and an
+  empty stream; the same track cannot go to both hands; assignments reset when
+  the file is replaced. Config shape and `configVersion` are untouched, as are
+  section-loop, runtime transport, NoteRoll, and schemas.
+
+Verification: typecheck, lint, full unit suite, production build, plus
+`e2e/a11y.spec.ts` and `e2e/marketplace-seed-detail.spec.ts` on this branch.
+
+## Source-only practice pages now grade themselves (2026-09)
+
+The September audit found a gap: a page built from a source (chord library,
+piece section) plus a Target display and a drill timer or transport — the
+natural "practice this" page — initialized with empty targets and never
+advanced or logged anything, because only explicit target blocks (chord set,
+scale run, key cycle, progression) ever registered targets. Two phases on
+`fix/audit-source-targets-20260920` closed it:
+
+- **`lib/stream-targets.ts` (pure adapter)** — converts the composed
+  `PracticeNote[]` stream into `ChordTarget[]` fallback targets: untimed
+  entries stay distinct, same-onset timed notes merge into one chord,
+  restarted timelines break merging, and accompaniment markers and empty
+  pitch sets are skipped. `streamTargetsIdentity` hashes ordered pitch
+  classes + labels but excludes absolute milliseconds, so a Transport
+  tempo ramp — which rebuilds the stream array every rep — keeps the
+  logical identity stable and never resets target progress.
+- **Runtime wiring** — `sourcePracticeCapable`
+  (`lib/stream-practice.ts`) gates eligibility: preview pages (empty
+  `pageId`) and pages whose targets an explicit target block owns are
+  excluded; freePlay-only pages stay ungraded. `useDrillRuntime` applies
+  `targetsFromStream` only when the identity changes, and clears or
+  rebuilds the fallback safely when a source is removed or replaced.
+  `TargetDisplayBlock` renders the runtime's grouped targets when they
+  exist, falling back to per-note stream rows for stream-only previews.
+  `chordSet`'s manifest justification and the `unscored_page` wiring
+  guidance were made truthful.
+
+Explicit target blocks keep their authoritative registration path;
+scoring stays pitch-class only (octave, voicing, fingering, and hand
+separation remain unverified — the pre-existing runtime limitation).
+
+Verification: `npm run typecheck` and `npm run lint` exit 0; unit suite
+176 files / 1588 tests pass (including the new
+`lib/__tests__/stream-targets.test.ts`,
+`hooks/__tests__/useDrillRuntime-source-targets.test.tsx`, and
+`components/feature-blocks/__tests__/source-practice.test.tsx`);
+`npm run build` compiles successfully (45/45 static pages); and the named
+E2E specs (`a11y`, `marketplace-seed-detail`, `workshop-anonymous`) pass
+on port 3453.
+
+## Transport controls drive the live runtime tempo (2026-09)
+
+The September 2026 audit run `audit-transport-controls-20260920` (two commits on
+`fix/audit-transport-controls-20260920`, pinned base 99b1038) made the
+Transport block's controls live against the drill runtime instead of a local
+metronome only:
+
+- **Runtime tempo override** — `DrillRuntime` gained an optional
+  `setTransportBpm` override (`lib/drill-runtime.ts`, `hooks/useDrillRuntime.ts`)
+  that re-times both the clock-advanced target window and the composed stream,
+  clamped to the transport config's 30–300 BPM bounds. Changing or removing the
+  saved transport BPM clears the override; the tempo ramp derives from the
+  override base so the user's live choice is respected.
+- **The block is the transport** — on a practice page, Start/Stop drive
+  `runtime.start`/`reset` plus the audible tick (StrictMode-safe single
+  `drill_started` analytics event), the BPM slider writes the runtime override
+  without touching saved config, and the label/tick read the runtime's ramped
+  effective BPM. External resets stop the tick. Preview mode (block library)
+  keeps its local metronome behavior and stays analytics-free.
+- Documented live vs saved tempo in `docs/components/transport.md`.
+
+Verification: `npm run typecheck`, `npm run lint`, `npm run test:unit:run`,
+`npm run build`, and `e2e/a11y.spec.ts` + `e2e/workshop-anonymous.spec.ts`
+green at final HEAD (see the run's evidence file).
+
 ## Roadmap
 
 - [x] Scaffold Next.js + Tailwind + shadcn/ui

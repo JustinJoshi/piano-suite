@@ -37,6 +37,8 @@ export type MusicPlayerNote = {
   ticks?: number;
   /** Source note length in ticks; present for MIDI notes only. */
   durationTicks?: number;
+  /** Index of the original MIDI track this note came from. */
+  trackIndex?: number;
 };
 
 export type MusicPlayerState =
@@ -47,6 +49,13 @@ export type MusicPlayerState =
   | "paused"
   | "error";
 
+export type ParsedMidiTrack = {
+  /** Index of the track in the original MIDI file (empty tracks keep theirs). */
+  index: number;
+  /** Track name from the MIDI file, when present. */
+  name?: string;
+};
+
 export type ParsedMidi = {
   kind: "midi";
   duration: number;
@@ -56,6 +65,8 @@ export type ParsedMidi = {
    * Optional so legacy / hand-built fixtures stay valid.
    */
   timing?: SourceTiming;
+  /** Original tracks in file order, identified for explicit hand assignment. */
+  tracks?: ParsedMidiTrack[];
 };
 
 export type ParsedAudio = {
@@ -128,7 +139,21 @@ function readSourceTiming(midi: Midi): SourceTiming {
  */
 export function parseMidiFile(arrayBuffer: ArrayBuffer): ParsedMidi {
   const midi = new Midi(arrayBuffer);
-  const rawNotes = midi.tracks.flatMap((track) => track.notes);
+  const rawNotes = midi.tracks.flatMap((track, trackIndex) =>
+    track.notes.map((n) => ({
+      midi: n.midi,
+      velocity: n.velocity,
+      time: n.time,
+      duration: n.duration,
+      ticks: n.ticks,
+      durationTicks: n.durationTicks,
+      trackIndex,
+    }))
+  );
+  const tracks: ParsedMidiTrack[] = midi.tracks.map((track, index) => ({
+    index,
+    ...(track.name ? { name: track.name } : {}),
+  }));
   const notes: MusicPlayerNote[] = rawNotes
     .map((n) => ({
       note: n.midi,
@@ -138,6 +163,7 @@ export function parseMidiFile(arrayBuffer: ArrayBuffer): ParsedMidi {
       duration: n.duration,
       ticks: n.ticks,
       durationTicks: n.durationTicks,
+      trackIndex: n.trackIndex,
     }))
     .sort((a, b) => a.time - b.time);
 
@@ -146,7 +172,13 @@ export function parseMidiFile(arrayBuffer: ArrayBuffer): ParsedMidi {
       ? 0
       : Math.max(...notes.map((n) => n.time + n.duration));
 
-  return { kind: "midi", duration, notes, timing: readSourceTiming(midi) };
+  return {
+    kind: "midi",
+    duration,
+    notes,
+    timing: readSourceTiming(midi),
+    tracks,
+  };
 }
 
 export function detectFileKind(file: File): MusicPlayerFileKind {

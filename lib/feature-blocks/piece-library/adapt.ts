@@ -11,17 +11,28 @@ import type { PieceLibraryConfig } from "./config";
 
 const MS_PER_SECOND = 1000;
 
+/**
+ * Explicit assignment of original MIDI tracks to hands. `null` means
+ * "unassigned" — hands are never guessed from pitch.
+ */
+export type HandAssignment = {
+  leftTrack: number | null;
+  rightTrack: number | null;
+};
+
 /** Convert one music-player note into a PracticeNote. */
 export function adaptNote(
   note: MusicPlayerNote,
   transpose: number,
-  timing?: SourceTiming
+  timing?: SourceTiming,
+  hand?: "left" | "right"
 ): PracticeNote {
   const midi = note.note + transpose;
   const adapted: PracticeNote = {
     midi: [midi],
     pcs: new Set([((midi % 12) + 12) % 12]),
     symbol: "",
+    ...(hand ? { hand } : {}),
     onsetMs: note.time * MS_PER_SECOND,
     durationMs: note.duration * MS_PER_SECOND,
     velocity: note.velocity,
@@ -58,10 +69,37 @@ export function adaptNote(
  */
 export function notesFromParsedMidi(
   parsed: ParsedMidi,
-  config: PieceLibraryConfig
+  config: PieceLibraryConfig,
+  assignment?: HandAssignment
 ): PracticeNote[] {
+  if (
+    assignment &&
+    assignment.leftTrack !== null &&
+    assignment.leftTrack === assignment.rightTrack
+  ) {
+    throw new Error(
+      "Invalid hand assignment: the same track cannot belong to both hands"
+    );
+  }
+  const handFor = (note: MusicPlayerNote): "left" | "right" | undefined => {
+    if (!assignment) return undefined;
+    if (assignment.leftTrack !== null && note.trackIndex === assignment.leftTrack)
+      return "left";
+    if (
+      assignment.rightTrack !== null &&
+      note.trackIndex === assignment.rightTrack
+    )
+      return "right";
+    return undefined;
+  };
+  // Notes with no assigned hand are dropped only when filtering one hand;
+  // "both" keeps every note regardless of assignment.
+  const filterHand = config.handFilter === "both" ? undefined : config.handFilter;
   const notes = parsed.notes
-    .map((note) => adaptNote(note, config.transpose, parsed.timing))
+    .filter((note) => filterHand === undefined || handFor(note) === filterHand)
+    .map((note) =>
+      adaptNote(note, config.transpose, parsed.timing, handFor(note))
+    )
     .sort((a, b) => (a.onsetMs ?? 0) - (b.onsetMs ?? 0));
 
   if (config.role === "accompaniment") {

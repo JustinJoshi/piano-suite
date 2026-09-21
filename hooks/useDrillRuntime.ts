@@ -23,6 +23,11 @@ import type {
   DrillPhase,
   DrillRuntimeConfig,
 } from "@/lib/drill-runtime";
+import { sourcePracticeCapable } from "@/lib/stream-practice";
+import {
+  streamTargetsIdentity,
+  targetsFromStream,
+} from "@/lib/stream-targets";
 import type { TransportConfig } from "@/lib/feature-blocks/transport/config";
 import type { PracticeNote } from "@/lib/practice-note";
 
@@ -90,6 +95,23 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
   const [targetIndex, setTargetIndex] = useState(0);
   const [misses, setMisses] = useState(0);
   const missReportedRef = useRef(false);
+
+  // Live transport tempo override (BPM) from the Transport UI. Only the
+  // user's chosen base lives here — transient ramp ticks are derived, never
+  // stored. A saved-config tempo change or transport-block removal clears it
+  // (adjust-during-render, so the cleared value applies to the same render).
+  const savedTransportBpm = clock?.bpm ?? null;
+  const hasTransport = clock !== null;
+  const transportKey = `${savedTransportBpm}:${hasTransport}`;
+  const [transportState, setTransportState] = useState({
+    key: transportKey,
+    override: null as number | null,
+  });
+  if (transportState.key !== transportKey) {
+    setTransportState({ key: transportKey, override: null });
+  }
+  const transportBpmOverride =
+    transportState.key === transportKey ? transportState.override : null;
 
   const targetIndexRef = useRef(targetIndex);
   const targetsLengthRef = useRef(targets.length);
@@ -272,14 +294,28 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
     setTargetIndex((prev) => prev + 1);
   }, [targetIndex, targets.length, timer]);
 
+  // Clamp to the transport config's BPM bounds (normalizeTransportConfig:
+  // 30..300). Effective only on transport pages; null restores saved tempo.
+  const setTransportBpm = useCallback((bpm: number | null) => {
+    if (bpm === null) {
+      setTransportState((prev) => ({ ...prev, override: null }));
+      return;
+    }
+    if (!Number.isFinite(bpm)) return;
+    const clamped = Math.max(30, Math.min(300, Math.floor(bpm)));
+    setTransportState((prev) => ({ ...prev, override: clamped }));
+  }, []);
+
   const currentTarget = targets[targetIndex] ?? null;
 
-  // The effective tempo: the configured bpm while the ramp is off, otherwise
-  // ramped from it toward the target over completed reps (targetIndex resets
-  // on start/reset). Both timing consumers below use this one value.
+  // The effective tempo: the live override when set, else the configured
+  // bpm — ramped toward the target over completed reps when the ramp is on
+  // (targetIndex resets on start/reset). Both timing consumers below use
+  // this one value.
+  const baseBpm = transportBpmOverride ?? clock?.bpm;
   const effectiveBpm = ramp.enabled && clock
-    ? rampedBpm(clock.bpm, ramp.targetBpm, targetIndex, ramp.overReps)
-    : clock?.bpm;
+    ? rampedBpm(baseBpm ?? clock.bpm, ramp.targetBpm, targetIndex, ramp.overReps)
+    : baseBpm;
 
   const beatsPerBar = clock?.beatsPerBar ?? 4;
 
@@ -291,6 +327,35 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
     () => buildStream(blocks ?? [], effectiveBpm, runtimeNotes, beatsPerBar),
     [blocks, effectiveBpm, runtimeNotes, beatsPerBar]
   );
+
+  // Source-only practice: a page with a display/timer/transport but no
+  // explicit target block grades itself against the stream. The transport's
+  // tempo ramp rebuilds `stream` on every rep, so application is keyed on the
+  // targets' logical identity — pitch classes and labels only — never on the
+  // array itself; a re-timing alone must not reset targetIndex or misses.
+  const fallbackCapable = sourcePracticeCapable(blocks ?? [], pageId);
+  const appliedFallbackIdentityRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!fallbackCapable) {
+      if (appliedFallbackIdentityRef.current !== null) {
+        appliedFallbackIdentityRef.current = null;
+        setTargetsState([]);
+        setTargetIndex(0);
+        setMisses(0);
+        missReportedRef.current = false;
+      }
+      return;
+    }
+
+    const nextTargets = targetsFromStream(stream);
+    const identity = streamTargetsIdentity(nextTargets);
+    if (identity === appliedFallbackIdentityRef.current) return;
+    appliedFallbackIdentityRef.current = identity;
+    setTargetsState(nextTargets);
+    setTargetIndex(0);
+    setMisses(0);
+    missReportedRef.current = false;
+  }, [fallbackCapable, stream]);
 
   useEffect(() => {
     currentTargetRef.current = currentTarget;
@@ -376,6 +441,7 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
       countdownValue: timer.countdownValue,
       breakRemaining: timer.breakRemaining,
       currentTarget,
+      targets,
       targetIndex,
       totalTargets: targets.length,
       misses,
@@ -384,6 +450,7 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
       reset,
       setTargets,
       skipTarget,
+      setTransportBpm,
       registerTargetSource,
       activeTargetSource,
       setRuntimeSourceNotes,
@@ -395,14 +462,15 @@ export function useDrillRuntimeProvider(options: DrillRuntimeOptions = {}) {
       timer.countdownValue,
       timer.breakRemaining,
       currentTarget,
+      targets,
       targetIndex,
-      targets.length,
       misses,
       stream,
       start,
       reset,
       setTargets,
       skipTarget,
+      setTransportBpm,
       pageId,
       registerTargetSource,
       activeTargetSource,

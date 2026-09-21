@@ -18,7 +18,7 @@ A continuous time-scrolling view is a different visual language from one-target-
 | `scrollSpeed` | range 100–600 | Pixels per second |
 | `handFilter` | select | `both`, `left`, or `right` |
 | `showNoteNames` | toggle | Label notes with their names |
-| `waitMode` | toggle | Hold position until you play (phase-2 runtime) |
+| `waitMode` | toggle | Hold position until the first note (real pages only) |
 
 ## Example pages
 
@@ -28,4 +28,5 @@ A continuous time-scrolling view is a different visual language from one-target-
 ## Testing notes
 
 - `lib/feature-blocks/note-roll/geometry.ts` is pure and unit tested: visibility windows, hit-line positions (at, above, passed), note height, and hand filtering.
-- In the component library the roll animates the preview sequence; the phase-2 runtime will drive it from the page's source stream.
+- In the component library the roll animates the preview sequence regardless of `waitMode`; a real page drives it from the page's source stream.
+- With `waitMode` on a real page, the roll is latched at elapsed zero until a fresh `midi-note-on` arrives (hardware or the on-screen keyboard via `pressVirtualNote`). Song playback (`music-note-on`) never releases it, a key already held when the latch arms does not count, and pausing keeps the position so resuming continues without a rewind. The latch re-arms when the source content is replaced, the page changes, or waitMode is enabled. See `hooks/useNoteRollClock.ts` (`hooks/__tests__/useNoteRollClock.test.tsx`, `components/feature-blocks/__tests__/note-roll-wait.test.tsx`).
