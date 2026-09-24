@@ -59,7 +59,16 @@ The warmth reinforces the "piano suite" metaphor — brass, wood, low studio lig
 
 A small vocabulary of decorative primitives carries the theme without illustration:
 
-- **`Keybed`** (`components/brand/keybed.tsx`, geometry in `lib/keybed.ts`) — an SVG piano keybed drawn from `--ivory` / `--ebony`, with optional lit keys (a chord) in the brand or a door hue. Used as a stage edge under the hero, the footer's top edge, door cards, marketplace cards, theme previews, the sidebar footer, and the auth pages. Always `aria-hidden`.
+- **`Keybed`** (`components/brand/keybed.tsx`, geometry in `lib/keybed.ts`) — an SVG piano keybed drawn from `--ivory` / `--ebony`, with optional lit keys (a chord) in the brand or a door hue. Keys are shaded like the real thing — fallboard shadow, the white keys' front lip, black keys with a lit top face, a sloped front and a cast shadow, the red key-slip felt under the rail — using id-free overlays so it can render anywhere. `closingC` ends the range on a C. It stretches to its box, so use it on card edges (door cards, marketplace cards, theme previews, the Anki card, the auth stage). Always `aria-hidden`.
+- **`KeybedStrip`** (`components/brand/keybed-strip.tsx`) — the full-bleed version: one octave tiled at a fixed key width, so keys keep their proportions from 375px to 2560px. Footer, closing CTA, demo frame, sidebar, drill gate.
+- **The playable keybed** (`components/welcome/playable-keybed.tsx`) — the hero's stage edge is an instrument: click, tap, glissando, or MIDI; a name board above the keys names what's held (`lib/chord-naming.ts`) and a light follows the hand.
+- **`.staff-stave`** — exactly one five-line stave (12px gaps) for places where notes are actually drawn ("how it works" is a rising C–E–G arpeggio in one bar). Unlike `.staff-lines`, which is texture.
+- **`.staff-lines-edges`** — mask that keeps staff texture to a panel's frame and clears it behind centred copy (closing CTA, pricing hero, drill gate). Lines never run through paragraphs.
+- **`.final-barline`** — the thin-thick double bar that ends a piece: the end of "how it works", the empty bar on the 404, the footer's *Fine*.
+- **`.movement-numeral`** — Fraunces' wonky italic for movement numbers (I–VI) on the landing bands, as a concert programme numbers movements. `.drop-cap` sets an engraved initial on a band's opening paragraph (`initial-letter` where supported).
+- **`.prose-veil`** — a soft pool of page colour behind long copy over the live atmosphere (no blur; the canvas animates).
+- **`.metronome-dot`** — the hero eyebrow's metronome: counts in four beats at ♩ = 72, then rests.
+- **`.skeleton`** — loading placeholder with a slow sheen; still under reduced motion.
 - **`.staff-lines`** / **`.staff-lines-faded`** — five hairlines repeating every 128px, from `--staff-line`. The faded variant is a mask and must sit on its own absolutely positioned decor layer, never on a content container.
 - **`.bar-line`** — a thin brand-tinted rule with heavier end caps, used between section headings and content (a measure's bar line).
 - **`.measure-number`** — large, faint, italic Fraunces numerals for numbered sections (01, 02 …).
@@ -75,7 +84,7 @@ A small vocabulary of decorative primitives carries the theme without illustrati
 Three Google fonts create a clear hierarchy:
 
 - **Inter** (`--font-inter`) — body, labels, navigation, inputs.
-- **Fraunces** (`--font-fraunces`) — display headings, section titles, brand wordmarks. Loaded with its `SOFT`, `WONK`, and `opsz` axes; `.font-heading` dials these in so large headlines read as engraved sheet-music type rather than a flat web serif. Used with `tracking-tight` and `font-semibold`; the hero italicises the second clause of its headline in the accent colour.
+- **Fraunces** (`--font-fraunces`) — display headings, section titles, brand wordmarks. Loaded with its `SOFT`, `WONK`, and `opsz` axes; `.font-heading` sets the soft axis and leaves `opsz` to the browser (`font-optical-sizing: auto`), so an 18px card title gets the open text cut and a 72px headline the tight display cut. **Never pin `opsz` in `font-variation-settings`** — a fixed display value collapsed the word spaces of every small heading. Used with `tracking-tight` and `font-semibold`; the hero italicises the second clause of its headline in the accent colour.
 - **Geist Mono** (`--font-geist-mono`) — timers, chord notes, stats, code.
 
 Headings are large, tight, and high-contrast (`text-foreground`). Body copy uses `leading-relaxed` and `text-muted-foreground` to reduce eye strain during longer reads (see `components/articles/article-content.tsx`).
@@ -114,7 +123,7 @@ This creates a friendly, tactile feel appropriate for a practice app where users
 
 Sticky headers and floating chips use translucent backgrounds plus blur to stay unobtrusive:
 
-- `Navbar`, `DrillShell` header, the mobile dashboard top bar, and the Workshop tile toolbar all use the shared `.glass` utility.
+- `DrillShell` header, the mobile dashboard top bar, and the Workshop tile toolbar use the shared `.glass` utility. The public `Navbar` is clear at the top of the page (the atmosphere runs to the top edge) and picks up `.glass`, a hairline, and a soft shadow once the page scrolls past 8px (`data-scrolled`).
 - The public `Navbar` centres its links in a `rounded-full` pill; the active section gets a lit underline (`bg-primary` + `--primary-glow`).
 - Hero chips: `bg-primary/10 backdrop-blur-sm`
 
@@ -149,7 +158,7 @@ The tools and settings sections follow a Vercel-style dashboard pattern:
 - The signed-out state of the four ready-made drills is `DrillGate`: the message, a sign-in key, a pointer to the free Workshop, and a keybed edge.
 - Content is centered within `max-w-6xl` or `max-w-3xl` containers.
 
-This separates marketing pages (`/`, `/start`, `/marketplace`, `/pricing`, `/articles`) — which use the top `Navbar` and end in `SiteFooter` (keybed top edge, wordmark, links) — from the application workspace (`/tools/*`, `/settings/*`) — which uses the sidebar (fixed on desktop, drawer on mobile). The Clerk sign-in / sign-up pages sit on `AuthStage`. The landing page alternates treatments down the scroll: a hero with a keybed stage edge, a numbered "how it works" score, template cards, numbered feature bands (one inverse), the deck card, the demo framed as a stage, the Workshop marquee, grouped tool cards, and an inverse closing CTA.
+This separates marketing pages (`/`, `/start`, `/marketplace`, `/pricing`, `/articles`) — which use the top `Navbar` and end in `SiteFooter` (keybed top edge, wordmark, links) — from the application workspace (`/tools/*`, `/settings/*`) — which uses the sidebar (fixed on desktop, drawer on mobile). The Clerk sign-in / sign-up pages sit on `AuthStage`. The landing page reads like a concert programme: a hero whose stage edge is a playable keybed, "how it works" written as one bar of music, starter cards that show a miniature of their Workshop page, movements I–IV (one inverse) with drop caps, V the Anki card, VI the demo framed as a stage, an inverse closing CTA, and a footer that ends on *Fine*.
 
 ---
 
@@ -178,7 +187,21 @@ This rhythm creates predictable vertical flow and prevents layout shifts between
 
 ---
 
-## 12. Minimal Hard-Coding / Anti-Patterns
+## 12. The Small Things
+
+Details that are cheap to keep and noticeable when missing:
+
+- **Typographer's punctuation.** Copy uses ’ “ ” — and never a straight `'` in prose; hyphenated number phrases ("46-second") never break across lines.
+- **Figures.** `.font-mono`, `<time>`, and `[data-numeric]` get tabular figures so counters and timers don't jitter. Dates are `<time dateTime>` and bare ISO dates are formatted in UTC (`lib/article-date.ts`).
+- **Native controls** pick up the brand through `accent-color`; inputs get a brand caret; placeholders are softened muted text.
+- **Focus.** Links without their own ring get an offset outline; every public page has a *Skip to content* link.
+- **Chrome that responds.** The public navbar is clear at the top of a page and gathers glass and a hairline once it scrolls. `<meta name="theme-color">` follows the active preset.
+- **Keys are keys.** Anything drawn as a piano key is ivory and ebony, on every theme. Hover lifts are `-translate-y-0.5` with `motion-reduce:` resets. Decorative motion that starts on its own ends inside five seconds.
+- **Buttons are the action colour everywhere**, including third-party UI (Clerk's primary button via `authAppearance`).
+
+---
+
+## 13. Minimal Hard-Coding / Anti-Patterns
 
 `AGENTS.md` enforces a strict rule: do not hard-code hex, rgb, hsl, gradients, or glow shadows in components. Colors must come from the token system. Examples of the intended pattern:
 
