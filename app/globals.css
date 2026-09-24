@@ -54,6 +54,10 @@
   --shadow-surface: var(--shadow-surface);
   --shadow-raised: var(--shadow-raised);
   --shadow-glow: 0 0 24px 4px var(--primary-glow);
+  /* Motion: a key goes down fast and comes back up with a little give. */
+  --ease-key: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in-out-sine: cubic-bezier(0.37, 0, 0.63, 1);
 }
 
 /*
@@ -407,23 +411,75 @@
   html {
     @apply font-sans;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    /* Never fake a bold or an italic — every weight and style is loaded. */
+    font-synthesis: none;
+    font-kerning: normal;
+    /* Sticky chrome is 4rem; anchors land below it, not under it. */
+    scroll-padding-top: 5.5rem;
+    /* Safari: let opening quotes hang into the margin like set type. */
+    hanging-punctuation: first allow-end;
+    -webkit-tap-highlight-color: transparent;
+    /* Native checkboxes, radios, and range sliders pick up the brand. */
+    accent-color: var(--primary);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html:focus-within {
+      scroll-behavior: smooth;
+    }
   }
   ::selection {
-    background: color-mix(in oklab, var(--primary) 35%, transparent);
+    background: color-mix(in oklab, var(--primary) 32%, transparent);
     color: var(--foreground);
   }
-  /* Display type: Fraunces with a touch of its "wonky" and soft axes so
-     headings feel engraved rather than typeset. */
+  input,
+  textarea,
+  [contenteditable="true"] {
+    caret-color: var(--primary);
+  }
+  ::placeholder {
+    color: color-mix(in oklab, var(--muted-foreground) 72%, transparent);
+    opacity: 1;
+  }
+  /* Links that don't style their own focus still get a visible, offset
+     ring — never the browser's default blue box on a warm stage. */
+  a:focus-visible,
+  summary:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--ring) 80%, transparent);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+  /* Inline underlines sit below the descenders and thin out with the face. */
+  a {
+    text-underline-offset: 0.22em;
+    text-decoration-thickness: from-font;
+  }
+  /* Display type: Fraunces with a touch of its soft axis so headings feel
+     engraved rather than typeset. The optical-size axis is left to the
+     browser (`font-optical-sizing: auto`) so a 14px card title gets the
+     open, sturdy text cut and a 72px headline gets the tight display cut —
+     pinning `opsz` to a display value collapsed word spaces at small sizes. */
   .font-heading {
-    font-variation-settings: "SOFT" 40, "WONK" 0, "opsz" 72;
-    letter-spacing: -0.015em;
+    font-optical-sizing: auto;
+    font-variation-settings: "SOFT" 40, "WONK" 0;
+    letter-spacing: -0.01em;
+    /* Fraunces' word space is narrow, and narrower still in italic; a
+       hair more keeps small captions from running words together. */
+    word-spacing: 0.04em;
+    font-feature-settings: "kern", "liga", "calt";
   }
   h1, h2, h3, h4 {
     text-wrap: balance;
   }
-  p {
+  p, li, blockquote, figcaption {
     text-wrap: pretty;
+  }
+  /* Timers, counts, tempo — digits that change shouldn't make text jitter. */
+  .font-mono,
+  time,
+  [data-numeric] {
+    font-variant-numeric: tabular-nums;
   }
 }
 
@@ -457,6 +513,16 @@
     black 18%,
     black 82%,
     transparent 100%
+  );
+}
+
+/* Keep the staff to the frame of a panel and clear it behind centred copy,
+   like manuscript paper with the middle left blank. Decor layer only. */
+.staff-lines-edges {
+  mask-image: radial-gradient(
+    ellipse 48% 58% at 50% 48%,
+    transparent 55%,
+    black 100%
   );
 }
 
@@ -509,6 +575,78 @@
   );
 }
 
+/* A single five-line stave, 12px between lines. Give it a height of 49px
+   (4 gaps + 1 line) and it draws exactly five lines — used where a real
+   staff carries notes, unlike the decorative repeating `.staff-lines`. */
+.staff-stave {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--foreground) 32%, transparent) 0 1px,
+    transparent 1px 12px
+  );
+}
+
+/* The final double bar that ends a piece: a thin line, then a thick one.
+   Inherits currentColor; give it a height (`h-4`). */
+.final-barline {
+  display: inline-block;
+  width: 7px;
+  background:
+    linear-gradient(currentColor, currentColor) left / 1px 100% no-repeat,
+    linear-gradient(currentColor, currentColor) right / 3.5px 100% no-repeat;
+}
+
+/* A quiet pool of page colour behind long-form copy on the landing page,
+   centred on the text column, fading out before the edges so the pattern
+   still frames the section. */
+.prose-veil {
+  background: radial-gradient(
+    ellipse 62% 70% at 58% 50%,
+    color-mix(in oklab, var(--background) 78%, transparent) 0%,
+    color-mix(in oklab, var(--background) 45%, transparent) 55%,
+    transparent 85%
+  );
+}
+
+/* Movement numerals (I, II, III…) for the landing page's numbered bands —
+   Fraunces' wonky italic at full softness, like a programme's movement
+   headings. Reads --primary, so the inverse band gets its own brass. */
+.movement-numeral {
+  font-family: var(--font-fraunces);
+  font-style: italic;
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  color: color-mix(in oklab, var(--primary) 82%, transparent);
+  user-select: none;
+}
+
+/* Engraved drop cap on the opening paragraph of a block of prose. Uses
+   `initial-letter` where supported (it aligns to the baseline grid) and a
+   floated fallback elsewhere. */
+.drop-cap > p:first-child::first-letter {
+  font-family: var(--font-fraunces);
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+  font-weight: 600;
+  color: var(--foreground);
+  float: left;
+  font-size: 3.2em;
+  line-height: 0.85;
+  margin: 0.05em 0.1em 0 -0.02em;
+}
+@supports (initial-letter: 3) or (-webkit-initial-letter: 3) {
+  .drop-cap > p:first-child::first-letter {
+    float: none;
+    font-size: inherit;
+    line-height: inherit;
+    margin: 0 0.14em 0 0;
+    -webkit-initial-letter: 3;
+    initial-letter: 3;
+  }
+}
+
 /* Big translucent measure numbers behind section headings. */
 .measure-number {
   font-family: var(--font-fraunces);
@@ -518,6 +656,29 @@
   color: color-mix(in oklab, var(--primary) 22%, transparent);
   letter-spacing: -0.04em;
   user-select: none;
+}
+
+/* The hero eyebrow's metronome: it counts the visitor in — four beats at
+   ♩ = 72, the first accented — and then rests. Four beats (3.3s) keeps it
+   under WCAG 2.2.2's five-second limit, so it needs no pause control. */
+.metronome-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: currentColor;
+  animation: metronome-count-in 3333ms linear 450ms 1 both;
+}
+@keyframes metronome-count-in {
+  0% { transform: scale(1.7); box-shadow: 0 0 0 0 color-mix(in oklab, currentColor 55%, transparent); }
+  8% { transform: scale(1); box-shadow: 0 0 0 7px transparent; }
+  25% { transform: scale(1.35); box-shadow: 0 0 0 0 color-mix(in oklab, currentColor 45%, transparent); }
+  33% { transform: scale(1); box-shadow: 0 0 0 6px transparent; }
+  50% { transform: scale(1.35); box-shadow: 0 0 0 0 color-mix(in oklab, currentColor 45%, transparent); }
+  58% { transform: scale(1); box-shadow: 0 0 0 6px transparent; }
+  75% { transform: scale(1.35); box-shadow: 0 0 0 0 color-mix(in oklab, currentColor 45%, transparent); }
+  83%, 100% { transform: scale(1); box-shadow: 0 0 0 6px transparent; }
 }
 
 /* Entrance motion for hero copy. Honors reduced motion. */
@@ -540,13 +701,47 @@
 .rise-in-delay-4 { animation-delay: 360ms; }
 
 @media (prefers-reduced-motion: reduce) {
-  .rise-in {
+  .rise-in,
+  .metronome-dot {
     animation: none;
   }
   .key-press,
   .key-press:active {
     transition: none;
     transform: none;
+  }
+}
+
+/* Loading placeholder: a muted block with a slow sheen passing over it.
+   The sheen is decoration; under reduced motion the block simply rests. */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  background-color: var(--muted);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--foreground) 6%, transparent),
+    transparent
+  );
+  animation: skeleton-sheen 1.6s cubic-bezier(0.37, 0, 0.63, 1) infinite;
+}
+@keyframes skeleton-sheen {
+  to {
+    transform: translateX(100%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after {
+    animation: none;
+    display: none;
   }
 }
 
