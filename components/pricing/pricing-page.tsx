@@ -69,11 +69,11 @@ export function PricingPage() {
   return (
     <div className="relative z-10 flex min-h-screen flex-col">
       <Navbar />
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1 outline-none">
         <section className="relative overflow-hidden px-4 pb-12 pt-14 sm:px-6 sm:pt-20 lg:px-8">
           <div
             aria-hidden
-            className="staff-lines staff-lines-faded pointer-events-none absolute inset-0"
+            className="staff-lines staff-lines-edges pointer-events-none absolute inset-0"
           />
           <div className="relative mx-auto max-w-3xl text-center">
             <span className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
@@ -81,7 +81,7 @@ export function PricingPage() {
             </span>
             <h1 className="mt-3 font-heading text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
               {BILLING_ENABLED
-                ? "Practice free. Pro when you're ready."
+                ? "Practice free. Pro when you’re ready."
                 : "Practice free. Pro is on the way."}
             </h1>
             <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">
@@ -110,8 +110,8 @@ export function PricingPage() {
                 Free
               </span>
               <div className="mt-2 flex items-baseline gap-2">
-                <span className="font-heading text-4xl font-semibold tracking-tight text-foreground">
-                  $0
+                <span className="font-heading text-5xl font-semibold tracking-tight text-foreground">
+                  <span className="align-super text-2xl text-muted-foreground">$</span>0
                 </span>
                 <span className="text-sm text-muted-foreground">forever</span>
               </div>

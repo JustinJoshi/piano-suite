@@ -3,6 +3,20 @@ import { AppliedLogoMark } from "@/components/brand/applied-logo-mark";
 import { Keybed } from "@/components/brand/keybed";
 
 /**
+ * Clerk appearance for the auth pages. The shadcn theme fills Clerk's
+ * primary button with `--primary` (the brand hue); in this app a button you
+ * press is the *action* colour — ivory on a dark stage, ebony on Ivory — so
+ * the Continue button reads as the same piano key as every other CTA.
+ * Trailing `!` beats Clerk's unlayered CSS-in-JS.
+ */
+export const authAppearance = {
+  elements: {
+    formButtonPrimary:
+      "bg-action! bg-none! text-action-foreground! shadow-key! hover:bg-action-hover! key-press",
+  },
+};
+
+/**
  * Shared stage for the Clerk sign-in / sign-up pages: brand mark, a short
  * line of copy, staff lines, and a keybed along the bottom edge. Clerk's
  * component itself is themed through `@clerk/ui/themes/shadcn.css`, which
@@ -50,10 +64,13 @@ export function AuthStage({
         {children}
       </main>
 
+      {/* Ten octaves keeps each key narrow enough to look like a key at
+          full width; the lit Cmaj7 sits in the middle, around "middle C". */}
       <Keybed
-        octaves={7}
-        lit={[0, 4, 7, 11]}
-        className="relative z-10 h-10 w-full opacity-90"
+        octaves={10}
+        closingC
+        lit={[60, 64, 67, 71]}
+        className="relative z-10 h-10 w-full sm:h-12"
       />
     </div>
   );

@@ -8,6 +8,7 @@ import {
   Aperture,
   ChevronDown,
   CreditCard,
+  Music2,
   Palette,
   Volume2,
   X,
@@ -16,7 +17,7 @@ import {
 import { useUser } from "@clerk/nextjs";
 import { AppUserButton } from "@/components/app-user-button";
 import { AppliedLogoMark } from "@/components/brand/applied-logo-mark";
-import { Keybed } from "@/components/brand/keybed";
+import { KeybedStrip } from "@/components/brand/keybed-strip";
 import { Button } from "@/components/ui/button";
 import { useDashboardNav } from "@/components/tools/dashboard-nav";
 import { useExperimentalFeatures } from "@/hooks/useExperimentalFeatures";
@@ -295,9 +296,9 @@ export function Sidebar() {
           </div>
         </nav>
 
-        {/* User account */}
+        {/* User account, under a short run of keys — the studio's floor. */}
         <div className="border-t border-border">
-          <Keybed octaves={4} className="h-3 w-full opacity-70" />
+          <KeybedStrip keyWidth={11} className="h-3.5 opacity-80" />
           <div className="flex items-center gap-3 px-4 py-3 text-sm text-muted-foreground">
             <AppUserButton
               appearance={{
@@ -306,7 +307,26 @@ export function Sidebar() {
                 },
               }}
             />
-            <span className="truncate">{accountLabel}</span>
+            {isLoaded && !isSignedIn ? (
+              <span
+                aria-hidden
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground ring-1 ring-border"
+              >
+                <Music2 className="h-3 w-3" />
+              </span>
+            ) : null}
+            <span className="flex min-w-0 flex-1 flex-col leading-tight">
+              <span className="truncate">{accountLabel}</span>
+              {isLoaded && !isSignedIn ? (
+                <Link
+                  href="/sign-in"
+                  onClick={closeDrawer}
+                  className="mt-0.5 w-fit rounded-sm text-xs font-medium text-primary underline-offset-2 hover:underline"
+                >
+                  Sign in to sync
+                </Link>
+              ) : null}
+            </span>
           </div>
         </div>
       </aside>

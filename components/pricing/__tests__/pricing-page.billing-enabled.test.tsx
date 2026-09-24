@@ -48,7 +48,7 @@ describe("PricingPage (BILLING_ENABLED=true)", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: /Practice free\. Pro when you're ready\./i,
+        name: /Practice free\. Pro when you[’']re ready\./i,
       })
     ).toBeInTheDocument();
     expect(screen.getByTestId("pricing-table")).toBeInTheDocument();
