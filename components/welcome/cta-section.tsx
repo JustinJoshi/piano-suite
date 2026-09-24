@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Play } from "lucide-react";
-import { Keybed } from "@/components/brand/keybed";
+import { KeybedStrip } from "@/components/brand/keybed-strip";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useWelcomeConfig } from "@/hooks/useWelcomeConfig";
@@ -17,7 +17,7 @@ export function CtaSection() {
     <section className="py-16 sm:py-24">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="tone-inverse grain relative overflow-hidden rounded-[2rem] border border-border shadow-raised">
-          <div className="staff-lines staff-lines-faded absolute inset-0" aria-hidden />
+          <div className="staff-lines staff-lines-edges absolute inset-0" aria-hidden />
           <div className="relative flex flex-col items-center px-6 pb-10 pt-14 text-center sm:px-12 sm:pt-20">
             <span className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
               {closingCta.eyebrow}
@@ -44,7 +44,7 @@ export function CtaSection() {
                 href="/pricing"
                 className={cn(
                   buttonVariants({ variant: "ghost", size: "lg" }),
-                  "rounded-full text-foreground/80"
+                  "rounded-full text-foreground/80 hover:bg-foreground/[0.06]"
                 )}
               >
                 See plans
@@ -59,11 +59,11 @@ export function CtaSection() {
               >
                 Anki + AnkiConnect
               </Link>
-              . Don&apos;t have one yet? No worries — every drill plays happily
+              . Don’t have one yet? No worries — every drill plays happily
               on the on-screen keys too.
             </p>
           </div>
-          <Keybed octaves={7} className="relative h-10 w-full sm:h-14" />
+          <KeybedStrip keyWidth={22} className="relative h-12 sm:h-16" />
         </div>
       </div>
     </section>

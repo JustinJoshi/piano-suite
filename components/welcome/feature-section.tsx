@@ -47,10 +47,27 @@ const radiusClasses = {
   "2xl": "rounded-[2rem]",
 };
 
+const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
+
 /**
- * One landing "measure": the number and label sit in a left column that
+ * "01" → "I". Movements of a piece are numbered in Roman numerals on a
+ * concert programme; anything that isn't a small positive integer is shown
+ * as written, so the dev lab can still type free text.
+ */
+export function movementNumeral(number: string): string {
+  const parsed = Number.parseInt(number, 10);
+  if (!Number.isInteger(parsed) || parsed < 1 || parsed > ROMAN.length) {
+    return number;
+  }
+  return ROMAN[parsed - 1];
+}
+
+/**
+ * One landing "movement": the numeral and label sit in a left column that
  * stays put while the copy scrolls on wide screens, so the four sections
- * read as movements of one piece instead of four identical cards.
+ * read as movements of one piece instead of four identical cards. The
+ * opening paragraph gets an engraved drop cap, like the first page of a
+ * printed score's preface.
  */
 export function FeatureSection({
   id,
@@ -83,6 +100,11 @@ export function FeatureSection({
           className="staff-lines staff-lines-faded pointer-events-none absolute inset-0"
         />
       ) : null}
+      {tone !== "inverse" ? (
+        // A soft pool of background behind the prose, so paragraphs never
+        // sit directly on the live pattern (no blur — the canvas animates).
+        <div aria-hidden className="prose-veil pointer-events-none absolute inset-0" />
+      ) : null}
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div
@@ -92,10 +114,17 @@ export function FeatureSection({
           )}
         >
           <div className="relative md:sticky md:top-28 md:self-start">
-            <span className="measure-number block text-8xl sm:text-9xl">
-              {section.number}
+            <span
+              className="movement-numeral block text-6xl sm:text-7xl"
+              aria-hidden
+            >
+              {movementNumeral(section.number)}
             </span>
-            <span className="mt-2 block text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+            <span className="mt-4 flex max-w-[13rem] items-start gap-3 text-xs font-semibold uppercase leading-relaxed tracking-[0.18em] text-primary">
+              <span aria-hidden className="mt-[0.8em] h-px w-6 shrink-0 bg-primary/50" />
+              <span className="sr-only">
+                {`Part ${movementNumeral(section.number)}: `}
+              </span>
               {section.label}
             </span>
           </div>
@@ -111,7 +140,7 @@ export function FeatureSection({
             </h2>
             <div
               className={cn(
-                "mt-6 space-y-5 leading-relaxed text-muted-foreground",
+                "drop-cap mt-6 space-y-5 leading-relaxed text-muted-foreground",
                 density.body
               )}
             >
@@ -121,15 +150,20 @@ export function FeatureSection({
             </div>
 
             {section.tags && section.tags.length > 0 ? (
-              <div className="mt-7 flex flex-wrap gap-2">
-                {section.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded-full border border-border bg-muted/70 px-3 py-1 text-xs font-medium text-foreground/80"
-                  >
-                    {tag}
-                  </span>
-                ))}
+              <div className="mt-8 border-t border-border pt-5">
+                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  In the tradition of
+                </p>
+                <ul className="mt-3 flex flex-wrap gap-2">
+                  {section.tags.map((tag) => (
+                    <li
+                      key={tag}
+                      className="rounded-full border border-border bg-muted/70 px-3 py-1 text-xs font-medium text-foreground/80"
+                    >
+                      {tag}
+                    </li>
+                  ))}
+                </ul>
               </div>
             ) : null}
 

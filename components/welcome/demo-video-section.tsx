@@ -1,5 +1,22 @@
-import { Keybed } from "@/components/brand/keybed";
+import { KeybedStrip } from "@/components/brand/keybed-strip";
 import { useWelcomeConfig } from "@/hooks/useWelcomeConfig";
+import { MovementMark } from "./movement-mark";
+
+/**
+ * Keep a number glued to the word it's hyphenated to ("46-second"), so a
+ * narrow column never strands "46-" at the end of a line.
+ */
+function keepNumbersTogether(text: string) {
+  return text.split(/(\d+-[A-Za-z]+)/).map((part, index) =>
+    /^\d+-[A-Za-z]+$/.test(part) ? (
+      <span key={index} className="whitespace-nowrap">
+        {part}
+      </span>
+    ) : (
+      part
+    )
+  );
+}
 
 /**
  * Product demo video section for the welcome page.
@@ -15,18 +32,11 @@ export function DemoVideoSection() {
 
   return (
     <section className="py-16 sm:py-24">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-[minmax(0,22rem)_1fr] lg:items-center lg:gap-14 lg:px-8">
+      <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-[minmax(0,25rem)_1fr] lg:items-center lg:gap-14 lg:px-8">
         <div>
-          <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/10 font-heading text-sm font-semibold text-primary">
-              {demo.number}
-            </span>
-            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-              {demo.label}
-            </span>
-          </div>
+          <MovementMark number={demo.number} label={demo.label} />
           <h2 className="mt-5 font-heading text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            {demo.title}
+            {keepNumbersTogether(demo.title)}
           </h2>
           <div className="mt-5 space-y-4 text-base leading-relaxed text-muted-foreground">
             {demo.body.map((paragraph, index) => (
@@ -36,8 +46,13 @@ export function DemoVideoSection() {
         </div>
 
         <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-2 shadow-raised sm:p-3">
+          {/* A music-stand lamp: a soft warm pool on the frame's top edge. */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-12 -top-10 h-20 rounded-full bg-primary/12 blur-2xl"
+          />
           <video
-            className="aspect-[16/10] w-full rounded-2xl border border-border bg-background"
+            className="relative aspect-[16/10] w-full rounded-2xl border border-border bg-background"
             src={demo.videoSrc}
             controls
             muted
@@ -45,7 +60,9 @@ export function DemoVideoSection() {
             preload="metadata"
             aria-label={demo.videoLabel}
           />
-          <Keybed octaves={6} className="mt-2 h-6 w-full rounded-b-2xl sm:mt-3 sm:h-8" />
+          <div className="mt-2 overflow-hidden rounded-b-2xl rounded-t-sm sm:mt-3">
+            <KeybedStrip keyWidth={15} className="h-6 sm:h-8" />
+          </div>
         </div>
       </div>
     </section>

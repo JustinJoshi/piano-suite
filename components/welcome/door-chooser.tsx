@@ -85,19 +85,19 @@ export function DoorChooser() {
                 data-testid={`door-${door.id}`}
                 data-emphasis="primary"
                 onClick={() => captureEvent("door_clicked", { doorId: door.id })}
-                className="group relative flex flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-surface transition-all hover:-translate-y-1 hover:border-foreground/20 hover:shadow-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+                className="group relative flex flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-surface transition-[transform,border-color,box-shadow] duration-200 ease-out hover:-translate-y-1 hover:border-foreground/20 hover:shadow-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 motion-reduce:hover:translate-y-0"
               >
                 <div
                   aria-hidden
                   className={cn(
-                    "absolute inset-x-0 top-0 h-32 bg-gradient-to-b to-transparent opacity-80",
+                    "absolute inset-x-0 top-0 h-32 bg-gradient-to-b to-transparent opacity-80 transition-opacity duration-300 group-hover:opacity-100",
                     tone.glow
                   )}
                 />
                 <div className="relative flex flex-1 flex-col p-8">
                   <span
                     className={cn(
-                      "flex h-12 w-12 items-center justify-center rounded-2xl shadow-key",
+                      "flex h-12 w-12 items-center justify-center rounded-2xl shadow-key transition-transform duration-200 ease-key group-hover:-rotate-3 motion-reduce:group-hover:rotate-0",
                       tone.chip
                     )}
                   >
@@ -121,9 +121,10 @@ export function DoorChooser() {
                 </div>
                 <Keybed
                   octaves={3}
+                  closingC
                   lit={tone.lit}
                   litColor={tone.litColor}
-                  className="relative h-7 w-full opacity-90"
+                  className="relative h-9 w-full"
                 />
               </Link>
             );

@@ -21,7 +21,7 @@ test.describe("home page mobile", () => {
     await page.goto("/");
     const steps = [
       "Pick a starter drill or open a fresh page",
-      "Press start and play — we'll keep time for you",
+      "Press start and play — we’ll keep time for you",
       "Tweak the blocks until it feels like yours",
     ];
     for (const text of steps) {
@@ -37,7 +37,7 @@ test.describe("home page mobile", () => {
       "Start from a friendly template or a fresh page",
       "Snap metronome, timer, and chord blocks together",
       "Press start and play — real keys or on-screen",
-      "Share what you built, or borrow someone else's",
+      "Share what you built, or borrow someone else’s",
     ];
     for (const text of steps) {
       await expect(page.getByText(text, { exact: true })).toBeVisible();
@@ -57,7 +57,7 @@ test.describe("home page mobile", () => {
   test("feature cards are readable on mobile", async ({ page }) => {
     await page.goto("/");
     const firstFeature = page.getByText(
-      "Re-reading a chord chart feels like practice. It isn't — and that's good news"
+      "Re-reading a chord chart feels like practice. It isn’t — and that’s good news"
     );
     await expect(firstFeature).toBeVisible();
   });
