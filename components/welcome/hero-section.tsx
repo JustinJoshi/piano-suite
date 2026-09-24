@@ -4,10 +4,10 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { ArrowRight, Play } from "lucide-react";
-import { Keybed } from "@/components/brand/keybed";
 import { scrimStrengthCss } from "@/lib/chladni-hero-settings";
 import { useWelcomeConfig } from "@/hooks/useWelcomeConfig";
 import { cn } from "@/lib/utils";
+import { PlayableKeybed } from "./playable-keybed";
 
 function scrimStyleFromDarkness(scrimDarkness: number): CSSProperties {
   const strength = scrimStrengthCss(scrimDarkness);
@@ -24,9 +24,6 @@ const backgroundEffectClasses = {
   orb: "hero-orb opacity-20",
   beam: "beam opacity-10",
 };
-
-/** Cmaj7 — the first "grown-up" chord most self-taught players learn. */
-const HERO_CHORD = [0, 4, 7, 11, 12 + 4];
 
 /**
  * Split a headline on its first em dash so the second clause can be set in
@@ -61,7 +58,7 @@ export function HeroSection({
         )}
       />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-center justify-center px-4 pb-24 pt-16 sm:px-6 lg:px-8">
+      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-center justify-center px-4 pb-12 pt-12 sm:px-6 sm:pb-16 lg:px-8">
         <div
           className={cn(
             "flex max-w-3xl flex-col gap-7",
@@ -71,10 +68,9 @@ export function HeroSection({
           )}
         >
           {hero.showEyebrow ? (
-            <span className="rise-in inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3.5 py-1.5 text-[0.62rem] font-medium uppercase tracking-[0.1em] text-primary backdrop-blur-sm sm:text-xs sm:tracking-[0.18em]">
-              <span aria-hidden className="hidden text-sm leading-none sm:inline">
-                ♪
-              </span>
+            <span className="rise-in inline-flex items-center gap-2.5 rounded-full border border-primary/25 bg-primary/10 py-1.5 pl-3 pr-3.5 text-[0.62rem] font-medium uppercase tracking-[0.1em] text-primary backdrop-blur-sm sm:text-xs sm:tracking-[0.18em]">
+              {/* A metronome ticking at ♩ = 72 — the tempo most drills start at. */}
+              <span aria-hidden className="metronome-dot" />
               {hero.eyebrow}
             </span>
           ) : null}
@@ -127,34 +123,25 @@ export function HeroSection({
               href={templateStrip.browseHref}
               className={cn(
                 buttonVariants({ variant: "ghost", size: "lg" }),
-                "rounded-full px-5 text-base text-foreground/90"
+                "group rounded-full px-5 text-base text-foreground/90"
               )}
             >
               See what others built
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
             </Link>
           </div>
 
           <p className="rise-in rise-in-delay-4 max-w-sm text-xs leading-relaxed text-muted-foreground">
-            Everything&apos;s free to try — explore the community gallery freely
-            and sign in only when you&apos;d like to keep your own pages.
+            Everything’s free to try — explore the community gallery freely
+            and sign in only when you’d like to keep your own pages.
           </p>
         </div>
       </div>
 
-      {/* Stage edge: a keybed with a lit Cmaj7 that hands off to the content. */}
-      <div
-        aria-hidden
-        className="pointer-events-none relative z-[2] mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8"
-      >
-        <div className="relative overflow-hidden rounded-t-2xl border border-b-0 border-border bg-card/70 shadow-raised backdrop-blur-sm">
-          <div className="h-3 w-full bg-gradient-to-b from-door-play/35 to-transparent" />
-          <Keybed
-            octaves={5}
-            lit={HERO_CHORD}
-            className="h-14 w-full opacity-95 sm:h-20"
-          />
-          <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-background to-transparent" />
+      {/* Stage edge: a real keyboard. Click, tap, drag, or plug in MIDI. */}
+      <div className="relative z-[2] mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8">
+        <div className="rise-in rise-in-delay-4 relative overflow-hidden rounded-t-2xl border border-b-0 border-border bg-card/75 shadow-raised backdrop-blur-md">
+          <PlayableKeybed />
         </div>
       </div>
     </section>

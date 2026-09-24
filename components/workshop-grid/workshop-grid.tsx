@@ -197,6 +197,9 @@ export function WorkshopGrid({
 
   return (
     <DndContext
+      // A fixed id keeps dnd-kit's aria-describedby ids identical on the
+      // server and the client; its module counter otherwise drifts.
+      id="workshop-grid"
       sensors={sensors}
       collisionDetection={closestCenter}
       onDragStart={handleDragStart}

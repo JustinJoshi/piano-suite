@@ -42,7 +42,7 @@ export function WelcomePage() {
     <WelcomeConfigProvider>
       <div className="relative z-10 flex min-h-screen flex-col">
         <Navbar />
-        <main className="flex-1">
+        <main id="main-content" tabIndex={-1} className="flex-1 outline-none">
           <HeroSection settings={heroScrimSettings} />
           <WelcomeContent />
         </main>

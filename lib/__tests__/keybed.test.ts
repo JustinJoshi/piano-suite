@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildKeybedGeometry,
+  buildStripOctave,
   KEYBED_HEIGHT,
   WHITE_KEY_WIDTH,
 } from "@/lib/keybed";
@@ -38,5 +39,37 @@ describe("buildKeybedGeometry", () => {
   it("never returns fewer than one octave", () => {
     expect(buildKeybedGeometry(0).whiteKeys).toHaveLength(7);
     expect(buildKeybedGeometry(-2).whiteKeys).toHaveLength(7);
+  });
+});
+
+describe("buildKeybedGeometry closingC", () => {
+  it("adds one white C at the top and no black key", () => {
+    const plain = buildKeybedGeometry(2);
+    const closed = buildKeybedGeometry(2, { closingC: true });
+    expect(closed.whiteKeys).toHaveLength(plain.whiteKeys.length + 1);
+    expect(closed.blackKeys).toHaveLength(plain.blackKeys.length);
+    const top = closed.whiteKeys[closed.whiteKeys.length - 1];
+    expect(top.semitone).toBe(24);
+    expect(top.x).toBe(14 * WHITE_KEY_WIDTH);
+    expect(closed.width).toBe(15 * WHITE_KEY_WIDTH);
+  });
+});
+
+describe("buildStripOctave", () => {
+  it("tiles one octave of seven white keys", () => {
+    const octave = buildStripOctave(20);
+    expect(octave.tileWidth).toBe(140);
+    expect(octave.blackKeyX).toHaveLength(5);
+  });
+
+  it("centres each black key on a white-key boundary", () => {
+    const octave = buildStripOctave(20);
+    const centres = octave.blackKeyX.map((x) => x + octave.blackKeyWidth / 2);
+    // C#, D#, then the E–F gap, then F#, G#, A#.
+    expect(centres).toEqual([20, 40, 80, 100, 120]);
+  });
+
+  it("clamps absurdly small keys to a drawable width", () => {
+    expect(buildStripOctave(0).tileWidth).toBe(28);
   });
 });

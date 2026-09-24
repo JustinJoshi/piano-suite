@@ -135,18 +135,22 @@ export function KeyboardDisplayBlock(config: KeyboardDisplayConfig) {
             onPointerLeave={() => releaseVirtualNote(key.note)}
             onPointerCancel={() => releaseVirtualNote(key.note)}
             onContextMenu={(event) => event.preventDefault()}
+            // Piano constants, not surface tokens: a white key is ivory and
+            // a black key is ebony on every theme. (Surface tokens drew the
+            // keyboard inverted on all six dark presets.)
             className={cn(
-              "relative z-0 min-w-0 flex-1 rounded-b-md border border-border bg-card transition-colors",
-              "hover:bg-muted/60",
-              heldSet.has(key.note) && "border-primary/50 bg-primary/20",
-              highlightPcs?.has(key.note % 12) && "ring-1 ring-accent/70"
+              "relative z-0 min-w-0 flex-1 rounded-b-md border border-ebony/35 bg-ivory shadow-[inset_0_-5px_0_0_color-mix(in_oklab,var(--color-ebony)_9%,transparent),inset_0_6px_6px_-4px_color-mix(in_oklab,var(--color-ebony)_22%,transparent)] transition-[background-color,box-shadow,transform] duration-75",
+              "hover:bg-[color-mix(in_oklab,var(--color-ivory)_92%,var(--color-ebony))]",
+              heldSet.has(key.note) &&
+                "translate-y-px bg-primary shadow-[inset_0_-2px_0_0_color-mix(in_oklab,var(--color-ebony)_18%,transparent),inset_0_8px_8px_-5px_color-mix(in_oklab,var(--color-ebony)_30%,transparent)] hover:bg-primary",
+              highlightPcs?.has(key.note % 12) && "ring-2 ring-inset ring-accent/80"
             )}
           >
             {config.showNoteNames && (
-              <span className="pointer-events-none absolute inset-x-0 bottom-1.5 text-center text-[10px] font-medium text-muted-foreground">
+              <span className="pointer-events-none absolute inset-x-0 bottom-2 text-center text-[10px] font-medium text-ebony/75">
                 {key.name}
                 {computerKeys && key.keyCap && (
-                  <span className="ml-1 text-muted-foreground/60">
+                  <span className="ml-1 text-ebony/60">
                     {key.keyCap.toUpperCase()}
                   </span>
                 )}
@@ -173,14 +177,15 @@ export function KeyboardDisplayBlock(config: KeyboardDisplayConfig) {
                 width: `${widthPercent}%`,
               }}
               className={cn(
-                "absolute top-0 z-10 h-3/5 -translate-x-1/2 rounded-b-md border border-border bg-foreground/90 transition-colors",
-                "hover:bg-foreground/70",
-                heldSet.has(key.note) && "border-primary bg-primary",
-                highlightPcs?.has(key.note % 12) && "ring-1 ring-accent/80"
+                "absolute top-0 z-10 h-3/5 -translate-x-1/2 rounded-b-[5px] border border-ebony bg-ebony shadow-[inset_0_-6px_0_0_color-mix(in_oklab,var(--color-ivory)_7%,transparent),2px_3px_4px_-1px_color-mix(in_oklab,var(--color-ebony)_45%,transparent)] transition-[background-color,box-shadow] duration-75",
+                "hover:bg-[color-mix(in_oklab,var(--color-ebony)_88%,var(--color-ivory))]",
+                heldSet.has(key.note) &&
+                  "border-primary bg-primary shadow-[inset_0_-3px_0_0_color-mix(in_oklab,var(--color-ebony)_20%,transparent)] hover:bg-primary",
+                highlightPcs?.has(key.note % 12) && "ring-2 ring-accent/80"
               )}
             >
               {computerKeys && key.keyCap && (
-                <span className="pointer-events-none absolute inset-x-0 bottom-1 text-center text-[9px] font-medium text-background/70">
+                <span className="pointer-events-none absolute inset-x-0 bottom-1.5 text-center text-[9px] font-medium text-ivory/65">
                   {key.keyCap.toUpperCase()}
                 </span>
               )}

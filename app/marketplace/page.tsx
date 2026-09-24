@@ -18,6 +18,7 @@ import {
 import { useState } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Keybed } from "@/components/brand/keybed";
+import { PageThumbnail } from "@/components/workshop-grid/page-thumbnail";
 import { marketplaceSeeds } from "@/lib/marketplace-seeds";
 import { featureRegistry } from "@/lib/feature-blocks/registry";
 import {
@@ -61,16 +62,44 @@ function chordFor(seed: string): number[] {
   return shape.map((interval) => root + interval);
 }
 
-function BlockChips({ labels }: { labels: string[] }) {
+/**
+ * What's on the page: a miniature of its grid for sighted visitors, and the
+ * same block names as a plain list for screen readers (the sketch itself is
+ * decorative).
+ */
+function PageContents({ blocks }: { blocks: Array<{ type: string }> }) {
   return (
-    <div className="flex flex-wrap gap-1.5">
-      {labels.map((label) => (
-        <span
-          key={label}
-          className="rounded-md border border-border bg-muted/70 px-2 py-0.5 text-[0.7rem] font-medium text-foreground/80"
+    <>
+      <PageThumbnail blocks={blocks} rows={3} />
+      <ul className="sr-only">
+        {blockLabels(blocks).map((label, index) => (
+          <li key={`${label}-${index}`}>{label}</li>
+        ))}
+      </ul>
+    </>
+  );
+}
+
+/** Placeholder cards while community pages load; the sheen rests under reduced motion. */
+function CommunitySkeleton() {
+  return (
+    <div
+      className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+      role="status"
+      aria-label="Loading community pages"
+    >
+      {[0, 1, 2].map((index) => (
+        <div
+          key={index}
+          aria-hidden
+          className="overflow-hidden rounded-2xl border border-border bg-card shadow-surface"
         >
-          {label}
-        </span>
+          <div className="skeleton h-7 rounded-none" />
+          <div className="space-y-3 p-5">
+            <div className="skeleton h-5 w-2/3" />
+            <div className="skeleton h-3.5 w-1/2" />
+          </div>
+        </div>
       ))}
     </div>
   );
@@ -105,10 +134,11 @@ function SeedCard({
   }
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-surface transition-all hover:-translate-y-0.5 hover:border-door-explore/40 hover:shadow-raised">
+    <article className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-surface transition-[transform,border-color,box-shadow] duration-200 ease-out hover:-translate-y-0.5 hover:border-door-explore/40 hover:shadow-raised motion-reduce:hover:translate-y-0">
       <div className="relative">
         <Keybed
           octaves={3}
+          closingC
           lit={chordFor(id)}
           litColor="var(--color-door-explore)"
           className="h-9 w-full"
@@ -133,7 +163,7 @@ function SeedCard({
         </p>
 
         <div className="mt-4">
-          <BlockChips labels={blockLabels(blocks)} />
+          <PageContents blocks={blocks} />
         </div>
 
         <div className="mt-5 flex w-full gap-2">
@@ -231,9 +261,7 @@ export default function MarketplacePage() {
             <span className="bar-line flex-1" aria-hidden />
           </div>
           {drills === undefined ? (
-            <div className="rounded-2xl border border-border bg-card p-8 text-center text-sm text-muted-foreground shadow-surface">
-              Loading…
-            </div>
+            <CommunitySkeleton />
           ) : drills.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border bg-card/60 p-12 text-center">
               <LayoutGrid className="mx-auto mb-4 h-8 w-8 text-muted-foreground" />

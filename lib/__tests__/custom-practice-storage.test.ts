@@ -436,6 +436,15 @@ describe("getServerPracticePageStore", () => {
     expect(snapshot.activePageId).toBe(snapshot.pages[0].id);
   });
 
+  it("uses fixed ids and timestamps so server and client snapshots match", () => {
+    // Both bundles evaluate the module; random ids here broke hydration.
+    const snapshot = getServerPracticePageStore();
+    expect(snapshot.activePageId).toBe("server-snapshot-page");
+    expect(snapshot.pages[0].id).toBe("server-snapshot-page");
+    expect(snapshot.pages[0].updatedAt).toBe(0);
+    expect(snapshot.pages[0].blocks[0].id).toBe("server-snapshot-block-0-0");
+  });
+
   it("a mutating caller cannot corrupt the snapshot for a later caller", () => {
     const first = getServerPracticePageStore();
     try {

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ArrowRight, Piano } from "lucide-react";
 import { SignInButton } from "@clerk/nextjs";
-import { Keybed } from "@/components/brand/keybed";
+import { KeybedStrip } from "@/components/brand/keybed-strip";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -27,7 +27,7 @@ export function DrillGate({
     >
       <div
         aria-hidden="true"
-        className="staff-lines staff-lines-faded pointer-events-none absolute inset-0"
+        className="staff-lines staff-lines-edges pointer-events-none absolute inset-0"
       />
       <div className="relative flex flex-col items-center gap-4 px-6 py-10 text-center">
         <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/12 text-primary ring-1 ring-primary/20">
@@ -56,11 +56,7 @@ export function DrillGate({
           </div>
         ) : null}
       </div>
-      <Keybed
-        octaves={5}
-        lit={[0, 4, 7]}
-        className="relative h-6 w-full opacity-80"
-      />
+      <KeybedStrip keyWidth={16} className="relative h-6 opacity-90" />
     </div>
   );
 }

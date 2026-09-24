@@ -54,7 +54,11 @@ export default async function RoutePage({ params }: RoutePageProps) {
   return (
     <div className="relative z-10 flex min-h-screen flex-col">
       <Navbar />
-      <main className="flex-1 px-4 pb-20 pt-12 sm:px-6 lg:px-8">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="flex-1 px-4 pb-20 pt-12 outline-none sm:px-6 lg:px-8"
+      >
         {/* routeId only: the icon component cannot cross the RSC boundary. */}
         <RouteGuide routeId={route.id} decks={decks} />
       </main>

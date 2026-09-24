@@ -1067,6 +1067,47 @@ Verification: `npm run typecheck`, `npm run lint`, `npm run test:unit:run`,
 `npm run build`, and `e2e/a11y.spec.ts` + `e2e/workshop-anonymous.spec.ts`
 green at final HEAD (see the run's evidence file).
 
+## Studio details — the second UI pass (2026-09-24)
+
+A detail pass on top of "the studio": fix what was quietly wrong, and give
+the landing page things to play with rather than more to read.
+
+- **Type.** `.font-heading` no longer pins Fraunces' `opsz` to 72. That
+  pinned value ran words together in every small heading ("Playyour first
+  Cmaj7", "Alltwelvekeys"); the browser now picks the optical size.
+  Also: `font-synthesis: none`, tabular figures for `.font-mono` /
+  `<time>` / `[data-numeric]`, brand caret and `accent-color`, offset
+  link focus rings, typographer's apostrophes in landing and tour copy.
+- **Keybed.** Shaded keys drawn without SVG ids, so they're safe in server
+  components: fallboard shadow, front lip, black-key top faces and cast
+  shadows, a red key-slip felt, and an optional closing C.
+  `KeybedStrip` tiles one octave in pixel units, so full-bleed edges keep
+  real key proportions.
+- **A playable hero.** `PlayableKeybed` is the landing stage edge. Click,
+  tap, or glissando across it and it plays through the audio host
+  (`pressVirtualNote`); MIDI lights it. The name board shows what's
+  held via the new `lib/chord-naming.ts`. QWERTY turns on only after the
+  first note. The eyebrow's metronome counts in four beats and stops
+  (under WCAG 2.2.2's five seconds).
+- **Landing as a programme.** "How it works" is one bar of music (a rising
+  C–E–G arpeggio on a real stave, ending on a final double bar). Starter
+  and marketplace cards show a `PageThumbnail` of the page's grid. Bands
+  are movements I–VI with drop caps and a prose veil. The Anki band shows
+  a real card with grade buttons.
+- **Chrome.** The navbar is clear at the top and glass once you scroll,
+  with a skip link on every public page. The footer has link columns and a
+  *Fine* colophon. `ThemeColorHost` keeps `<meta name="theme-color">` on
+  the active preset. On the auth pages, Clerk's primary button uses the
+  action colour. The 404 page is an empty bar with a fermata. The sidebar
+  has a signed-out account row.
+- **Bugs found along the way.** The on-screen keyboard block drew white
+  keys with `bg-card`, so they rendered dark on all six dark presets; it
+  now uses `--ivory` / `--ebony`. The Workshop's server snapshot used
+  random UUIDs, which caused a hydration mismatch on every load; it now
+  uses fixed ids, and dnd-kit gets a stable context id. Article dates
+  showed a day early west of UTC; `lib/article-date.ts` formats them in
+  UTC. `app/error.tsx` used a `font-serif` class that doesn't exist.
+
 ## Roadmap
 
 - [x] Scaffold Next.js + Tailwind + shadcn/ui

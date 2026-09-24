@@ -51,12 +51,12 @@ test.describe("/tools onboarding", () => {
       "Active recall & spaced repetition",
       "Take care of yourself",
       "Manage your frustrations",
-      "Happy playing — we're rooting for you",
+      "Happy playing — we’re rooting for you",
     ]) {
       await shell.getByRole("button", { name: /next/i }).first().click();
       await expect(shell.getByText(slide).first()).toBeVisible();
     }
-    await shell.getByRole("button", { name: /let's practice/i }).click();
+    await shell.getByRole("button", { name: /let[’']s practice/i }).click();
     await expect(page.getByTestId("onboarding-shell")).toHaveCount(0);
   });
 

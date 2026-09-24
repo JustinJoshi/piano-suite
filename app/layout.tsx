@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Fraunces, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { shadcn } from "@clerk/ui/themes";
@@ -6,6 +6,7 @@ import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AmbientEffectsHost } from "@/components/ambient/ambient-effects-host";
 import { FaviconHost } from "@/components/brand/favicon-host";
+import { ThemeColorHost } from "@/components/brand/theme-color-host";
 import { AmbientEffectsProvider } from "@/hooks/useAmbientEffects";
 import { AudioEngineHost } from "@/components/audio/audio-engine-host";
 import { AudioSettingsProvider } from "@/hooks/useAudioSettings";
@@ -70,6 +71,13 @@ export const metadata: Metadata = {
   },
 };
 
+// First-paint browser chrome colour (Amber's --background). ThemeColorHost
+// re-points it at the active preset once the client knows which one it is.
+export const viewport: Viewport = {
+  themeColor: "#0c0a08",
+  colorScheme: "dark light",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -99,6 +107,7 @@ export default function RootLayout({
                         <AmbientEffectsHost />
                         <AudioEngineHost />
                         <FaviconHost />
+                        <ThemeColorHost />
                         {children}
                       </AnalyticsProvider>
                     </MusicPlayerProvider>

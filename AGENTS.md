@@ -61,9 +61,15 @@ This project extracts shared capabilities from the original Reflex Drill HTML ap
 | `lib/logo-mark-settings.ts` | Serializable applied logo mark + presets / normalize / localStorage |
 | `hooks/useLogoMarkSettings.ts` | Applied logo mark; localStorage always; Convex when `canPersist` |
 | `components/brand/*` | `PianoSuiteMark`, `AppliedLogoMark`, `FaviconHost`; the musical-note mark (`app/icon.svg`, lucide `Music`) is the shipping default — custom Chladni marks apply only after Logo Lab's Apply (`isShippingLogoMark` decides) |
-| `lib/keybed.ts` + `components/brand/keybed.tsx` | Decorative SVG piano keybed (`Keybed`): pure geometry in `lib/`, `aria-hidden` render in `components/`. Keys are `--ivory` / `--ebony`; `lit` semitones take `litColor` (defaults to primary; door cards pass their door hue). The house motif for section edges, footers, cards, and theme previews |
+| `lib/keybed.ts` + `components/brand/keybed.tsx` | Decorative SVG piano keybed (`Keybed`): pure geometry in `lib/`, `aria-hidden` render in `components/`. Keys are `--ivory` / `--ebony`; `lit` semitones take `litColor` (defaults to primary; door cards pass their door hue); `closingC` ends on the next C. Shading is id-free overlay rects (safe in server components, dozens per page) — never add SVG gradients with ids here. `WhiteKeyShape` / `BlackKeyShape` / `BlackKeyShadowShape` / `KeybedRail` are exported for interactive keybeds. Stretches to its box — right for card edges of known size |
+| `components/brand/keybed-strip.tsx` | `KeybedStrip`: full-bleed keybed that keeps real key proportions at any width (one octave tiled as a pixel-unit SVG `<pattern>`; `keyWidth` in px, height from `className`). Use it for footers and section edges; use `Keybed` when keys must be lit |
+| `components/welcome/playable-keybed.tsx` | The landing hero's keybed is a real instrument: pointer / touch / glissando → `pressVirtualNote`, lights from `useMidi().heldNotes`, names what's held on its name board, and turns on the QWERTY piano only after the first note played. `aria-hidden` and never focusable |
+| `lib/chord-naming.ts` | Pure `nameHeldNotes(notes)` → `{ symbol, notes, kind }` ("C4", "Major 3rd", "Cmaj7", "C/E"); bass-first root choice, ROOTS-table spelling; `midiNoteName(60) === "C4"` |
+| `lib/article-date.ts` | `formatArticleDate(iso)` — formats a bare `publishedAt` date in UTC so it never shows the previous day west of Greenwich |
+| `components/workshop-grid/page-thumbnail.tsx` | `PageThumbnail`: miniature of a page's blocks at their real grid spans, labelled from the manifest, the live target block in the Play hue; fixed `rows` so card rows align. Decorative — pair it with a text list of blocks for screen readers |
+| `components/brand/theme-color-host.tsx` | Keeps `<meta name="theme-color">` on the active preset's `--background`; `app/layout.tsx` `viewport.themeColor` is the Amber first-paint value |
 | `components/site-footer.tsx` | Shared public footer (keybed top edge, wordmark, Terms/Privacy — e2e checks those links); `compact` hides the primary links |
-| `components/auth/auth-stage.tsx` | Stage around Clerk `SignIn` / `SignUp` (brand, eyebrow, staff lines, keybed) |
+| `components/auth/auth-stage.tsx` | Stage around Clerk `SignIn` / `SignUp` (brand, eyebrow, staff lines, keybed). Exports `authAppearance`, which paints Clerk's primary button in the action colour — pass it to every Clerk auth component |
 | `components/drills/drill-gate.tsx` | Signed-out / loading state for the four ready-made drills; keeps the exact "Sign in to save…" copy |
 | `components/tools/settings-page-header.tsx` | Eyebrow + heading + description + actions for `/settings/*` pages |
 | `components/welcome/section-heading.tsx` | Landing-page section heading with optional `measure-number` numeral |
@@ -176,8 +182,9 @@ The block library is the bottleneck (audit `04-roadmap.md`), so adding a block s
 1. **Unmodified letters are piano notes.** `keyboard-display-block.tsx` binds A W S E D… as a QWERTY piano. Every global shortcut must use a modifier (Ctrl/Cmd+K) or a non-letter key (`?`, `/`, Escape), and every shortcut handler must bail on editable targets through the shared `isEditableTarget` in `lib/keyboard.ts` — no third inline copy.
 2. **One binding constant.** `WORKSHOP_SHORTCUTS` in `lib/keyboard.ts` is the single list of Workshop bindings; the palette hint and the shortcut-help dialog render it, so neither can drift.
 3. **Window-level Escape is owned by existing handlers** (`pages-menu.tsx`, `dashboard-nav.tsx`). New dialogs handle Escape on their own dialog element and suppress sibling shortcuts while open (see `command-palette.tsx`, `shortcut-help.tsx`).
-4. **Continuous animation needs `usePrefersReducedMotion`** plus a visible pause control (WCAG 2.2.2). Note roll is the reference implementation.
+4. **Continuous animation needs `usePrefersReducedMotion`** plus a visible pause control (WCAG 2.2.2). Note roll is the reference implementation. Decorative motion that starts on its own must end within five seconds instead (the hero's `.metronome-dot` counts in four beats, then rests).
 5. **The axe gate:** `e2e/a11y.spec.ts` scans `/tools/workshop`, `/tools/workshop/blocks`, and `/marketplace` signed-out for zero `serious`/`critical` violations. Run it before merging UI work on those routes; fix in place or record out-of-scope findings with rule ids in the PR — never lower the threshold.
+6. **Piano keys are piano constants.** Any drawn or rendered key uses `--ivory` / `--ebony` (`bg-ivory`, `bg-ebony`, `var(--color-ivory)`), never surface tokens — `bg-card` / `bg-foreground` render the keyboard inverted on every dark preset.
 
 ## Navigation conventions (Workshop-first)
 

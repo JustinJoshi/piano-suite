@@ -142,7 +142,7 @@ export const defaultWelcomeConfig: WelcomeConfig = {
     eyebrow: "free tools for people learning piano",
     showEyebrow: true,
     headline:
-      "Teaching yourself piano? — welcome home. Let's practice.",
+      "Teaching yourself piano? — welcome home. Let’s practice.",
     subheadline:
       "Piano Suite is a free, friendly home for self-taught pianists. Build your own practice from simple blocks, borrow a starter template that already works, and grow alongside other learners.",
     ctaText: "Come on in",
@@ -179,7 +179,7 @@ export const defaultWelcomeConfig: WelcomeConfig = {
     eyebrow: "the bench is ready",
     title: "Pull up the bench. We saved you a seat.",
     subtitle:
-      "Everything here is free and runs right in your browser. Your progress stays safely on this device until you decide you'd like an account — no pressure, no paywall between you and the piano.",
+      "Everything here is free and runs right in your browser. Your progress stays safely on this device until you decide you’d like an account — no pressure, no paywall between you and the piano.",
   },
   features: {
     sections: [
@@ -189,7 +189,7 @@ export const defaultWelcomeConfig: WelcomeConfig = {
         label: "build your practice",
         title: "Practice that fits you, not the other way around.",
         body: [
-          "A metronome. A timer. A chord to aim for. Snap them together and you've made yourself a practice page. Change the chords, ease the tempo, leave yourself a kind note for tomorrow — the Workshop bends to whatever you need today, and you can practice right there.",
+          "A metronome. A timer. A chord to aim for. Snap them together and you’ve made yourself a practice page. Change the chords, ease the tempo, leave yourself a kind note for tomorrow — the Workshop bends to whatever you need today, and you can practice right there.",
           "No code, no setup, nothing to install. Press the slash key, pick a block, and play. Every page saves itself, so you can close the lid and pick up exactly where you left off.",
         ],
       },
@@ -197,7 +197,7 @@ export const defaultWelcomeConfig: WelcomeConfig = {
         id: "start-from-something-that-works",
         number: "02",
         label: "start from something that works",
-        title: "Blank pages are scary. Start with one that isn't.",
+        title: "Blank pages are scary. Start with one that isn’t.",
         body: [
           "First chords. A gentle ii-V-I warmup. A five-minute metronome sprint. Starter templates give you a working drill in one click — sit down, press start, and change anything once you feel at home.",
           "You can also wander through drills shared by other self-taught pianists, copy one into your own Workshop, and make it yours. Someone out there has already built the thing you were about to struggle with.",
@@ -209,9 +209,9 @@ export const defaultWelcomeConfig: WelcomeConfig = {
         label: "why these drills work",
         title: "Kind to you, and built on the science of remembering.",
         body: [
-          "Re-reading a chord chart feels like practice. It isn't — and that's good news, because the thing that actually works is simpler: retrieval. Ask your hands for the answer instead of showing it to them. In one classic study, retrieval practice roughly doubled week-later retention over re-reading (Roediger & Karpicke, 2006).",
-          "Every drill here is built on that principle. Turn on Anki Sync and the Workshop quietly loads your due cards, scheduling reviews right before you'd forget. Or just pick chords by hand — the motor-memory loop works either way, and neither way is wrong.",
-          "Playing a voicing through every key, in time, until it stops needing thought — that's how jazz pianists have always gotten from theory to fluency. We just put a stopwatch and a gentle schedule underneath a habit that already works.",
+          "Re-reading a chord chart feels like practice. It isn’t — and that’s good news, because the thing that actually works is simpler: retrieval. Ask your hands for the answer instead of showing it to them. In one classic study, retrieval practice roughly doubled week-later retention over re-reading (Roediger & Karpicke, 2006).",
+          "Every drill here is built on that principle. Turn on Anki Sync and the Workshop quietly loads your due cards, scheduling reviews right before you’d forget. Or just pick chords by hand — the motor-memory loop works either way, and neither way is wrong.",
+          "Playing a voicing through every key, in time, until it stops needing thought — that’s how jazz pianists have always gotten from theory to fluency. We just put a stopwatch and a gentle schedule underneath a habit that already works.",
         ],
         tags: [
           "Barry Harris — voicing drills",
@@ -225,8 +225,8 @@ export const defaultWelcomeConfig: WelcomeConfig = {
         label: "who made this",
         title: "Made by a self-taught pianist, for the rest of us.",
         body: [
-          "Lessons run $60 an hour and up, so a lot of us teach ourselves — usually alone, usually unsure if we're doing it right. Piano Suite started as the toolkit I wished I'd had, and it's growing into something warmer: a free community where self-taught pianists learn together, share what works, and cheer each other on.",
-          "The whole project is open source and always will be free to learn with. If you're teaching yourself too, you belong here — questions, ideas, and first attempts are all welcome.",
+          "Lessons run $60 an hour and up, so a lot of us teach ourselves — usually alone, usually unsure if we’re doing it right. Piano Suite started as the toolkit I wished I’d had, and it’s growing into something warmer: a free community where self-taught pianists learn together, share what works, and cheer each other on.",
+          "The whole project is open source and always will be free to learn with. If you’re teaching yourself too, you belong here — questions, ideas, and first attempts are all welcome.",
         ],
       },
     ],
@@ -253,7 +253,7 @@ export const defaultWelcomeConfig: WelcomeConfig = {
       {
         id: "share",
         label: "share",
-        text: "Share what you built, or borrow someone else's",
+        text: "Share what you built, or borrow someone else’s",
       },
     ],
     layout: "auto",
@@ -276,7 +276,7 @@ export const defaultWelcomeConfig: WelcomeConfig = {
     title: "Practice that fits the way you learn",
     steps: [
       { id: "pick", label: "01", text: "Pick a starter drill or open a fresh page" },
-      { id: "play", label: "02", text: "Press start and play — we'll keep time for you" },
+      { id: "play", label: "02", text: "Press start and play — we’ll keep time for you" },
       { id: "build", label: "03", text: "Tweak the blocks until it feels like yours" },
     ],
   },
@@ -304,14 +304,14 @@ export const defaultWelcomeConfig: WelcomeConfig = {
       welcome: "welcome to piano suite",
     },
     pillarsOverview:
-      "We're glad you're here. Before you dive in, here are the three most important pillars of learning on your piano journey.",
+      "We’re glad you’re here. Before you dive in, here are the three most important pillars of learning on your piano journey.",
     pillars: [
       {
         id: "active-recall",
         headline: "Active recall & spaced repetition",
         body: [
-          "Here's a friendly secret: re-reading something you already saw is the easiest way to spend practice time without learning much. What actually builds memory is retrieval — producing the answer from scratch, then spacing those little wins out over days.",
-          "Anki handles the scheduling so you don't have to. It notices what you're about to forget and shows it to you right before that happens. Use it for chord names, progressions, and anything else worth keeping.",
+          "Here’s a friendly secret: re-reading something you already saw is the easiest way to spend practice time without learning much. What actually builds memory is retrieval — producing the answer from scratch, then spacing those little wins out over days.",
+          "Anki handles the scheduling so you don’t have to. It notices what you’re about to forget and shows it to you right before that happens. Use it for chord names, progressions, and anything else worth keeping.",
         ],
         nextDelayMs: 1800,
         resources: [
@@ -349,7 +349,7 @@ export const defaultWelcomeConfig: WelcomeConfig = {
         headline: "Take care of yourself",
         body: [
           "Your hands are doing all the work here, so be good to them. Piano puts wrists and tendons under repeated load — stretch, rest, and build the muscles around your wrists so they can carry you for years of playing.",
-          "A few minutes of hand care isn't a break from practice — it is practice. Strong, comfortable hands let you show up every day, and showing up is what makes everything else work.",
+          "A few minutes of hand care isn’t a break from practice — it is practice. Strong, comfortable hands let you show up every day, and showing up is what makes everything else work.",
         ],
         nextDelayMs: 0,
         resources: [
@@ -363,7 +363,7 @@ export const defaultWelcomeConfig: WelcomeConfig = {
           },
           {
             id: "dr-levi",
-            title: "Dr. Levi's hand exercises",
+            title: "Dr. Levi’s hand exercises",
             description:
               "Stretches and exercises designed for people who use their hands intensively.",
             href: "https://www.youtube.com/c/DrLeviHarrison",
@@ -385,7 +385,7 @@ export const defaultWelcomeConfig: WelcomeConfig = {
         id: "manage-frustrations",
         headline: "Manage your frustrations",
         body: [
-          "Some days the piano wins, and that's okay — it's part of how learning works. Your brain has two modes: focused mode, where you absorb new material, and diffuse mode, where connections quietly settle in the background. You need both.",
+          "Some days the piano wins, and that’s okay — it’s part of how learning works. Your brain has two modes: focused mode, where you absorb new material, and diffuse mode, where connections quietly settle in the background. You need both.",
           "So practice in short, kind blocks — twenty minutes of real attention, then a real break. Walk away, breathe, let your mind wander. Little sessions most days beat rare marathons every time, and the wandering is when the music actually sinks in.",
         ],
         nextDelayMs: 0,
@@ -420,8 +420,8 @@ export const defaultWelcomeConfig: WelcomeConfig = {
         ],
       },
     ],
-    closing: "Happy playing — we're rooting for you",
-    cta: "Let's practice!",
+    closing: "Happy playing — we’re rooting for you",
+    cta: "Let’s practice!",
     resourceCardVariant: "image-card",
   },
   styleTokens: {

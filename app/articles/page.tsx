@@ -8,7 +8,7 @@ export default function ArticlesPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1 outline-none">
         <section className="relative overflow-hidden border-b border-border bg-card/50">
           <div
             aria-hidden

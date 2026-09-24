@@ -160,19 +160,35 @@ export function subscribePracticePageStore(listener: () => void): () => void {
 // Module-level server snapshot for useSyncExternalStore, built once and
 // deep-frozen so a caller mutating what it received cannot corrupt the
 // snapshot handed to a later caller.
+//
+// Ids and timestamps are fixed rather than generated: the server bundle and
+// the client bundle each evaluate this module, and React hydrates the client
+// from *its own* server snapshot — random UUIDs made the two disagree and
+// every tile's `data-tile-id` failed hydration.
+const SERVER_SNAPSHOT_PAGE_ID = "server-snapshot-page";
 const SERVER_SNAPSHOT: PracticePageStore = (() => {
   const store = createEmptyPracticePageStore();
   const frozen: PracticePageStore = {
     version: store.version,
-    pages: store.pages.map((page) =>
+    pages: store.pages.map((page, pageIndex) =>
       Object.freeze({
         ...page,
+        id:
+          pageIndex === 0
+            ? SERVER_SNAPSHOT_PAGE_ID
+            : `${SERVER_SNAPSHOT_PAGE_ID}-${pageIndex}`,
+        updatedAt: 0,
         blocks: Object.freeze(
-          page.blocks.map((block) => Object.freeze({ ...block }))
+          page.blocks.map((block, blockIndex) =>
+            Object.freeze({
+              ...block,
+              id: `server-snapshot-block-${pageIndex}-${blockIndex}`,
+            })
+          )
         ) as unknown as FeatureBlock[],
       })
     ),
-    activePageId: store.activePageId,
+    activePageId: SERVER_SNAPSHOT_PAGE_ID,
   };
   frozen.pages = Object.freeze(frozen.pages) as unknown as PracticePage[];
   return Object.freeze(frozen);

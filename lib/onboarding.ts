@@ -31,8 +31,8 @@ export const introSlides = {
   hi: "Hi",
   welcome: "welcome to piano suite",
   pillarsOverview: "These are the three most important pillars of learning on your piano journey.",
-  closing: "Happy playing — we're rooting for you",
-  cta: "Let's practice!",
+  closing: "Happy playing — we’re rooting for you",
+  cta: "Let’s practice!",
 } as const;
 
 export const onboardingPillars: OnboardingPillar[] = [
@@ -86,7 +86,7 @@ export const onboardingPillars: OnboardingPillar[] = [
       },
       {
         id: "dr-levi",
-        title: "Dr. Levi's hand exercises",
+        title: "Dr. Levi’s hand exercises",
         description: "Stretches and exercises designed for people who use their hands intensively.",
         href: "https://www.youtube.com/c/DrLeviHarrison",
         imageSrc: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&auto=format&fit=crop&q=60",
