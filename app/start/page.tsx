@@ -14,7 +14,11 @@ export default function StartPage() {
     <WelcomeConfigProvider>
       <div className="relative z-10 flex min-h-screen flex-col">
         <Navbar />
-        <main className="relative flex flex-1 items-center justify-center">
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="relative flex flex-1 items-center justify-center outline-none"
+        >
           <div
             aria-hidden
             className="staff-lines staff-lines-faded pointer-events-none absolute inset-0"
