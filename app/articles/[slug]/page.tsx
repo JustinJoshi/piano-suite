@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Calendar, Clock } from "lucide-react";
 import Link from "next/link";
 import { getAllArticles, getArticleBySlug } from "@/lib/articles";
+import { formatArticleDate } from "@/lib/article-date";
 import { ArticleContent } from "@/components/articles/article-content";
 import { SiteFooter } from "@/components/site-footer";
 
@@ -40,7 +41,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1 outline-none">
         <article className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
           <div className="mb-8">
             <Link
@@ -63,16 +64,16 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             </p>
 
             <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-              {article.publishedAt && (
-                <span className="flex items-center gap-1.5">
+              {article.publishedAt &&
+              formatArticleDate(article.publishedAt, "long") ? (
+                <time
+                  dateTime={article.publishedAt}
+                  className="flex items-center gap-1.5"
+                >
                   <Calendar className="h-4 w-4" />
-                  {new Date(article.publishedAt).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </span>
-              )}
+                  {formatArticleDate(article.publishedAt, "long")}
+                </time>
+              ) : null}
               {article.readingTime && (
                 <span className="flex items-center gap-1.5">
                   <Clock className="h-4 w-4" />
