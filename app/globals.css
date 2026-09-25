@@ -10,7 +10,9 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-fraunces);
+  --font-heading: var(--font-newsreader);
+  --font-serif: var(--font-newsreader);
+  --font-label: var(--font-archivo);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-elevated: var(--elevated);
@@ -35,6 +37,18 @@
   --color-sidebar-background: var(--sidebar-background);
   --color-ivory: var(--ivory);
   --color-ebony: var(--ebony);
+  --color-paper: var(--paper);
+  --color-paper-deep: var(--paper-deep);
+  --color-paper-bright: var(--paper-bright);
+  --color-felt: var(--felt);
+  --color-felt-bright: var(--felt-bright);
+  --color-case: var(--case);
+  --color-case-raised: var(--case-raised);
+  --color-case-foreground: var(--case-foreground);
+  --color-brass: var(--brass);
+  --color-lamp: var(--lamp);
+  --color-hole: var(--hole);
+  --color-rule: var(--rule);
   --color-door-play: var(--door-play);
   --color-door-explore: var(--door-explore);
   --color-door-learn: var(--door-learn);
@@ -75,8 +89,14 @@
  *   doors      --door-play / --door-explore / --door-learn: the three entry
  *              paths, used consistently wherever a door appears.
  *
- * :root is the Amber (default) dark theme. Presets override only the brand
- * ramp; Ivory (light) overrides the whole surface ladder as well.
+ * :root carries the Amber dark values as the base every preset builds on.
+ * Roll (the default, light) and Ivory (light) override the whole surface
+ * ladder; the dark presets override only the brand ramp.
+ *
+ * Roll constants (--paper, --felt, --case, --brass, --lamp, --hole, --rule)
+ * are like --ivory / --ebony: materials of the instrument, the same on every
+ * preset. The tracker bar and key slip are always --case; a hole is always
+ * --hole until it sounds.
  */
 
 :root {
@@ -85,6 +105,20 @@
   /* Piano constants */
   --ivory: #f3ecd9;
   --ebony: #0b0a09;
+
+  /* Roll constants: the paper, the felt, the case, the tracker's brass */
+  --paper: #efe6d3;
+  --paper-deep: #e6dbc4;
+  --paper-bright: #f7f1e5;
+  --felt: #a4262c;
+  --felt-bright: #e0625c;
+  --case: #17120e;
+  --case-raised: #221a14;
+  --case-foreground: #efe6d3;
+  --brass: #b88a45;
+  --lamp: #ffd98a;
+  --hole: #241c16;
+  --rule: #cfc1a4;
 
   /* Surface ladder */
   --background: #0c0a08;
@@ -370,6 +404,95 @@
     0 18px 50px -24px rgba(26, 22, 17, 0.45);
 }
 
+/* ---------- Roll: the default ----------
+   The page as a player-piano roll: roll paper for surfaces, printing ink for
+   text and the action key, red key-slip felt for the brand. `.roll` is the
+   preset on <html>; `.tone-roll` scopes the same tokens to a subtree so the
+   public pages wear the roll whatever preset the workspace uses. */
+.roll,
+.tone-roll {
+  color-scheme: light;
+
+  --background: var(--paper);
+  --foreground: #1c1814;
+  --card: var(--paper-bright);
+  --card-foreground: #1c1814;
+  --elevated: #fbf8f1;
+  --popover: #fbf8f1;
+  --popover-foreground: #1c1814;
+  --secondary: var(--paper-deep);
+  --secondary-foreground: #1c1814;
+  --muted: var(--paper-deep);
+  --muted-foreground: #4a4238;
+  --destructive: #b3452f;
+  --radius: 0.45rem;
+
+  --border: rgba(28, 24, 20, 0.13);
+  --input: rgba(28, 24, 20, 0.2);
+  --staff-line: rgba(28, 24, 20, 0.09);
+
+  --primary: #a4262c;
+  --primary-foreground: #f7f1e5;
+  --accent: #a4262c;
+  --accent-foreground: #f7f1e5;
+  --ring: #a4262c;
+  --primary-glow: rgba(164, 38, 44, 0.3);
+
+  --action: #1c1814;
+  --action-foreground: var(--paper-bright);
+  --action-hover: #2b241e;
+  --key-edge: #000;
+  --key-shadow: rgba(28, 24, 20, 0.55);
+
+  --door-play: #b8512f;
+  --door-explore: #1f7f70;
+  --door-learn: #5d4bb0;
+
+  --inverse-background: var(--case);
+  --inverse-foreground: var(--case-foreground);
+  --inverse-card: var(--case-raised);
+  --inverse-muted: #2c231b;
+  --inverse-muted-foreground: #b9ab93;
+  --inverse-border: rgba(239, 230, 211, 0.13);
+  --inverse-primary: var(--felt-bright);
+  --inverse-primary-foreground: var(--case);
+  --inverse-action: var(--paper);
+  --inverse-action-foreground: #1c1814;
+  --inverse-action-hover: var(--paper-bright);
+  --inverse-staff-line: rgba(239, 230, 211, 0.08);
+
+  --sidebar-background: #e9dfca;
+  --success: #4c7f45;
+
+  --hero-glow-1: rgba(164, 38, 44, 0.14);
+  --hero-glow-2: rgba(184, 138, 69, 0.12);
+  --hero-glow-3: rgba(164, 38, 44, 0.05);
+  --hero-orb-inner: #f0c9a0;
+  --hero-orb-mid: #b88a45;
+  --hero-orb-outer: #7e1a1f;
+  --hero-orb-shadow: rgba(164, 38, 44, 0.2);
+  --beam-mid: rgba(164, 38, 44, 0.35);
+  --beam-highlight: rgba(224, 98, 92, 0.6);
+
+  --grade-again: #b3452f;
+  --grade-hard: #a67d0b;
+  --grade-good: #4c7f45;
+  --grade-easy: #2f7f7a;
+  --grade-ungraded: #a79f8e;
+
+  /* Paper doesn't glow; it lies flat and casts a soft shadow. A key has a
+     3px front edge you press down past. */
+  --shadow-surface:
+    0 1px 0 0 rgba(28, 24, 20, 0.05),
+    0 14px 30px -22px rgba(60, 40, 15, 0.45);
+  --shadow-raised:
+    0 1px 0 0 rgba(28, 24, 20, 0.06),
+    0 22px 44px -24px rgba(60, 40, 15, 0.55);
+  --shadow-key:
+    0 3px 0 0 var(--key-edge),
+    0 12px 22px -12px var(--key-shadow);
+}
+
 /* ---------- Inverse tone ----------
    A section that flips the stage (ivory on a dark theme, ebony on Ivory)
    without leaving the token system. Children keep using bg-card, text-primary,
@@ -455,18 +578,14 @@
     text-underline-offset: 0.22em;
     text-decoration-thickness: from-font;
   }
-  /* Display type: Fraunces with a touch of its soft axis so headings feel
-     engraved rather than typeset. The optical-size axis is left to the
-     browser (`font-optical-sizing: auto`) so a 14px card title gets the
-     open, sturdy text cut and a 72px headline gets the tight display cut —
-     pinning `opsz` to a display value collapsed word spaces at small sizes. */
-  .font-heading {
+  /* Display type: Newsreader, as printed on a roll label. The optical-size
+     axis is left to the browser (`font-optical-sizing: auto`) so a 14px card
+     title gets the open text cut and a 72px headline the tight display cut —
+     never pin `opsz` in `font-variation-settings`. */
+  .font-heading,
+  .font-serif {
     font-optical-sizing: auto;
-    font-variation-settings: "SOFT" 40, "WONK" 0;
-    letter-spacing: -0.01em;
-    /* Fraunces' word space is narrow, and narrower still in italic; a
-       hair more keeps small captions from running words together. */
-    word-spacing: 0.04em;
+    letter-spacing: -0.012em;
     font-feature-settings: "kern", "liga", "calt";
   }
   h1, h2, h3, h4 {
@@ -612,9 +731,8 @@
    Fraunces' wonky italic at full softness, like a programme's movement
    headings. Reads --primary, so the inverse band gets its own brass. */
 .movement-numeral {
-  font-family: var(--font-fraunces);
+  font-family: var(--font-heading);
   font-style: italic;
-  font-variation-settings: "SOFT" 100, "WONK" 1;
   font-optical-sizing: auto;
   font-weight: 400;
   line-height: 0.9;
@@ -627,8 +745,7 @@
    `initial-letter` where supported (it aligns to the baseline grid) and a
    floated fallback elsewhere. */
 .drop-cap > p:first-child::first-letter {
-  font-family: var(--font-fraunces);
-  font-variation-settings: "SOFT" 100, "WONK" 1;
+  font-family: var(--font-heading);
   font-weight: 600;
   color: var(--foreground);
   float: left;
@@ -649,8 +766,7 @@
 
 /* Big translucent measure numbers behind section headings. */
 .measure-number {
-  font-family: var(--font-fraunces);
-  font-variation-settings: "SOFT" 100, "WONK" 1, "opsz" 144;
+  font-family: var(--font-heading);
   font-weight: 500;
   line-height: 1;
   color: color-mix(in oklab, var(--primary) 22%, transparent);

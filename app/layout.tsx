@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Fraunces, Geist_Mono } from "next/font/google";
+import { Inter, Newsreader, Archivo, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { shadcn } from "@clerk/ui/themes";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
@@ -16,20 +16,29 @@ import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
 import { defaultTheme, themeIds } from "@/lib/themes";
 import { resolveSiteUrl } from "@/lib/site-url";
 import "./globals.css";
+import "./roll.css";
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
 });
 
-// Fraunces is the display face. Loading its optical-size, softness, and
-// "wonk" axes lets `.font-heading` (globals.css) dial in an engraved,
-// sheet-music feel instead of a flat web serif.
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
+// Newsreader is the roll's printed type: headings everywhere, and running
+// text on public pages. Its optical-size axis gives a 72px headline the tight
+// display cut and a 17px paragraph the open text cut.
+const newsreader = Newsreader({
+  variable: "--font-newsreader",
   subsets: ["latin"],
   style: ["normal", "italic"],
-  axes: ["SOFT", "WONK", "opsz"],
+  axes: ["opsz"],
+});
+
+// Archivo, condensed through its width axis, sets the roll's labels:
+// roll numbers, tempo markings, button faces.
+const archivo = Archivo({
+  variable: "--font-archivo",
+  subsets: ["latin"],
+  axes: ["wdth"],
 });
 
 const geistMono = Geist_Mono({
@@ -71,10 +80,10 @@ export const metadata: Metadata = {
   },
 };
 
-// First-paint browser chrome colour (Amber's --background). ThemeColorHost
+// First-paint browser chrome colour (the roll's paper). ThemeColorHost
 // re-points it at the active preset once the client knows which one it is.
 export const viewport: Viewport = {
-  themeColor: "#0c0a08",
+  themeColor: "#efe6d3",
   colorScheme: "dark light",
 };
 
@@ -86,7 +95,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${fraunces.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${newsreader.variable} ${archivo.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">

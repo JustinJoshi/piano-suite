@@ -2,7 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/font/google", () => ({
   Inter: () => ({}),
-  Fraunces: () => ({}),
+  Newsreader: () => ({}),
+  Archivo: () => ({}),
   Geist_Mono: () => ({}),
 }));
 

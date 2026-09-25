@@ -4,11 +4,15 @@
  * Each theme id matches a CSS class applied to <html> by next-themes.
  * The corresponding color tokens live in app/globals.css.
  *
- * Every preset except Ivory is a dark "stage" that swaps only the brand
- * ramp. Ivory flips the whole surface ladder to a light, paper-like stage.
+ * Roll is the default: roll paper, printing ink, red key-slip felt and a
+ * brass tracker bar. It overrides the whole surface ladder, like Ivory.
+ * Every other preset except Ivory is a dark "stage" that swaps only the
+ * brand ramp. Public pages always wear the roll (`.tone-roll`); presets
+ * apply to the workspace.
  */
 
 export const themeIds = [
+  "roll",
   "amber",
   "ivory",
   "rose",
@@ -31,9 +35,15 @@ export interface Theme {
 
 export const themes: Theme[] = [
   {
+    id: "roll",
+    name: "Roll",
+    description: "Paper, ink and red felt — the default",
+    appearance: "light",
+  },
+  {
     id: "amber",
     name: "Amber",
-    description: "Brass and ebony — the default stage",
+    description: "Brass and ebony — the studio stage",
     appearance: "dark",
   },
   {
@@ -74,7 +84,7 @@ export const themes: Theme[] = [
   },
 ];
 
-export const defaultTheme: ThemeId = "amber";
+export const defaultTheme: ThemeId = "roll";
 
 export function isThemeId(value: string): value is ThemeId {
   return themeIds.includes(value as ThemeId);

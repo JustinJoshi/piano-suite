@@ -6,6 +6,7 @@ import { themeIds, type ThemeId } from "@/lib/themes";
 // Brand ramp per preset — keep in sync with the theme classes in
 // app/globals.css.
 const EXPECTED_PRIMARY: Record<ThemeId, string> = {
+  roll: "#a4262c",
   amber: "#d3ab2e",
   ivory: "#8f6d10",
   rose: "#e8506f",

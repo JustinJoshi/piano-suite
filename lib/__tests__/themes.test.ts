@@ -13,8 +13,8 @@ describe("themes registry", () => {
     expect(themeIds.length).toBe(themes.length);
   });
 
-  it("default theme is amber", () => {
-    expect(defaultTheme).toBe("amber");
+  it("default theme is the roll", () => {
+    expect(defaultTheme).toBe("roll");
   });
 
   it("every theme has a unique id", () => {

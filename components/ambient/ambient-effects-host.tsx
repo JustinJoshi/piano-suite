@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { useAmbientEffects } from "@/hooks/useAmbientEffects";
 import { useAuthAccess } from "@/hooks/useAuthAccess";
+import { isRollRoute } from "@/lib/roll-routes";
 
 const AmbientBackground = dynamic(
   () =>
@@ -23,8 +24,8 @@ const AmbientFloatPanel = dynamic(
 
 /**
  * Root-layout host: one full-bleed ambient background + optional float panel.
- * Float / pop-out is Pro-only (`canUseFloatPanel`). Welcome (`/`) keeps its
- * own hero scrim, so the host scrim is hidden there.
+ * Float / pop-out is Pro-only (`canUseFloatPanel`). Public pages wear the
+ * roll (`lib/roll-routes.ts`), so the background is off behind them.
  */
 export function AmbientEffectsHost() {
   const pathname = usePathname() ?? "/";
@@ -37,7 +38,8 @@ export function AmbientEffectsHost() {
     setFloatRect,
   } = useAmbientEffects();
 
-  const backgroundKind = backgroundFor(pathname);
+  // Roll pages are opaque paper on a dark case; nothing would show through.
+  const backgroundKind = isRollRoute(pathname) ? "none" : backgroundFor(pathname);
   const showFloat = canUseFloatPanel && floatVisibleFor(pathname);
   const hideScrim = pathname === "/";
 
