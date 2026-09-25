@@ -111,6 +111,19 @@
   margin: 0;
 }
 
+/* Archivo's word space narrows with its width axis: condensed to 88% it is
+   about 0.14em, no wider than the gap between two letters, so "Sign in"
+   read as "Signin". Mixed-case condensed labels get the space back;
+   tracked uppercase labels already have it. */
+.roll-btn,
+.roll-tracker-link,
+.roll-tracker-signin,
+.roll-block-name,
+.roll-tile-head,
+.roll-grade {
+  word-spacing: 0.12em;
+}
+
 .roll-h1 {
   font-family: var(--font-heading);
   font-weight: 400;
