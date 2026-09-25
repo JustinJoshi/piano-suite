@@ -1,249 +1,218 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
-import {
-  SignInButton,
-  SignUpButton,
-  Show,
-} from "@clerk/nextjs";
+import { SignInButton, Show } from "@clerk/nextjs";
 import { AppUserButton } from "@/components/app-user-button";
-import { AppliedLogoMark } from "@/components/brand/applied-logo-mark";
-import { Button } from "@/components/ui/button";
+import { useRollSound } from "@/hooks/useRollSound";
+import { ROLL_LANES, ROLL_LOW } from "@/lib/roll-music";
+import { ROLL_NOTE_OFF, ROLL_NOTE_ON } from "@/lib/roll-audio";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
   { label: "Workshop", href: "/tools/workshop" },
   { label: "Marketplace", href: "/marketplace" },
-  { label: "Pricing", href: "/pricing" },
+  { label: "Routes", href: "/routes" },
   { label: "Articles", href: "/articles" },
+  { label: "Pricing", href: "/pricing" },
 ];
 
 function isActivePath(pathname: string, href: string): boolean {
-  if (href === "/") return pathname === "/";
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-/** How far the page scrolls before the bar picks up its glass and hairline. */
-const SCROLLED_THRESHOLD_PX = 8;
+const NOTE_ON_EVENTS = ["midi-note-on", "music-note-on", ROLL_NOTE_ON];
+const NOTE_OFF_EVENTS = ["midi-note-off", "music-note-off", ROLL_NOTE_OFF];
 
 /**
- * Public site chrome. Wordmark on the left, a pill nav in the middle with a
- * lit underline for the active section, account on the right.
+ * The tracker bar: the public header, and the bar a player-piano roll feeds
+ * past. Its brass rail has one slot per semitone from C3 to C6, lined up with
+ * the lanes of the roll below; a slot lights whenever its note sounds —
+ * a key pressed, a MIDI keyboard, a hole passing, a song in the music player.
+ * The wordmark's three holes are a C major chord and light for C, E and G.
  *
- * At the top of the page the bar is clear, so the hero atmosphere runs to
- * the very top edge; once the page scrolls it gathers glass, a hairline,
- * and a soft shadow so content passing underneath stays legible.
+ * Lighting is written straight to the DOM (`data-lit`), not React state: a
+ * fast scroll can start and stop dozens of notes a second.
  */
-export function Navbar() {
+export function Navbar({ sound = false }: { sound?: boolean }) {
   const pathname = usePathname() ?? "/";
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const rollSound = useRollSound();
+  const slotsRef = useRef<HTMLDivElement>(null);
+  const markRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(min-width: 768px)");
-
-    const handleChange = (event: MediaQueryListEvent) => {
-      if (event.matches) {
-        setMobileMenuOpen(false);
-      }
+    const query = window.matchMedia("(min-width: 900px)");
+    const close = (event: MediaQueryListEvent) => {
+      if (event.matches) setMenuOpen(false);
     };
-
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
+    query.addEventListener("change", close);
+    return () => query.removeEventListener("change", close);
   }, []);
 
+  // Escape closes the menu (a disclosure, not a dialog, so no focus trap).
   useEffect(() => {
-    let frame = 0;
-    const update = () => {
-      frame = 0;
-      setScrolled(window.scrollY > SCROLLED_THRESHOLD_PX);
-    };
-    const onScroll = () => {
-      if (frame === 0) frame = window.requestAnimationFrame(update);
-    };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (frame !== 0) window.cancelAnimationFrame(frame);
-    };
-  }, []);
-
-  // Escape closes the mobile menu (the menu is a disclosure, not a dialog,
-  // so it doesn't trap focus — but it should still dismiss from the keyboard).
-  useEffect(() => {
-    if (!mobileMenuOpen) return;
+    if (!menuOpen) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setMobileMenuOpen(false);
+      if (event.key === "Escape") setMenuOpen(false);
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [mobileMenuOpen]);
+  }, [menuOpen]);
 
-  const raised = scrolled || mobileMenuOpen;
+  useEffect(() => {
+    const slots = slotsRef.current ? Array.from(slotsRef.current.children) : [];
+    const marks = markRef.current ? Array.from(markRef.current.children) : [];
+    const noteCount = new Map<number, number>();
+    const pcCount = new Map<number, number>();
+
+    const bump = (note: number, delta: number) => {
+      const n = Math.max(0, (noteCount.get(note) ?? 0) + delta);
+      noteCount.set(note, n);
+      const slot = slots[note - ROLL_LOW];
+      if (slot) slot.toggleAttribute("data-lit", n > 0);
+      const pc = ((note % 12) + 12) % 12;
+      const p = Math.max(0, (pcCount.get(pc) ?? 0) + delta);
+      pcCount.set(pc, p);
+      for (const mark of marks) {
+        if (Number((mark as HTMLElement).dataset.pc) === pc) mark.toggleAttribute("data-lit", p > 0);
+      }
+    };
+    const on = (event: Event) => {
+      const note = (event as CustomEvent<{ note: number }>).detail?.note;
+      if (typeof note === "number") bump(note, 1);
+    };
+    const off = (event: Event) => {
+      const note = (event as CustomEvent<{ note: number }>).detail?.note;
+      if (typeof note === "number") bump(note, -1);
+    };
+    NOTE_ON_EVENTS.forEach((name) => window.addEventListener(name, on));
+    NOTE_OFF_EVENTS.forEach((name) => window.addEventListener(name, off));
+    return () => {
+      NOTE_ON_EVENTS.forEach((name) => window.removeEventListener(name, on));
+      NOTE_OFF_EVENTS.forEach((name) => window.removeEventListener(name, off));
+    };
+  }, []);
 
   return (
-    <header
-      data-scrolled={raised ? "true" : undefined}
-      className={cn(
-        "sticky top-0 z-50 w-full border-b transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300 ease-out",
-        raised
-          ? "glass border-border shadow-[0_12px_32px_-24px_var(--key-shadow)]"
-          : "border-transparent bg-transparent"
-      )}
-    >
+    <header className="tone-roll roll-tracker roll-on-case">
       <a
         href="#main-content"
-        className="sr-only rounded-full bg-action px-4 py-2 text-sm font-medium text-action-foreground shadow-key focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-[60]"
+        className="sr-only rounded-full bg-paper px-4 py-2 text-sm font-medium text-foreground focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-[60]"
       >
         Skip to content
       </a>
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        <Link
-          href="/"
-          className="group flex items-center gap-2.5 rounded-lg text-foreground"
-          aria-label="Piano Suite home"
-        >
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/12 text-primary ring-1 ring-primary/20 transition-[background-color,box-shadow] duration-200 group-hover:bg-primary/18 group-hover:shadow-[0_0_18px_-4px_var(--primary-glow)]">
-            <AppliedLogoMark
-              className="h-5 w-5 origin-bottom transition-transform duration-300 ease-key group-hover:-rotate-6 motion-reduce:transition-none motion-reduce:group-hover:rotate-0"
-              title="Piano Suite"
-            />
-          </span>
-          <span className="font-heading text-lg font-semibold tracking-tight">
-            Piano Suite
-          </span>
-        </Link>
+      <div className="roll-sheet">
+        <div className="roll-tracker-row">
+          <Link href="/" className="roll-wordmark" aria-label="Piano Suite home">
+            <span className="roll-mark" aria-hidden="true" ref={markRef}>
+              <i data-pc="0" />
+              <i data-pc="4" />
+              <i data-pc="7" />
+            </span>
+            <span>Piano Suite</span>
+          </Link>
 
-        <nav
-          aria-label="Primary"
-          className={cn(
-            "hidden items-center gap-0.5 rounded-full border p-1 transition-colors duration-300 md:flex",
-            raised
-              ? "border-border bg-card/60"
-              : "border-border/70 bg-card/35 backdrop-blur-md"
-          )}
-        >
-          {navLinks.map((link) => {
-            const active = isActivePath(pathname, link.href);
-            return (
+          <nav aria-label="Primary" className="roll-tracker-nav">
+            {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "relative rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-150",
-                  active
-                    ? "bg-primary/12 text-foreground"
-                    : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"
-                )}
+                className="roll-tracker-link"
+                aria-current={isActivePath(pathname, link.href) ? "page" : undefined}
               >
                 {link.label}
-                {active ? (
-                  <span
-                    aria-hidden
-                    className="absolute inset-x-4 -bottom-[5px] h-0.5 rounded-full bg-primary shadow-[0_0_10px_1px_var(--primary-glow)]"
-                  />
-                ) : null}
               </Link>
-            );
-          })}
-        </nav>
+            ))}
+          </nav>
 
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="md:hidden text-muted-foreground hover:text-foreground"
-            aria-expanded={mobileMenuOpen}
-            aria-controls="mobile-nav-menu"
-            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-            onClick={() => setMobileMenuOpen((open) => !open)}
-          >
-            {mobileMenuOpen ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <Menu className="h-5 w-5" />
-            )}
-          </Button>
-
-          <Show when="signed-out">
-            <SignInButton>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="hidden text-muted-foreground hover:text-foreground sm:inline-flex"
+          <div className="roll-tracker-controls">
+            {sound ? (
+              <button
+                type="button"
+                className="roll-sound"
+                aria-pressed={rollSound.on}
+                onClick={rollSound.toggle}
               >
-                Sign in
-              </Button>
-            </SignInButton>
-            <SignUpButton>
-              <Button size="sm" className="rounded-full px-4">
-                Try it free
-              </Button>
-            </SignUpButton>
-          </Show>
-          <Show when="signed-in">
-            <AppUserButton />
-          </Show>
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 9.5h3.2L12 5.5v13l-4.8-4H4z" />
+                  <path className="wave" d="M15.5 9.2a4 4 0 0 1 0 5.6" />
+                  <path className="wave wave-far" d="M18.3 6.6a7.6 7.6 0 0 1 0 10.8" />
+                  <path className="mute" d="M16 9.5l5 5M21 9.5l-5 5" />
+                </svg>
+                <span className="roll-sound-text">
+                  Sound<span aria-hidden="true"> {rollSound.on ? "on" : "off"}</span>
+                </span>
+              </button>
+            ) : null}
+            <Show when="signed-out">
+              <SignInButton>
+                <button type="button" className="roll-tracker-signin">
+                  Sign in
+                </button>
+              </SignInButton>
+            </Show>
+            <Show when="signed-in">
+              <AppUserButton />
+            </Show>
+            <Link href="/start" className="roll-btn roll-btn-paper roll-btn-sm">
+              Start playing
+            </Link>
+            <button
+              type="button"
+              className="roll-tracker-menu"
+              aria-expanded={menuOpen}
+              aria-controls="roll-menu"
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              onClick={() => setMenuOpen((open) => !open)}
+            >
+              {menuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            </button>
+          </div>
         </div>
-      </div>
 
-      {mobileMenuOpen ? (
-        <nav
-          id="mobile-nav-menu"
-          aria-label="Primary (mobile)"
-          className="animate-in fade-in slide-in-from-top-1 border-t border-border duration-200 md:hidden motion-reduce:animate-none"
-        >
-          <div className="mx-auto flex max-w-7xl flex-col gap-1.5 px-4 py-3 sm:px-6 lg:px-8">
-            {navLinks.map((link, index) => {
-              const active = isActivePath(pathname, link.href);
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  aria-current={active ? "page" : undefined}
-                  className={cn(
-                    "flex items-center justify-between rounded-xl border px-4 py-3 text-sm font-medium transition-colors",
-                    active
-                      ? "border-primary/30 bg-primary/12 text-foreground"
-                      : "border-border bg-card/70 text-muted-foreground hover:bg-elevated hover:text-foreground"
-                  )}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <span className="flex items-center gap-3">
-                    <span className="font-mono text-[0.65rem] tracking-wider text-muted-foreground">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    {link.label}
-                  </span>
-                  {active ? (
-                    <span
-                      aria-hidden
-                      className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_1px_var(--primary-glow)]"
-                    />
-                  ) : null}
-                </Link>
-              );
-            })}
+        {menuOpen ? (
+          <nav id="roll-menu" aria-label="Primary (mobile)" className="roll-tracker-drawer">
+            {navLinks.map((link, index) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                aria-current={isActivePath(pathname, link.href) ? "page" : undefined}
+                onClick={() => setMenuOpen(false)}
+              >
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                {link.label}
+              </Link>
+            ))}
             <Show when="signed-out">
               <SignInButton>
                 <button
                   type="button"
-                  className="mt-1 rounded-xl px-4 py-2.5 text-left text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:hidden"
-                  onClick={() => setMobileMenuOpen(false)}
+                  className="roll-tracker-signin"
+                  style={{ display: "block", padding: "12px 0", fontSize: 16 }}
+                  onClick={() => setMenuOpen(false)}
                 >
                   Sign in
                 </button>
               </SignInButton>
             </Show>
+          </nav>
+        ) : null}
+
+        <div className="roll-row roll-rail" data-roll-rail aria-hidden="true">
+          <span className="roll-railcap" />
+          <div className="roll-lanes roll-slots" ref={slotsRef}>
+            {Array.from({ length: ROLL_LANES }, (_, i) => (
+              <span key={i} className="roll-slot" style={{ "--i": i } as React.CSSProperties} />
+            ))}
           </div>
-        </nav>
-      ) : null}
+        </div>
+      </div>
+      <p className={cn("roll-toast")} role="status" aria-live="polite" data-shown={rollSound.message ? "" : undefined}>
+        {rollSound.message}
+      </p>
     </header>
   );
 }
