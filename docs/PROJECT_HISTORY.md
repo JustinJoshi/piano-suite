@@ -1108,6 +1108,67 @@ the landing page things to play with rather than more to read.
   showed a day early west of UTC; `lib/article-date.ts` formats them in
   UTC. `app/error.tsx` used a `font-serif` class that doesn't exist.
 
+## The roll — public pages as a player-piano roll (2026-09-25)
+
+The landing page began as a blind brief: design an original landing page
+for Piano Suite from a written description only, without opening the
+repository. The concept was a player-piano roll. A roll is a practice
+machine someone built by hand, one person's playing encoded so someone else
+can use it, which is Piano Suite's origin story. The standalone build
+(plain HTML, CSS and JavaScript, `piano-roll-landing/`, never committed)
+was then ported into the app, and the rest of the public site followed.
+
+- **Theme.** `.roll` is a new light preset and the default: roll paper,
+  printing ink, red key-slip felt, a brass tracker bar. Public pages always
+  wear it through `.tone-roll`, whatever preset is saved; presets now apply
+  to the workspace. Newsreader replaces Fraunces; Archivo, condensed
+  through its width axis, sets labels. Roll constants (`--paper`, `--felt`,
+  `--case`, `--brass`, `--lamp`, `--hole`, `--rule`) sit beside
+  `--ivory` / `--ebony`. The ambient canvas is off on roll routes
+  (`lib/roll-routes.ts`) because the paper is opaque.
+- **Chrome.** The navbar is the tracker bar: one slot per semitone from C3
+  to C6 that lights when its note sounds anywhere (a key, MIDI, a hole on
+  the roll, the music player). The footer is the key slip: dark case, red
+  felt, exactly one Terms and one Privacy link.
+- **The landing.** One long roll (`components/welcome/roll/*`). The hero is
+  a real four-chord drill (I–V–vi–IV) on the app primitives
+  (`pressVirtualNote`, `useMidi()`, the audio host), playable with a mouse,
+  touch, QWERTY or MIDI. A released note counts for 1.5s so a mouse can
+  play a chord. Runs land in a ledger in localStorage, deliberately apart
+  from practice history. Passages punched between sections play as they
+  pass the bar once sound is on. Sections read the real registries (drills,
+  routes, starter pages, article slugs). The studio landing's sections were
+  deleted.
+- **Every other public page.** `/start`, `/marketplace` (and detail),
+  `/pricing`, `/routes` (with its own layout), `/articles`, `/terms`,
+  `/privacy`, the 404 (a blank stretch of roll: *tacet*) and the Clerk
+  stage now sit in `RollFrame`. New helpers: `RollPageHead` / `RollMain` /
+  `RollRuleLabel` for the margin grid, and `RollChordStrip`, a chord
+  punched across a card's top in place of the lit keybed.
+- **Fixes along the way.** The roll's door hues were too light for small
+  text on paper (Play and Explore under 4.5:1 even plain); they are
+  darkened to pass on a 15% tint of themselves, which the a11y gate caught
+  on `/marketplace`'s page thumbnails. The marketplace grid goes to three
+  columns at `xl`, not `lg`, so card buttons fit at 1024px. Condensed
+  Archivo's word space is barely wider than a letter gap ("Sign in" read
+  as "Signin"), so mixed-case condensed labels get `word-spacing: 0.12em`.
+  `useOptionalAudioSettings` lets the roll's sound toggle stay silent
+  outside `AudioSettingsProvider` (isolated test renders).
+- **Known gaps.** Pattern Lab's **Apply to home** still writes hero
+  settings that nothing on `/` renders now. Ten studio decor utilities
+  lost their last users and are still in `globals.css` (listed in
+  `DESIGN-PRINCIPLES.md` §3). The `/start` Play door still promises a
+  drill that "opens right away — free, no account", but links to the Chord
+  Drill, which shows signed-out visitors a sign-in gate (`DrillGate`); the
+  roll landing's own copy says the drill pages ask for an account.
+  `components/feature-blocks/__tests__/source-practice.test.tsx` fails on
+  this branch and on its base commit alike.
+- **Verified.** Lint and typecheck clean; unit 1,775 of 1,776 (the one
+  above). Touched-flow e2e against a production build: 73 passed, 2 flaky
+  (auth-protection `page.goto` timeouts under machine load, green on
+  retry), and the a11y gate, which failed on the door contrast, passes
+  after the fix along with `theme.spec.ts`.
+
 ## Roadmap
 
 - [x] Scaffold Next.js + Tailwind + shadcn/ui
