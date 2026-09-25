@@ -1,4 +1,4 @@
-import { Navbar } from "@/components/navbar";
+import { RollFrame } from "@/components/roll/roll-frame";
 import { ChatBubble } from "@/components/articles/chat-bubble";
 
 export default function ArticlesLayout({
@@ -7,10 +7,9 @@ export default function ArticlesLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="flex min-h-screen flex-col">
-      <Navbar />
-      {children}
+    <>
+      <RollFrame>{children}</RollFrame>
       <ChatBubble />
-    </div>
+    </>
   );
 }

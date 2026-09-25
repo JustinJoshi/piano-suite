@@ -1778,3 +1778,139 @@
   .roll-pc[data-on] { transform: none; }
   .roll-entry-dots::after { transition: none; }
 }
+
+/* ==========================================================================
+   Public pages beyond the landing
+   ========================================================================== */
+
+.roll-page-head {
+  padding-top: clamp(20px, 3vw, 44px);
+  padding-bottom: clamp(28px, 4vw, 56px);
+}
+.roll-h1-page { font-size: clamp(38px, 2.4vw + 22px, 62px); margin-bottom: 18px; }
+.roll-page-head .roll-lede p { margin: 0 0 0.6em; }
+.roll-page-end { padding-bottom: clamp(56px, 7vw, 104px); }
+
+.roll-rule-label { display: flex; align-items: center; gap: 14px; margin: 0 0 22px; }
+.roll-rule-label > span { flex: 1; height: 1px; background: var(--rule); }
+
+.roll-chord-strip { display: block; width: 100%; height: 26px; }
+.roll-chord-strip-paper { fill: var(--paper-deep); }
+.roll-chord-strip-hole { fill: var(--hole); transition: fill 0.3s; }
+a:hover .roll-chord-strip-hole,
+article:hover .roll-chord-strip-hole { fill: var(--felt); }
+
+/* A paper card on the roll: flatter and squarer than the studio's. */
+.roll-card-paper {
+  border-radius: 6px;
+  background: var(--paper-bright);
+  box-shadow: inset 0 0 0 1px var(--rule), 0 14px 26px -22px color-mix(in oklab, var(--brass) 70%, black);
+  transition: box-shadow 0.2s, transform 0.2s var(--roll-ease);
+}
+a.roll-card-paper:hover,
+.roll-card-paper:has(a:hover) {
+  box-shadow: inset 0 0 0 1px var(--foreground), 0 18px 30px -22px color-mix(in oklab, var(--brass) 80%, black);
+}
+
+.roll-stamp-chip {
+  display: inline-block;
+  padding: 3px 7px 2px;
+  border: 1.5px solid currentColor;
+  border-radius: 4px;
+  font: 700 10.5px/1 var(--font-label);
+  font-stretch: 80%;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--felt);
+  background: color-mix(in oklab, var(--paper-bright) 85%, transparent);
+  transform: rotate(-4deg);
+}
+
+/* Long-form reading on paper: articles and the legal pages. */
+.roll-reading {
+  max-width: 38em;
+  font-size: clamp(17px, 0.3vw + 16px, 19px);
+  line-height: 1.65;
+}
+.roll-reading h2 {
+  font-family: var(--font-heading);
+  font-size: 1.35em;
+  font-weight: 450;
+  margin: 1.8em 0 0.4em;
+}
+.roll-reading p,
+.roll-reading li { color: color-mix(in oklab, var(--foreground) 88%, transparent); }
+
+/* The auth stage: a sheet of paper laid on the dark case. */
+.roll-auth {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.roll-auth-top { display: flex; align-items: center; height: 60px; }
+.roll-auth-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding: 24px 16px 56px;
+  text-align: center;
+}
+.roll-auth-main .roll-label { color: var(--felt-bright); }
+.roll-auth-title {
+  font-family: var(--font-heading);
+  font-size: clamp(30px, 2vw + 20px, 42px);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  color: var(--case-foreground);
+  margin: 6px 0 0;
+}
+
+/* ---------- the doors (/start) ---------- */
+
+.roll-doors-primary { display: grid; gap: 18px; }
+@media (min-width: 640px) { .roll-doors-primary { grid-template-columns: 1fr 1fr; } }
+.roll-door { display: flex; flex-direction: column; overflow: hidden; color: var(--foreground); text-decoration: none; }
+.roll-door-body { display: flex; flex: 1; flex-direction: column; gap: 10px; padding: 24px 26px 26px; }
+.roll-door-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  color: var(--paper-bright);
+  background: var(--door, var(--felt));
+  box-shadow: inset 0 -2px 0 color-mix(in oklab, black 22%, transparent);
+}
+.roll-door-name { font-family: var(--font-heading); font-size: clamp(28px, 1vw + 22px, 34px); line-height: 1.05; margin-top: 6px; }
+.roll-door-desc { flex: 1; font-size: 17px; line-height: 1.45; color: var(--muted-foreground); }
+.roll-door-cta { align-self: flex-start; margin-top: 8px; font-size: 17px; }
+.roll-door:hover .roll-door-cta { color: var(--felt); background-size: 100% 1.5px, 6px 1.5px; }
+.roll-door:hover .roll-chord-strip-hole { fill: var(--door, var(--felt)); }
+.roll-door-row {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px 14px;
+  margin-top: 18px;
+  padding: 14px 18px;
+  color: var(--foreground);
+  text-decoration: none;
+}
+.roll-door-row .roll-door-icon { width: 30px; height: 30px; }
+.roll-door-row-name { font-family: var(--font-heading); font-size: 20px; }
+.roll-door-row-desc { color: var(--muted-foreground); font-size: 16px; }
+@media (max-width: 560px) {
+  .roll-door-row { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .roll-door-row-desc { grid-column: 1 / -1; }
+}
+
+/* A blank stretch of roll (the 404): faint lanes, nothing punched. */
+.roll-blank {
+  height: 140px;
+  background:
+    linear-gradient(to bottom, var(--paper) 0, transparent 30%, transparent 70%, var(--paper) 100%),
+    repeating-linear-gradient(90deg, transparent 0 calc(100% / var(--lanes) - 1px), color-mix(in oklab, var(--foreground) 7%, transparent) calc(100% / var(--lanes) - 1px) calc(100% / var(--lanes)));
+}

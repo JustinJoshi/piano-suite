@@ -10,7 +10,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useAudioSettings } from "@/hooks/useAudioSettings";
+import { useOptionalAudioSettings } from "@/hooks/useAudioSettings";
 import { playRollSequence } from "@/lib/roll-audio";
 
 /**
@@ -41,7 +41,9 @@ const FIRST_ON_MESSAGE =
   "Sound is on. The roll plays whatever passes under this bar, so scroll slowly to hear it.";
 
 export function RollSoundProvider({ children }: { children: ReactNode }) {
-  const { settings, setMusicEnabled } = useAudioSettings();
+  const audio = useOptionalAudioSettings();
+  const musicEnabled = audio?.settings.musicEnabled ?? true;
+  const setMusicEnabled = audio?.setMusicEnabled;
   const [on, setOn] = useState(false);
   const [userMuted, setUserMuted] = useState(false);
   const [message, setMessage] = useState("");
@@ -76,7 +78,7 @@ export function RollSoundProvider({ children }: { children: ReactNode }) {
     setUserMuted(false);
     mutedRef.current = false;
     // The visitor asked for sound, so make sure the music channel can speak.
-    if (!settings.musicEnabled) setMusicEnabled(true);
+    if (!musicEnabled) setMusicEnabled?.(true);
     turnOn();
     playRollSequence(
       [
@@ -85,7 +87,7 @@ export function RollSoundProvider({ children }: { children: ReactNode }) {
       ],
       { bpm: 120, source: "roll-hello" }
     );
-  }, [settings.musicEnabled, setMusicEnabled, turnOn]);
+  }, [musicEnabled, setMusicEnabled, turnOn]);
 
   const want = useCallback(() => {
     if (onRef.current) return true;

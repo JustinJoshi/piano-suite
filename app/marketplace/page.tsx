@@ -12,12 +12,11 @@ import {
   Hammer,
   LayoutGrid,
   Play,
-  Sparkles,
-  Users,
 } from "lucide-react";
 import { useState } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Keybed } from "@/components/brand/keybed";
+import { RollChordStrip } from "@/components/roll/chord-strip";
+import { RollPageHead, RollRuleLabel } from "@/components/roll/page-head";
 import { PageThumbnail } from "@/components/workshop-grid/page-thumbnail";
 import { marketplaceSeeds } from "@/lib/marketplace-seeds";
 import { featureRegistry } from "@/lib/feature-blocks/registry";
@@ -84,7 +83,7 @@ function PageContents({ blocks }: { blocks: Array<{ type: string }> }) {
 function CommunitySkeleton() {
   return (
     <div
-      className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+      className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"
       role="status"
       aria-label="Loading community pages"
     >
@@ -92,7 +91,7 @@ function CommunitySkeleton() {
         <div
           key={index}
           aria-hidden
-          className="overflow-hidden rounded-2xl border border-border bg-card shadow-surface"
+          className="roll-card-paper overflow-hidden"
         >
           <div className="skeleton h-7 rounded-none" />
           <div className="space-y-3 p-5">
@@ -134,20 +133,9 @@ function SeedCard({
   }
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-surface transition-[transform,border-color,box-shadow] duration-200 ease-out hover:-translate-y-0.5 hover:border-door-explore/40 hover:shadow-raised motion-reduce:hover:translate-y-0">
-      <div className="relative">
-        <Keybed
-          octaves={3}
-          closingC
-          lit={chordFor(id)}
-          litColor="var(--color-door-explore)"
-          className="h-9 w-full"
-        />
-        <span className="absolute right-3 top-2 inline-flex items-center gap-1 rounded-full bg-door-explore px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-ebony shadow-key">
-          <Sparkles className="h-3 w-3" />
-          Featured
-        </span>
-      </div>
+    <article className="roll-card-paper group relative flex flex-col overflow-hidden">
+      <RollChordStrip notes={chordFor(id).map((n) => n + 60)} />
+      <span className="roll-stamp-chip absolute right-3 top-9">Featured</span>
       <div className="flex flex-1 flex-col p-5">
         <div className="flex items-start justify-between gap-3">
           <h3 className="font-heading text-lg font-semibold tracking-tight text-foreground">
@@ -202,50 +190,28 @@ export default function MarketplacePage() {
 
   return (
     <div className="relative">
-      {/* Header band */}
-      <section className="relative overflow-hidden border-b border-border bg-card/50">
-        <div
-          aria-hidden
-          className="staff-lines staff-lines-faded pointer-events-none absolute inset-0"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-door-explore/12 to-transparent"
-        />
-        <div className="relative mx-auto flex max-w-6xl flex-col gap-8 px-4 py-14 sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:px-8 lg:py-20">
-          <div className="max-w-2xl">
-            <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-door-explore">
-              <Users className="h-3.5 w-3.5" />
-              explore
-            </span>
-            <h1 className="mt-3 font-heading text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-              Marketplace
-            </h1>
-            <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Practice pages built and shared by fellow learners — try one,
-              copy it, make it yours. No sign-up needed, ever.
-            </p>
-          </div>
-          <Link
-            href="/tools/workshop"
-            className={cn(buttonVariants({ size: "lg" }), "shrink-0 rounded-full px-6")}
-          >
-            <Hammer className="h-4 w-4" />
-            Build your own
-          </Link>
-        </div>
-      </section>
+      <RollPageHead
+        label="The shelf"
+        note="It’s new, so there’s room."
+        eyebrow="Practice pages to borrow"
+        title="Marketplace"
+        lede={
+          <p>
+            Practice pages built and shared by fellow learners. Try one, copy it into your own workshop, and make it
+            yours. No sign-up needed to borrow.
+          </p>
+        }
+      >
+        <Link href="/tools/workshop" className="roll-btn roll-btn-ink mt-2">
+          <Hammer className="h-4 w-4" />
+          Build your own
+        </Link>
+      </RollPageHead>
 
-      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="roll-page-end">
         <section className="mb-16" aria-label="Featured pages">
-          <div className="mb-6 flex items-center gap-3">
-            <span className="h-2 w-2 rounded-full bg-door-explore" />
-            <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              Featured
-            </h2>
-            <span className="bar-line flex-1" aria-hidden />
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <RollRuleLabel>Featured</RollRuleLabel>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {marketplaceSeeds.map((seed) => (
               <SeedCard key={seed.id} {...seed} />
             ))}
@@ -253,17 +219,11 @@ export default function MarketplacePage() {
         </section>
 
         <section aria-label="Community pages">
-          <div className="mb-6 flex items-center gap-3">
-            <span className="h-2 w-2 rounded-full bg-primary" />
-            <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              From the community
-            </h2>
-            <span className="bar-line flex-1" aria-hidden />
-          </div>
+          <RollRuleLabel>From the community</RollRuleLabel>
           {drills === undefined ? (
             <CommunitySkeleton />
           ) : drills.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-border bg-card/60 p-12 text-center">
+            <div className="rounded-md border border-dashed border-rule bg-paper-bright/60 p-12 text-center">
               <LayoutGrid className="mx-auto mb-4 h-8 w-8 text-muted-foreground" />
               <p className="text-muted-foreground">
                 No community pages yet — yours could be the very first. Publish
@@ -277,19 +237,14 @@ export default function MarketplacePage() {
               </Link>
             </div>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {drills.map((drill) => (
                 <Link
                   key={drill._id}
                   href={`/marketplace/${drill._id}`}
-                  className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-surface transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-raised"
+                  className="roll-card-paper group flex flex-col overflow-hidden"
                 >
-                  <Keybed
-                    octaves={3}
-                    lit={chordFor(drill._id)}
-                    litColor="var(--color-door-explore)"
-                    className="h-7 w-full opacity-90"
-                  />
+                  <RollChordStrip notes={chordFor(drill._id).map((n) => n + 60)} />
                   <div className="flex flex-1 flex-col p-5">
                     <div className="flex items-start justify-between gap-2">
                       <h3 className="font-heading text-lg font-semibold tracking-tight text-foreground group-hover:text-primary">

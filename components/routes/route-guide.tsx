@@ -111,18 +111,15 @@ export function RouteGuide({ routeId, decks }: RouteGuideProps) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl">
+    <div className="w-full max-w-3xl">
       <header className="mb-6 flex items-start gap-4">
         <route.icon className="mt-1 h-8 w-8 shrink-0 text-primary" />
         <div>
-          <h1 className="font-heading text-2xl font-semibold tracking-tight text-foreground">
+          <h1 className="roll-h1 roll-h1-page">
             {route.title}
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">{route.description}</p>
-          <p
-            data-testid="route-progress"
-            className="mt-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground"
-          >
+          <p className="roll-lede">{route.description}</p>
+          <p data-testid="route-progress" className="roll-label" style={{ color: "var(--felt)" }}>
             {doneCount} of {route.steps.length} steps done
           </p>
         </div>

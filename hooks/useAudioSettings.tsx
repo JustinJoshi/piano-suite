@@ -182,6 +182,14 @@ export function AudioSettingsProvider({ children }: { children: ReactNode }) {
 }
 
 /**
+ * Audio preferences, or null outside `AudioSettingsProvider`. For callers
+ * that can simply stay silent without it (the roll's sound toggle).
+ */
+export function useOptionalAudioSettings() {
+  return useContext(AudioSettingsContext);
+}
+
+/**
  * Audio preferences React hook.
  *
  * Must be used inside `AudioSettingsProvider` (mounted in the root layout).

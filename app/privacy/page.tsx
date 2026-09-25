@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Navbar } from "@/components/navbar";
+import { RollFrame } from "@/components/roll/roll-frame";
+import { RollMain } from "@/components/roll/page-head";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -9,18 +10,20 @@ export const metadata: Metadata = {
 
 export default function PrivacyRoute() {
   return (
-    <div className="relative z-10 flex min-h-screen flex-col">
-      <Navbar />
-      <main id="main-content" tabIndex={-1} className="flex-1 outline-none">
-        <article className="mx-auto max-w-2xl px-4 pb-20 pt-12 sm:px-6 lg:px-8">
-          <h1 className="font-heading text-3xl font-semibold tracking-tight text-foreground">
+    <RollFrame>
+      <RollMain className="roll-page-end">
+        <article className="roll-reading pt-10">
+          <p className="roll-label" style={{ color: "var(--felt)" }}>
+            The small print
+          </p>
+          <h1 className="roll-h1 roll-h1-page mt-3">
             Privacy Policy
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Last updated: August 31, 2026
           </p>
 
-          <div className="mt-8 space-y-6 text-sm leading-6 text-foreground/90">
+          <div className="mt-8 space-y-6">
             <section>
               <h2 className="font-semibold text-foreground">The short version</h2>
               <p className="mt-2">
@@ -135,7 +138,7 @@ export default function PrivacyRoute() {
             </p>
           </div>
         </article>
-      </main>
-    </div>
+      </RollMain>
+    </RollFrame>
   );
 }

@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
 import { PricingTable } from "@clerk/nextjs";
-import { Navbar } from "@/components/navbar";
-import { SiteFooter } from "@/components/site-footer";
+import { RollFrame } from "@/components/roll/roll-frame";
+import { RollMain, RollPageHead, RollRuleLabel } from "@/components/roll/page-head";
+import { RollTicket } from "@/components/roll/ticket";
 import { WaitlistCta } from "@/components/waitlist/waitlist-cta";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -67,24 +68,13 @@ export function PricingPage() {
   ];
 
   return (
-    <div className="relative z-10 flex min-h-screen flex-col">
-      <Navbar />
-      <main id="main-content" tabIndex={-1} className="flex-1 outline-none">
-        <section className="relative overflow-hidden px-4 pb-12 pt-14 sm:px-6 sm:pt-20 lg:px-8">
-          <div
-            aria-hidden
-            className="staff-lines staff-lines-edges pointer-events-none absolute inset-0"
-          />
-          <div className="relative mx-auto max-w-3xl text-center">
-            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-              Plans
-            </span>
-            <h1 className="mt-3 font-heading text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-              {BILLING_ENABLED
-                ? "Practice free. Pro when you’re ready."
-                : "Practice free. Pro is on the way."}
-            </h1>
-            <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">
+    <RollFrame compactFooter>
+      <RollPageHead
+        label="What it costs"
+        note="No card details. No trial clock."
+        title={BILLING_ENABLED ? "Practice free. Pro when you’re ready." : "Practice free. Pro is on the way."}
+        lede={
+          <p>
               {BILLING_ENABLED ? (
                 <>
                   Free forever for local drills. Pro ({proMonthlyLabel()} or{" "}
@@ -99,13 +89,13 @@ export function PricingPage() {
                   pricing and let your personal bests follow you across devices.
                 </>
               )}
-            </p>
-          </div>
-        </section>
+          </p>
+        }
+      />
 
-        <section className="px-4 pb-16 sm:px-6 lg:px-8">
-          <div className="mx-auto grid max-w-5xl gap-6 lg:grid-cols-[minmax(0,20rem)_1fr] lg:items-start">
-            <aside className="rounded-3xl border border-border bg-card p-6 shadow-surface sm:p-8">
+        <RollMain className="pb-16">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,17rem)_1fr] lg:items-start">
+            <aside className="roll-card-paper p-6 sm:p-7">
               <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 Free
               </span>
@@ -158,42 +148,32 @@ export function PricingPage() {
               </p>
             </div>
           </div>
-        </section>
+        </RollMain>
 
-        <section className="border-t border-border bg-card/40 px-4 py-16 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl">
-            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-              Questions
-            </span>
-            <h2 className="mt-3 font-heading text-3xl font-semibold tracking-tight text-foreground">
-              FAQ
-            </h2>
-            <dl className="mt-8 divide-y divide-border">
+        <hr className="roll-crease" aria-hidden="true" />
+
+        <RollMain className="py-16">
+          <div className="max-w-2xl">
+            <RollRuleLabel as="p">Questions</RollRuleLabel>
+            <h2 className="roll-h2">FAQ</h2>
+            <dl className="mt-6 divide-y divide-rule border-y border-rule">
               {faq.map((item) => (
                 <div key={item.q} className="py-5">
                   <dt className="font-heading text-lg font-semibold tracking-tight text-foreground">
                     {item.q}
                   </dt>
-                  <dd className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  <dd className="mt-2 text-base leading-relaxed text-muted-foreground">
                     {item.a}
                   </dd>
                 </div>
               ))}
             </dl>
           </div>
-        </section>
+        </RollMain>
 
-        <section className="px-4 py-16 text-center sm:px-6 lg:px-8">
-          <Link
-            href="/tools"
-            className={cn(buttonVariants({ size: "lg" }), "rounded-full px-7")}
-          >
-            Back to the piano
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </section>
-      </main>
-      <SiteFooter compact />
-    </div>
+        <RollMain className="roll-page-end">
+          <RollTicket href="/tools">Back to the piano</RollTicket>
+        </RollMain>
+    </RollFrame>
   );
 }

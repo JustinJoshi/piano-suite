@@ -1,34 +1,33 @@
 "use client";
 
-import { Navbar } from "@/components/navbar";
-import { SiteFooter } from "@/components/site-footer";
+import { RollFrame } from "@/components/roll/roll-frame";
+import { RollMain, RollPageHead } from "@/components/roll/page-head";
 import { WelcomeConfigProvider } from "@/components/welcome/welcome-config-provider";
 import { DoorChooser } from "@/components/welcome/door-chooser";
+import { useWelcomeConfig } from "@/hooks/useWelcomeConfig";
+
+function StartContent() {
+  const { config } = useWelcomeConfig();
+  return (
+    <>
+      <RollPageHead label="Start here" note="Two ways in, and a third for reading." eyebrow={config.doors.eyebrow} title={config.doors.title} />
+      <RollMain className="roll-page-end">
+        <DoorChooser />
+      </RollMain>
+    </>
+  );
+}
 
 /**
- * The three-door chooser (Phase 1.3). The hero CTA lands here; each door
- * leads somewhere immediately useful — no account, no scroll, no reading.
+ * The doors. The hero's ticket lands here; each door leads somewhere
+ * immediately useful.
  */
 export default function StartPage() {
   return (
     <WelcomeConfigProvider>
-      <div className="relative z-10 flex min-h-screen flex-col">
-        <Navbar />
-        <main
-          id="main-content"
-          tabIndex={-1}
-          className="relative flex flex-1 items-center justify-center outline-none"
-        >
-          <div
-            aria-hidden
-            className="staff-lines staff-lines-faded pointer-events-none absolute inset-0"
-          />
-          <div className="relative w-full">
-            <DoorChooser />
-          </div>
-        </main>
-        <SiteFooter compact />
-      </div>
+      <RollFrame compactFooter>
+        <StartContent />
+      </RollFrame>
     </WelcomeConfigProvider>
   );
 }

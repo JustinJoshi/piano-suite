@@ -54,9 +54,9 @@ export default function PublicDrillView() {
           Marketplace
         </Link>
 
-        <header className="mt-6 flex flex-col gap-5 rounded-2xl border border-border bg-card p-6 shadow-surface sm:flex-row sm:items-end sm:justify-between">
+        <header className="roll-card-paper mt-6 flex flex-col gap-5 p-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-door-explore">
+            <span className="roll-label" style={{ color: "var(--felt)" }}>
               featured page
             </span>
             <h1 className="mt-2 font-heading text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
@@ -104,7 +104,7 @@ export default function PublicDrillView() {
   if (drill === undefined) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-        <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
+        <div className="roll-card-paper p-8 text-center text-sm text-muted-foreground">
           Loading…
         </div>
       </div>
@@ -198,9 +198,9 @@ export default function PublicDrillView() {
         Marketplace
       </Link>
 
-      <header className="mt-6 flex flex-col gap-5 rounded-2xl border border-border bg-card p-6 shadow-surface sm:flex-row sm:items-end sm:justify-between">
+      <header className="roll-card-paper mt-6 flex flex-col gap-5 p-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-door-explore">
+          <span className="roll-label" style={{ color: "var(--felt)" }}>
             community page
           </span>
           <h1 className="mt-2 font-heading text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
