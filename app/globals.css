@@ -444,9 +444,11 @@
   --key-edge: #000;
   --key-shadow: rgba(28, 24, 20, 0.55);
 
-  --door-play: #b8512f;
-  --door-explore: #1f7f70;
-  --door-learn: #5d4bb0;
+  /* Dark enough for small text on a 15% tint of the same hue over paper
+     (4.6:1), which is what page thumbnails and chips put under it. */
+  --door-play: #914025;
+  --door-explore: #186357;
+  --door-learn: #5948a9;
 
   --inverse-background: var(--case);
   --inverse-foreground: var(--case-foreground);
