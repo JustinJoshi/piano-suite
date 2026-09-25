@@ -88,8 +88,79 @@ export interface WelcomeClosingCtaConfig {
   subtitle: string;
 }
 
+
+/**
+ * Copy for the roll landing page. Strings may use a little inline markup,
+ * rendered by `components/roll/inline.tsx`: `*em*`, `**strong**`,
+ * `` `kbd` `` and `[text](/href)`. `{time}` and `{misses}` are filled in by
+ * the drill console.
+ */
+export interface WelcomeRollSectionCopy {
+  label: string;
+  note: string;
+  eyebrow: string;
+  title: string;
+  lede: string;
+}
+
+export interface WelcomeRollConfig {
+  rollLabel: { left: string; middle: string; right: string };
+  heroMeta: string;
+  console: {
+    title: string;
+    verb: string;
+    rollNote: string;
+    helpFine: string;
+    helpTouch: string;
+    midi: string;
+    doneLabel: string;
+    doneTitle: string;
+    doneSummary: string;
+    doneNext: string;
+    doneCta: string;
+    doneCtaHref: string;
+    again: string;
+  };
+  drills: WelcomeRollSectionCopy & {
+    items: Array<{ id: string; name: string; description: string; href: string }>;
+    go: string;
+    goHref: string;
+    goNote: string;
+  };
+  interludes: { scale: string; circle: string; penta: string; coda: string };
+  routes: WelcomeRollSectionCopy & { go: string };
+  origin: WelcomeRollSectionCopy & {
+    paragraphs: string[];
+    turn: string;
+    closing: string;
+    signoff: string;
+    story: string;
+    decksIntro: string;
+    cardCaption: string;
+  };
+  pages: WelcomeRollSectionCopy & { go: string; starterIds: string[] };
+  workshop: WelcomeRollSectionCopy & {
+    cta: string;
+    ctaNote: string;
+    blocks: Array<{ id: string; name: string; gloss: string; phrase: string }>;
+  };
+  piece: WelcomeRollSectionCopy & { aside: string; go: string };
+  shelf: WelcomeRollSectionCopy & { body: string; browse: string; publish: string };
+  reading: WelcomeRollSectionCopy & {
+    items: Array<{ slug: string; title: string; summary: string }>;
+    go: string;
+  };
+  progress: WelcomeRollSectionCopy & { empty: string; blocked: string };
+  cost: WelcomeRollSectionCopy & {
+    rows: Array<{ who: string; price: string; body: string }>;
+    stamp: string;
+  };
+  fine: { word: string; gloss: string; text: string; cta: string; dacapo: string; dacapoSub: string; tail: string };
+}
+
 export interface WelcomeConfig {
   hero: WelcomeHeroConfig;
+  roll: WelcomeRollConfig;
   doors: WelcomeDoorsConfig;
   closingCta: WelcomeClosingCtaConfig;
   features: {
@@ -139,15 +210,236 @@ export interface WelcomeConfig {
 
 export const defaultWelcomeConfig: WelcomeConfig = {
   hero: {
-    eyebrow: "free tools for people learning piano",
+    eyebrow: "Piano Suite",
     showEyebrow: true,
-    headline:
-      "Teaching yourself piano? — welcome home. Let’s practice.",
+    headline: "A workshop for building *your own* piano practice.",
     subheadline:
-      "Piano Suite is a free, friendly home for self-taught pianists. Build your own practice from simple blocks, borrow a starter template that already works, and grow alongside other learners.",
-    ctaText: "Come on in",
+      "Pick a ready-made drill and start playing, or put together the exact session you need today from small blocks. It’s free, it runs in your browser, and there’s no account to make.",
+    ctaText: "Start playing",
     ctaHref: "/start",
-    align: "center",
+    align: "left",
+  },
+  roll: {
+    rollLabel: {
+      left: "A roll for self-taught pianists",
+      middle: "Tempo: yours",
+      right: "Played by: you",
+    },
+    heroMeta:
+      "Free, with no account and no sign-up. **No MIDI keyboard needed:** the on-screen piano plays with a mouse, a touchscreen, or your computer keys.",
+    console: {
+      title: "Try it here",
+      verb: "Play",
+      rollNote: "Your notes get punched into the paper as you play.",
+      helpFine:
+        "Any octave, any order. On a computer keyboard, the home row plays the white keys, starting from `A` for C. With a mouse, click the notes one after another; close together, they count as a chord.",
+      helpTouch:
+        "Any octave, any order. Tap all three at once, or one after another in quick succession.",
+      midi: "Use a MIDI keyboard instead",
+      doneLabel: "Four for four",
+      doneTitle: "That was I–V–vi–IV.",
+      doneSummary:
+        "C, G, A minor and F: the four chords under a great many songs. You found them in {time}, with {misses}.",
+      doneNext: "The Chord Drill picks up from here, with more chords, and keeps your times.",
+      doneCta: "Open the Chord Drill",
+      doneCtaHref: "/tools/chord-drill",
+      again: "Go again",
+    },
+    drills: {
+      label: "Ready-made drills",
+      note: "Not sure which? Chord Drill. The others grew out of it.",
+      eyebrow: "",
+      title: "Four drills, ready when you are.",
+      lede: "Each one shows you what to play, listens, and times you. Use a MIDI keyboard if you have one. If you don’t, the on-screen keyboard works with a mouse, a finger, or the letter keys on your computer.",
+      items: [
+        {
+          id: "chordDrill",
+          name: "Chord Drill",
+          description: "A chord name appears and you play it, in any octave. It keeps your time and counts your misses.",
+          href: "/tools/chord-drill",
+        },
+        {
+          id: "arpeggios",
+          name: "Arpeggios",
+          description: "Chords taken apart and played one note at a time, up and back down.",
+          href: "/tools/arpeggios",
+        },
+        {
+          id: "progressions",
+          name: "Progressions",
+          description: "Chords in the order songs use them, such as ii–V–I, so you learn where each one tends to go next.",
+          href: "/tools/progression",
+        },
+        {
+          id: "rootCycling",
+          name: "Root Cycling",
+          description: "One kind of chord, moved from root to root around the keys.",
+          href: "/tools/root-cycling",
+        },
+      ],
+      go: "Or play in the Workshop, no account at all",
+      goHref: "/tools/workshop",
+      goNote: "The drill pages keep your times, so they ask for a free account.",
+    },
+    interludes: {
+      scale: "C major, two octaves up and back down over a held C. On a roll, a scale is a staircase.",
+      circle: "Twelve roots around the circle of fourths, each with its third and seventh. A key cycle and a progression at the same time.",
+      penta: "A few bars of improvising on the A minor pentatonic scale, over a left hand that stays put.",
+      coda: "C major with a ninth, rolled from the bottom up.",
+    },
+    routes: {
+      label: "Guided routes",
+      note: "The first route is close to how all of this started.",
+      eyebrow: "If you’ve just got a keyboard",
+      title: "Not sure what to do first? Follow a route.",
+      lede: "Two short routes take you from zero to practicing, one step at a time. Each one ends by building your practice page for you, so the last step is sitting down and playing it.",
+      go: "See both routes",
+    },
+    origin: {
+      label: "Where it came from",
+      note: "Told by the person who built it.",
+      eyebrow: "",
+      title: "It started as one web page and a deck of flashcards.",
+      lede: "",
+      paragraphs: [
+        "I taught myself piano, and what I wanted most was to improvise. It took me a while to see what that actually asks of you: knowing your chords cold, so your hands find them before you’ve finished thinking the name.",
+        "So I built a small web page. It took a chord from my Anki deck, listened to my MIDI keyboard, and timed how long I took to play it. Anki decided when each chord came back.",
+      ],
+      turn: "It worked. I learned the chords.",
+      closing: "Piano Suite is that same routine, taken apart into pieces so you can build your own version of it, for whatever it is you’re trying to know cold.",
+      signoff: "Justin, who built this",
+      story: "[Read the longer version](/articles/why-im-learning-piano-without-a-teacher)",
+      decksIntro: "If you use Anki, the chord decks are free:",
+      cardCaption: "A card like the ones it started with.",
+    },
+    pages: {
+      label: "Ready-made pages",
+      note: "None of these is precious. Move things around.",
+      eyebrow: "If you’ve been playing the same exercise for months",
+      title: "Start from a page that’s already put together.",
+      lede: "When you can’t see what comes next, borrow a next step. Each page is a starting point: play it as it is, then rearrange it until it fits.",
+      go: "Open them in the Workshop",
+      starterIds: [
+        "ten-minute-warmup",
+        "scale-of-the-day",
+        "five-finger-foundations",
+        "circle-of-fourths-chords",
+        "ii-v-i-every-key",
+        "twelve-bar-blues",
+        "pop-loop",
+        "modes-tour",
+        "hanon-cell-warmup",
+        "pentatonic-improv",
+      ],
+    },
+    workshop: {
+      label: "The Workshop",
+      note: "Fewer blocks is usually better. The page you’ll actually open beats the perfect one.",
+      eyebrow: "If you’ve got a drill in your head",
+      title: "Or build the session you need today.",
+      lede: "A practice page is a few blocks on one screen: a metronome, a timer, the chords or scales you’re working on, a way to see how it went. Pick the blocks and put them in order, and the page is there when you come back.",
+      cta: "Open the Workshop",
+      ctaNote: "No account needed to build a page.",
+      blocks: [
+        { id: "metronome", name: "Metronome", gloss: "Keeps the beat.", phrase: "a metronome" },
+        { id: "drillTimer", name: "Drill timer", gloss: "Times the drill.", phrase: "a drill timer" },
+        { id: "restTimer", name: "Rest timer", gloss: "A timed break between rounds.", phrase: "a rest timer" },
+        { id: "chordSets", name: "Chord sets", gloss: "The chords you’re working on.", phrase: "chord sets" },
+        { id: "scaleRuns", name: "Scale runs", gloss: "Scales, up and back down.", phrase: "scale runs" },
+        { id: "keyCycles", name: "Key cycles", gloss: "Takes it through the keys in turn.", phrase: "key cycles" },
+        { id: "progressions", name: "Chord progressions", gloss: "Chords in order, like ii–V–I.", phrase: "chord progressions" },
+        { id: "fallingNotes", name: "Falling notes", gloss: "Shows what’s coming as it comes.", phrase: "falling notes" },
+        { id: "sessionStats", name: "Session stats", gloss: "Today’s times and misses.", phrase: "session stats" },
+        { id: "keyboard", name: "On-screen keyboard", gloss: "For when there’s no MIDI keyboard.", phrase: "an on-screen keyboard" },
+      ],
+    },
+    piece: {
+      label: "Learning a piece",
+      note: "Slow is fine. The speed comes a little at a time.",
+      eyebrow: "",
+      title: "For a real piece, a few bars at a time.",
+      lede: "Bring a MIDI file of something you’re learning. The Workshop loops a few bars at a time and plays them a little faster on each pass, so the hard part gets its repetitions and the tempo comes up gradually.",
+      aside: "If you’d like to learn one song by watching a video, there are good places for that already. This is for the practice underneath.",
+      go: "Try it in the Workshop",
+    },
+    shelf: {
+      label: "The Marketplace",
+      note: "It’s new, so there’s room.",
+      eyebrow: "",
+      title: "Other people’s practice, there to borrow.",
+      lede: "The Marketplace is a shelf of practice pages published for anyone to use. Try one as it is, copy it into your own workshop, and change whatever doesn’t suit you.",
+      body: "Publishing your own is free; you only need to sign in. The shelf is new, and for now most of what’s on it is mine, so the pages that go on it next will be among the first things the next person finds.",
+      browse: "Browse the Marketplace",
+      publish: "Publish yours",
+    },
+    reading: {
+      label: "Reading",
+      note: "Written for people teaching themselves.",
+      eyebrow: "",
+      title: "How to practice, when there’s no teacher to ask.",
+      lede: "",
+      items: [
+        {
+          slug: "beginner-pianist-learning-journey",
+          title: "How beginners should actually practice",
+          summary: "Active recall, spaced repetition, drilling with your hands, and why a good session switches between focused and relaxed thinking.",
+        },
+        {
+          slug: "beginner-pianist-learning-journey-quick-start",
+          title: "The quick-start version",
+          summary: "The same ideas in a few minutes, for when you’d rather be playing.",
+        },
+        {
+          slug: "anki-ankiconnect-setup",
+          title: "Setting up Anki for your chords",
+          summary: "Three steps: install Anki, add AnkiConnect, import the decks. Then the Chord Drill can read your reviews.",
+        },
+      ],
+      go: "Read the articles",
+    },
+    progress: {
+      label: "Progress",
+      note: "Kept in this browser. Clear it whenever you like.",
+      eyebrow: "",
+      title: "It keeps count, on your device.",
+      lede: "Piano Suite saves your timings, misses, streaks and practice history on your device. This page keeps a small version of the same thing, from the four chords at the top.",
+      empty: "Nothing here yet. Play the four chords at the top and your times will be written in here.",
+      blocked: "This browser isn’t letting the page save anything, so there’s nothing to keep here. The drill at the top still works.",
+    },
+    cost: {
+      label: "What it costs",
+      note: "No card details. No trial clock.",
+      eyebrow: "",
+      title: "Free, and the Workshop never asks you to sign in.",
+      lede: "",
+      rows: [
+        {
+          who: "Without an account",
+          price: "Free",
+          body: "The Workshop and its ready-made pages, the guided routes, the articles, this page’s drill, and your history on this device.",
+        },
+        {
+          who: "With a free account",
+          price: "Free",
+          body: "The four ready-made drills, which keep your times, and publishing your pages to the Marketplace. [Sign up](/sign-up) or [sign in](/sign-in).",
+        },
+        {
+          who: "Founding Pro",
+          price: "Later",
+          body: "Sync across your devices. It’s planned, and it isn’t live yet. If you’d like to hear when it is, [join the Founding Pro waitlist](/pricing).",
+        },
+      ],
+      stamp: "Not live yet",
+    },
+    fine: {
+      word: "Fine",
+      gloss: "fee·nay · the end of the roll",
+      text: "If you’ve read this far, you know more than you need to. The next step is the smallest one: pick a drill and play it for five minutes.",
+      cta: "Start playing",
+      dacapo: "Da capo",
+      dacapoSub: "back to the top",
+      tail: "End of roll",
+    },
   },
   doors: {
     eyebrow: "welcome — pick a door",
@@ -540,6 +832,29 @@ function isValidDoor(item: unknown): item is WelcomeDoorItemConfig {
  * Validates a partial config object and returns a complete config, filling
  * missing or invalid fields from `defaultWelcomeConfig`.
  */
+
+/**
+ * Merge stored copy over the defaults, field by field: a string survives only
+ * where the default is a string, an array only where it keeps the default's
+ * length and shape, so an old or hand-edited config can never leave a hole.
+ */
+export function mergeCopy<T>(base: T, input: unknown): T {
+  if (typeof base === "string") return (typeof input === "string" ? input : base) as T;
+  if (Array.isArray(base)) {
+    if (!Array.isArray(input) || input.length !== base.length) return base;
+    return base.map((item, i) => mergeCopy(item, input[i])) as T;
+  }
+  if (base && typeof base === "object") {
+    const source = isObject(input) ? input : {};
+    const out: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(base as Record<string, unknown>)) {
+      out[key] = mergeCopy(value, source[key]);
+    }
+    return out as T;
+  }
+  return base;
+}
+
 export function validateWelcomeConfig(
   partial: unknown,
   base: WelcomeConfig = defaultWelcomeConfig
@@ -713,8 +1028,11 @@ export function validateWelcomeConfig(
     ),
   };
 
+  const roll = mergeCopy(base.roll, input.roll);
+
   return {
     hero,
+    roll,
     doors,
     closingCta,
     features,

@@ -5,60 +5,42 @@ test.describe("home page mobile", () => {
     await page.setViewportSize({ width: 375, height: 667 });
   });
 
-  test("renders hero CTA and supporting text without overflow", async ({
-    page,
-  }) => {
+  test("renders the hero ticket and the no-MIDI promise without overflow", async ({ page }) => {
     await page.goto("/");
-    const cta = page.getByRole("link", { name: /come on in/i }).first();
+    const cta = page.locator("main").getByRole("link", { name: /start playing/i }).first();
     await expect(cta).toBeVisible();
     await expect(cta).toBeInViewport();
-
-    const supporting = page.getByText(/explore the community gallery freely/i);
-    await expect(supporting).toBeVisible();
+    await expect(page.getByText(/no midi keyboard needed/i).first()).toBeVisible();
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    expect(overflow).toBeLessThanOrEqual(0);
   });
 
-  test("shows Workshop how-it-works steps on mobile", async ({ page }) => {
+  test("the hero drill hears a C major chord from the computer keys", async ({ page }) => {
     await page.goto("/");
-    const steps = [
-      "Pick a starter drill or open a fresh page",
-      "Press start and play — we’ll keep time for you",
-      "Tweak the blocks until it feels like yours",
-    ];
-    for (const text of steps) {
-      await expect(page.getByText(text, { exact: true })).toBeVisible();
+    // The ledger only fills in after hydration, so the keys are live once it has.
+    await expect(page.getByText(/nothing here yet/i)).toBeAttached();
+    const piano = page.getByRole("group", { name: /on-screen piano/i });
+    await piano.getByRole("button", { name: "C 4", exact: true }).focus();
+    // Home row: A is C, D is E, G is G. Held together, like a chord.
+    for (const key of ["a", "d", "g"]) await page.keyboard.down(key);
+    for (const key of ["a", "d", "g"]) await page.keyboard.up(key);
+    await expect(page.getByRole("status").filter({ hasText: /C major in/ })).toHaveCount(1);
+  });
+
+  test("deck download links stay on screen", async ({ page }) => {
+    await page.goto("/");
+    const links = page.getByRole("link", { name: /chord symbols/i });
+    await expect(links).toHaveCount(2);
+    for (let i = 0; i < 2; i++) {
+      const box = await links.nth(i).boundingBox();
+      expect(box).not.toBeNull();
+      expect(box!.x + box!.width).toBeLessThanOrEqual(375);
     }
   });
 
-  test("shows Workshop flow steps in a vertical layout on mobile", async ({
-    page,
-  }) => {
+  test("the four drills link to their pages", async ({ page }) => {
     await page.goto("/");
-    const steps = [
-      "Start from a friendly template or a fresh page",
-      "Snap metronome, timer, and chord blocks together",
-      "Press start and play — real keys or on-screen",
-      "Share what you built, or borrow someone else’s",
-    ];
-    for (const text of steps) {
-      await expect(page.getByText(text, { exact: true })).toBeVisible();
-    }
-  });
-
-  test("deck download buttons stack without overflowing", async ({ page }) => {
-    await page.goto("/");
-    const buttons = page.getByRole("link", { name: /chord symbols/i });
-    const count = await buttons.count();
-    expect(count).toBe(2);
-    for (let i = 0; i < count; i++) {
-      await expect(buttons.nth(i)).toBeVisible();
-    }
-  });
-
-  test("feature cards are readable on mobile", async ({ page }) => {
-    await page.goto("/");
-    const firstFeature = page.getByText(
-      "Re-reading a chord chart feels like practice. It isn’t — and that’s good news"
-    );
-    await expect(firstFeature).toBeVisible();
+    await expect(page.getByRole("link", { name: "Chord Drill", exact: true })).toHaveAttribute("href", "/tools/chord-drill");
+    await expect(page.getByRole("link", { name: "Root Cycling", exact: true })).toHaveAttribute("href", "/tools/root-cycling");
   });
 });

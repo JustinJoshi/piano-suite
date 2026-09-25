@@ -1,54 +1,22 @@
 "use client";
 
-import { Navbar } from "@/components/navbar";
 import { DevToolsLink } from "@/components/dev-tools-link";
-import { useAmbientEffects } from "@/hooks/useAmbientEffects";
-import { useExperimentalFeatures } from "@/hooks/useExperimentalFeatures";
-import { useHeroChladniSettings } from "@/hooks/useHeroChladniSettings";
-import { useHeroQuasiperiodicSettings } from "@/hooks/useHeroQuasiperiodicSettings";
-import { useHeroMultigridSettings } from "@/hooks/useHeroMultigridSettings";
+import { RollFrame } from "@/components/roll/roll-frame";
 import { WelcomeConfigProvider } from "./welcome-config-provider";
 import { WelcomeContent } from "./welcome-content";
-import { isExperimentalAmbientKind } from "@/lib/experimental-features";
-import { HeroSection } from "./hero-section";
 
 /**
- * Welcome / marketing page.
- *
- * Full-bleed atmosphere is owned by AmbientEffectsHost in the root layout.
- * This page supplies content + the hero scrim pocket, wrapped in the welcome
- * config provider so copy and style tokens can be edited from the dev lab.
+ * The welcome page: roll paper hanging from the tracker bar by its leader,
+ * with the Sound toggle on so the roll can play as it scrolls.
  */
 export function WelcomePage() {
-  const { settings: ambient, backgroundFor } = useAmbientEffects();
-  const { enabled: experimentalEnabled } = useExperimentalFeatures();
-  const { settings: chladniSettings } = useHeroChladniSettings();
-  const { settings: quasiperiodicSettings } = useHeroQuasiperiodicSettings();
-  const { settings: multigridSettings } = useHeroMultigridSettings();
-
-  const kind = backgroundFor("/");
-  const effectiveKind =
-    !experimentalEnabled && isExperimentalAmbientKind(kind) ? "none" : kind;
-  const heroScrimSettings =
-    effectiveKind === "multigrid"
-      ? multigridSettings
-      : effectiveKind === "quasiperiodic"
-        ? quasiperiodicSettings
-        : effectiveKind === "chladni"
-          ? chladniSettings
-          : { scrimDarkness: ambient.scrimDarkness };
-
   return (
     <WelcomeConfigProvider>
-      <div className="relative z-10 flex min-h-screen flex-col">
-        <Navbar />
-        <main id="main-content" tabIndex={-1} className="flex-1 outline-none">
-          <HeroSection settings={heroScrimSettings} />
-          <WelcomeContent />
-        </main>
-        <div className="pointer-events-none fixed bottom-4 right-4 z-50">
-          <DevToolsLink className="pointer-events-auto" />
-        </div>
+      <RollFrame leader sound>
+        <WelcomeContent />
+      </RollFrame>
+      <div className="pointer-events-none fixed bottom-4 right-4 z-50">
+        <DevToolsLink className="pointer-events-auto" />
       </div>
     </WelcomeConfigProvider>
   );
