@@ -34,8 +34,9 @@ import {
   getPracticePageStore,
   isStarterPage,
   setPracticePageStore,
-  upsertPracticePage,
+  upsertTemplatePageWithEvent,
 } from "@/lib/custom-practice-storage";
+import { capturePending } from "@/lib/analytics";
 
 type RouteGuideProps = {
   routeId: string;
@@ -104,7 +105,13 @@ export function RouteGuide({ routeId, decks }: RouteGuideProps) {
     const pageToStore = isStarterPage(active)
       ? { ...page, id: active.id }
       : page;
-    setPracticePageStore(upsertPracticePage(store, pageToStore));
+    const { result, event } = upsertTemplatePageWithEvent(store, pageToStore, {
+      origin: "route",
+      templateId: template.id,
+      routeId: activeRoute.id,
+    });
+    setPracticePageStore(result);
+    capturePending(event);
 
     saveRouteProgress(markStep(progress, activeRoute.id, "seed-workshop", true));
     router.push("/tools/workshop");

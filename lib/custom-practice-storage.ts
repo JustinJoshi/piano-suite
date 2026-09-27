@@ -267,8 +267,16 @@ export function duplicatePracticePage(
   store: PracticePageStore,
   pageId: string
 ): PracticePageStore {
+  return duplicatePracticePageWithEvent(store, pageId).result;
+}
+
+/** `duplicatePracticePage` plus the `page_created` event; `event` is null when the source page is gone. */
+export function duplicatePracticePageWithEvent(
+  store: PracticePageStore,
+  pageId: string
+): { result: PracticePageStore; event: PendingAnalyticsEvent | null } {
   const source = store.pages.find((p) => p.id === pageId);
-  if (!source) return store;
+  if (!source) return { result: store, event: null };
 
   const copy: PracticePage = {
     id: generateId(),
@@ -285,7 +293,40 @@ export function duplicatePracticePage(
   const pages = [...store.pages];
   pages.splice(index + 1, 0, copy);
 
-  return { ...store, pages, activePageId: copy.id };
+  return {
+    result: { ...store, pages, activePageId: copy.id },
+    event: { event: "page_created", properties: { origin: "duplicate" } },
+  };
+}
+
+/** Where a template page came from: the workshop picker or a guided route seed. */
+export type TemplatePageSource = {
+  origin: "template" | "route";
+  templateId: string;
+  routeId?: string;
+};
+
+/**
+ * Upserts an already-built template page and returns its `page_created`
+ * event. The caller owns the starter-shell replacement rule and fires the
+ * event once, outside any state updater.
+ */
+export function upsertTemplatePageWithEvent(
+  store: PracticePageStore,
+  page: PracticePage,
+  source: TemplatePageSource
+): { result: PracticePageStore; event: PendingAnalyticsEvent | null } {
+  // Registry ids only — never the page title or its blocks.
+  const properties: Record<string, unknown> = {
+    origin: source.origin,
+    templateId: source.templateId,
+  };
+  if (source.routeId) properties.routeId = source.routeId;
+
+  return {
+    result: upsertPracticePage(store, page),
+    event: { event: "page_created", properties },
+  };
 }
 
 export function createPracticePageInStore(
