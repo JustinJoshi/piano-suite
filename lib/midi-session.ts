@@ -24,7 +24,7 @@ export type MidiSessionSnapshot = {
   inputs: MidiInputInfo[];
   selectedInputId: string | null;
   heldNotes: number[];
-  /** True while on-screen keyboard notes are held (no hardware involved). */
+  /** True while on-screen keyboard notes are held (even over a hardware pitch). */
   virtualActive: boolean;
 };
 
@@ -38,8 +38,9 @@ type PersistedMidiSession = {
 type Listener = () => void;
 
 const listeners = new Set<Listener>();
-const heldSet = new Set<number>();
-/** Notes currently held via the on-screen keyboard (no hardware). */
+/** Notes held by the selected hardware input. */
+const hardwareSet = new Set<number>();
+/** Notes held via the on-screen keyboard. */
 const virtualSet = new Set<number>();
 
 let access: MIDIAccess | null = null;
@@ -61,6 +62,11 @@ function detectSupported(): boolean {
   return typeof navigator !== "undefined" && "requestMIDIAccess" in navigator;
 }
 
+/** Held by either source, sorted — hardware and virtual may share a pitch. */
+function unionHeldNotes(): number[] {
+  return [...new Set([...hardwareSet, ...virtualSet])].sort((a, b) => a - b);
+}
+
 function emit(): void {
   snapshot = {
     supported: snapshot.supported,
@@ -68,7 +74,7 @@ function emit(): void {
     error: snapshot.error,
     inputs: snapshot.inputs,
     selectedInputId: snapshot.selectedInputId,
-    heldNotes: [...heldSet].sort((a, b) => a - b),
+    heldNotes: unionHeldNotes(),
     virtualActive: virtualSet.size > 0,
   };
   for (const listener of listeners) {
@@ -83,7 +89,7 @@ function setSnapshot(partial: Partial<MidiSessionSnapshot>): void {
     heldNotes:
       partial.heldNotes !== undefined
         ? partial.heldNotes
-        : [...heldSet].sort((a, b) => a - b),
+        : unionHeldNotes(),
   };
   for (const listener of listeners) {
     listener();
@@ -139,6 +145,34 @@ function clearPersisted(): void {
   }
 }
 
+function dispatchNoteOff(note: number): void {
+  if (typeof window === "undefined") return;
+
+  window.dispatchEvent(
+    new CustomEvent<MidiNoteEventDetail>("midi-note-off", {
+      detail: {
+        note,
+        pc: ((note % 12) + 12) % 12,
+        velocity: 0,
+      },
+    })
+  );
+}
+
+/**
+ * Drop hardware ownership (input switch / disconnect). Pitches the
+ * on-screen keyboard still holds keep sounding; everything else gets its
+ * note-off, because the device will never send the matching release.
+ */
+function dropHardwareNotes(): void {
+  for (const note of hardwareSet) {
+    if (!virtualSet.has(note)) {
+      dispatchNoteOff(note);
+    }
+  }
+  hardwareSet.clear();
+}
+
 function handleMidiMessage(event: MIDIMessageEvent): void {
   const data = event.data;
   if (!data || data.length < 3) return;
@@ -151,7 +185,9 @@ function handleMidiMessage(event: MIDIMessageEvent): void {
   const isNoteOff = command === 0x80 || (command === 0x90 && velocity === 0);
 
   if (isNoteOn) {
-    heldSet.add(note);
+    // Hardware retriggers: devices send repeated note-ons, and each one
+    // re-attacks. Ownership is still a set, so heldNotes keeps one entry.
+    hardwareSet.add(note);
     if (typeof window !== "undefined") {
       window.dispatchEvent(
         new CustomEvent<MidiNoteEventDetail>("midi-note-on", {
@@ -164,17 +200,10 @@ function handleMidiMessage(event: MIDIMessageEvent): void {
       );
     }
   } else if (isNoteOff) {
-    heldSet.delete(note);
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(
-        new CustomEvent<MidiNoteEventDetail>("midi-note-off", {
-          detail: {
-            note,
-            pc: ((note % 12) + 12) % 12,
-            velocity: 0,
-          },
-        })
-      );
+    // Only the final owner's release stops the sounding note.
+    const owned = hardwareSet.delete(note);
+    if (owned && !virtualSet.has(note)) {
+      dispatchNoteOff(note);
     }
   } else {
     return;
@@ -244,13 +273,13 @@ async function doConnect(): Promise<void> {
     refreshInputs(midiAccess);
     midiAccess.onstatechange = () => {
       if (access) {
-        // A disconnected input never sends its pending note-offs; drop held
+        // A disconnected input never sends its pending note-offs; drop its
         // notes so drills don't see them stuck forever.
         if (
           snapshot.selectedInputId !== null &&
           !access.inputs.get(snapshot.selectedInputId)
         ) {
-          heldSet.clear();
+          dropHardwareNotes();
         }
         refreshInputs(access);
       }
@@ -261,6 +290,7 @@ async function doConnect(): Promise<void> {
     // Reaching here means requestMIDIAccess exists, so the browser supports
     // Web MIDI — the user (or browser policy) denied permission. Keep
     // `supported: true` so the UI can offer a retry instead of dead-ending.
+    dropHardwareNotes();
     setSnapshot({
       supported: true,
       connected: false,
@@ -268,9 +298,7 @@ async function doConnect(): Promise<void> {
         "MIDI access was denied — allow it in the browser site settings and retry.",
       inputs: [],
       selectedInputId: null,
-      heldNotes: [],
     });
-    heldSet.clear();
     clearPersisted();
   }
 }
@@ -295,6 +323,11 @@ export async function connectMidiSession(): Promise<void> {
 
 export function setMidiSelectedInputId(id: string): void {
   preferredInputId = id;
+  // Switching inputs detaches the old handler, so its held notes would be
+  // stuck forever — release them now, keeping on-screen notes alive.
+  if (snapshot.selectedInputId !== id) {
+    dropHardwareNotes();
+  }
   setSnapshot({ selectedInputId: id });
   attachHandler();
   persistSession();
@@ -311,9 +344,13 @@ export function pressVirtualNote(note: number, velocity = 80): void {
   if (typeof window === "undefined") return;
   if (!Number.isInteger(note) || note < 0 || note > 127) return;
 
-  if (!heldSet.has(note)) {
-    heldSet.add(note);
-    virtualSet.add(note);
+  // Idempotent: a second press of an already-held virtual note does not
+  // re-attack. Ownership is recorded even when hardware already holds the
+  // pitch, so `virtualActive` reflects the on-screen keyboard truthfully.
+  const alreadySounding = hardwareSet.has(note) || virtualSet.has(note);
+  virtualSet.add(note);
+
+  if (!alreadySounding) {
     window.dispatchEvent(
       new CustomEvent<MidiNoteEventDetail>("midi-note-on", {
         detail: {
@@ -332,17 +369,11 @@ export function pressVirtualNote(note: number, velocity = 80): void {
 export function releaseVirtualNote(note: number): void {
   if (typeof window === "undefined") return;
 
-  if (heldSet.delete(note)) {
-    virtualSet.delete(note);
-    window.dispatchEvent(
-      new CustomEvent<MidiNoteEventDetail>("midi-note-off", {
-        detail: {
-          note,
-          pc: ((note % 12) + 12) % 12,
-          velocity: 0,
-        },
-      })
-    );
+  // Only the virtual owner may release here; an unmatched release must not
+  // silence a hardware-held pitch.
+  const owned = virtualSet.delete(note);
+  if (owned && !hardwareSet.has(note)) {
+    dispatchNoteOff(note);
   }
 
   emit();
@@ -353,16 +384,9 @@ export function releaseAllVirtualNotes(): void {
   if (typeof window === "undefined") return;
 
   for (const note of virtualSet) {
-    heldSet.delete(note);
-    window.dispatchEvent(
-      new CustomEvent<MidiNoteEventDetail>("midi-note-off", {
-        detail: {
-          note,
-          pc: ((note % 12) + 12) % 12,
-          velocity: 0,
-        },
-      })
-    );
+    if (!hardwareSet.has(note)) {
+      dispatchNoteOff(note);
+    }
   }
   virtualSet.clear();
 
@@ -445,7 +469,7 @@ export function __resetMidiSessionForTests(): void {
   connectPromise = null;
   restoreStarted = false;
   preferredInputId = null;
-  heldSet.clear();
+  hardwareSet.clear();
   virtualSet.clear();
   listeners.clear();
   snapshot = {
