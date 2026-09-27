@@ -24,6 +24,14 @@ export interface WelcomeHeroConfig {
   align: "center" | "left";
 }
 
+/** Functional labels for the hero's playable keybed (see playable-keybed). */
+export interface WelcomeInstrumentConfig {
+  /** Accessible name of the keyboard entry in the name board. */
+  playLabel: string;
+  /** How to play; associated with the entry via aria-describedby. */
+  instructions: string;
+}
+
 export interface WelcomeFeatureSectionConfig {
   id: string;
   number: string;
@@ -90,6 +98,7 @@ export interface WelcomeClosingCtaConfig {
 
 export interface WelcomeConfig {
   hero: WelcomeHeroConfig;
+  instrument: WelcomeInstrumentConfig;
   doors: WelcomeDoorsConfig;
   closingCta: WelcomeClosingCtaConfig;
   features: {
@@ -148,6 +157,11 @@ export const defaultWelcomeConfig: WelcomeConfig = {
     ctaText: "Come on in",
     ctaHref: "/start",
     align: "center",
+  },
+  instrument: {
+    playLabel: "Play this keyboard",
+    instructions:
+      "Play with your computer keys: A W S E D F… — or drag across the keys. A MIDI keyboard works too.",
   },
   doors: {
     eyebrow: "welcome — pick a door",
@@ -557,6 +571,15 @@ export function validateWelcomeConfig(
     align: clampEnum(heroInput.align, ["center", "left"], base.hero.align),
   };
 
+  const instrumentInput = isObject(input.instrument) ? input.instrument : {};
+  const instrument: WelcomeInstrumentConfig = {
+    playLabel: clampString(instrumentInput.playLabel, base.instrument.playLabel),
+    instructions: clampString(
+      instrumentInput.instructions,
+      base.instrument.instructions
+    ),
+  };
+
   const doorsInput = isObject(input.doors) ? input.doors : {};
   const doors: WelcomeDoorsConfig = {
     eyebrow: clampString(doorsInput.eyebrow, base.doors.eyebrow),
@@ -715,6 +738,7 @@ export function validateWelcomeConfig(
 
   return {
     hero,
+    instrument,
     doors,
     closingCta,
     features,

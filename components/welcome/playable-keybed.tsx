@@ -1,13 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import {
   BlackKeyShadowShape,
   BlackKeyShape,
   KeybedRail,
   WhiteKeyShape,
 } from "@/components/brand/keybed";
+import { buttonVariants } from "@/components/ui/button";
 import { useMidi } from "@/hooks/useMidi";
+import { useWelcomeConfig } from "@/hooks/useWelcomeConfig";
 import { nameHeldNotes } from "@/lib/chord-naming";
 import { computerKeyForOffset } from "@/lib/feature-blocks/keyboard-display/keys";
 import { buildKeybedGeometry } from "@/lib/keybed";
@@ -168,17 +170,27 @@ function noteAtPoint(x: number, y: number): { note: number; depth: number } | nu
  * through the shared audio host via `pressVirtualNote`, exactly like the
  * Workshop's on-screen keyboard. A connected MIDI keyboard lights the same
  * keys. The name board above the keys names whatever is held — "C4",
- * "Major 3rd", "Cmaj7" — and, after the first note, offers the QWERTY
- * piano (A W S E D…) so a visitor can keep going without a mouse.
+ * "Major 3rd", "Cmaj7".
  *
- * Purely an invitation: it is `aria-hidden` and never focusable, so it
- * adds nothing to the tab order or the accessibility tree.
+ * The name board also carries the one keyboard entry: a named button whose
+ * focus arms the QWERTY piano (A W S E D…) before any pointer action, with
+ * instructions from the welcome config on `aria-describedby`. A pointer note
+ * is the other opt-in. Key presses never claim letters from a reader
+ * scrolling elsewhere. The keys themselves stay decorative SVG, hidden from
+ * assistive technology; the wrapper, instructions and readout do not.
  */
 export function PlayableKeybed({ className }: { className?: string }) {
+  const { config } = useWelcomeConfig();
+  const { playLabel, instructions } = config.instrument;
+  const instructionsId = useId();
+  const entryRef = useRef<HTMLButtonElement | null>(null);
+
   const { heldNotes, connected } = useMidi();
   const pointerNotes = useRef(new Map<number, number | null>());
   const qwertyNotes = useRef(new Map<string, number>());
   const [played, setPlayed] = useState(false);
+  const [pointerOptIn, setPointerOptIn] = useState(false);
+  const [entryFocused, setEntryFocused] = useState(false);
   const [lastNote, setLastNote] = useState<number | null>(null);
 
   const held = useMemo(() => new Set(heldNotes), [heldNotes]);
@@ -213,6 +225,20 @@ export function PlayableKeybed({ className }: { className?: string }) {
     releaseVirtualNote(note);
   }, []);
 
+  // Drop both ownership maps together, then let go of what they held — a map
+  // kept across a mass release would swallow the matching keyup / pointerup.
+  const releaseOwnedNotes = useCallback(() => {
+    const owned = new Set<number>();
+    for (const note of pointerNotes.current.values()) {
+      if (note !== null && note !== undefined) owned.add(note);
+    }
+    for (const note of qwertyNotes.current.values()) owned.add(note);
+
+    pointerNotes.current.clear();
+    qwertyNotes.current.clear();
+    for (const note of owned) releaseVirtualNote(note);
+  }, []);
+
   const onPointerDown = useCallback(
     (event: React.PointerEvent<SVGSVGElement>) => {
       if (event.pointerType === "mouse" && event.button !== 0) return;
@@ -224,8 +250,11 @@ export function PlayableKeybed({ className }: { className?: string }) {
       }
       const hit = noteAtPoint(event.clientX, event.clientY);
       if (!hit) return;
+      // Also stops the press from stealing focus, so a click on the keys
+      // never cuts a note through the entry's blur cleanup.
       event.preventDefault();
       pointerNotes.current.set(event.pointerId, hit.note);
+      setPointerOptIn(true);
       press(hit.note, velocityFromDepth(hit.depth));
     },
     [press]
@@ -255,42 +284,50 @@ export function PlayableKeybed({ className }: { className?: string }) {
     [releaseIfUnused]
   );
 
-  // QWERTY piano, offered only once the visitor has played a note — the
-  // landing page never claims the letter keys from someone just reading.
+  // QWERTY piano, live only while the visitor is deliberately on the
+  // instrument — the entry focused, or a pointer note already played.
   useEffect(() => {
-    if (!played) return;
+    if (!entryFocused && !pointerOptIn) return;
     const heldKeys = qwertyNotes.current;
+    // Synthetic events may carry no `code`; fall back to the character.
+    const keyIdOf = (event: KeyboardEvent) =>
+      event.code || event.key.toLowerCase();
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.repeat || event.metaKey || event.ctrlKey || event.altKey) return;
       if (isEditableTarget(event.target)) return;
       const offset = QWERTY_OFFSETS.get(event.key.toLowerCase());
-      if (offset === undefined || heldKeys.has(event.code)) return;
+      if (offset === undefined) return;
+      const keyId = keyIdOf(event);
+      if (heldKeys.has(keyId)) return;
       const note = QWERTY_BASE_NOTE + offset;
-      heldKeys.set(event.code, note);
+      heldKeys.set(keyId, note);
       press(note);
     };
     const onKeyUp = (event: KeyboardEvent) => {
-      const note = heldKeys.get(event.code);
+      const keyId = keyIdOf(event);
+      const note = heldKeys.get(keyId);
       if (note === undefined) return;
-      heldKeys.delete(event.code);
+      heldKeys.delete(keyId);
       releaseIfUnused(note);
-    };
-    const releaseAll = () => {
-      heldKeys.clear();
-      releaseAllVirtualNotes();
     };
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
-    window.addEventListener("blur", releaseAll);
     return () => {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
-      window.removeEventListener("blur", releaseAll);
     };
-  }, [played, press, releaseIfUnused]);
+  }, [entryFocused, pointerOptIn, press, releaseIfUnused]);
 
-  // Leaving the page must never strand a sounding note.
-  useEffect(() => () => releaseAllVirtualNotes(), []);
+  // Focus loss, window blur, or leaving the page must never strand a note.
+  useEffect(() => {
+    const releaseAll = () => releaseOwnedNotes();
+    window.addEventListener("blur", releaseAll);
+    return () => {
+      window.removeEventListener("blur", releaseAll);
+      releaseOwnedNotes();
+      releaseAllVirtualNotes();
+    };
+  }, [releaseOwnedNotes]);
 
   const caption = connected
     ? "Your keyboard is connected — play anything."
@@ -299,19 +336,21 @@ export function PlayableKeybed({ className }: { className?: string }) {
       : "Go on — press a key.";
 
   return (
-    <div aria-hidden className={cn("relative select-none", className)}>
+    <div data-testid="hero-instrument" className={cn("relative select-none", className)}>
       {/* Name board: the strip of wood above the keys, with a status lamp. */}
       <div className="relative flex h-9 items-center justify-between gap-4 overflow-hidden border-b border-ebony/60 px-4 text-xs sm:h-10 sm:px-5">
         {/* Light spilling up from the key you're holding; it follows a
             glissando and fades when you let go. */}
         {glowAt !== null ? (
           <span
+            aria-hidden="true"
             className="pointer-events-none absolute top-full h-16 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/45 blur-2xl transition-[left,opacity] duration-500 ease-out-quart motion-reduce:transition-none"
             style={{ left: `${glowAt * 100}%`, opacity: held.size > 0 ? 1 : 0 }}
           />
         ) : null}
         <span className="relative flex min-w-0 items-center gap-2.5 text-muted-foreground">
           <span
+            aria-hidden="true"
             className={cn(
               "h-1.5 w-1.5 shrink-0 rounded-full transition-colors duration-300",
               connected
@@ -323,24 +362,50 @@ export function PlayableKeybed({ className }: { className?: string }) {
           />
           <span className="truncate font-heading text-[0.8rem] italic">{caption}</span>
         </span>
-        <span className="relative flex min-w-0 items-baseline gap-2">
-          {readout ? (
-            <>
-              <span className="font-heading text-sm font-semibold italic text-primary sm:text-base">
-                {readout.symbol}
-              </span>
-              {readout.kind !== "note" ? (
-                <span className="hidden font-mono text-[0.68rem] tracking-wide text-muted-foreground sm:inline">
-                  {readout.notes.join(" · ")}
+        <div className="relative flex min-w-0 items-center gap-2">
+          {/* What is held, named — announced as it changes. */}
+          <span role="status" className="flex min-w-0 items-baseline gap-2">
+            {readout ? (
+              <>
+                <span className="font-heading text-sm font-semibold italic text-primary sm:text-base">
+                  {readout.symbol}
                 </span>
-              ) : null}
-            </>
-          ) : (
-            <span className="font-mono text-[0.68rem] tracking-wide text-muted-foreground/70">
-              {played ? " " : "Cmaj7 · C E G B"}
-            </span>
-          )}
-        </span>
+                {readout.kind !== "note" ? (
+                  <span className="hidden font-mono text-[0.68rem] tracking-wide text-muted-foreground sm:inline">
+                    {readout.notes.join(" · ")}
+                  </span>
+                ) : null}
+              </>
+            ) : (
+              <span className="font-mono text-[0.68rem] tracking-wide text-muted-foreground">
+                {played ? " " : "Cmaj7 · C E G B"}
+              </span>
+            )}
+          </span>
+          <span id={instructionsId} className="sr-only">
+            {instructions}
+          </span>
+          {/* The one keyboard entry: focus it and the computer keys play. */}
+          <button
+            ref={entryRef}
+            type="button"
+            className={buttonVariants({ variant: "outline", size: "xs" })}
+            aria-describedby={instructionsId}
+            onFocus={() => setEntryFocused(true)}
+            onBlur={() => {
+              setEntryFocused(false);
+              releaseOwnedNotes();
+            }}
+            onClick={(event) => event.currentTarget.focus()}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.currentTarget.focus();
+              }
+            }}
+          >
+            {playLabel}
+          </button>
+        </div>
       </div>
 
       <KeybedSvg
