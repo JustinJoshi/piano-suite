@@ -9,6 +9,7 @@ import {
   setMidiSelectedInputId,
   subscribeMidiSession,
   ensureMidiSessionRestored,
+  type MidiNoteEventDetail,
 } from "@/lib/midi-session";
 
 function createMockMidiInput(id: string, name: string) {
@@ -291,5 +292,324 @@ describe("virtual (on-screen keyboard) notes", () => {
     const snap = getMidiSessionSnapshot();
     expect(snap.heldNotes).toEqual([]);
     expect(snap.virtualActive).toBe(false);
+  });
+});
+
+describe("hardware and virtual note ownership", () => {
+  let inputs: ReturnType<typeof createMockMidiInput>[];
+  let access: ReturnType<typeof createMockMidiAccess>;
+
+  function hwOn(note: number, velocity = 100): void {
+    inputs[0].onmidimessage?.(createMockMidiMessage([0x90, note, velocity]));
+  }
+
+  function hwOff(note: number): void {
+    inputs[0].onmidimessage?.(createMockMidiMessage([0x80, note, 0]));
+  }
+
+  function collectNoteEvents() {
+    const events: { type: string; note: number; velocity: number }[] = [];
+    const listener = (event: Event) => {
+      const detail = (event as CustomEvent<MidiNoteEventDetail>).detail;
+      events.push({ type: event.type, note: detail.note, velocity: detail.velocity });
+    };
+    window.addEventListener("midi-note-on", listener);
+    window.addEventListener("midi-note-off", listener);
+    return {
+      events,
+      stop(): void {
+        window.removeEventListener("midi-note-on", listener);
+        window.removeEventListener("midi-note-off", listener);
+      },
+    };
+  }
+
+  async function connectHardware(count = 1): Promise<void> {
+    inputs = Array.from({ length: count }, (_, index) =>
+      createMockMidiInput(`input-${index + 1}`, `Device ${index + 1}`)
+    );
+    access = createMockMidiAccess(inputs);
+    vi.mocked(navigator.requestMIDIAccess).mockResolvedValue(
+      access as unknown as MIDIAccess
+    );
+    await connectMidiSession();
+  }
+
+  beforeEach(() => {
+    sessionStorage.clear();
+    vi.stubGlobal("navigator", {
+      requestMIDIAccess: vi.fn(),
+    });
+    __resetMidiSessionForTests();
+  });
+
+  afterEach(() => {
+    __resetMidiSessionForTests();
+    vi.unstubAllGlobals();
+    sessionStorage.clear();
+  });
+
+  it("hardware-first overlap: one held entry, virtualActive, virtual release keeps hardware sounding", async () => {
+    await connectHardware();
+    const tracker = collectNoteEvents();
+
+    hwOn(60);
+    pressVirtualNote(60);
+
+    let snap = getMidiSessionSnapshot();
+    expect(snap.heldNotes).toEqual([60]);
+    expect(snap.virtualActive).toBe(true);
+    // Already sounding from hardware — the virtual press takes ownership
+    // without a second attack.
+    expect(tracker.events).toEqual([
+      { type: "midi-note-on", note: 60, velocity: 100 },
+    ]);
+
+    releaseVirtualNote(60);
+
+    snap = getMidiSessionSnapshot();
+    expect(snap.heldNotes).toEqual([60]);
+    expect(snap.virtualActive).toBe(false);
+    expect(tracker.events).toEqual([
+      { type: "midi-note-on", note: 60, velocity: 100 },
+    ]);
+
+    hwOff(60);
+
+    snap = getMidiSessionSnapshot();
+    expect(snap.heldNotes).toEqual([]);
+    expect(tracker.events).toEqual([
+      { type: "midi-note-on", note: 60, velocity: 100 },
+      { type: "midi-note-off", note: 60, velocity: 0 },
+    ]);
+    tracker.stop();
+  });
+
+  it("hardware-first overlap: hardware release keeps the virtual note sounding", async () => {
+    await connectHardware();
+    const tracker = collectNoteEvents();
+
+    hwOn(60);
+    pressVirtualNote(60);
+
+    hwOff(60);
+
+    let snap = getMidiSessionSnapshot();
+    expect(snap.heldNotes).toEqual([60]);
+    expect(snap.virtualActive).toBe(true);
+    expect(tracker.events).toEqual([
+      { type: "midi-note-on", note: 60, velocity: 100 },
+    ]);
+
+    releaseVirtualNote(60);
+
+    snap = getMidiSessionSnapshot();
+    expect(snap.heldNotes).toEqual([]);
+    expect(snap.virtualActive).toBe(false);
+    expect(tracker.events).toEqual([
+      { type: "midi-note-on", note: 60, velocity: 100 },
+      { type: "midi-note-off", note: 60, velocity: 0 },
+    ]);
+    tracker.stop();
+  });
+
+  it("virtual-first overlap: virtual release keeps hardware sounding", async () => {
+    await connectHardware();
+    const tracker = collectNoteEvents();
+
+    pressVirtualNote(60);
+    hwOn(60);
+
+    let snap = getMidiSessionSnapshot();
+    expect(snap.heldNotes).toEqual([60]);
+    expect(snap.virtualActive).toBe(true);
+
+    releaseVirtualNote(60);
+
+    snap = getMidiSessionSnapshot();
+    expect(snap.heldNotes).toEqual([60]);
+    expect(snap.virtualActive).toBe(false);
+    expect(tracker.events.filter((e) => e.type === "midi-note-off")).toEqual([]);
+
+    hwOff(60);
+
+    snap = getMidiSessionSnapshot();
+    expect(snap.heldNotes).toEqual([]);
+    expect(tracker.events.filter((e) => e.type === "midi-note-off")).toEqual([
+      { type: "midi-note-off", note: 60, velocity: 0 },
+    ]);
+    tracker.stop();
+  });
+
+  it("virtual-first overlap: hardware release keeps the virtual note sounding", async () => {
+    await connectHardware();
+    const tracker = collectNoteEvents();
+
+    pressVirtualNote(60);
+    hwOn(60);
+
+    hwOff(60);
+
+    let snap = getMidiSessionSnapshot();
+    expect(snap.heldNotes).toEqual([60]);
+    expect(snap.virtualActive).toBe(true);
+    expect(tracker.events.filter((e) => e.type === "midi-note-off")).toEqual([]);
+
+    releaseVirtualNote(60);
+
+    snap = getMidiSessionSnapshot();
+    expect(snap.heldNotes).toEqual([]);
+    expect(snap.virtualActive).toBe(false);
+    expect(tracker.events.filter((e) => e.type === "midi-note-off")).toEqual([
+      { type: "midi-note-off", note: 60, velocity: 0 },
+    ]);
+    tracker.stop();
+  });
+
+  it("bulk virtual release keeps hardware-held pitches sounding", async () => {
+    await connectHardware();
+    const tracker = collectNoteEvents();
+
+    pressVirtualNote(60);
+    pressVirtualNote(64);
+    hwOn(60);
+
+    releaseAllVirtualNotes();
+
+    const snap = getMidiSessionSnapshot();
+    expect(snap.heldNotes).toEqual([60]);
+    expect(snap.virtualActive).toBe(false);
+    // Only the virtual-only pitch (64) stops; 60 is still hardware-owned.
+    expect(tracker.events.filter((e) => e.type === "midi-note-off")).toEqual([
+      { type: "midi-note-off", note: 64, velocity: 0 },
+    ]);
+
+    hwOff(60);
+    expect(getMidiSessionSnapshot().heldNotes).toEqual([]);
+    tracker.stop();
+  });
+
+  it("unmatched virtual release leaves a hardware-held pitch alone", async () => {
+    await connectHardware();
+    const tracker = collectNoteEvents();
+
+    hwOn(60);
+    releaseVirtualNote(60);
+
+    const snap = getMidiSessionSnapshot();
+    expect(snap.heldNotes).toEqual([60]);
+    expect(snap.virtualActive).toBe(false);
+    expect(tracker.events).toEqual([
+      { type: "midi-note-on", note: 60, velocity: 100 },
+    ]);
+
+    hwOff(60);
+    expect(getMidiSessionSnapshot().heldNotes).toEqual([]);
+    tracker.stop();
+  });
+
+  it("unmatched hardware release leaves a virtual-held pitch alone", async () => {
+    await connectHardware();
+    const tracker = collectNoteEvents();
+
+    pressVirtualNote(60);
+    hwOff(60);
+
+    const snap = getMidiSessionSnapshot();
+    expect(snap.heldNotes).toEqual([60]);
+    expect(snap.virtualActive).toBe(true);
+    expect(tracker.events.filter((e) => e.type === "midi-note-off")).toEqual([]);
+
+    releaseVirtualNote(60);
+    expect(getMidiSessionSnapshot().heldNotes).toEqual([]);
+    tracker.stop();
+  });
+
+  it("repeated hardware note-on retriggers and keeps one held entry", async () => {
+    await connectHardware();
+    const tracker = collectNoteEvents();
+
+    hwOn(60, 100);
+    hwOn(60, 90);
+
+    const snap = getMidiSessionSnapshot();
+    expect(snap.heldNotes).toEqual([60]);
+    expect(tracker.events).toEqual([
+      { type: "midi-note-on", note: 60, velocity: 100 },
+      { type: "midi-note-on", note: 60, velocity: 90 },
+    ]);
+
+    hwOff(60);
+    expect(
+      tracker.events.filter((e) => e.type === "midi-note-off")
+    ).toHaveLength(1);
+    tracker.stop();
+  });
+
+  it("switching the selected input drops hardware notes and keeps virtual ones", async () => {
+    await connectHardware(2);
+    const tracker = collectNoteEvents();
+
+    hwOn(60);
+    hwOn(62);
+    pressVirtualNote(62);
+    pressVirtualNote(64);
+
+    setMidiSelectedInputId("input-2");
+
+    const snap = getMidiSessionSnapshot();
+    expect(snap.selectedInputId).toBe("input-2");
+    // 62 stays: virtual ownership outlives the input. 60 stops with the input.
+    expect(snap.heldNotes).toEqual([62, 64]);
+    expect(snap.virtualActive).toBe(true);
+    expect(tracker.events.filter((e) => e.type === "midi-note-off")).toEqual([
+      { type: "midi-note-off", note: 60, velocity: 0 },
+    ]);
+    tracker.stop();
+  });
+
+  it("disconnecting the selected input drops hardware notes and keeps virtual ones", async () => {
+    await connectHardware();
+    const tracker = collectNoteEvents();
+
+    hwOn(60);
+    hwOn(62);
+    pressVirtualNote(60);
+    pressVirtualNote(64);
+
+    inputs.pop();
+    access.onstatechange?.(new Event("statechange"));
+
+    let snap = getMidiSessionSnapshot();
+    // 60 stays: virtual ownership outlives the device. 62 stops with it.
+    expect(snap.heldNotes).toEqual([60, 64]);
+    expect(snap.virtualActive).toBe(true);
+    expect(snap.selectedInputId).toBeNull();
+    expect(tracker.events.filter((e) => e.type === "midi-note-off")).toEqual([
+      { type: "midi-note-off", note: 62, velocity: 0 },
+    ]);
+
+    releaseAllVirtualNotes();
+
+    snap = getMidiSessionSnapshot();
+    expect(snap.heldNotes).toEqual([]);
+    expect(
+      tracker.events.filter((e) => e.type === "midi-note-off")
+    ).toHaveLength(3);
+    tracker.stop();
+  });
+
+  it("reset returns a clean snapshot", async () => {
+    await connectHardware();
+
+    hwOn(60);
+    pressVirtualNote(64);
+
+    __resetMidiSessionForTests();
+
+    const snap = getMidiSessionSnapshot();
+    expect(snap.heldNotes).toEqual([]);
+    expect(snap.virtualActive).toBe(false);
+    expect(snap.connected).toBe(false);
   });
 });
