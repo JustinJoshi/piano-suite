@@ -173,8 +173,10 @@ describe("source practice (wire-source-practice)", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /start/i }));
 
+    // A wrong chord only counts as an attempt once it is fully built:
+    // four pcs held against Dm7's four, none of them shared.
     act(() => {
-      holdPcs([1, 3]); // wrong notes
+      holdPcs([1, 3, 6, 8]);
     });
 
     await waitFor(() => {
@@ -182,7 +184,7 @@ describe("source practice (wire-source-practice)", () => {
     });
 
     act(() => {
-      holdPcs([0, 2, 5, 9]); // Dm7 rootless A
+      holdPcs([0, 2, 5, 9]); // Dm7 pcs {0,2,5,9}
     });
 
     await waitFor(() => {
@@ -190,6 +192,47 @@ describe("source practice (wire-source-practice)", () => {
     });
     expect(appendLocalWorkshopEvent).toHaveBeenCalledWith(
       expect.objectContaining({ target: "Dm7", misses: 1, grade: "Hard" })
+    );
+  });
+
+  it("an incomplete chord logs no miss and a built-up chord succeeds clean", async () => {
+    render(
+      <DrillRuntimeProvider pageId="seed-rootless" blocks={page(SEED_BLOCKS)}>
+        <TargetDisplayBlock {...DISPLAY_CONFIG} />
+        <DrillTimerBlock {...TIMER_CONFIG} />
+      </DrillRuntimeProvider>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /start/i }));
+
+    // A chord under construction is not an attempt: the runtime waits for
+    // heldPcs.size to reach the target's size (4 for Dm7) before it can
+    // record a miss, so partial sets — wrong or right — stay silent.
+    act(() => {
+      holdPcs([1, 3]);
+    });
+    expect(appendLocalWorkshopMiss).not.toHaveBeenCalled();
+
+    act(() => {
+      holdPcs([0, 2, 5]);
+    });
+    expect(appendLocalWorkshopMiss).not.toHaveBeenCalled();
+
+    // Building the right chord one note at a time must not score the
+    // partial sets either; only the completing note can count.
+    releaseAllVirtualNotes();
+    for (const pc of [0, 2, 5, 9]) {
+      act(() => {
+        pressVirtualNote(60 + pc);
+      });
+      expect(appendLocalWorkshopMiss).not.toHaveBeenCalled();
+    }
+
+    await waitFor(() => {
+      expect(appendLocalWorkshopEvent).toHaveBeenCalledTimes(1);
+    });
+    expect(appendLocalWorkshopEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ target: "Dm7", misses: 0, grade: "Good" })
     );
   });
 
