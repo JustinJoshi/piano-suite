@@ -35,7 +35,8 @@ import {
   setActivePageId,
   upsertPracticePage,
   deletePracticePage,
-  duplicatePracticePage,
+  duplicatePracticePageWithEvent,
+  upsertTemplatePageWithEvent,
   createPracticePageInStoreWithEvent,
   isStarterPage,
   generateId,
@@ -121,7 +122,9 @@ export function PracticePageEditor() {
   }
 
   function duplicatePage() {
-    setPracticePageStore(duplicatePracticePage(store, page.id));
+    const { result, event } = duplicatePracticePageWithEvent(store, page.id);
+    setPracticePageStore(result);
+    capturePending(event);
   }
 
   function removePage() {
@@ -149,7 +152,12 @@ export function PracticePageEditor() {
       isStarterPage(page) && store.pages.length === 1
         ? { ...templatePage, id: page.id }
         : templatePage;
-    setPracticePageStore(upsertPracticePage(store, pageToStore));
+    const { result, event } = upsertTemplatePageWithEvent(store, pageToStore, {
+      origin: "template",
+      templateId: template.id,
+    });
+    setPracticePageStore(result);
+    capturePending(event);
     setShowTemplateLibrary(false);
   }
 

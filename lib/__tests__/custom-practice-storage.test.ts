@@ -11,6 +11,8 @@ import {
   upsertPracticePage,
   deletePracticePage,
   duplicatePracticePage,
+  duplicatePracticePageWithEvent,
+  upsertTemplatePageWithEvent,
   createPracticePageInStore,
   createPracticePageInStoreWithEvent,
   isStarterPage,
@@ -416,6 +418,150 @@ describe("page_created / block_added analytics", () => {
     expect(forked.pages).toHaveLength(2);
   });
 });
+
+describe("template / route / duplicate creation events", () => {
+  const templateSource = {
+    origin: "template" as const,
+    templateId: "first-chords",
+  };
+
+  function builtTemplatePage(title = "First chords") {
+    const page = createEmptyPracticePage(title);
+    page.blocks = [
+      { id: "tpl-block", type: "metronome", version: 1, config: { bpm: 90 } },
+    ];
+    return page;
+  }
+
+  it("returns a page_created event with origin duplicate from duplicatePracticePageWithEvent", () => {
+    const store = createEmptyPracticePageStore();
+
+    const { event } = duplicatePracticePageWithEvent(store, store.activePageId);
+
+    expect(event).toEqual({
+      event: "page_created",
+      properties: { origin: "duplicate" },
+    });
+  });
+
+  it("duplicate result keeps page count, selects the copy and refreshes block ids", () => {
+    const store = createEmptyPracticePageStore();
+    const source = store.pages[0];
+    const sourceBlockId = source.blocks[0].id;
+
+    const { result, event } = duplicatePracticePageWithEvent(
+      store,
+      source.id
+    );
+
+    expect(result.pages).toHaveLength(2);
+    expect(result.activePageId).toBe(result.pages[1].id);
+    expect(result.pages[1].id).not.toBe(source.id);
+    expect(result.pages[1].title).toContain("copy");
+    expect(result.pages[1].blocks[0].id).not.toBe(sourceBlockId);
+    expect(event).not.toBeNull();
+  });
+
+  it("returns a null event and an unchanged store when the duplicate source is missing", () => {
+    const store = createEmptyPracticePageStore();
+
+    const { result, event } = duplicatePracticePageWithEvent(
+      store,
+      "not-a-page"
+    );
+
+    expect(result).toBe(store);
+    expect(event).toBeNull();
+  });
+
+  it("keeps duplicatePracticePage a result-only facade of the same op", () => {
+    const store = createEmptyPracticePageStore();
+
+    const facade = duplicatePracticePage(store, store.activePageId);
+
+    expect(facade.pages).toHaveLength(2);
+    expect(facade.activePageId).toBe(facade.pages[1].id);
+  });
+
+  it("returns a template creation event carrying the registry templateId", () => {
+    const store = createEmptyPracticePageStore();
+    const page = builtTemplatePage();
+
+    const { result, event } = upsertTemplatePageWithEvent(store, page, templateSource);
+
+    expect(result.pages).toHaveLength(2);
+    expect(result.activePageId).toBe(page.id);
+    expect(event).toEqual({
+      event: "page_created",
+      properties: { origin: "template", templateId: "first-chords" },
+    });
+  });
+
+  it("adds the route id for a route-seeded template page", () => {
+    const store = createEmptyPracticePageStore();
+    const page = builtTemplatePage("Music theory starter");
+
+    const { event } = upsertTemplatePageWithEvent(store, page, {
+      origin: "route",
+      templateId: "music-theory-starter",
+      routeId: "music-theory",
+    });
+
+    expect(event).toEqual({
+      event: "page_created",
+      properties: {
+        origin: "route",
+        templateId: "music-theory-starter",
+        routeId: "music-theory",
+      },
+    });
+  });
+
+  it("replaces a starter shell in place, keeping the selected id and page count", () => {
+    const store = createEmptyPracticePageStore();
+    const shell = store.pages[0];
+    expect(isStarterPage(shell)).toBe(true);
+
+    const replacement = { ...builtTemplatePage(), id: shell.id };
+    const { result, event } = upsertTemplatePageWithEvent(
+      store,
+      replacement,
+      templateSource
+    );
+
+    expect(result.pages).toHaveLength(1);
+    expect(result.activePageId).toBe(shell.id);
+    expect(result.pages[0].blocks[0].type).toBe("metronome");
+    expect(event).not.toBeNull();
+  });
+
+  it("creation events never carry user text, block config or free-form keys", () => {
+    const store = createEmptyPracticePageStore();
+    const page = builtTemplatePage("Secret Song Title");
+
+    const { event: templateEvent } = upsertTemplatePageWithEvent(
+      store,
+      page,
+      templateSource
+    );
+    const { event: duplicateEvent } = duplicatePracticePageWithEvent(
+      store,
+      store.activePageId
+    );
+
+    expect(Object.keys(templateEvent!.properties ?? {}).sort()).toEqual([
+      "origin",
+      "templateId",
+    ]);
+    expect(Object.keys(duplicateEvent!.properties ?? {})).toEqual(["origin"]);
+
+    for (const event of [templateEvent, duplicateEvent]) {
+      expect(JSON.stringify(event)).not.toContain("Secret Song Title");
+      expect(JSON.stringify(event)).not.toContain("bpm");
+    }
+  });
+});
+
 describe("getServerPracticePageStore", () => {
   it("returns the same object reference on every call", () => {
     const a = getServerPracticePageStore();

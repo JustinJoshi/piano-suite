@@ -1,10 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { StrictMode } from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { readFileSync } from "fs";
 import path from "path";
 import { RouteGuide } from "@/components/routes/route-guide";
 import { getLearningRoute, ROUTE_PROGRESS_KEY } from "@/lib/routes";
 import type { AnkiDeckFile } from "@/lib/anki-setup-prompt";
+import { starterTemplates } from "@/lib/starter-templates";
 import {
   resetPracticePageStore,
   getPracticePageStore,
@@ -29,6 +31,18 @@ function loadDecks(): AnkiDeckFile[] {
   );
 }
 
+function pageCreations(): Array<{
+  name: string;
+  props: Record<string, unknown>;
+}> {
+  return (
+    ((window as unknown as Record<string, unknown>).__analyticsEvents ?? []) as Array<{
+      name: string;
+      props: Record<string, unknown>;
+    }>
+  ).filter((event) => event.name === "page_created");
+}
+
 describe("RouteGuide", () => {
   const route = getLearningRoute("music-theory");
   if (!route) throw new Error("music-theory route missing");
@@ -37,6 +51,7 @@ describe("RouteGuide", () => {
 
   beforeEach(() => {
     window.localStorage.clear();
+    delete (window as unknown as Record<string, unknown>).__analyticsEvents;
     resetPracticePageStore();
     pushMock.mockClear();
     let uuidCount = 0;
@@ -123,5 +138,64 @@ describe("RouteGuide", () => {
     const store = getPracticePageStore();
     expect(store.pages).toHaveLength(1);
     expect(store.pages[0].blocks.length).toBeGreaterThan(0);
+  });
+
+  it("emits one page_created with origin route when the workshop is seeded", async () => {
+    render(
+      <StrictMode>
+        <RouteGuide routeId="music-theory" decks={loadDecks()} />
+      </StrictMode>
+    );
+
+    fireEvent.click(screen.getByTestId("seed-workshop"));
+
+    await waitFor(() => expect(pushMock).toHaveBeenCalledWith("/tools/workshop"));
+
+    const events = pageCreations();
+    expect(events).toHaveLength(1);
+    expect(events[0].props).toEqual({
+      origin: "route",
+      templateId: "music-theory-starter",
+      routeId: "music-theory",
+    });
+  });
+
+  it("emits nothing when the seed template id is unknown", () => {
+    // The guard is a registry lookup; hide the registry to reach it.
+    const saved = starterTemplates.splice(0, starterTemplates.length);
+    try {
+      render(
+        <StrictMode>
+          <RouteGuide routeId="music-theory" decks={loadDecks()} />
+        </StrictMode>
+      );
+
+      fireEvent.click(screen.getByTestId("seed-workshop"));
+
+      expect(pageCreations()).toHaveLength(0);
+      expect(pushMock).not.toHaveBeenCalled();
+    } finally {
+      starterTemplates.push(...saved);
+    }
+  });
+
+  it("keeps titles and block config out of the route creation event", async () => {
+    render(
+      <StrictMode>
+        <RouteGuide routeId="music-theory" decks={loadDecks()} />
+      </StrictMode>
+    );
+
+    fireEvent.click(screen.getByTestId("seed-workshop"));
+    await waitFor(() => expect(pushMock).toHaveBeenCalledWith("/tools/workshop"));
+
+    const events = pageCreations();
+    expect(events).toHaveLength(1);
+    const templateTitle = starterTemplates.find(
+      (t) => t.id === "music-theory-starter"
+    )?.title;
+    expect(templateTitle).toBeTruthy();
+    expect(JSON.stringify(events[0].props)).not.toContain(templateTitle!);
+    expect(JSON.stringify(events[0].props)).not.toContain("bpm");
   });
 });
