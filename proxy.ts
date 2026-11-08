@@ -96,9 +96,11 @@ export default clerkMiddleware(
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
-    // (video extensions included so public demo media loads signed-out)
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|txt|docx?|xlsx?|zip|webmanifest|mp4|webm|mov)).*)",
+    // Skip Next.js internals, all static files, and the PostHog reverse proxy
+    // (`/ingest/*` is rewritten straight to PostHog in next.config.ts; Clerk
+    // must not redirect analytics requests to /sign-in). Video extensions are
+    // included so public demo media loads signed-out.
+    "/((?!_next|ingest(?:/|$)|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|txt|docx?|xlsx?|zip|webmanifest|mp4|webm|mov)).*)",
     // Always run for API routes
     "/(api|trpc)(.*)",
     // Always run for Clerk-specific frontend API routes

@@ -1067,6 +1067,25 @@ Verification: `npm run typecheck`, `npm run lint`, `npm run test:unit:run`,
 `npm run build`, and `e2e/a11y.spec.ts` + `e2e/workshop-anonymous.spec.ts`
 green at final HEAD (see the run's evidence file).
 
+## Full PostHog product analytics behind a first-party proxy (2026-11)
+
+`lib/analytics.ts` now initializes PostHog through `/ingest` instead of
+`*.posthog.com`, so ad blockers no longer drop events. `next.config.ts`
+rewrites `/ingest/static/*` to `us-assets.i.posthog.com` and `/ingest/*` to
+`us.i.posthog.com` (US Cloud) with `skipTrailingSlashRedirect`, and `proxy.ts`
+excludes `/ingest` from Clerk so analytics requests are never redirected to
+sign-in.
+
+Analytics is now full-fidelity: autocapture, manual path-only `$pageview`,
+pageleaves, heatmaps, dead/rage clicks, exception capture, and session
+recordings with `maskAllInputs: true`. Custom `ANALYTICS_EVENTS` are unchanged.
+`identifyUser`/`resetAnalytics` tie events to the Clerk user and start a fresh
+anonymous person on sign-out. `/privacy` discloses the new collection.
+
+**Blocker:** `NEXT_PUBLIC_POSTHOG_KEY` is absent from Vercel Production and
+Preview and from local env, so production remains a no-op until the key is
+added. See `docs/posthog-setup-report.md`.
+
 ## Roadmap
 
 - [x] Scaffold Next.js + Tailwind + shadcn/ui
