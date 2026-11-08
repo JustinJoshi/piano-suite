@@ -174,7 +174,10 @@ describe("source practice (wire-source-practice)", () => {
     fireEvent.click(screen.getByRole("button", { name: /start/i }));
 
     act(() => {
-      holdPcs([1, 3]); // wrong notes
+      // Four wrong notes: a miss only counts once the held set is at least as
+      // large as the four-note target (a chord under construction is not an
+      // attempt, see 22964b5).
+      holdPcs([1, 3, 6, 8]);
     });
 
     await waitFor(() => {
