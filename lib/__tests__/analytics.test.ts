@@ -3,7 +3,9 @@ import {
   ANALYTICS_EVENTS,
   captureEvent,
   capturePageview,
+  identifyUser,
   initAnalytics,
+  resetAnalytics,
 } from "@/lib/analytics";
 import posthog from "posthog-js";
 
@@ -11,6 +13,8 @@ vi.mock("posthog-js", () => ({
   default: {
     init: vi.fn(),
     capture: vi.fn(),
+    identify: vi.fn(),
+    reset: vi.fn(),
   },
 }));
 
@@ -54,7 +58,18 @@ describe("analytics", () => {
     });
     expect(mockPosthog.init).toHaveBeenCalledWith(
       "phc_test",
-      expect.objectContaining({ autocapture: false }),
+      expect.objectContaining({
+        api_host: "/ingest",
+        ui_host: "https://us.posthog.com",
+        autocapture: true,
+        capture_pageview: false,
+        capture_pageleave: true,
+        capture_heatmaps: true,
+        capture_dead_clicks: true,
+        capture_exceptions: true,
+        disable_session_recording: false,
+        session_recording: { maskAllInputs: true },
+      }),
     );
   });
 
@@ -169,5 +184,40 @@ describe("capturePageview", () => {
     const props = log[0].props as Record<string, unknown>;
     expect(props.$current_url).toBe("/tools/workshop");
     expect(String(props.$current_url)).not.toContain("?");
+  });
+});
+
+describe("identity", () => {
+  beforeEach(() => {
+    vi.unstubAllEnvs();
+    vi.clearAllMocks();
+  });
+
+  it("identifies the signed-in Clerk user", async () => {
+    vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "phc_test");
+    initAnalytics();
+    identifyUser("user_abc");
+    await flushAsync();
+
+    expect(mockPosthog.identify).toHaveBeenCalledWith("user_abc");
+  });
+
+  it("resets the person on sign-out", async () => {
+    vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "phc_test");
+    initAnalytics();
+    resetAnalytics();
+    await flushAsync();
+
+    expect(mockPosthog.reset).toHaveBeenCalled();
+  });
+
+  it("does nothing without a key", async () => {
+    vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "");
+    identifyUser("user_abc");
+    resetAnalytics();
+    await Promise.resolve();
+
+    expect(mockPosthog.identify).not.toHaveBeenCalled();
+    expect(mockPosthog.reset).not.toHaveBeenCalled();
   });
 });

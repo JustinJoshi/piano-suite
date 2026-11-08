@@ -17,7 +17,7 @@ export default function PrivacyRoute() {
             Privacy Policy
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Last updated: August 31, 2026
+            Last updated: November 8, 2026
           </p>
 
           <div className="mt-8 space-y-6 text-sm leading-6 text-foreground/90">
@@ -47,8 +47,11 @@ export default function PrivacyRoute() {
                 </li>
                 <li>
                   <strong>Anonymous analytics</strong> via PostHog: tool usage
-                  events such as starting or completing a drill. No note
-                  content, no keypresses, no recordings.
+                  events such as starting or completing a drill, clicks,
+                  heatmaps, error reports, and session replays. Session replays
+                  record page interactions, but every form input is masked.
+                  MIDI note data, piano keypresses, and practice content are
+                  never sent to PostHog.
                 </li>
                 <li>
                   <strong>Error logs</strong> via Sentry: technical details

@@ -21,6 +21,31 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: resolveProjectRoot(),
   },
+  // PostHog's first-party reverse proxy (US Cloud). Analytics requests go to
+  // this domain instead of *.posthog.com, so ad blockers that match third-party
+  // analytics hosts leave them alone. The client inits with `api_host:
+  // "/ingest"`; keep these destinations in sync with that value.
+  //   /ingest/static/* -> us-assets.i.posthog.com/static/*
+  //   /ingest/*        -> us.i.posthog.com/*
+  // `skipTrailingSlashRedirect` stops Next.js from 308-redirecting PostHog's
+  // trailing-slash requests before the rewrite runs.
+  skipTrailingSlashRedirect: true,
+  async rewrites() {
+    return [
+      {
+        source: "/ingest/static/:path*",
+        destination: "https://us-assets.i.posthog.com/static/:path*",
+      },
+      {
+        source: "/ingest/decide",
+        destination: "https://us.i.posthog.com/decide",
+      },
+      {
+        source: "/ingest/:path*",
+        destination: "https://us.i.posthog.com/:path*",
+      },
+    ];
+  },
   // The Workshop is the core of the app: /tools lands on it. Ready-made
   // drills remain direct routes and are linked from the Workshop page and
   // sidebar. Temporary (307) so the destination can evolve without cached
